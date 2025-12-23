@@ -45,6 +45,8 @@ export default function BaristaFIRE() {
         currentSavings={params.currentSavings} 
         fireNumber={results.baristaNumber}
         yearsToFIRE={results.yearsToBaristaFIRE}
+        label="Progress to Barista FIRE"
+        targetLabel="Barista Number"
       />
 
       {/* Barista FIRE Explanation Banner */}

@@ -5,13 +5,17 @@ interface ProgressToFIREProps {
   fireNumber: number
   yearsToFIRE?: number
   showMilestones?: boolean
+  label?: string
+  targetLabel?: string
 }
 
 export default function ProgressToFIRE({ 
   currentSavings, 
   fireNumber, 
   yearsToFIRE,
-  showMilestones = true 
+  showMilestones = true,
+  label = 'Progress to FIRE',
+  targetLabel = 'FIRE Number',
 }: ProgressToFIREProps) {
   const progress = Math.min(100, (currentSavings / fireNumber) * 100)
   
@@ -44,7 +48,7 @@ export default function ProgressToFIRE({
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Progress to FIRE</h3>
+          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">{label}</h3>
           <p className={`text-sm font-medium ${statusColor}`}>{statusMessage}</p>
         </div>
         <div className="text-right">
@@ -93,7 +97,7 @@ export default function ProgressToFIRE({
           <p className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(currentSavings)}</p>
         </div>
         <div className="text-right">
-          <p className="text-gray-500 dark:text-gray-400">FIRE Number</p>
+          <p className="text-gray-500 dark:text-gray-400">{targetLabel}</p>
           <p className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(fireNumber)}</p>
         </div>
       </div>

@@ -46,6 +46,8 @@ export default function CoastFIRE() {
         currentSavings={params.currentSavings} 
         fireNumber={results.coastNumber}
         yearsToFIRE={results.yearsToCoast}
+        label="Progress to Coast FIRE"
+        targetLabel="Coast Number"
       />
 
       {/* Coast FIRE Explanation Banner */}
