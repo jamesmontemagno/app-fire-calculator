@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useId, useState, useEffect } from 'react'
 
 interface AgeInputProps {
   label: string
@@ -20,16 +20,32 @@ export default function AgeInput({
   className = '',
 }: AgeInputProps) {
   const id = useId()
+  const [inputValue, setInputValue] = useState(value.toString())
+
+  // Sync with external value changes (e.g., from URL params or presets)
+  useEffect(() => {
+    const parsed = parseInt(inputValue)
+    if (parsed !== value) {
+      setInputValue(value.toString())
+    }
+  }, [value])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseInt(e.target.value) || min
+    const raw = e.target.value
+    setInputValue(raw)
     
-    if (newValue < min) {
-      onChange(min)
-    } else if (newValue > max) {
-      onChange(max)
-    } else {
-      onChange(newValue)
+    // Only update parent if valid number in range
+    const parsed = parseInt(raw)
+    if (!isNaN(parsed) && parsed >= min && parsed <= max) {
+      onChange(parsed)
+    }
+  }
+
+  const handleBlur = () => {
+    // On blur, validate and reset to last valid value if needed
+    const parsed = parseInt(inputValue)
+    if (isNaN(parsed) || parsed < min || parsed > max) {
+      setInputValue(value.toString())
     }
   }
 
@@ -56,8 +72,9 @@ export default function AgeInput({
         <input
           id={id}
           type="number"
-          value={value}
+          value={inputValue}
           onChange={handleChange}
+          onBlur={handleBlur}
           min={min}
           max={max}
           className="
