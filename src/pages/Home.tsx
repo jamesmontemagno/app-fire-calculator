@@ -1,51 +1,59 @@
 import { Link } from 'react-router-dom'
 import { Card, CardContent } from '../components/ui'
 import { calculators } from '../config/calculators'
+import SEO from '../components/SEO'
 
 export default function Home() {
   return (
-    <div className="space-y-12">
-      {/* Hero Section */}
-      <div className="text-center py-8">
-        <div className="flex justify-center mb-6">
-          <span className="text-5xl animate-pulse">🔥</span>
-        </div>
-        <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-          FIRE Calculators
-        </h1>
-        <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
-          Plan your path to <strong>Financial Independence, Retire Early</strong>. 
-          Free, private, and works completely offline.
-        </p>
+    <>
+      <SEO
+        title="FIRE Calculators - Free Financial Independence Calculator | Retire Early Planning Tools"
+        description="Free FIRE calculators to plan your path to Financial Independence, Retire Early. Calculate Standard FIRE, Coast FIRE, Lean FIRE, Fat FIRE & more. 100% private, works offline, no tracking."
+        keywords="FIRE calculator, financial independence calculator, retire early calculator, coast FIRE, lean FIRE, fat FIRE, barista FIRE, withdrawal rate, savings rate, 4% rule, retirement planning, early retirement"
+        canonicalPath="/"
+      />
+      <div className="space-y-12">
+        {/* Hero Section */}
+        <header className="text-center py-8">
+          <div className="flex justify-center mb-6">
+            <span className="text-5xl animate-pulse" role="img" aria-label="Fire emoji">🔥</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+            FIRE Calculators
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
+            Plan your path to <strong>Financial Independence, Retire Early</strong>. 
+            Free, private, and works completely offline.
+          </p>
         
         {/* Privacy badges */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-medium">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
             100% Private
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
             </svg>
             Works Offline
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
             </svg>
             No Tracking
           </span>
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-sm font-medium">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
             Shareable URLs
           </span>
         </div>
-      </div>
+      </header>
 
       {/* Quiz CTA */}
       <div className="bg-gradient-to-br from-fire-50 via-orange-50 to-amber-50 dark:from-fire-900/20 dark:via-orange-900/20 dark:to-amber-900/20 rounded-2xl p-6 border-2 border-fire-200 dark:border-fire-800">
@@ -304,5 +312,6 @@ export default function Home() {
         </p>
       </footer>
     </div>
+    </>
   )
 }
