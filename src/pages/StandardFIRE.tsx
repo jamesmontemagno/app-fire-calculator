@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateStandardFIRE, formatCurrency } from '../utils/calculations'
+import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, QuickPresets, Disclaimer } from '../components/ui'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, QuickPresets, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 
 export default function StandardFIRE() {
@@ -21,6 +22,26 @@ export default function StandardFIRE() {
     })
   }, [params])
 
+  const handleExport = () => {
+    const inputs = {
+      currentAge: params.currentAge,
+      retirementAge: params.retirementAge,
+      currentSavings: params.currentSavings,
+      annualContribution: params.annualContribution,
+      expectedReturn: params.expectedReturn,
+      inflationRate: params.inflationRate,
+      withdrawalRate: params.withdrawalRate,
+      annualExpenses: params.annualExpenses,
+    }
+
+    exportToExcel({
+      calculatorName: 'Standard FIRE',
+      inputs: formatInputsForExport(inputs),
+      results: formatResultsForExport(results),
+      projections: results.projections,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -34,7 +55,10 @@ export default function StandardFIRE() {
             Calculate your path to financial independence using the 25x expenses rule.
           </p>
         </div>
-        <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        <div className="flex flex-wrap gap-2">
+          <ExportButton onExport={handleExport} />
+          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        </div>
       </div>
 
       {/* Progress Bar */}
