@@ -22,7 +22,7 @@ export default function CoastFIRE() {
   }, [params])
 
   const coastStatus = results.alreadyCoasting
-    ? { text: "You're already Coast FIRE! 🎉", color: 'text-green-600 dark:text-green-400' }
+    ? { text: "You're already Coast FIRE!", color: 'text-green-600 dark:text-green-400' }
     : { text: `${results.yearsToCoast.toFixed(1)} years to Coast FIRE`, color: 'text-fire-600 dark:text-fire-400' }
 
   return (
@@ -145,21 +145,18 @@ export default function CoastFIRE() {
               value={results.coastNumber}
               format="currency"
               highlight
-              icon="⛵"
               subtext="Amount needed today"
             />
             <ResultCard
               label="Full FIRE Number"
               value={results.fireNumber}
               format="currency"
-              icon="🎯"
               subtext={`At age ${params.retirementAge}`}
             />
             <ResultCard
               label="Current Progress"
               value={Math.min(1, params.currentSavings / results.coastNumber)}
               format="percent"
-              icon="📊"
               subtext={`${formatCurrency(params.currentSavings)} saved`}
             />
           </div>

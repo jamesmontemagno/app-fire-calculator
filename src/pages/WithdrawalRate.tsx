@@ -114,25 +114,23 @@ export default function WithdrawalRate() {
               value={results.annualWithdrawal}
               format="currency"
               highlight
-              icon="💵"
             />
             <ResultCard
               label="Monthly Withdrawal"
               value={results.monthlyWithdrawal}
               format="currency"
-              icon="📅"
             />
             <ResultCard
               label="Portfolio Lasts"
               value={results.portfolioLongevity}
               format="years"
-              icon={results.portfolioLongevity >= params.retirementYears ? "✅" : "⚠️"}
+              subtext={results.portfolioLongevity >= params.retirementYears ? 'Sustainable' : 'May run out'}
             />
             <ResultCard
               label="Success Rate"
               value={results.successRate}
               format="percent"
-              icon={results.successRate >= 1 ? "🎯" : "📉"}
+              subtext={results.successRate >= 1 ? 'Good' : 'Risky'}
             />
           </div>
 

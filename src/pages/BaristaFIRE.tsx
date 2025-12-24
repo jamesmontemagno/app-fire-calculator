@@ -159,14 +159,12 @@ export default function BaristaFIRE() {
               value={results.baristaNumber}
               format="currency"
               highlight
-              icon="☕"
               subtext="Target portfolio value"
             />
             <ResultCard
               label="Full FIRE Number"
               value={results.fullFireNumber}
               format="currency"
-              icon="🎯"
               subtext="Without part-time work"
             />
             <ResultCard

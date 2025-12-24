@@ -31,19 +31,19 @@ export default function ProgressToFIRE({
   let statusColor = ''
   
   if (progress >= 100) {
-    statusMessage = "🎉 You've reached FIRE!"
+    statusMessage = "You've reached FIRE!"
     statusColor = 'text-green-600 dark:text-green-400'
   } else if (progress >= 75) {
-    statusMessage = "🔥 Almost there! Final stretch!"
+    statusMessage = "Almost there! Final stretch!"
     statusColor = 'text-orange-600 dark:text-orange-400'
   } else if (progress >= 50) {
-    statusMessage = "💪 Halfway to freedom!"
+    statusMessage = "Halfway to freedom!"
     statusColor = 'text-blue-600 dark:text-blue-400'
   } else if (progress >= 25) {
-    statusMessage = "📈 Great progress! Keep going!"
+    statusMessage = "Great progress! Keep going!"
     statusColor = 'text-purple-600 dark:text-purple-400'
   } else {
-    statusMessage = "🚀 Journey started!"
+    statusMessage = "Journey started!"
     statusColor = 'text-gray-600 dark:text-gray-400'
   }
 

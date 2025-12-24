@@ -178,7 +178,6 @@ export default function ReverseFIRE() {
           {results.alreadyAchievable ? (
             <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white">
               <div className="flex items-center gap-4">
-                <span className="text-4xl">🎉</span>
                 <div>
                   <p className="text-green-100 text-sm">Great News!</p>
                   <p className="text-2xl font-bold">You're Already on Track!</p>
@@ -214,21 +213,18 @@ export default function ReverseFIRE() {
               value={results.fireNumber}
               format="currency"
               highlight
-              icon="🎯"
               subtext="Target portfolio"
             />
             <ResultCard
               label="Years to FIRE"
               value={results.yearsToFIRE}
               format="years"
-              icon="⏱️"
               subtext={`At age ${params.retirementAge}`}
             />
             <ResultCard
               label="Current Savings Will Grow To"
               value={results.currentWillGrowTo}
               format="currency"
-              icon="📈"
               subtext={`By age ${params.retirementAge}`}
             />
           </div>

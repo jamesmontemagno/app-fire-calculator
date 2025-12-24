@@ -225,20 +225,17 @@ export default function SavingsRate() {
               value={results.fireNumber}
               format="currency"
               highlight
-              icon="🎯"
               subtext="Target portfolio"
             />
             <ResultCard
               label="Years to FIRE"
               value={results.yearsToFIRE === Infinity ? 'Never' : results.yearsToFIRE}
               format={results.yearsToFIRE === Infinity ? 'none' : 'years'}
-              icon="⏱️"
             />
             <ResultCard
               label="Annual Savings"
               value={results.annualSavings}
               format="currency"
-              icon="💰"
             />
           </div>
 

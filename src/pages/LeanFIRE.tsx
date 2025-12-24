@@ -166,21 +166,18 @@ export default function LeanFIRE() {
               value={results.fireNumber}
               format="currency"
               highlight
-              icon="🌿"
               subtext={isLean ? "You're in Lean territory!" : "Based on your expenses"}
             />
             <ResultCard
               label="Years to Lean FIRE"
               value={results.yearsToFIRE}
               format="years"
-              icon="⏱️"
               subtext={`At age ${Math.round(results.fireAge)}`}
             />
             <ResultCard
               label="Monthly Budget"
               value={params.annualExpenses / 12}
               format="currency"
-              icon="📅"
               subtext="In retirement"
             />
           </div>

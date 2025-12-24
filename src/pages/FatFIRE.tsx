@@ -111,7 +111,7 @@ export default function FatFIRE() {
                   />
                 </div>
                 {isFat && (
-                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">✓ Fat FIRE territory</p>
+                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">Fat FIRE territory</p>
                 )}
               </div>
             </div>
@@ -149,21 +149,18 @@ export default function FatFIRE() {
               value={results.fireNumber}
               format="currency"
               highlight
-              icon="💎"
               subtext="Target portfolio value"
             />
             <ResultCard
               label="Years to Fat FIRE"
               value={results.yearsToFIRE}
               format="years"
-              icon="⏱️"
               subtext={`At age ${Math.round(results.fireAge)}`}
             />
             <ResultCard
               label="Monthly Lifestyle"
               value={params.annualExpenses / 12}
               format="currency"
-              icon="🌟"
               subtext="In retirement"
             />
           </div>

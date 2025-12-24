@@ -122,21 +122,18 @@ export default function StandardFIRE() {
               value={results.fireNumber}
               format="currency"
               highlight
-              icon="🎯"
               subtext="Target portfolio value"
             />
             <ResultCard
               label="Years to FIRE"
               value={results.yearsToFIRE}
               format="years"
-              icon="⏱️"
               subtext={`At age ${Math.round(results.fireAge)}`}
             />
             <ResultCard
               label="Savings Rate"
               value={results.savingsRate}
               format="percent"
-              icon="💰"
               subtext={`${formatCurrency(results.monthlyContribution)}/month`}
             />
           </div>

@@ -204,21 +204,18 @@ export default function HealthcareGap() {
               label="Gap Years"
               value={results.gapYears}
               format="years"
-              icon="📅"
               subtext={`Age ${params.retirementAge} to ${medicareAge}`}
             />
             <ResultCard
               label="Year 1 Cost"
               value={results.annualCost}
               format="currency"
-              icon="💵"
               subtext="Before inflation"
             />
             <ResultCard
               label="Avg Annual Cost"
               value={results.avgAnnualCost}
               format="currency"
-              icon="📊"
               subtext="With inflation"
             />
           </div>

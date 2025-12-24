@@ -100,7 +100,7 @@ export default function Home() {
       {/* Hero Section */}
       <div className="text-center py-8">
         <div className="flex justify-center mb-6">
-          <span className="text-7xl animate-pulse">🔥</span>
+          <span className="text-5xl animate-pulse">🔥</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
           FIRE Calculators
@@ -181,7 +181,7 @@ export default function Home() {
       {/* Recommended Books Section */}
       <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8">
         <div className="text-center mb-8">
-          <span className="text-5xl mb-4 block">📚</span>
+          <span className="text-4xl mb-4 block">📚</span>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             Recommended FIRE Books
           </h2>
