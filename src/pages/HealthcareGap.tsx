@@ -4,6 +4,8 @@ import { formatCurrency } from '../utils/calculations'
 import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
 import { AgeInput, CurrencyInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
+import SEO from '../components/SEO'
+import { calculatorSEO } from '../config/seo'
 
 // Healthcare cost estimates by age (annual, US average) - for future use
 // const HEALTHCARE_COSTS = {
@@ -109,23 +111,25 @@ export default function HealthcareGap() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <span className="text-3xl">🏥</span>
-            Healthcare Gap Calculator
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Estimate healthcare costs between early retirement and Medicare eligibility.
-          </p>
+    <>
+      <SEO {...calculatorSEO.healthcare} />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+              <span className="text-3xl" role="img" aria-label="Hospital emoji">🏥</span>
+              Healthcare Gap Calculator
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Estimate healthcare costs between early retirement and Medicare eligibility.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton onExport={handleExport} />
+            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <ExportButton onExport={handleExport} />
-          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
-        </div>
-      </div>
 
       {/* Warning Banner */}
       <div className="bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800 rounded-xl p-4">
@@ -372,5 +376,6 @@ export default function HealthcareGap() {
 
       <Disclaimer />
     </div>
+    </>
   )
 }

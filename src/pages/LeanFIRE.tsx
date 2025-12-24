@@ -5,6 +5,8 @@ import { exportToExcel, formatInputsForExport, formatResultsForExport } from '..
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
+import SEO from '../components/SEO'
+import { calculatorSEO } from '../config/seo'
 
 const LEAN_THRESHOLD = 40000
 
@@ -50,22 +52,24 @@ export default function LeanFIRE() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <span className="text-3xl">🌿</span>
-            Lean FIRE Calculator
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Achieve financial independence faster with a minimalist lifestyle.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ExportButton onExport={handleExport} />
-          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
-        </div>
+    <>
+      <SEO {...calculatorSEO.lean} />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+              <span className="text-3xl" role="img" aria-label="Leaf emoji">🌿</span>
+              Lean FIRE Calculator
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Achieve financial independence faster with a minimalist lifestyle.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton onExport={handleExport} />
+            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+          </div>
       </div>
 
       {/* Progress Bar */}
@@ -264,5 +268,6 @@ export default function LeanFIRE() {
 
       <Disclaimer />
     </div>
+    </>
   )
 }

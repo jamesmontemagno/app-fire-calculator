@@ -1,4 +1,6 @@
 import { Card, CardHeader, CardContent } from '../components/ui'
+import SEO from '../components/SEO'
+import { calculatorSEO } from '../config/seo'
 
 interface Book {
   title: string
@@ -62,23 +64,25 @@ const books: Book[] = [
 
 export default function Books() {
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-          <span className="text-3xl">📚</span>
-          Recommended FIRE Books
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-1">
-          Essential reading for your financial independence journey.
-        </p>
-      </div>
+    <>
+      <SEO {...calculatorSEO.books} />
+      <div className="space-y-6">
+        {/* Header */}
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+            <span className="text-3xl" role="img" aria-label="Books emoji">📚</span>
+            Recommended FIRE Books
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Essential reading for your financial independence journey.
+          </p>
+        </div>
 
-      {/* Info Banner */}
-      <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-        <div className="flex gap-3">
-          <span className="text-2xl">💡</span>
-          <div>
+        {/* Info Banner */}
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+          <div className="flex gap-3">
+            <span className="text-2xl" role="img" aria-label="Light bulb emoji">💡</span>
+            <div>
             <h3 className="font-semibold text-amber-900 dark:text-amber-100">Knowledge is Power</h3>
             <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
               These books have helped millions achieve financial independence. Whether you're just starting out 
@@ -143,5 +147,6 @@ export default function Books() {
         </CardContent>
       </Card>
     </div>
+    </>
   )
 }

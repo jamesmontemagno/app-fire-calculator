@@ -5,6 +5,8 @@ import { exportToExcel, formatInputsForExport, formatResultsForExport } from '..
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, QuickPresets, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
+import SEO from '../components/SEO'
+import { calculatorSEO } from '../config/seo'
 
 export default function StandardFIRE() {
   const { params, setParam, setParams, resetParams, copyUrl, hasCustomParams } = useCalculatorParams()
@@ -43,21 +45,23 @@ export default function StandardFIRE() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <span className="text-3xl">🎯</span>
-            Standard FIRE Calculator
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Calculate your path to financial independence using the 25x expenses rule.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ExportButton onExport={handleExport} />
-          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+    <>
+      <SEO {...calculatorSEO.standard} />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+              <span className="text-3xl" role="img" aria-label="Target emoji">🎯</span>
+              Standard FIRE Calculator
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Calculate your path to financial independence using the 25x expenses rule.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton onExport={handleExport} />
+            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
         </div>
       </div>
 
@@ -203,5 +207,6 @@ export default function StandardFIRE() {
 
       <Disclaimer />
     </div>
+    </>
   )
 }

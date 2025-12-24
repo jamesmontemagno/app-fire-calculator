@@ -6,6 +6,8 @@ import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import ProgressToFIRE from '../components/ui/ProgressToFIRE'
 import { ProjectionChart } from '../components/charts'
+import SEO from '../components/SEO'
+import { calculatorSEO } from '../config/seo'
 
 // Calculate required monthly savings to reach FIRE by target age
 function calculateReverseFIRE(
@@ -102,22 +104,24 @@ export default function ReverseFIRE() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <span className="text-3xl">🎯</span>
-            Reverse FIRE Calculator
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Find out how much you need to save monthly to FIRE by your target age.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ExportButton onExport={handleExport} />
-          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
-        </div>
+    <>
+      <SEO {...calculatorSEO.reverse} />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+              <span className="text-3xl" role="img" aria-label="Recycle emoji">🔄</span>
+              Reverse FIRE Calculator
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Find out how much you need to save monthly to FIRE by your target age.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton onExport={handleExport} />
+            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+          </div>
       </div>
 
       {/* Progress Bar */}
@@ -333,5 +337,6 @@ export default function ReverseFIRE() {
 
       <Disclaimer />
     </div>
+    </>
   )
 }

@@ -12,6 +12,8 @@ import DebtListInput from '../components/inputs/DebtListInput'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import DebtBalanceChart from '../components/charts/DebtBalanceChart'
 import DebtBreakdownChart from '../components/charts/DebtBreakdownChart'
+import SEO from '../components/SEO'
+import { calculatorSEO } from '../config/seo'
 
 export default function DebtPayoff() {
   const { params, resetParams, copyUrl, hasCustomParams } = useCalculatorParams()
@@ -122,22 +124,24 @@ export default function DebtPayoff() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <span className="text-3xl">💳</span>
-            Debt Payoff Calculator
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Eliminate debt faster with Snowball or Avalanche strategies.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ExportButton onExport={handleExport} disabled={!canCalculate} />
-          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
-        </div>
+    <>
+      <SEO {...calculatorSEO['debt-payoff']} />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+              <span className="text-3xl" role="img" aria-label="Credit card emoji">💳</span>
+              Debt Payoff Calculator
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Eliminate debt faster with Snowball or Avalanche strategies.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton onExport={handleExport} disabled={!canCalculate} />
+            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+          </div>
       </div>
 
       {/* Info Banner */}
@@ -553,5 +557,6 @@ export default function DebtPayoff() {
 
       <Disclaimer />
     </div>
+    </>
   )
 }
