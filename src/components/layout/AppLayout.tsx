@@ -1,12 +1,15 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import { useState } from 'react'
+import UpdatePrompt from '../UpdatePrompt'
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="min-h-screen flex bg-gray-50 dark:bg-gray-950">
+    <>
+      <UpdatePrompt />
+      <div className="min-h-screen flex bg-gray-50 dark:bg-gray-950">
       {/* Mobile menu overlay */}
       {sidebarOpen && (
         <div 
@@ -47,6 +50,7 @@ export default function AppLayout() {
           </div>
         </main>
       </div>
-    </div>
+      </div>
+    </>
   )
 }
