@@ -69,7 +69,14 @@ export default function ProgressToFIRE({
 
       {/* Progress Bar */}
       <div className="relative">
-        <div className="h-4 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+        <div 
+          className="h-4 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden"
+          role="progressbar"
+          aria-valuenow={Math.round(progress)}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`${displayProgress}% progress to FIRE goal`}
+        >
           <div 
             className="h-full bg-gradient-to-r from-fire-400 via-fire-500 to-fire-600 rounded-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}

@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router-dom'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useRef } from 'react'
 
 import type { DebtItem } from '../utils/calculations'
 
@@ -66,6 +66,7 @@ const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
 
 export function useCalculatorParams() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const params = useMemo((): CalculatorParams => {
     const getParam = (key: keyof CalculatorParams): any => {
@@ -137,6 +138,19 @@ export function useCalculatorParams() {
     }, { replace: true })
   }, [setSearchParams])
 
+  // Debounced version of setParam for high-frequency updates (like slider inputs)
+  const setParamDebounced = useCallback((key: keyof CalculatorParams, value: any, delay = 300) => {
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current)
+    }
+    
+    // Set new timer
+    debounceTimerRef.current = setTimeout(() => {
+      setParam(key, value)
+    }, delay)
+  }, [setParam])
+
   const setParams = useCallback((updates: Partial<CalculatorParams>) => {
     setSearchParams(prev => {
       const newParams = new URLSearchParams(prev)
@@ -180,6 +194,7 @@ export function useCalculatorParams() {
   return {
     params,
     setParam,
+    setParamDebounced,
     setParams,
     resetParams,
     copyUrl,

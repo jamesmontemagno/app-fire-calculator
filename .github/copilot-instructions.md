@@ -15,10 +15,12 @@ This is a **privacy-first, offline-capable** FIRE (Financial Independence Retire
 The entire application state is stored in URL query parameters via [useCalculatorParams.ts](src/hooks/useCalculatorParams.ts). This is fundamental to the architecture:
 
 - All calculator inputs sync to/from URL via `useSearchParams`
-- No localStorage, cookies, or database—URLs are the "database"
+- No calculator data in localStorage—only UI preferences (theme, sidebar state)
+- URLs are the "database" for all financial calculations
 - Users share calculations by sharing URLs (privacy-preserving)
 - Browser back/forward navigation works naturally
 - Pattern: `setParam('currentAge', 30)` → URL updates → component re-renders
+- Use `setParamDebounced()` for high-frequency updates (sliders) to prevent excessive URL rewrites
 
 When adding new inputs, add them to `CalculatorParams` interface and `DEFAULTS`/`PARAM_KEYS` in [useCalculatorParams.ts](src/hooks/useCalculatorParams.ts).
 
@@ -44,10 +46,11 @@ const results = useMemo(() => {
 - **Pages** ([src/pages/](src/pages/)): Each calculator is a standalone page/route
 - **Inputs** ([src/components/inputs/](src/components/inputs/)): Reusable form inputs (CurrencyInput, PercentageInput, AgeInput)
 - **Charts** ([src/components/charts/](src/components/charts/)): Recharts wrappers for projections
-- **UI** ([src/components/ui/](src/components/ui/)): Cards, buttons, progress bars, disclaimers
+- **UI** ([src/components/ui/](src/components/ui/)): Cards, buttons, progress bars, disclaimers, accessible Tooltip
 - **Layout** ([src/components/layout/](src/components/layout/)): AppLayout with sidebar navigation
+- **Config** ([src/config/](src/config/)): Centralized calculator metadata (names, icons, colors, descriptions)
 
-All input components follow [InputGroup.tsx](src/components/inputs/InputGroup.tsx) pattern with tooltips, labels, and controlled inputs.
+All input components follow [InputGroup.tsx](src/components/inputs/InputGroup.tsx) pattern with tooltips, labels, controlled inputs, and optional helper text linked via `aria-describedby`.
 
 ## Key Conventions
 
@@ -93,9 +96,9 @@ npm run preview  # Preview production build
 Follow the pattern from existing pages:
 
 1. Create page component in [src/pages/](src/pages/) (e.g., `NewCalculator.tsx`)
-2. Add calculation function to [calculations.ts](src/utils/calculations.ts)
-3. Add route to [main.tsx](src/main.tsx) router config
-4. Add link to [Sidebar.tsx](src/components/layout/Sidebar.tsx)
+2. Add calculation function to [calculations.ts](src/utils/calculations.ts) with JSDoc comments
+3. Add calculator metadata to [calculators.ts](src/config/calculators.ts)
+4. Add route to [main.tsx](src/main.tsx) router config
 5. Use `useCalculatorParams()` for state management
 6. Wrap results in `useMemo()` for performance
 7. Use existing input/chart/UI components for consistency
@@ -112,6 +115,15 @@ Example structure: inputs on left, results + charts on right (responsive grid).
 - Presets include Conservative, Moderate, Aggressive, Fat FIRE
 - Can be customized per-calculator by passing custom `presets` prop
 
+### Tooltip
+
+[Tooltip.tsx](src/components/ui/Tooltip.tsx) provides accessible help text:
+
+- Keyboard accessible (focus/blur support)
+- Proper ARIA attributes (`role="tooltip"`, `aria-describedby`)
+- Visible on hover and focus for screen reader compatibility
+- Used throughout all input components for contextual help
+
 ### URL Actions
 
 [UrlActions.tsx](src/components/ui/UrlActions.tsx) provides reset/copy functionality:
@@ -127,12 +139,15 @@ Example structure: inputs on left, results + charts on right (responsive grid).
 
 ## Gotchas & Common Issues
 
-- **Don't use localStorage** for calculator data—breaks privacy promise
-- **All state must be serializable to URL**—no complex objects
+- **Don't use localStorage** for calculator data—only for UI preferences (theme, sidebar)
+- **All calculator state must be serializable to URL**—no complex objects
 - **Percentages are decimals**—UI shows "7%" but store as `0.07`
+- **Use debouncing** for high-frequency inputs—call `setParamDebounced()` for sliders
+- **Input validation**—CurrencyInput and PercentageInput handle NaN, negatives, edge cases
 - **React Router v7** uses data router pattern—use `createBrowserRouter`, not `BrowserRouter`
 - **Tailwind v4** has breaking changes from v3—check docs for migration
 - **Dark mode requires both class and CSS**—ensure `dark:` variants are present
+- **Accessibility first**—use Tooltip component, add ARIA labels, support keyboard navigation
 
 ## External Dependencies
 
@@ -143,7 +158,16 @@ Example structure: inputs on left, results + charts on right (responsive grid).
 
 ## Privacy & Security
 
-- **Zero tracking:** No analytics, no cookies, no localStorage (except theme preference)
+- **Zero tracking:** No analytics, no cookies for tracking
+- **UI preferences only:** localStorage used exclusively for theme and sidebar state—never financial data
 - **No server calls:** All computation client-side
 - **URL state is intentional:** Users must consciously share URLs with financial data
 - Disclaimer component required on all calculator pages
+
+## Accessibility
+
+- All tooltips are keyboard accessible with proper ARIA attributes
+- Interactive components (sidebar toggle, progress bars) have ARIA labels
+- Animations respect `prefers-reduced-motion` media query
+- Form inputs support optional helper text linked via `aria-describedby`
+- Tooltips work with hover, focus, and keyboard navigation

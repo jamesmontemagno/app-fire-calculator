@@ -1,8 +1,10 @@
 import { useId, type InputHTMLAttributes } from 'react'
+import Tooltip from '../ui/Tooltip'
 
 interface InputGroupProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'onChange'> {
   label: string
   tooltip?: string
+  helperText?: string
   prefix?: string
   suffix?: string
   value: number
@@ -15,6 +17,7 @@ interface InputGroupProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'o
 export default function InputGroup({
   label,
   tooltip,
+  helperText,
   prefix,
   suffix,
   value,
@@ -26,6 +29,7 @@ export default function InputGroup({
   ...props
 }: InputGroupProps) {
   const id = useId()
+  const helperTextId = useId()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = parseFloat(e.target.value) || 0
@@ -45,17 +49,7 @@ export default function InputGroup({
         className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
       >
         {label}
-        {tooltip && (
-          <span className="group relative">
-            <svg className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 max-w-xs text-center">
-              {tooltip}
-              <span className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
-            </span>
-          </span>
-        )}
+        {tooltip && <Tooltip content={tooltip} />}
       </label>
       <div className="relative">
         {prefix && (
@@ -71,6 +65,7 @@ export default function InputGroup({
           min={min}
           max={max}
           step={step}
+          aria-describedby={helperText ? helperTextId : undefined}
           className={`
             w-full px-3 py-2.5 
             bg-white dark:bg-gray-800 
@@ -91,6 +86,11 @@ export default function InputGroup({
           </span>
         )}
       </div>
+      {helperText && (
+        <p id={helperTextId} className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+          {helperText}
+        </p>
+      )}
     </div>
   )
 }

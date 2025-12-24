@@ -282,7 +282,7 @@ export default function FIREQuiz() {
 
   const currentQuestion = questions[step]
   const currentAnswer = answers[currentQuestion?.id as keyof QuizAnswers]
-  const canProceed = currentAnswer !== undefined && currentAnswer !== ''
+  const canProceed = currentAnswer !== undefined && currentAnswer !== null
 
   // Results view
   if (recommendation) {

@@ -205,6 +205,38 @@ export function formatPercent(value: number): string {
 // Standard FIRE Calculator
 // ============================================
 
+/**
+ * Calculate Standard FIRE metrics using the 4% rule (25x annual expenses)
+ * 
+ * The Standard FIRE approach calculates:
+ * 1. FIRE Number = Annual Expenses / Safe Withdrawal Rate (typically 4%)
+ * 2. Years to FIRE based on current savings, contributions, and expected returns
+ * 3. Coast FIRE number (amount needed now to reach FIRE through growth alone)
+ * 
+ * Mathematical formulas:
+ * - FIRE Number: FN = E / w (where E = annual expenses, w = withdrawal rate)
+ * - Years to FIRE: Solved using logarithmic time-value-of-money equation
+ * - Real return: r_real = (1 + r_nominal) / (1 + i) - 1 (adjusts for inflation)
+ * 
+ * Based on the Trinity Study which found a 4% withdrawal rate has historically
+ * been safe for 30+ year retirements with a balanced stock/bond portfolio.
+ * 
+ * @param inputs - Calculator parameters including age, savings, expenses, rates
+ * @returns FIRE metrics including target number, years to FIRE, and projections
+ * 
+ * @example
+ * calculateStandardFIRE({
+ *   currentAge: 30,
+ *   retirementAge: 55,
+ *   currentSavings: 100000,
+ *   annualContribution: 24000,
+ *   expectedReturn: 0.07,    // 7% nominal return
+ *   inflationRate: 0.03,     // 3% inflation
+ *   withdrawalRate: 0.04,    // 4% safe withdrawal rate
+ *   annualExpenses: 48000
+ * })
+ * // Returns: { fireNumber: 1200000, yearsToFIRE: 21.5, ... }
+ */
 export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
   const { 
     currentAge, 
@@ -260,6 +292,35 @@ export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
 // Coast FIRE Calculator
 // ============================================
 
+/**
+ * Calculate Coast FIRE - the point where you can stop contributing and let compound
+ * interest carry you to your FIRE goal by target retirement age
+ * 
+ * Coast FIRE asks: "How much do I need saved NOW so that I don't need to save another
+ * penny, and compound growth alone will get me to my FIRE number by retirement?"
+ * 
+ * Mathematical formula:
+ * - Coast Number = FIRE Number / (1 + r)^years_remaining
+ * - This is the present value (PV) calculation discounting future FIRE number
+ * 
+ * Two scenarios calculated:
+ * 1. Continue contributing: Shows accelerated path to Coast FIRE
+ * 2. Stop contributing now: Shows natural growth trajectory
+ * 
+ * @param currentAge - Current age in years
+ * @param targetRetirementAge - Desired retirement age
+ * @param currentSavings - Current portfolio value
+ * @param annualContribution - Annual savings amount (used for accelerated scenario)
+ * @param expectedReturn - Expected annual return (decimal, e.g., 0.07 for 7%)
+ * @param inflationRate - Expected inflation rate (decimal)
+ * @param withdrawalRate - Safe withdrawal rate (typically 0.04)
+ * @param annualExpenses - Annual living expenses in retirement
+ * @returns Coast FIRE metrics including coast number, years to reach it, and projections
+ * 
+ * @example
+ * calculateCoastFIRE(30, 55, 100000, 24000, 0.07, 0.03, 0.04, 48000)
+ * // If you have $100k at 30, you need ~$466k to "coast" to $1.2M by 55
+ */
 export function calculateCoastFIRE(
   currentAge: number,
   targetRetirementAge: number,
@@ -407,6 +468,40 @@ export function calculateBaristaFIRE(
 // Withdrawal Rate Calculator
 // ============================================
 
+/**
+ * Calculate portfolio longevity and withdrawal sustainability
+ * 
+ * Tests how long a portfolio will last given:
+ * - An initial withdrawal amount (as % of portfolio)
+ * - Annual withdrawals adjusted for inflation
+ * - Portfolio growth at expected return rate
+ * 
+ * This models the retirement drawdown phase, answering:
+ * "Will my money last through retirement?"
+ * 
+ * Mathematical model:
+ * - Each year: Balance = Balance × (1 + r) - Withdrawal
+ * - Withdrawal increases annually: W_n = W_0 × (1 + inflation)^n
+ * - Portfolio fails when Balance <= 0
+ * 
+ * The 4% rule historically provided 95%+ success over 30-year periods,
+ * but actual safe rates depend on:
+ * - Asset allocation (stocks vs bonds)
+ * - Sequence of returns risk
+ * - Retirement time horizon
+ * - Flexibility to reduce spending in bad years
+ * 
+ * @param portfolioValue - Starting portfolio balance
+ * @param withdrawalRate - Initial withdrawal rate (decimal, e.g., 0.04 for 4%)
+ * @param expectedReturn - Annual portfolio return (nominal, not inflation-adjusted)
+ * @param inflationRate - Expected inflation for withdrawal adjustments
+ * @param retirementYears - Expected retirement duration in years
+ * @returns Analysis including years portfolio lasts, ending balance, and rate comparisons
+ * 
+ * @example
+ * calculateWithdrawal(1000000, 0.04, 0.07, 0.03, 30)
+ * // Tests if $1M portfolio with 4% withdrawal lasts 30 years at 7% return
+ */
 export function calculateWithdrawal(
   portfolioValue: number,
   withdrawalRate: number,

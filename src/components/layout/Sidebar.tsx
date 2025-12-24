@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTheme } from '../../context/ThemeContext'
+import { calculators } from '../../config/calculators'
 
 interface SidebarProps {
   isOpen: boolean
@@ -7,19 +8,6 @@ interface SidebarProps {
   isCollapsed: boolean
   onToggleCollapse: () => void
 }
-
-const calculators = [
-  { path: '/standard', icon: '🎯', label: 'Standard FIRE', color: 'text-orange-500' },
-  { path: '/coast', icon: '⛵', label: 'Coast FIRE', color: 'text-blue-500' },
-  { path: '/lean', icon: '🌿', label: 'Lean FIRE', color: 'text-green-500' },
-  { path: '/fat', icon: '💎', label: 'Fat FIRE', color: 'text-purple-500' },
-  { path: '/barista', icon: '☕', label: 'Barista FIRE', color: 'text-amber-600' },
-  { path: '/reverse', icon: '🔄', label: 'Reverse FIRE', color: 'text-teal-500' },
-  { path: '/withdrawal', icon: '📊', label: 'Withdrawal Rate', color: 'text-sky-500' },
-  { path: '/savings-rate', icon: '🧮', label: 'Savings & Investment Rate', color: 'text-indigo-500' },
-  { path: '/debt-payoff', icon: '💳', label: 'Debt Payoff', color: 'text-red-500' },
-  { path: '/healthcare', icon: '🏥', label: 'Healthcare Gap', color: 'text-rose-500' },
-]
 
 export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: SidebarProps) {
   const location = useLocation()
@@ -32,12 +20,14 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
 
   return (
     <aside 
+      id="sidebar-navigation"
       className={`
         fixed lg:sticky top-0 left-0 z-50 h-screen
         bg-white dark:bg-gray-900 
         border-r border-gray-200 dark:border-gray-800
         flex flex-col
         transform transition-all duration-200 ease-in-out
+        motion-reduce:transition-none
         ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         ${isCollapsed ? 'lg:w-20' : 'w-72'}
       `}
@@ -78,6 +68,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
           onClick={onToggleCollapse}
           className="hidden lg:block p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
           aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!isCollapsed}
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

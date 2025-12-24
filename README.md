@@ -10,7 +10,8 @@ A **private**, **offline-first** FIRE (Financial Independence, Retire Early) cal
 
 ### 🔒 Privacy First
 - **No cookies** - We don't use any cookies
-- **No localStorage** - Nothing stored in your browser
+- **No financial data storage** - Calculator data only in URLs, never stored
+- **UI preferences only** - Only theme and layout preferences stored locally
 - **No analytics** - Zero tracking scripts
 - **No servers** - All calculations run client-side
 - **URL-based state** - Share your calculations via URL (your choice!)

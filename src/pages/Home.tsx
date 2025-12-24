@@ -1,108 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Card, CardContent } from '../components/ui'
-
-const calculators = [
-  {
-    path: '/standard',
-    icon: '🎯',
-    name: 'Standard FIRE',
-    description: 'The classic 25x expenses rule — calculate your "magic number" for full financial independence.',
-    color: 'from-orange-500 to-red-500',
-    bgColor: 'bg-orange-50 dark:bg-orange-900/20',
-    borderColor: 'border-orange-200 dark:border-orange-800',
-    audience: 'Best for: Anyone starting their FI journey',
-  },
-  {
-    path: '/coast',
-    icon: '⛵',
-    name: 'Coast FIRE',
-    description: 'Find how much you need now so compound growth does the rest — then coast to retirement.',
-    color: 'from-blue-500 to-cyan-500',
-    bgColor: 'bg-blue-50 dark:bg-blue-900/20',
-    borderColor: 'border-blue-200 dark:border-blue-800',
-    audience: 'Best for: Young savers wanting flexibility',
-  },
-  {
-    path: '/lean',
-    icon: '🌿',
-    name: 'Lean FIRE',
-    description: 'Achieve FI faster with a minimalist lifestyle — perfect for frugal-minded planners.',
-    color: 'from-green-500 to-emerald-500',
-    bgColor: 'bg-green-50 dark:bg-green-900/20',
-    borderColor: 'border-green-200 dark:border-green-800',
-    audience: 'Best for: Minimalists & early retirees',
-  },
-  {
-    path: '/fat',
-    icon: '💎',
-    name: 'Fat FIRE',
-    description: 'Retire without compromise — calculate FI while maintaining a comfortable lifestyle.',
-    color: 'from-purple-500 to-pink-500',
-    bgColor: 'bg-purple-50 dark:bg-purple-900/20',
-    borderColor: 'border-purple-200 dark:border-purple-800',
-    audience: 'Best for: High earners & luxury seekers',
-  },
-  {
-    path: '/barista',
-    icon: '☕',
-    name: 'Barista FIRE',
-    description: 'Blend part-time work with portfolio income — retire from corporate life earlier.',
-    color: 'from-amber-500 to-orange-500',
-    bgColor: 'bg-amber-50 dark:bg-amber-900/20',
-    borderColor: 'border-amber-200 dark:border-amber-800',
-    audience: 'Best for: Those wanting work-life balance',
-  },
-  {
-    path: '/reverse',
-    icon: '🔄',
-    name: 'Reverse FIRE',
-    description: 'Work backwards — set your target age and find out how much you need to save monthly.',
-    color: 'from-teal-500 to-cyan-500',
-    bgColor: 'bg-teal-50 dark:bg-teal-900/20',
-    borderColor: 'border-teal-200 dark:border-teal-800',
-    audience: 'Best for: Goal-oriented planners',
-  },
-  {
-    path: '/withdrawal',
-    icon: '📊',
-    name: 'Withdrawal Rate',
-    description: 'Test your portfolio\'s longevity — find your safe withdrawal rate for any scenario.',
-    color: 'from-sky-500 to-blue-500',
-    bgColor: 'bg-sky-50 dark:bg-sky-900/20',
-    borderColor: 'border-sky-200 dark:border-sky-800',
-    audience: 'Best for: Those at or near FIRE',
-  },
-  {
-    path: '/savings-rate',
-    icon: '🧮',
-    name: 'Savings & Investment Rate',
-    description: 'The most important metric — see how your savings rate impacts your time to FIRE.',
-    color: 'from-indigo-500 to-purple-500',
-    bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
-    borderColor: 'border-indigo-200 dark:border-indigo-800',
-    audience: 'Best for: Understanding your FI timeline',
-  },
-  {
-    path: '/debt-payoff',
-    icon: '💳',
-    name: 'Debt Payoff',
-    description: 'Eliminate debt faster with Snowball or Avalanche strategies — compare methods and see the impact of extra payments.',
-    color: 'from-red-500 to-rose-500',
-    bgColor: 'bg-red-50 dark:bg-red-900/20',
-    borderColor: 'border-red-200 dark:border-red-800',
-    audience: 'Best for: Tackling multiple debts strategically',
-  },
-  {
-    path: '/healthcare',
-    icon: '🏥',
-    name: 'Healthcare Gap',
-    description: 'The hidden cost of early retirement — estimate healthcare costs before Medicare.',
-    color: 'from-rose-500 to-pink-500',
-    bgColor: 'bg-rose-50 dark:bg-rose-900/20',
-    borderColor: 'border-rose-200 dark:border-rose-800',
-    audience: 'Best for: US-based early retirees',
-  },
-]
+import { calculators } from '../config/calculators'
 
 export default function Home() {
   return (
@@ -150,26 +48,26 @@ export default function Home() {
       </div>
 
       {/* Quiz CTA */}
-      <div className="bg-gradient-to-br from-fire-50 via-orange-50 to-amber-50 dark:from-fire-900/20 dark:via-orange-900/20 dark:to-amber-900/20 rounded-2xl p-8 border-2 border-fire-200 dark:border-fire-800">
+      <div className="bg-gradient-to-br from-fire-50 via-orange-50 to-amber-50 dark:from-fire-900/20 dark:via-orange-900/20 dark:to-amber-900/20 rounded-2xl p-6 border-2 border-fire-200 dark:border-fire-800">
         <div className="max-w-3xl mx-auto text-center">
-          <span className="text-4xl mb-4 block">🧭</span>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+          <span className="text-3xl mb-2 block">🧭</span>
+          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
             Not sure which calculator to use?
           </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-base text-gray-600 dark:text-gray-400 mb-4">
             Take our quick quiz to find the perfect FIRE path for your situation. 
             Answer a few questions and we'll recommend the best calculator with your information pre-filled.
           </p>
           <Link
             to="/quiz"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-fire-600 hover:bg-fire-700 text-white text-lg font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-fire-600 hover:bg-fire-700 text-white text-base font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
           >
             Find Your FIRE Path
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </Link>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
             Takes 2-3 minutes · Personalized recommendation
           </p>
         </div>
@@ -297,8 +195,8 @@ export default function Home() {
               </svg>
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">No Data Storage</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">No cookies, localStorage, or databases. Your data never leaves your browser.</p>
+              <h3 className="font-semibold text-gray-900 dark:text-gray-100">No Financial Data Storage</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Your financial data stays in URLs only—never stored. Only UI preferences (theme, layout) stored locally.</p>
             </div>
           </div>
           

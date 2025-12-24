@@ -1,4 +1,5 @@
 import { useId, useState } from 'react'
+import Tooltip from '../ui/Tooltip'
 
 interface CurrencyInputProps {
   label: string
@@ -35,7 +36,25 @@ export default function CurrencyInput({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove non-numeric characters except decimal point
     const raw = e.target.value.replace(/[^0-9.]/g, '')
-    let newValue = parseFloat(raw) || 0
+    
+    // Handle empty input or invalid numbers
+    if (raw === '' || raw === '.') {
+      onChange(0)
+      return
+    }
+    
+    let newValue = parseFloat(raw)
+    
+    // Guard against NaN
+    if (isNaN(newValue)) {
+      onChange(0)
+      return
+    }
+    
+    // Ensure non-negative if min is 0 or positive
+    if (min >= 0 && newValue < 0) {
+      newValue = 0
+    }
     
     // Convert monthly to annual if in monthly mode
     if (isMonthly) {
@@ -72,17 +91,7 @@ export default function CurrencyInput({
         >
           {label}
           {isMonthly && <span className="text-xs text-gray-500">(monthly)</span>}
-          {tooltip && (
-            <span className="group relative">
-              <svg className="w-4 h-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-help" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 max-w-xs text-center">
-                {tooltip}
-                <span className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-gray-900 dark:border-t-gray-700" />
-              </span>
-            </span>
-          )}
+          {tooltip && <Tooltip content={tooltip} />}
         </label>
         
         {allowMonthlyToggle && (
