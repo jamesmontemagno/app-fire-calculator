@@ -86,7 +86,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           to="/books"
           onClick={onClose}
           className={({ isActive }) => `
-            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-2
+            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1
             font-medium transition-colors
             ${isActive 
               ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
@@ -96,6 +96,23 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         >
           <span className="text-xl">📚</span>
           <span>Recommended Books</span>
+        </NavLink>
+
+        {/* Quiz link */}
+        <NavLink
+          to="/quiz"
+          onClick={onClose}
+          className={({ isActive }) => `
+            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-2
+            font-medium transition-colors
+            ${isActive 
+              ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }
+          `}
+        >
+          <span className="text-xl">🧭</span>
+          <span>Find Your Path</span>
         </NavLink>
 
         <div className="mt-4 mb-3 px-3">

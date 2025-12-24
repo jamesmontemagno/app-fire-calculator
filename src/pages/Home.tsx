@@ -139,6 +139,32 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Quiz CTA */}
+      <div className="bg-gradient-to-br from-fire-50 via-orange-50 to-amber-50 dark:from-fire-900/20 dark:via-orange-900/20 dark:to-amber-900/20 rounded-2xl p-8 border-2 border-fire-200 dark:border-fire-800">
+        <div className="max-w-3xl mx-auto text-center">
+          <span className="text-4xl mb-4 block">🧭</span>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-3">
+            Not sure which calculator to use?
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+            Take our quick quiz to find the perfect FIRE path for your situation. 
+            Answer a few questions and we'll recommend the best calculator with your information pre-filled.
+          </p>
+          <Link
+            to="/quiz"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-fire-600 hover:bg-fire-700 text-white text-lg font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
+          >
+            Find Your FIRE Path
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-4">
+            Takes 2-3 minutes · Personalized recommendation
+          </p>
+        </div>
+      </div>
+
       {/* Calculator Grid */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">
