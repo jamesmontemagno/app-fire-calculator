@@ -13,6 +13,7 @@ import WithdrawalRate from './pages/WithdrawalRate'
 import SavingsRate from './pages/SavingsRate'
 import ReverseFIRE from './pages/ReverseFIRE'
 import HealthcareGap from './pages/HealthcareGap'
+import Books from './pages/Books'
 import './index.css'
 
 const basename = import.meta.env.BASE_URL
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
       { path: 'savings-rate', element: <SavingsRate /> },
       { path: 'reverse', element: <ReverseFIRE /> },
       { path: 'healthcare', element: <HealthcareGap /> },
+      { path: 'books', element: <Books /> },
     ],
   },
 ], { basename })

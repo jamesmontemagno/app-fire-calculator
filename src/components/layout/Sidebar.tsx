@@ -154,6 +154,23 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         </div>
 
+        {/* Resources link */}
+        <NavLink
+          to="/books"
+          onClick={onClose}
+          className={({ isActive }) => `
+            flex items-center gap-2 px-3 py-2 mb-4 rounded-lg
+            font-medium transition-colors text-sm
+            ${isActive 
+              ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' 
+              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }
+          `}
+        >
+          <span className="text-lg">📚</span>
+          <span>Recommended Books</span>
+        </NavLink>
+
         {/* Privacy badge */}
         <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
           <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
