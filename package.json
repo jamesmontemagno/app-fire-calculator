@@ -5,6 +5,7 @@
   "type": "module",
   "description": "A private, offline-first FIRE (Financial Independence, Retire Early) calculator. No tracking, no storage, 100% client-side.",
   "keywords": ["fire", "financial-independence", "retirement", "calculator", "privacy"],
+  "homepage": "https://myfirenumber.com",
   "license": "MIT",
   "scripts": {
     "dev": "vite",

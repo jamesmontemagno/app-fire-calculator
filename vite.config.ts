@@ -41,5 +41,5 @@ export default defineConfig({
       }
     })
   ],
-  base: '/app-fire-calculator/',
+  base: '/',
 })

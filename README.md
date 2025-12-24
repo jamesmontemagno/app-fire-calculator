@@ -43,7 +43,7 @@ After first load, the app works completely offline. Install it as a PWA on your 
 ## 🚀 Getting Started
 
 ### Visit the Live Site
-[https://jamesmontemagno.github.io/app-fire-calculator/](https://jamesmontemagno.github.io/app-fire-calculator/)
+[https://myfirenumber.com](https://myfirenumber.com)
 
 ### Run Locally
 
