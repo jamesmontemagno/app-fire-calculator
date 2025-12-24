@@ -157,7 +157,7 @@ export default function CoastFIRE() {
             />
             <ResultCard
               label="Current Progress"
-              value={Math.min(100, (params.currentSavings / results.coastNumber) * 100)}
+              value={Math.min(1, params.currentSavings / results.coastNumber)}
               format="percent"
               icon="📊"
               subtext={`${formatCurrency(params.currentSavings)} saved`}

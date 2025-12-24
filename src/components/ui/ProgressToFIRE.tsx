@@ -17,7 +17,11 @@ export default function ProgressToFIRE({
   label = 'Progress to FIRE',
   targetLabel = 'FIRE Number',
 }: ProgressToFIREProps) {
-  const progress = Math.min(100, (currentSavings / fireNumber) * 100)
+  // Safeguard against invalid values
+  const safeFireNumber = fireNumber > 0 ? fireNumber : 1
+  const rawProgress = (currentSavings / safeFireNumber) * 100
+  const progress = Math.min(100, rawProgress)
+  const displayProgress = rawProgress > 999 ? '>999' : rawProgress.toFixed(1)
   
   // Milestone percentages
   const milestones = [25, 50, 75, 100]
@@ -53,7 +57,7 @@ export default function ProgressToFIRE({
         </div>
         <div className="text-right">
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-            {progress.toFixed(1)}%
+            {displayProgress}%
           </p>
           {yearsToFIRE !== undefined && yearsToFIRE !== Infinity && yearsToFIRE > 0 && (
             <p className="text-xs text-gray-500 dark:text-gray-400">
