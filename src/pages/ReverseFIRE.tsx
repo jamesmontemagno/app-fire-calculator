@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency, generateProjections } from '../utils/calculations'
+import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer } from '../components/ui'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import ProgressToFIRE from '../components/ui/ProgressToFIRE'
 import { ProjectionChart } from '../components/charts'
 
@@ -81,6 +82,25 @@ export default function ReverseFIRE() {
     )
   }, [params])
 
+  const handleExport = () => {
+    const inputs = {
+      currentAge: params.currentAge,
+      targetRetirementAge: params.retirementAge,
+      currentSavings: params.currentSavings,
+      annualExpenses: params.annualExpenses,
+      expectedReturn: params.expectedReturn,
+      inflationRate: params.inflationRate,
+      withdrawalRate: params.withdrawalRate,
+    }
+
+    exportToExcel({
+      calculatorName: 'Reverse FIRE',
+      inputs: formatInputsForExport(inputs),
+      results: formatResultsForExport(results),
+      projections: results.projections,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -94,7 +114,10 @@ export default function ReverseFIRE() {
             Find out how much you need to save monthly to FIRE by your target age.
           </p>
         </div>
-        <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        <div className="flex flex-wrap gap-2">
+          <ExportButton onExport={handleExport} />
+          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        </div>
       </div>
 
       {/* Progress Bar */}

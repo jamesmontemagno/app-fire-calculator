@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateCoastFIRE, formatCurrency } from '../utils/calculations'
+import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer } from '../components/ui'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 
 export default function CoastFIRE() {
@@ -25,6 +26,30 @@ export default function CoastFIRE() {
     ? { text: "You're already Coast FIRE!", color: 'text-green-600 dark:text-green-400' }
     : { text: `${results.yearsToCoast.toFixed(1)} years to Coast FIRE`, color: 'text-fire-600 dark:text-fire-400' }
 
+  const handleExport = () => {
+    const inputs = {
+      currentAge: params.currentAge,
+      retirementAge: params.retirementAge,
+      currentSavings: params.currentSavings,
+      annualContribution: params.annualContribution,
+      expectedReturn: params.expectedReturn,
+      inflationRate: params.inflationRate,
+      annualExpenses: params.annualExpenses,
+      withdrawalRate: params.withdrawalRate,
+    }
+
+    exportToExcel({
+      calculatorName: 'Coast FIRE',
+      inputs: formatInputsForExport(inputs),
+      results: formatResultsForExport(results),
+      projections: results.projections,
+      additionalSheets: [{
+        name: 'With Contributions',
+        data: results.projectionsWithContributions,
+      }],
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -38,7 +63,10 @@ export default function CoastFIRE() {
             Find out how much you need now so compound growth does the rest.
           </p>
         </div>
-        <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        <div className="flex flex-wrap gap-2">
+          <ExportButton onExport={handleExport} />
+          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        </div>
       </div>
 
       {/* Progress to Coast FIRE */}

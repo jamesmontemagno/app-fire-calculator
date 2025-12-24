@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency } from '../utils/calculations'
+import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
 import { AgeInput, CurrencyInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer } from '../components/ui'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 
 // Healthcare cost estimates by age (annual, US average) - for future use
 // const HEALTHCARE_COSTS = {
@@ -88,6 +89,25 @@ export default function HealthcareGap() {
     )
   }, [params, monthlyPremium, annualDeductible, annualOutOfPocket])
 
+  const handleExport = () => {
+    const inputs = {
+      currentAge: params.currentAge,
+      earlyRetirementAge: params.retirementAge,
+      medicareAge,
+      monthlyPremium,
+      annualDeductible,
+      annualOutOfPocket,
+      inflationRate: params.inflationRate,
+    }
+
+    exportToExcel({
+      calculatorName: 'Healthcare Gap',
+      inputs: formatInputsForExport(inputs),
+      results: formatResultsForExport(results),
+      projections: results.yearlyBreakdown,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -101,7 +121,10 @@ export default function HealthcareGap() {
             Estimate healthcare costs between early retirement and Medicare eligibility.
           </p>
         </div>
-        <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        <div className="flex flex-wrap gap-2">
+          <ExportButton onExport={handleExport} />
+          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        </div>
       </div>
 
       {/* Warning Banner */}

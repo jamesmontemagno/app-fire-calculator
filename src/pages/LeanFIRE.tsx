@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateLeanFIRE, formatCurrency } from '../utils/calculations'
+import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer } from '../components/ui'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 
 const LEAN_THRESHOLD = 40000
@@ -28,6 +29,26 @@ export default function LeanFIRE() {
 
   const isLean = params.annualExpenses <= LEAN_THRESHOLD
 
+  const handleExport = () => {
+    const inputs = {
+      currentAge: params.currentAge,
+      retirementAge: params.retirementAge,
+      currentSavings: params.currentSavings,
+      annualContribution: params.annualContribution,
+      expectedReturn: params.expectedReturn,
+      inflationRate: params.inflationRate,
+      withdrawalRate: params.withdrawalRate,
+      annualExpenses: leanExpenses,
+    }
+
+    exportToExcel({
+      calculatorName: 'Lean FIRE',
+      inputs: formatInputsForExport(inputs),
+      results: formatResultsForExport(results),
+      projections: results.projections,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -41,7 +62,10 @@ export default function LeanFIRE() {
             Achieve financial independence faster with a minimalist lifestyle.
           </p>
         </div>
-        <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        <div className="flex flex-wrap gap-2">
+          <ExportButton onExport={handleExport} />
+          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        </div>
       </div>
 
       {/* Progress Bar */}

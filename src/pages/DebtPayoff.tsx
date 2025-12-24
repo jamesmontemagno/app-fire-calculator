@@ -5,10 +5,11 @@ import {
   calculateAvalanchePayoff, 
   formatCurrency,
 } from '../utils/calculations'
+import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
 import type { DebtItem } from '../utils/calculations'
 import { CurrencyInput } from '../components/inputs'
 import DebtListInput from '../components/inputs/DebtListInput'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer } from '../components/ui'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import DebtBalanceChart from '../components/charts/DebtBalanceChart'
 import DebtBreakdownChart from '../components/charts/DebtBreakdownChart'
 
@@ -75,6 +76,51 @@ export default function DebtPayoff() {
     return { monthsSaved, interestSaved }
   }, [results])
 
+  const handleExport = () => {
+    if (!results?.base) return
+
+    const inputs = {
+      strategy,
+      mode,
+      monthlyBudget,
+      targetMonths,
+      extraPayment,
+      totalDebts: debts.length,
+      totalDebt,
+    }
+
+    const baseResults = results.base
+    const additionalSheets = []
+
+    // Add debt list
+    if (debts.length > 0) {
+      additionalSheets.push({
+        name: 'Debt List',
+        data: debts.map(d => ({
+          name: d.name,
+          balance: formatCurrency(d.balance),
+          rate: `${(d.rate * 100).toFixed(2)}%`,
+          minPayment: formatCurrency(d.minPayment),
+        })),
+      })
+    }
+
+    // Add payoff projections
+    if (baseResults.projections) {
+      additionalSheets.push({
+        name: 'Payoff Projections',
+        data: baseResults.projections,
+      })
+    }
+
+    exportToExcel({
+      calculatorName: 'Debt Payoff',
+      inputs: formatInputsForExport(inputs),
+      results: formatResultsForExport(baseResults),
+      additionalSheets,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -88,7 +134,10 @@ export default function DebtPayoff() {
             Eliminate debt faster with Snowball or Avalanche strategies.
           </p>
         </div>
-        <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        <div className="flex flex-wrap gap-2">
+          <ExportButton onExport={handleExport} disabled={!canCalculate} />
+          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        </div>
       </div>
 
       {/* Info Banner */}
