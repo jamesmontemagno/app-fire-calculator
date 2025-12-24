@@ -2,7 +2,7 @@ import { useState } from 'react'
 import Button from './Button'
 
 interface ExportButtonProps {
-  onExport: () => void
+  onExport: () => void | Promise<void>
   disabled?: boolean
   className?: string
 }
@@ -19,7 +19,10 @@ export default function ExportButton({ onExport, disabled = false, className = '
     setIsExporting(true)
     
     try {
-      await onExport()
+      const result = onExport()
+      if (result instanceof Promise) {
+        await result
+      }
       setShowSuccess(true)
       setTimeout(() => setShowSuccess(false), 2000)
     } catch (error) {

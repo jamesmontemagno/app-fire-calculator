@@ -102,7 +102,7 @@ export function exportToExcel(data: ExportData): void {
     const projectionSheet = XLSX.utils.json_to_sheet(data.projections)
     
     // Auto-size columns
-    const colWidths = Object.keys(data.projections[0]).map(() => ({ wch: 15 }))
+    const colWidths = Object.keys(data.projections[0] || {}).map(() => ({ wch: 15 }))
     projectionSheet['!cols'] = colWidths
     
     XLSX.utils.book_append_sheet(workbook, projectionSheet, 'Projections')
@@ -115,7 +115,7 @@ export function exportToExcel(data: ExportData): void {
         const additionalSheet = XLSX.utils.json_to_sheet(sheet.data)
         
         // Auto-size columns
-        const colWidths = Object.keys(sheet.data[0]).map(() => ({ wch: 15 }))
+        const colWidths = Object.keys(sheet.data[0] || {}).map(() => ({ wch: 15 }))
         additionalSheet['!cols'] = colWidths
         
         XLSX.utils.book_append_sheet(workbook, additionalSheet, sheet.name)
@@ -123,9 +123,10 @@ export function exportToExcel(data: ExportData): void {
     }
   }
   
-  // Generate filename with timestamp
+  // Generate filename with timestamp - sanitize for filesystem
   const timestamp = new Date().toISOString().split('T')[0]
-  const filename = `${data.calculatorName.replace(/\s+/g, '_')}_${timestamp}.xlsx`
+  const safeName = data.calculatorName.replace(/[^a-zA-Z0-9]/g, '_')
+  const filename = `${safeName}_${timestamp}.xlsx`
   
   // Write file
   XLSX.writeFile(workbook, filename)
@@ -137,23 +138,28 @@ export function exportToExcel(data: ExportData): void {
 export function formatInputsForExport(params: any): Record<string, any> {
   const formatted: Record<string, any> = {}
   
+  // Define patterns for different value types
+  const currencyKeys = ['savings', 'contribution', 'expenses', 'income', 'value', 'budget', 'payment', 'premium', 'deductible', 'pocket']
+  const percentKeys = ['rate', 'return', 'inflation', 'withdrawal', 'swr']
+  const ageKeys = ['age']
+  const timeKeys = ['years', 'months']
+  
   for (const [key, value] of Object.entries(params)) {
     // Skip complex objects like debts array
     if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
       continue
     }
     
-    // Format based on the key name
-    if (key.toLowerCase().includes('age')) {
+    const lowerKey = key.toLowerCase()
+    
+    // Format based on the key name patterns
+    if (ageKeys.some(pattern => lowerKey.includes(pattern))) {
       formatted[key] = value
-    } else if (key.toLowerCase().includes('rate') || key.toLowerCase().includes('return') || key.toLowerCase().includes('inflation')) {
+    } else if (percentKeys.some(pattern => lowerKey.includes(pattern))) {
       formatted[key] = formatPercent(value as number)
-    } else if (key.toLowerCase().includes('savings') || key.toLowerCase().includes('contribution') || 
-               key.toLowerCase().includes('expenses') || key.toLowerCase().includes('income') ||
-               key.toLowerCase().includes('value') || key.toLowerCase().includes('budget') || 
-               key.toLowerCase().includes('payment')) {
+    } else if (currencyKeys.some(pattern => lowerKey.includes(pattern))) {
       formatted[key] = formatCurrency(value as number)
-    } else if (key.toLowerCase().includes('years') || key.toLowerCase().includes('months')) {
+    } else if (timeKeys.some(pattern => lowerKey.includes(pattern))) {
       formatted[key] = value
     } else {
       formatted[key] = value
@@ -169,6 +175,11 @@ export function formatInputsForExport(params: any): Record<string, any> {
 export function formatResultsForExport(results: any): Record<string, any> {
   const formatted: Record<string, any> = {}
   
+  // Define patterns for different value types
+  const currencyKeys = ['number', 'value', 'balance', 'withdrawal', 'income', 'interest', 'payment', 'savings', 'cost', 'total', 'principal']
+  const percentKeys = ['rate', 'savingsrate', 'successrate', 'percent', 'progress']
+  const timeKeys = ['years', 'months', 'age', 'longevity']
+  
   for (const [key, value] of Object.entries(results)) {
     // Skip arrays and complex objects (they go in separate sheets)
     if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
@@ -177,15 +188,13 @@ export function formatResultsForExport(results: any): Record<string, any> {
     
     // Format based on the key name and value type
     if (typeof value === 'number') {
-      if (key.toLowerCase().includes('rate') || key === 'savingsRate' || key === 'successRate') {
+      const lowerKey = key.toLowerCase()
+      
+      if (percentKeys.some(pattern => lowerKey.includes(pattern))) {
         formatted[key] = formatPercent(value)
-      } else if (key.toLowerCase().includes('number') || key.toLowerCase().includes('value') || 
-                 key.toLowerCase().includes('balance') || key.toLowerCase().includes('withdrawal') ||
-                 key.toLowerCase().includes('income') || key.toLowerCase().includes('interest') ||
-                 key.toLowerCase().includes('payment') || key.toLowerCase().includes('savings')) {
+      } else if (currencyKeys.some(pattern => lowerKey.includes(pattern))) {
         formatted[key] = formatCurrency(value)
-      } else if (key.toLowerCase().includes('years') || key.toLowerCase().includes('months') ||
-                 key.toLowerCase().includes('age') || key.toLowerCase().includes('longevity')) {
+      } else if (timeKeys.some(pattern => lowerKey.includes(pattern))) {
         formatted[key] = Math.round(value * 10) / 10 // Round to 1 decimal
       } else {
         formatted[key] = value
