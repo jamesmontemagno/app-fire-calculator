@@ -1,8 +1,8 @@
-# 🔥 FIRE Calculator
+# 🔥 FIRE Calculators
 
 A **private**, **offline-first** FIRE (Financial Independence, Retire Early) calculator. Calculate your path to financial freedom with 6 different calculator types—all running 100% in your browser.
 
-![FIRE Calculator](https://img.shields.io/badge/FIRE-Calculator-orange)
+![FIRE Calculators](https://img.shields.io/badge/FIRE-Calculator-orange)
 ![Privacy First](https://img.shields.io/badge/Privacy-First-green)
 ![Offline Ready](https://img.shields.io/badge/Offline-Ready-blue)
 

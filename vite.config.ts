@@ -11,7 +11,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'fire-icon.svg'],
       manifest: {
-        name: 'FIRE Calculator',
+        name: 'FIRE Calculators',
         short_name: 'FIRE Calc',
         description: 'Calculate your path to Financial Independence, Retire Early. 100% private, works offline.',
         theme_color: '#f97316',
