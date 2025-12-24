@@ -66,7 +66,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           to="/"
           onClick={onClose}
           className={`
-            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-2
+            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1
             font-medium transition-colors
             ${isHome 
               ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
@@ -78,7 +78,24 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           <span>Home</span>
         </NavLink>
 
-        <div className="mt-6 mb-3 px-3">
+        {/* Recommended Books link */}
+        <NavLink
+          to="/books"
+          onClick={onClose}
+          className={({ isActive }) => `
+            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-2
+            font-medium transition-colors
+            ${isActive 
+              ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }
+          `}
+        >
+          <span className="text-xl">📚</span>
+          <span>Recommended Books</span>
+        </NavLink>
+
+        <div className="mt-4 mb-3 px-3">
           <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
             Calculators
           </h3>
@@ -153,23 +170,6 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
             </button>
           </div>
         </div>
-
-        {/* Resources link */}
-        <NavLink
-          to="/books"
-          onClick={onClose}
-          className={({ isActive }) => `
-            flex items-center gap-2 px-3 py-2 mb-4 rounded-lg
-            font-medium transition-colors text-sm
-            ${isActive 
-              ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' 
-              : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800'
-            }
-          `}
-        >
-          <span className="text-lg">📚</span>
-          <span>Recommended Books</span>
-        </NavLink>
 
         {/* Privacy badge */}
         <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg">

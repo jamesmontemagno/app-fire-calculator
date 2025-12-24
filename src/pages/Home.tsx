@@ -178,6 +178,70 @@ export default function Home() {
         </div>
       </div>
 
+      {/* Recommended Books Section */}
+      <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8">
+        <div className="text-center mb-8">
+          <span className="text-5xl mb-4 block">📚</span>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+            Recommended FIRE Books
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Essential reading to accelerate your financial independence journey.
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-6">
+          {[
+            { title: "I Will Teach You to Be Rich", author: "Ramit Sethi", url: "https://amzn.to/3N1SrtP", image: "https://m.media-amazon.com/images/I/81c9SSbG3OL._SL1500_.jpg" },
+            { title: "Money for Couples", author: "Ramit Sethi", url: "https://amzn.to/4pQ81Hn", image: "https://m.media-amazon.com/images/I/81G3ygJ-jOL._SL1500_.jpg" },
+            { title: "The Psychology of Money", author: "Morgan Housel", url: "https://amzn.to/3Y74Jn9", image: "https://m.media-amazon.com/images/I/81Dky+tD+pL._SY522_.jpg" },
+            { title: "The Bogleheads' Guide to Investing", author: "Larimore et al.", url: "https://amzn.to/3MXrOWU", image: "https://m.media-amazon.com/images/I/611brjp7lgL._SL1200_.jpg" },
+            { title: "We Need to Talk", author: "Jennifer Risher", url: "https://amzn.to/3Y74Ij5", image: "https://m.media-amazon.com/images/I/81KH2bo+b0L._SL1500_.jpg" },
+            { title: "Die with Zero", author: "Bill Perkins", url: "https://amzn.to/3LgBMlK", image: "https://m.media-amazon.com/images/I/61+4EHZ4faL._SL1500_.jpg" },
+            { title: "The Little Book of Common Sense Investing", author: "John C. Bogle", url: "https://amzn.to/4pdtMQq", image: "https://m.media-amazon.com/images/I/81vPxCvGMcL._SL1500_.jpg" },
+          ].map((book) => (
+            <a
+              key={book.title}
+              href={book.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group"
+            >
+              <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-shadow duration-200 bg-white dark:bg-gray-800">
+                <img
+                  src={book.image}
+                  alt={book.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  loading="lazy"
+                />
+              </div>
+              <p className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-300 line-clamp-1 group-hover:text-fire-600 dark:group-hover:text-fire-400 transition-colors">
+                {book.title}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+                {book.author}
+              </p>
+            </a>
+          ))}
+        </div>
+        
+        <div className="text-center">
+          <Link
+            to="/books"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-fire-600 hover:bg-fire-700 text-white font-medium rounded-lg transition-colors"
+          >
+            View All Books & Details
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          </Link>
+        </div>
+        
+        <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">
+          Affiliate links — purchases support this free calculator at no extra cost to you.
+        </p>
+      </div>
+
       {/* Privacy Section */}
       <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-8">
         <div className="text-center mb-8">
