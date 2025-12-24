@@ -23,6 +23,9 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
   const { theme, setTheme } = useTheme()
 
   const isHome = location.pathname === '/'
+  
+  // Preserve query parameters when navigating between calculators
+  const currentSearch = location.search
 
   return (
     <aside 
@@ -105,7 +108,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
           {calculators.map(calc => (
             <NavLink
               key={calc.path}
-              to={calc.path}
+              to={`${calc.path}${currentSearch}`}
               onClick={onClose}
               className={({ isActive }) => `
                 flex items-center gap-3 px-3 py-2.5 rounded-lg
