@@ -103,6 +103,7 @@ export function presentValue(futureVal: number, rate: number, years: number): nu
 /**
  * Calculate years to reach a target with contributions
  * Solves for n in: FV = PV(1+r)^n + PMT * (((1+r)^n - 1) / r)
+ * Uses closed-form solution: n = ln((PMT + target*r) / (PMT + PV*r)) / ln(1+r)
  */
 export function yearsToTarget(
   presentVal: number,
@@ -116,17 +117,34 @@ export function yearsToTarget(
     return (target - presentVal) / annualContribution
   }
   
-  // Iterative approach for accuracy
-  let years = 0
-  let current = presentVal
-  const maxYears = 100
+  // Try closed-form solution for fractional years
+  // n = ln((PMT + FV*r) / (PMT + PV*r)) / ln(1+r)
+  const numerator = annualContribution + target * rate
+  const denominator = annualContribution + presentVal * rate
   
-  while (current < target && years < maxYears) {
-    current = current * (1 + rate) + annualContribution
-    years++
+  // Check if the target is reachable (denominator must be positive and numerator > denominator)
+  if (denominator <= 0 || numerator <= denominator) {
+    // Fall back to iterative approach if closed-form doesn't work
+    let years = 0
+    let current = presentVal
+    const maxYears = 100
+    
+    while (current < target && years < maxYears) {
+      current = current * (1 + rate) + annualContribution
+      years++
+    }
+    
+    return years >= maxYears ? Infinity : years
   }
   
-  return years >= maxYears ? Infinity : years
+  const years = Math.log(numerator / denominator) / Math.log(1 + rate)
+  
+  // Sanity check - if result is negative or too large, use iterative
+  if (years < 0 || years > 100) {
+    return Infinity
+  }
+  
+  return years
 }
 
 /**
@@ -208,9 +226,9 @@ export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
   const yearsToFIRE = yearsToTarget(currentSavings, annualContribution, realReturn, fireNumber)
   const fireAge = currentAge + yearsToFIRE
 
-  // Coast FIRE Number (amount needed now to coast to FIRE at 65)
-  const yearsTo65 = Math.max(0, 65 - currentAge)
-  const coastFireNumber = presentValue(fireNumber, realReturn, yearsTo65)
+  // Coast FIRE Number (amount needed now to coast to FIRE at target retirement age)
+  const yearsToRetirement = Math.max(0, inputs.retirementAge - currentAge)
+  const coastFireNumber = presentValue(fireNumber, realReturn, yearsToRetirement)
 
   // Calculate savings rate (assumes income = contributions + expenses)
   const estimatedIncome = annualContribution + annualExpenses
@@ -399,8 +417,9 @@ export function calculateWithdrawal(
   const annualWithdrawal = portfolioValue * withdrawalRate
   const monthlyWithdrawal = annualWithdrawal / 12
   
-  // Real return
-  const realReturn = (1 + expectedReturn) / (1 + inflationRate) - 1
+  // Use nominal return with inflation-adjusted withdrawals
+  // This properly models: portfolio grows at nominal rate, withdrawals increase with inflation
+  const nominalReturn = expectedReturn
   
   // Calculate portfolio longevity
   let balance = portfolioValue
@@ -415,7 +434,7 @@ export function calculateWithdrawal(
       withdrawal: Math.round(adjustedWithdrawal),
     })
     
-    balance = balance * (1 + realReturn) - adjustedWithdrawal
+    balance = balance * (1 + nominalReturn) - adjustedWithdrawal
     adjustedWithdrawal *= (1 + inflationRate) // Adjust withdrawal for inflation
     year++
   }
@@ -423,7 +442,7 @@ export function calculateWithdrawal(
   const portfolioLongevity = year - 1
   const endingBalance = Math.max(0, withdrawalProjections[withdrawalProjections.length - 1]?.balance || 0)
   
-  // Calculate success rate (simplified - based on whether portfolio lasts through retirement)
+  // Calculate goal achievement rate (simplified - based on whether portfolio lasts through retirement)
   const successRate = portfolioLongevity >= retirementYears ? 1 : portfolioLongevity / retirementYears
   
   // Analyze different withdrawal rates
@@ -434,7 +453,7 @@ export function calculateWithdrawal(
     let withdrawal = portfolioValue * rate
     
     while (bal > 0 && yr < 50) {
-      bal = bal * (1 + realReturn) - withdrawal
+      bal = bal * (1 + nominalReturn) - withdrawal
       withdrawal *= (1 + inflationRate)
       yr++
     }

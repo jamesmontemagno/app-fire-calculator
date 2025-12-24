@@ -1,9 +1,8 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency } from '../utils/calculations'
-import { CurrencyInput, PercentageInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer } from '../components/ui'
-import ProgressToFIRE from '../components/ui/ProgressToFIRE'
+import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ProgressToFIRE } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 
 // Calculate savings rate and time to FIRE
@@ -13,7 +12,8 @@ function calculateSavingsRate(
   currentSavings: number,
   expectedReturn: number,
   inflationRate: number,
-  withdrawalRate: number
+  withdrawalRate: number,
+  currentAge: number
 ) {
   const annualSavings = annualIncome - annualExpenses
   const savingsRate = annualIncome > 0 ? annualSavings / annualIncome : 0
@@ -44,7 +44,7 @@ function calculateSavingsRate(
   
   for (let i = 0; i <= Math.min(yearsToFIRE + 10, 50); i++) {
     projections.push({
-      age: 30 + i, // placeholder age
+      age: currentAge + i,
       year: currentYear + i,
       portfolio: Math.round(bal),
       contributions: i === 0 ? currentSavings : annualSavings,
@@ -100,7 +100,8 @@ export default function SavingsRate() {
       params.currentSavings,
       params.expectedReturn,
       params.inflationRate,
-      params.withdrawalRate
+      params.withdrawalRate,
+      params.currentAge
     )
   }, [annualIncome, params])
 
@@ -149,6 +150,12 @@ export default function SavingsRate() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Finances</h2>
           </CardHeader>
           <CardContent className="space-y-4">
+            <AgeInput
+              label="Current Age"
+              value={params.currentAge}
+              onChange={(v) => setParam('currentAge', v)}
+              tooltip="Your current age"
+            />
             <CurrencyInput
               label="Annual Income (After Tax)"
               value={annualIncome}

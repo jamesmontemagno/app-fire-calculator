@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency } from '../utils/calculations'
-import { AgeInput } from '../components/inputs'
+import { AgeInput, CurrencyInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer } from '../components/ui'
 
 // Healthcare cost estimates by age (annual, US average) - for future use
@@ -70,10 +70,10 @@ function calculateHealthcareGap(
 export default function HealthcareGap() {
   const { params, setParam, resetParams, copyUrl, hasCustomParams } = useCalculatorParams()
   
-  // Healthcare-specific params with defaults
-  const monthlyPremium = 600 // Default ACA silver plan
-  const annualDeductible = 2500
-  const annualOutOfPocket = 2000
+  // Healthcare-specific params with configurable defaults
+  const [monthlyPremium, setMonthlyPremium] = useState(600) // Default ACA silver plan
+  const [annualDeductible, setAnnualDeductible] = useState(2500)
+  const [annualOutOfPocket, setAnnualOutOfPocket] = useState(2000)
   const medicareAge = 65
 
   const results = useMemo(() => {
@@ -149,24 +149,33 @@ export default function HealthcareGap() {
             
             <div className="border-t border-gray-200 dark:border-gray-700 pt-4">
               <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-                Healthcare Cost Assumptions
+                Healthcare Cost Estimates
               </h3>
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
-                Based on ACA Silver plan averages. Adjust based on your state and needs.
+                Defaults based on ACA Silver plan averages. Adjust based on your state and needs.
               </p>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Monthly Premium</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(monthlyPremium)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Annual Deductible</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(annualDeductible)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Est. Out-of-Pocket</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(annualOutOfPocket)}</span>
-                </div>
+              <div className="space-y-3">
+                <CurrencyInput
+                  label="Monthly Premium"
+                  value={monthlyPremium}
+                  onChange={setMonthlyPremium}
+                  tooltip="Monthly health insurance premium"
+                  max={3000}
+                />
+                <CurrencyInput
+                  label="Annual Deductible"
+                  value={annualDeductible}
+                  onChange={setAnnualDeductible}
+                  tooltip="Yearly deductible before insurance pays"
+                  max={20000}
+                />
+                <CurrencyInput
+                  label="Est. Out-of-Pocket"
+                  value={annualOutOfPocket}
+                  onChange={setAnnualOutOfPocket}
+                  tooltip="Expected annual out-of-pocket medical costs"
+                  max={20000}
+                />
               </div>
             </div>
           </CardContent>
