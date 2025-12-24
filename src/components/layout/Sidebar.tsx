@@ -44,7 +44,7 @@ export default function Sidebar({ isOpen, onClose }: SidebarProps) {
         >
           <span className="text-3xl">🔥</span>
           <div>
-            <div className="font-bold text-lg text-gray-900 dark:text-gray-100">FIRE Calculator</div>
+            <div className="font-bold text-lg text-gray-900 dark:text-gray-100">FIRE Calculators</div>
             <div className="text-xs text-gray-500 dark:text-gray-400">Financial Independence</div>
           </div>
         </NavLink>

@@ -103,7 +103,7 @@ export default function Home() {
           <span className="text-7xl animate-pulse">🔥</span>
         </div>
         <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-          FIRE Calculator
+          FIRE Calculators
         </h1>
         <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
           Plan your path to <strong>Financial Independence, Retire Early</strong>. 
