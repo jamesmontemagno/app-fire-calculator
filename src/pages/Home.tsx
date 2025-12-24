@@ -75,12 +75,22 @@ const calculators = [
   {
     path: '/savings-rate',
     icon: '🧮',
-    name: 'Savings Rate',
+    name: 'Savings & Investment Rate',
     description: 'The most important metric — see how your savings rate impacts your time to FIRE.',
     color: 'from-indigo-500 to-purple-500',
     bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
     borderColor: 'border-indigo-200 dark:border-indigo-800',
     audience: 'Best for: Understanding your FI timeline',
+  },
+  {
+    path: '/debt-payoff',
+    icon: '💳',
+    name: 'Debt Payoff',
+    description: 'Eliminate debt faster with Snowball or Avalanche strategies — compare methods and see the impact of extra payments.',
+    color: 'from-red-500 to-rose-500',
+    bgColor: 'bg-red-50 dark:bg-red-900/20',
+    borderColor: 'border-red-200 dark:border-red-800',
+    audience: 'Best for: Tackling multiple debts strategically',
   },
   {
     path: '/healthcare',

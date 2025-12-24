@@ -1,10 +1,22 @@
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import UpdatePrompt from '../UpdatePrompt'
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebarCollapsed')
+    return saved === 'true'
+  })
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', String(sidebarCollapsed))
+  }, [sidebarCollapsed])
+
+  const toggleSidebarCollapse = () => {
+    setSidebarCollapsed(!sidebarCollapsed)
+  }
 
   return (
     <>
@@ -21,7 +33,9 @@ export default function AppLayout() {
       {/* Sidebar */}
       <Sidebar 
         isOpen={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)} 
+        onClose={() => setSidebarOpen(false)}
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={toggleSidebarCollapse}
       />
 
       {/* Main content */}

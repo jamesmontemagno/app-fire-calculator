@@ -9,6 +9,7 @@ interface CurrencyInputProps {
   max?: number
   className?: string
   allowMonthlyToggle?: boolean
+  showInvalidState?: boolean // When true, shows red border if value is below min instead of clamping
 }
 
 export default function CurrencyInput({
@@ -20,12 +21,16 @@ export default function CurrencyInput({
   max,
   className = '',
   allowMonthlyToggle = false,
+  showInvalidState = false,
 }: CurrencyInputProps) {
   const id = useId()
   const [isMonthly, setIsMonthly] = useState(false)
 
   // When in monthly mode, display and edit monthly values, but store annual
   const displayValue = isMonthly ? value / 12 : value
+
+  // Check if current value is invalid (below min)
+  const isInvalid = showInvalidState && value < min
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove non-numeric characters except decimal point
@@ -37,12 +42,22 @@ export default function CurrencyInput({
       newValue = newValue * 12
     }
     
-    if (max !== undefined && newValue > max) {
-      onChange(max)
-    } else if (newValue < min) {
-      onChange(min)
+    // If showInvalidState is enabled, don't clamp the min value - just let it through
+    if (showInvalidState) {
+      if (max !== undefined && newValue > max) {
+        onChange(max)
+      } else {
+        onChange(newValue)
+      }
     } else {
-      onChange(newValue)
+      // Original behavior: clamp to min/max
+      if (max !== undefined && newValue > max) {
+        onChange(max)
+      } else if (newValue < min) {
+        onChange(min)
+      } else {
+        onChange(newValue)
+      }
     }
   }
 
@@ -90,16 +105,18 @@ export default function CurrencyInput({
           inputMode="numeric"
           value={formattedValue}
           onChange={handleChange}
-          className="
+          className={`
             w-full pl-8 pr-3 py-2.5 
             bg-white dark:bg-gray-800 
-            border border-gray-300 dark:border-gray-600 
-            rounded-lg 
+            border rounded-lg 
             text-gray-900 dark:text-gray-100
             placeholder-gray-400 dark:placeholder-gray-500
-            focus:ring-2 focus:ring-fire-500 focus:border-fire-500 dark:focus:ring-fire-400 dark:focus:border-fire-400
             transition-colors
-          "
+            ${isInvalid 
+              ? 'border-red-500 dark:border-red-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:focus:ring-red-400 dark:focus:border-red-400' 
+              : 'border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-fire-500 focus:border-fire-500 dark:focus:ring-fire-400 dark:focus:border-fire-400'
+            }
+          `}
         />
         {allowMonthlyToggle && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">

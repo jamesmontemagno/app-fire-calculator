@@ -475,3 +475,214 @@ export function calculateWithdrawal(
     rateAnalysis,
   }
 }
+
+// ============================================
+// Debt Payoff Calculator
+// ============================================
+
+export interface DebtItem {
+  id: string
+  name: string
+  balance: number
+  rate: number // Annual rate as decimal, e.g., 0.18 for 18%
+  minPayment: number
+}
+
+export interface DebtPayoffMonth {
+  month: number
+  totalBalance: number
+  principalPaid: number
+  interestPaid: number
+  cumulativePrincipal: number
+  cumulativeInterest: number
+  debtsPaidOff: string[] // Names of debts paid off this month
+  debtsRemaining: { name: string; balance: number }[]
+}
+
+export interface DebtPayoffResult {
+  totalMonths: number
+  totalInterest: number
+  totalPrincipal: number
+  monthlyPayment: number
+  projections: DebtPayoffMonth[]
+  payoffOrder: string[] // Order in which debts are paid off
+  debtMilestones: { month: number; debtName: string }[]
+}
+
+/**
+ * Calculate debt payoff using Snowball method (smallest balance first)
+ */
+export function calculateSnowballPayoff(
+  debts: DebtItem[],
+  totalMonthlyPayment: number,
+  extraPayment: number = 0
+): DebtPayoffResult {
+  // Sort debts by balance (smallest first)
+  const sortedDebts = [...debts].sort((a, b) => a.balance - b.balance)
+  return calculateDebtPayoff(sortedDebts, totalMonthlyPayment, extraPayment)
+}
+
+/**
+ * Calculate debt payoff using Avalanche method (highest interest rate first)
+ */
+export function calculateAvalanchePayoff(
+  debts: DebtItem[],
+  totalMonthlyPayment: number,
+  extraPayment: number = 0
+): DebtPayoffResult {
+  // Sort debts by interest rate (highest first)
+  const sortedDebts = [...debts].sort((a, b) => b.rate - a.rate)
+  return calculateDebtPayoff(sortedDebts, totalMonthlyPayment, extraPayment)
+}
+
+/**
+ * Core debt payoff calculation logic
+ */
+function calculateDebtPayoff(
+  sortedDebts: DebtItem[],
+  totalMonthlyPayment: number,
+  extraPayment: number = 0
+): DebtPayoffResult {
+  // Clone debts to track balances
+  const remainingDebts = sortedDebts.map(d => ({ ...d, currentBalance: d.balance }))
+  
+  const projections: DebtPayoffMonth[] = []
+  const payoffOrder: string[] = []
+  const debtMilestones: { month: number; debtName: string }[] = []
+  
+  let month = 0
+  let cumulativePrincipal = 0
+  let cumulativeInterest = 0
+  const totalPrincipal = sortedDebts.reduce((sum, d) => sum + d.balance, 0)
+  
+  const availablePayment = totalMonthlyPayment + extraPayment
+  
+  while (remainingDebts.some(d => d.currentBalance > 0) && month < 600) { // Max 50 years
+    month++
+    
+    let monthlyBudget = availablePayment
+    let monthPrincipal = 0
+    let monthInterest = 0
+    const paidOffThisMonth: string[] = []
+    
+    // First, pay minimum payments on all debts
+    for (const debt of remainingDebts) {
+      if (debt.currentBalance <= 0) continue
+      
+      const monthlyRate = debt.rate / 12
+      const interestCharge = debt.currentBalance * monthlyRate
+      const minPaymentNeeded = Math.min(debt.minPayment, debt.currentBalance + interestCharge)
+      const principalPayment = Math.max(0, minPaymentNeeded - interestCharge)
+      
+      debt.currentBalance -= principalPayment
+      monthlyBudget -= minPaymentNeeded
+      monthPrincipal += principalPayment
+      monthInterest += interestCharge
+      
+      if (debt.currentBalance <= 0) {
+        debt.currentBalance = 0
+        paidOffThisMonth.push(debt.name)
+        payoffOrder.push(debt.name)
+        debtMilestones.push({ month, debtName: debt.name })
+      }
+    }
+    
+    // Apply remaining budget to highest priority debt
+    if (monthlyBudget > 0) {
+      const targetDebt = remainingDebts.find(d => d.currentBalance > 0)
+      if (targetDebt) {
+        const monthlyRate = targetDebt.rate / 12
+        const additionalInterest = targetDebt.currentBalance * monthlyRate
+        const maxPayment = targetDebt.currentBalance + additionalInterest
+        const actualPayment = Math.min(monthlyBudget, maxPayment)
+        const additionalPrincipal = Math.max(0, actualPayment - additionalInterest)
+        
+        targetDebt.currentBalance -= additionalPrincipal
+        monthPrincipal += additionalPrincipal
+        monthInterest += additionalInterest
+        
+        if (targetDebt.currentBalance <= 0) {
+          targetDebt.currentBalance = 0
+          if (!paidOffThisMonth.includes(targetDebt.name)) {
+            paidOffThisMonth.push(targetDebt.name)
+            payoffOrder.push(targetDebt.name)
+            debtMilestones.push({ month, debtName: targetDebt.name })
+          }
+        }
+      }
+    }
+    
+    cumulativePrincipal += monthPrincipal
+    cumulativeInterest += monthInterest
+    
+    const totalBalance = remainingDebts.reduce((sum, d) => sum + d.currentBalance, 0)
+    
+    projections.push({
+      month,
+      totalBalance: Math.round(totalBalance),
+      principalPaid: Math.round(monthPrincipal),
+      interestPaid: Math.round(monthInterest),
+      cumulativePrincipal: Math.round(cumulativePrincipal),
+      cumulativeInterest: Math.round(cumulativeInterest),
+      debtsPaidOff: paidOffThisMonth,
+      debtsRemaining: remainingDebts
+        .filter(d => d.currentBalance > 0)
+        .map(d => ({ name: d.name, balance: Math.round(d.currentBalance) })),
+    })
+    
+    // Break if all debts are paid
+    if (totalBalance <= 0) break
+  }
+  
+  return {
+    totalMonths: month,
+    totalInterest: Math.round(cumulativeInterest),
+    totalPrincipal: Math.round(totalPrincipal),
+    monthlyPayment: totalMonthlyPayment + extraPayment,
+    projections,
+    payoffOrder,
+    debtMilestones,
+  }
+}
+
+/**
+ * Calculate required monthly payment to pay off debts in target months
+ */
+export function calculateDebtPayoffByTimeline(
+  debts: DebtItem[],
+  targetMonths: number,
+  strategy: 'snowball' | 'avalanche',
+  extraPayment: number = 0
+): { requiredPayment: number; result: DebtPayoffResult } | null {
+  if (targetMonths <= 0 || debts.length === 0) return null
+  
+  // Binary search for required payment
+  const totalBalance = debts.reduce((sum, d) => sum + d.balance, 0)
+  const totalMinPayment = debts.reduce((sum, d) => sum + d.minPayment, 0)
+  
+  let minPayment = totalMinPayment
+  let maxPayment = totalBalance // Upper bound
+  let requiredPayment = minPayment
+  let result: DebtPayoffResult | null = null
+  
+  // Binary search with max 30 iterations
+  for (let i = 0; i < 30; i++) {
+    const testPayment = (minPayment + maxPayment) / 2
+    const testResult = strategy === 'snowball' 
+      ? calculateSnowballPayoff(debts, testPayment, extraPayment)
+      : calculateAvalanchePayoff(debts, testPayment, extraPayment)
+    
+    if (testResult.totalMonths <= targetMonths) {
+      requiredPayment = testPayment
+      result = testResult
+      maxPayment = testPayment
+    } else {
+      minPayment = testPayment
+    }
+    
+    // If we're close enough, break
+    if (Math.abs(maxPayment - minPayment) < 1) break
+  }
+  
+  return result ? { requiredPayment: Math.round(requiredPayment), result } : null
+}
