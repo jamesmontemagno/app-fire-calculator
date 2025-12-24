@@ -1,11 +1,8 @@
-import { useEffect, useState } from 'react'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 
 export default function UpdatePrompt() {
-  const [showReload, setShowReload] = useState(false)
-  
   const {
-    needRefresh: [needRefresh],
+    needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(swUrl: string) {
@@ -16,13 +13,7 @@ export default function UpdatePrompt() {
     },
   })
 
-  useEffect(() => {
-    if (needRefresh) {
-      setShowReload(true)
-    }
-  }, [needRefresh])
-
-  if (!showReload) {
+  if (!needRefresh) {
     return null
   }
 
@@ -39,7 +30,7 @@ export default function UpdatePrompt() {
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => setShowReload(false)}
+            onClick={() => setNeedRefresh(false)}
             className="px-3 py-1.5 text-sm text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
           >
             Later
