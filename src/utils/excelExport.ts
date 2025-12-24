@@ -1,4 +1,4 @@
-import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import { formatCurrency, formatPercent } from './calculations'
 
 /**
@@ -26,8 +26,6 @@ function formatValue(value: any): any {
   
   // Keep numbers as numbers for Excel
   if (typeof value === 'number') {
-    // For percentages stored as decimals, keep them as decimals
-    // Excel will format them with percentage format
     return value
   }
   
@@ -62,63 +60,103 @@ function objectToRows(data: Record<string, any>, formatLabels = true): any[][] {
 }
 
 /**
- * Export calculator data to Excel file
+ * Export calculator data to Excel file using ExcelJS
  */
-export function exportToExcel(data: ExportData): void {
-  const workbook = XLSX.utils.book_new()
+export async function exportToExcel(data: ExportData): Promise<void> {
+  const workbook = new ExcelJS.Workbook()
   
   // Sheet 1: Inputs
-  const inputRows = [
-    ['Input Parameter', 'Value'],
-    ...objectToRows(data.inputs)
-  ]
-  const inputSheet = XLSX.utils.aoa_to_sheet(inputRows)
-  
-  // Set column widths
-  inputSheet['!cols'] = [
-    { wch: 25 },  // Input Parameter column
-    { wch: 20 }   // Value column
+  const inputSheet = workbook.addWorksheet('Inputs')
+  inputSheet.columns = [
+    { header: 'Input Parameter', key: 'param', width: 25 },
+    { header: 'Value', key: 'value', width: 20 }
   ]
   
-  XLSX.utils.book_append_sheet(workbook, inputSheet, 'Inputs')
+  const inputRows = objectToRows(data.inputs)
+  inputRows.forEach(row => {
+    inputSheet.addRow({ param: row[0], value: row[1] })
+  })
+  
+  // Style header row
+  inputSheet.getRow(1).font = { bold: true }
+  inputSheet.getRow(1).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFE0E0E0' }
+  }
   
   // Sheet 2: Results
-  const resultRows = [
-    ['Result', 'Value'],
-    ...objectToRows(data.results)
-  ]
-  const resultSheet = XLSX.utils.aoa_to_sheet(resultRows)
-  
-  // Set column widths
-  resultSheet['!cols'] = [
-    { wch: 25 },  // Result column
-    { wch: 20 }   // Value column
+  const resultSheet = workbook.addWorksheet('Results')
+  resultSheet.columns = [
+    { header: 'Result', key: 'result', width: 25 },
+    { header: 'Value', key: 'value', width: 20 }
   ]
   
-  XLSX.utils.book_append_sheet(workbook, resultSheet, 'Results')
+  const resultRows = objectToRows(data.results)
+  resultRows.forEach(row => {
+    resultSheet.addRow({ result: row[0], value: row[1] })
+  })
+  
+  // Style header row
+  resultSheet.getRow(1).font = { bold: true }
+  resultSheet.getRow(1).fill = {
+    type: 'pattern',
+    pattern: 'solid',
+    fgColor: { argb: 'FFE0E0E0' }
+  }
   
   // Sheet 3: Projections (if available)
   if (data.projections && data.projections.length > 0) {
-    const projectionSheet = XLSX.utils.json_to_sheet(data.projections)
+    const projectionSheet = workbook.addWorksheet('Projections')
     
-    // Auto-size columns
-    const colWidths = Object.keys(data.projections[0] || {}).map(() => ({ wch: 15 }))
-    projectionSheet['!cols'] = colWidths
+    // Get column headers from first row
+    const headers = Object.keys(data.projections[0] || {})
+    projectionSheet.columns = headers.map(header => ({
+      header: header.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim(),
+      key: header,
+      width: 15
+    }))
     
-    XLSX.utils.book_append_sheet(workbook, projectionSheet, 'Projections')
+    // Add data rows
+    data.projections.forEach(row => {
+      projectionSheet.addRow(row)
+    })
+    
+    // Style header row
+    projectionSheet.getRow(1).font = { bold: true }
+    projectionSheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFE0E0E0' }
+    }
   }
   
   // Additional sheets (for specialized calculators)
   if (data.additionalSheets) {
     for (const sheet of data.additionalSheets) {
       if (sheet.data && sheet.data.length > 0) {
-        const additionalSheet = XLSX.utils.json_to_sheet(sheet.data)
+        const additionalSheet = workbook.addWorksheet(sheet.name)
         
-        // Auto-size columns
-        const colWidths = Object.keys(sheet.data[0] || {}).map(() => ({ wch: 15 }))
-        additionalSheet['!cols'] = colWidths
+        // Get column headers from first row
+        const headers = Object.keys(sheet.data[0] || {})
+        additionalSheet.columns = headers.map(header => ({
+          header: header.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim(),
+          key: header,
+          width: 15
+        }))
         
-        XLSX.utils.book_append_sheet(workbook, additionalSheet, sheet.name)
+        // Add data rows
+        sheet.data.forEach(row => {
+          additionalSheet.addRow(row)
+        })
+        
+        // Style header row
+        additionalSheet.getRow(1).font = { bold: true }
+        additionalSheet.getRow(1).fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: 'FFE0E0E0' }
+        }
       }
     }
   }
@@ -129,7 +167,14 @@ export function exportToExcel(data: ExportData): void {
   const filename = `${safeName}_${timestamp}.xlsx`
   
   // Write file
-  XLSX.writeFile(workbook, filename)
+  const buffer = await workbook.xlsx.writeBuffer()
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+  const url = window.URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  window.URL.revokeObjectURL(url)
 }
 
 /**
