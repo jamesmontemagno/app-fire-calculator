@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateBaristaFIRE, formatCurrency } from '../utils/calculations'
+import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer } from '../components/ui'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 
 export default function BaristaFIRE() {
@@ -24,6 +25,26 @@ export default function BaristaFIRE() {
   const portfolioReduction = results.fullFireNumber - results.baristaNumber
   const reductionPercent = (portfolioReduction / results.fullFireNumber) * 100
 
+  const handleExport = () => {
+    const inputs = {
+      currentAge: params.currentAge,
+      currentSavings: params.currentSavings,
+      annualContribution: params.annualContribution,
+      expectedReturn: params.expectedReturn,
+      inflationRate: params.inflationRate,
+      annualExpenses: params.annualExpenses,
+      withdrawalRate: params.withdrawalRate,
+      partTimeIncome: params.partTimeIncome,
+    }
+
+    exportToExcel({
+      calculatorName: 'Barista FIRE',
+      inputs: formatInputsForExport(inputs),
+      results: formatResultsForExport(results),
+      projections: results.projections,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -37,7 +58,10 @@ export default function BaristaFIRE() {
             Blend part-time work with portfolio income to retire from corporate life earlier.
           </p>
         </div>
-        <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        <div className="flex flex-wrap gap-2">
+          <ExportButton onExport={handleExport} />
+          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        </div>
       </div>
 
       {/* Progress Bar */}

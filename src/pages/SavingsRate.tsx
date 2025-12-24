@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency } from '../utils/calculations'
+import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer } from '../components/ui'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 
 // Calculate investment growth and savings rate
@@ -126,6 +127,26 @@ export default function SavingsRate() {
     )
   }, [params.currentSavings, contributionAmount, contributionFrequency, yearsInvesting, params.expectedReturn, params.inflationRate, annualIncome, params.currentAge])
 
+  const handleExport = () => {
+    const inputs = {
+      currentSavings: params.currentSavings,
+      contributionAmount: contributionFrequency === 'monthly' ? contributionAmount : contributionAmount / 12,
+      contributionFrequency,
+      yearsInvesting,
+      annualIncome,
+      expectedReturn: params.expectedReturn,
+      inflationRate: params.inflationRate,
+      currentAge: params.currentAge,
+    }
+
+    exportToExcel({
+      calculatorName: 'Savings & Investment Rate',
+      inputs: formatInputsForExport(inputs),
+      results: formatResultsForExport(results),
+      projections: results.projections,
+    })
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -139,7 +160,10 @@ export default function SavingsRate() {
             See how your investments can grow over time with consistent contributions.
           </p>
         </div>
-        <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        <div className="flex flex-wrap gap-2">
+          <ExportButton onExport={handleExport} />
+          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        </div>
       </div>
 
       {/* Savings Rate Info Banner */}

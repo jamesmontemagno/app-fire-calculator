@@ -1,8 +1,9 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateWithdrawal, formatCurrency } from '../utils/calculations'
+import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, InputGroup } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer } from '../components/ui'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import { WithdrawalChart } from '../components/charts'
 
 export default function WithdrawalRate() {
@@ -17,6 +18,27 @@ export default function WithdrawalRate() {
       params.retirementYears
     )
   }, [params])
+
+  const handleExport = () => {
+    const inputs = {
+      portfolioValue: params.portfolioValue,
+      withdrawalRate: params.withdrawalRate,
+      expectedReturn: params.expectedReturn,
+      inflationRate: params.inflationRate,
+      retirementYears: params.retirementYears,
+    }
+
+    exportToExcel({
+      calculatorName: 'Withdrawal Rate',
+      inputs: formatInputsForExport(inputs),
+      results: formatResultsForExport(results),
+      projections: results.withdrawalProjections,
+      additionalSheets: [{
+        name: 'Rate Analysis',
+        data: results.rateAnalysis,
+      }],
+    })
+  }
 
   const getSuccessColor = (rate: number) => {
     const analysis = results.rateAnalysis.find(a => a.rate === rate)
@@ -39,7 +61,10 @@ export default function WithdrawalRate() {
             Test your portfolio's longevity and find your safe withdrawal rate.
           </p>
         </div>
-        <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        <div className="flex flex-wrap gap-2">
+          <ExportButton onExport={handleExport} />
+          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+        </div>
       </div>
 
       {/* 4% Rule Explanation Banner */}
