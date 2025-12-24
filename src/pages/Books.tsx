@@ -14,14 +14,14 @@ const books: Book[] = [
     author: "Ramit Sethi",
     description: "A practical, no-BS 6-week program for 20-to-35-year-olds that covers banking, saving, budgeting, and investing. Perfect for beginners who want to automate their finances.",
     amazonUrl: "https://amzn.to/3N1SrtP",
-    imageUrl: "https://m.media-amazon.com/images/I/71aG+xDKSYL._SY522_.jpg"
+    imageUrl: "https://m.media-amazon.com/images/I/81c9SSbG3OL._SL1500_.jpg"
   },
   {
     title: "Money for Couples",
     author: "Ramit Sethi",
     description: "From the author of I Will Teach You to Be Rich, this book helps couples navigate the often-tricky world of combining finances, from joint accounts to big purchases.",
     amazonUrl: "https://amzn.to/4pQ81Hn",
-    imageUrl: "https://m.media-amazon.com/images/I/71MZhLNdBOL._SY522_.jpg"
+    imageUrl: "https://m.media-amazon.com/images/I/81G3ygJ-jOL._SL1500_.jpg"
   },
   {
     title: "The Psychology of Money",
@@ -35,28 +35,28 @@ const books: Book[] = [
     author: "Taylor Larimore, Mel Lindauer, Michael LeBoeuf",
     description: "The definitive guide to index fund investing, based on the philosophy of Vanguard founder John Bogle. Learn the simple, proven approach to building wealth.",
     amazonUrl: "https://amzn.to/3MXrOWU",
-    imageUrl: "https://m.media-amazon.com/images/I/81dJpJuft+L._SY522_.jpg"
+    imageUrl: "https://m.media-amazon.com/images/I/611brjp7lgL._SL1200_.jpg"
   },
   {
     title: "We Need to Talk: A Memoir About Wealth",
     author: "Jennifer Risher",
     description: "A candid memoir about navigating sudden wealth after Microsoft stock options. An honest look at the emotional and social complexities of money.",
     amazonUrl: "https://amzn.to/3Y74Ij5",
-    imageUrl: "https://m.media-amazon.com/images/I/71hIZNvRBqL._SY522_.jpg"
+    imageUrl: "https://m.media-amazon.com/images/I/81KH2bo+b0L._SL1500_.jpg"
   },
   {
     title: "Die with Zero",
     author: "Bill Perkins",
     description: "A bold counterpoint to traditional retirement advice. This book argues for optimizing life experiences over accumulating wealth you'll never spend.",
     amazonUrl: "https://amzn.to/3LgBMlK",
-    imageUrl: "https://m.media-amazon.com/images/I/714E6yyqGZL._SY522_.jpg"
+    imageUrl: "https://m.media-amazon.com/images/I/61+4EHZ4faL._SL1500_.jpg"
   },
   {
     title: "The Little Book of Common Sense Investing",
     author: "John C. Bogle",
     description: "John Bogle's classic on why low-cost index funds are the smartest way for most investors to build wealth. The foundation of passive investing.",
     amazonUrl: "https://amzn.to/4pdtMQq",
-    imageUrl: "https://m.media-amazon.com/images/I/712mXr9RfzL._SY522_.jpg"
+    imageUrl: "https://m.media-amazon.com/images/I/81vPxCvGMcL._SL1500_.jpg"
   },
 ]
 
