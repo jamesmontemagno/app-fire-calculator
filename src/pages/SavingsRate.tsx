@@ -5,6 +5,8 @@ import { exportToExcel, formatInputsForExport, formatResultsForExport } from '..
 import { CurrencyInput, PercentageInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
+import SEO from '../components/SEO'
+import { calculatorSEO } from '../config/seo'
 
 // Calculate investment growth and savings rate
 function calculateInvestmentGrowth(
@@ -148,22 +150,24 @@ export default function SavingsRate() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <span className="text-3xl">💰</span>
-            Savings & Investment Rate Calculator
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            See how your investments can grow over time with consistent contributions.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ExportButton onExport={handleExport} />
-          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
-        </div>
+    <>
+      <SEO {...calculatorSEO['savings-rate']} />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+              <span className="text-3xl" role="img" aria-label="Calculator emoji">🧮</span>
+              Savings & Investment Rate Calculator
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              See how your investments can grow over time with consistent contributions.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton onExport={handleExport} />
+            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+          </div>
       </div>
 
       {/* Savings Rate Info Banner */}
@@ -397,5 +401,6 @@ export default function SavingsRate() {
 
       <Disclaimer />
     </div>
+    </>
   )
 }

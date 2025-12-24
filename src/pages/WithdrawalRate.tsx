@@ -5,6 +5,8 @@ import { exportToExcel, formatInputsForExport, formatResultsForExport } from '..
 import { CurrencyInput, PercentageInput, InputGroup } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import { WithdrawalChart } from '../components/charts'
+import SEO from '../components/SEO'
+import { calculatorSEO } from '../config/seo'
 
 export default function WithdrawalRate() {
   const { params, setParam, resetParams, copyUrl, hasCustomParams } = useCalculatorParams()
@@ -49,21 +51,23 @@ export default function WithdrawalRate() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <span className="text-3xl">📊</span>
-            Withdrawal Rate Calculator
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Test your portfolio's longevity and find your safe withdrawal rate.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ExportButton onExport={handleExport} />
-          <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+    <>
+      <SEO {...calculatorSEO.withdrawal} />
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+              <span className="text-3xl" role="img" aria-label="Chart emoji">📊</span>
+              Withdrawal Rate Calculator
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Test your portfolio's longevity and find your safe withdrawal rate.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <ExportButton onExport={handleExport} />
+            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
         </div>
       </div>
 
@@ -293,5 +297,6 @@ export default function WithdrawalRate() {
 
       <Disclaimer />
     </div>
+    </>
   )
 }

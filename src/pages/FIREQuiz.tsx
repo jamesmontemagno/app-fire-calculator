@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Card, CardHeader, CardContent } from '../components/ui'
+import SEO from '../components/SEO'
+import { calculatorSEO } from '../config/seo'
 
 interface QuizAnswers {
   currentAge?: number
@@ -28,6 +30,8 @@ export default function FIREQuiz() {
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<QuizAnswers>({})
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
+
+  const seoComponent = <SEO {...calculatorSEO.quiz} />
 
   const questions = [
     {
@@ -287,21 +291,23 @@ export default function FIREQuiz() {
   // Results view
   if (recommendation) {
     return (
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Your Recommended Path
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Based on your answers, here's the best FIRE strategy for you
-          </p>
-        </div>
+      <>
+        {seoComponent}
+        <div className="max-w-3xl mx-auto space-y-6">
+          {/* Header */}
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Your Recommended Path
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Based on your answers, here's the best FIRE strategy for you
+            </p>
+          </div>
 
-        {/* Recommendation Card */}
-        <Card className="border-2 border-fire-200 dark:border-fire-800">
-          <CardContent className="p-8">
-            <div className="text-center mb-6">
+          {/* Recommendation Card */}
+          <Card className="border-2 border-fire-200 dark:border-fire-800">
+            <CardContent className="p-8">
+              <div className="text-center mb-6">
               <span className="text-6xl mb-4 block">{recommendation.icon}</span>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
                 {recommendation.title}
@@ -370,26 +376,29 @@ export default function FIREQuiz() {
           </CardContent>
         </Card>
       </div>
+      </>
     )
   }
 
   // Quiz view
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      {/* Progress */}
-      <div>
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Question {step + 1} of {questions.length}
-          </span>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {Math.round(((step + 1) / questions.length) * 100)}% complete
-          </span>
-        </div>
-        <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-fire-500 to-fire-600 transition-all duration-300"
-            style={{ width: `${((step + 1) / questions.length) * 100}%` }}
+    <>
+      {seoComponent}
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* Progress */}
+        <div>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Question {step + 1} of {questions.length}
+            </span>
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {Math.round(((step + 1) / questions.length) * 100)}% complete
+            </span>
+          </div>
+          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-fire-500 to-fire-600 transition-all duration-300"
+              style={{ width: `${((step + 1) / questions.length) * 100}%` }}
           />
         </div>
       </div>
@@ -479,5 +488,6 @@ export default function FIREQuiz() {
         </button>
       </div>
     </div>
+    </>
   )
 }
