@@ -1,59 +1,75 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency } from '../utils/calculations'
-import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ProgressToFIRE } from '../components/ui'
+import { CurrencyInput, PercentageInput } from '../components/inputs'
+import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 
-// Calculate savings rate and time to FIRE
-function calculateSavingsRate(
-  annualIncome: number,
-  annualExpenses: number,
-  currentSavings: number,
+// Calculate investment growth and savings rate
+function calculateInvestmentGrowth(
+  startingAmount: number,
+  contributionAmount: number,
+  contributionFrequency: 'monthly' | 'yearly',
+  yearsInvesting: number,
   expectedReturn: number,
   inflationRate: number,
-  withdrawalRate: number,
-  currentAge: number
+  annualIncome: number,
+  currentAge: number = 30
 ) {
-  const annualSavings = annualIncome - annualExpenses
-  const savingsRate = annualIncome > 0 ? annualSavings / annualIncome : 0
+  // Convert contributions to annual
+  const annualContribution = contributionFrequency === 'monthly' 
+    ? contributionAmount * 12 
+    : contributionAmount
   
-  // FIRE number based on expenses
-  const fireNumber = annualExpenses / withdrawalRate
-  
-  // Real return
-  const realReturn = (1 + expectedReturn) / (1 + inflationRate) - 1
-  
-  // Years to FIRE
-  let years = 0
-  let portfolio = currentSavings
-  const maxYears = 100
-  
-  while (portfolio < fireNumber && years < maxYears) {
-    portfolio = portfolio * (1 + realReturn) + annualSavings
-    years++
-  }
-  
-  const yearsToFIRE = years >= maxYears ? Infinity : years
+  // Calculate savings rate
+  const savingsRate = annualIncome > 0 ? annualContribution / annualIncome : 0
   
   // Generate projections
   const projections = []
-  let bal = currentSavings
-  let totalContrib = currentSavings
+  let nominalBalance = startingAmount
+  let inflationAdjustedBalance = startingAmount
+  let totalContributions = startingAmount
   const currentYear = new Date().getFullYear()
   
-  for (let i = 0; i <= Math.min(yearsToFIRE + 10, 50); i++) {
+  // Add starting point
+  projections.push({
+    age: currentAge,
+    year: currentYear,
+    yearNumber: 0,
+    portfolio: Math.round(nominalBalance),
+    inflationAdjusted: Math.round(inflationAdjustedBalance),
+    totalContributions: Math.round(totalContributions),
+    contributions: 0,
+  })
+  
+  // Real return for inflation-adjusted calculations
+  const realReturn = (1 + expectedReturn) / (1 + inflationRate) - 1
+  
+  for (let i = 1; i <= yearsInvesting; i++) {
+    // Nominal growth (no inflation adjustment)
+    nominalBalance = nominalBalance * (1 + expectedReturn) + annualContribution
+    
+    // Inflation-adjusted growth
+    inflationAdjustedBalance = inflationAdjustedBalance * (1 + realReturn) + annualContribution
+    
+    totalContributions += annualContribution
+    
     projections.push({
       age: currentAge + i,
       year: currentYear + i,
-      portfolio: Math.round(bal),
-      contributions: i === 0 ? currentSavings : annualSavings,
-      totalContributions: Math.round(totalContrib),
-      inflationAdjusted: Math.round(bal / Math.pow(1 + inflationRate, i)),
+      yearNumber: i,
+      portfolio: Math.round(nominalBalance),
+      inflationAdjusted: Math.round(inflationAdjustedBalance),
+      totalContributions: Math.round(totalContributions),
+      contributions: annualContribution,
     })
-    bal = bal * (1 + expectedReturn) + annualSavings
-    totalContrib += annualSavings
   }
+  
+  const finalNominalBalance = nominalBalance
+  const finalInflationAdjustedBalance = inflationAdjustedBalance
+  const totalInvested = totalContributions
+  const totalGrowth = finalNominalBalance - totalInvested
+  const inflationImpact = finalNominalBalance - finalInflationAdjustedBalance
   
   // Savings rate categories
   let savingsCategory = ''
@@ -77,10 +93,13 @@ function calculateSavingsRate(
 
   return {
     savingsRate,
-    annualSavings,
-    monthlySavings: annualSavings / 12,
-    fireNumber,
-    yearsToFIRE,
+    annualContribution,
+    monthlyContribution: annualContribution / 12,
+    finalNominalBalance,
+    finalInflationAdjustedBalance,
+    totalInvested,
+    totalGrowth,
+    inflationImpact,
     projections,
     savingsCategory,
     savingsCategoryColor,
@@ -89,21 +108,23 @@ function calculateSavingsRate(
 
 export default function SavingsRate() {
   const { params, setParam, resetParams, copyUrl, hasCustomParams } = useCalculatorParams()
-  
-  // Use annualContribution as income proxy, derive from inputs
-  const annualIncome = params.annualContribution + params.annualExpenses
+  const [contributionFrequency, setContributionFrequency] = useState<'monthly' | 'yearly'>('monthly')
+  const [yearsInvesting, setYearsInvesting] = useState(30)
+  const [contributionAmount, setContributionAmount] = useState(500)
+  const [annualIncome, setAnnualIncome] = useState(75000)
 
   const results = useMemo(() => {
-    return calculateSavingsRate(
-      annualIncome,
-      params.annualExpenses,
+    return calculateInvestmentGrowth(
       params.currentSavings,
+      contributionAmount,
+      contributionFrequency,
+      yearsInvesting,
       params.expectedReturn,
       params.inflationRate,
-      params.withdrawalRate,
+      annualIncome,
       params.currentAge
     )
-  }, [annualIncome, params])
+  }, [params.currentSavings, contributionAmount, contributionFrequency, yearsInvesting, params.expectedReturn, params.inflationRate, annualIncome, params.currentAge])
 
   return (
     <div className="space-y-6">
@@ -111,33 +132,25 @@ export default function SavingsRate() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <span className="text-3xl">🧮</span>
-            Savings Rate Calculator
+            <span className="text-3xl">💰</span>
+            Savings & Investment Rate Calculator
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Calculate your savings rate and see how it impacts your path to FIRE.
+            See how your investments can grow over time with consistent contributions.
           </p>
         </div>
         <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
-
-      {/* Progress Bar */}
-      <ProgressToFIRE 
-        currentSavings={params.currentSavings} 
-        fireNumber={results.fireNumber}
-        yearsToFIRE={results.yearsToFIRE}
-      />
 
       {/* Savings Rate Info Banner */}
       <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-4">
         <div className="flex gap-3">
           <span className="text-2xl">💡</span>
           <div>
-            <h3 className="font-semibold text-indigo-900 dark:text-indigo-100">Why Savings Rate Matters</h3>
+            <h3 className="font-semibold text-indigo-900 dark:text-indigo-100">The Power of Compound Interest</h3>
             <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">
-              Your savings rate is the single most important factor in reaching FIRE. A 10% savings rate 
-              means ~50 years to retirement, while a 50% rate can get you there in ~17 years. It matters 
-              more than investment returns!
+              Consistent investing is the key to building wealth. Even small amounts invested regularly can 
+              grow substantially over time thanks to compound interest. Start early and stay consistent!
             </p>
           </div>
         </div>
@@ -147,35 +160,68 @@ export default function SavingsRate() {
         {/* Inputs */}
         <Card className="lg:col-span-1">
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Finances</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Investment Details</h2>
           </CardHeader>
           <CardContent className="space-y-4">
-            <AgeInput
-              label="Current Age"
-              value={params.currentAge}
-              onChange={(v) => setParam('currentAge', v)}
-              tooltip="Your current age"
-            />
             <CurrencyInput
-              label="Annual Income (After Tax)"
-              value={annualIncome}
-              onChange={(v) => setParam('annualContribution', v - params.annualExpenses)}
-              tooltip="Your take-home pay after taxes"
-            />
-            <CurrencyInput
-              label="Annual Expenses"
-              value={params.annualExpenses}
-              onChange={(v) => setParam('annualExpenses', v)}
-              tooltip="Total yearly spending"
-            />
-            <CurrencyInput
-              label="Current Savings"
+              label="Starting Amount"
               value={params.currentSavings}
               onChange={(v) => setParam('currentSavings', v)}
-              tooltip="Total invested assets"
+              tooltip="How much you're starting with"
             />
+            
+            {/* Contribution Frequency Toggle */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Contribution Frequency
+              </label>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setContributionFrequency('monthly')}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                    contributionFrequency === 'monthly'
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Monthly
+                </button>
+                <button
+                  onClick={() => setContributionFrequency('yearly')}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
+                    contributionFrequency === 'yearly'
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  Yearly
+                </button>
+              </div>
+            </div>
+
+            <CurrencyInput
+              label={`${contributionFrequency === 'monthly' ? 'Monthly' : 'Yearly'} Contribution`}
+              value={contributionAmount}
+              onChange={setContributionAmount}
+              tooltip={`Amount you'll invest ${contributionFrequency}`}
+            />
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                Years Investing
+              </label>
+              <input
+                type="number"
+                value={yearsInvesting}
+                onChange={(e) => setYearsInvesting(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                min="1"
+                max="50"
+              />
+            </div>
+
             <PercentageInput
-              label="Expected Return"
+              label="Expected Annual Return"
               value={params.expectedReturn}
               onChange={(v) => setParam('expectedReturn', v)}
               min={0}
@@ -188,114 +234,138 @@ export default function SavingsRate() {
               min={0}
               max={0.10}
             />
-            <PercentageInput
-              label="Safe Withdrawal Rate"
-              value={params.withdrawalRate}
-              onChange={(v) => setParam('withdrawalRate', v)}
-              min={0.02}
-              max={0.06}
-            />
+
+            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <CurrencyInput
+                label="Annual Income (Optional)"
+                value={annualIncome}
+                onChange={setAnnualIncome}
+                tooltip="For calculating your savings rate"
+              />
+            </div>
           </CardContent>
         </Card>
 
         {/* Results */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Savings Rate Highlight */}
+          {/* Main Result Highlight */}
           <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl p-6 text-white">
-            <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="space-y-4">
               <div>
-                <p className="text-indigo-100 text-sm">Your Savings Rate</p>
-                <p className="text-5xl font-bold">{(results.savingsRate * 100).toFixed(1)}%</p>
-                <p className={`mt-2 font-semibold ${results.savingsRate >= 0.2 ? 'text-green-200' : 'text-amber-200'}`}>
-                  {results.savingsCategory}
-                </p>
+                <p className="text-indigo-100 text-sm">Your Investment Will Grow To</p>
+                <p className="text-5xl font-bold">{formatCurrency(results.finalNominalBalance)}</p>
+                <p className="text-indigo-200 text-sm mt-1">in {yearsInvesting} years</p>
               </div>
-              <div className="text-right">
-                <p className="text-indigo-100 text-sm">You Save</p>
-                <p className="text-3xl font-bold">{formatCurrency(results.monthlySavings)}</p>
-                <p className="text-indigo-200 text-sm">per month</p>
+              <div className="pt-4 border-t border-indigo-400/30">
+                <p className="text-indigo-100 text-sm">Inflation-Adjusted Value (Today's Dollars)</p>
+                <p className="text-3xl font-bold">{formatCurrency(results.finalInflationAdjustedBalance)}</p>
               </div>
             </div>
           </div>
 
+          {/* Savings Rate Display */}
+          {annualIncome > 0 && (
+            <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white">
+              <div className="flex items-center justify-between flex-wrap gap-4">
+                <div>
+                  <p className="text-green-100 text-sm">Your Savings Rate</p>
+                  <p className="text-5xl font-bold">{(results.savingsRate * 100).toFixed(1)}%</p>
+                  <p className={`mt-2 font-semibold ${results.savingsRate >= 0.2 ? 'text-green-200' : 'text-amber-200'}`}>
+                    {results.savingsCategory}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-green-100 text-sm">You're Investing</p>
+                  <p className="text-3xl font-bold">{formatCurrency(results.annualContribution)}</p>
+                  <p className="text-green-200 text-sm">per year</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Key Metrics */}
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <ResultCard
-              label="FIRE Number"
-              value={results.fireNumber}
+              label="Total Invested"
+              value={results.totalInvested}
+              format="currency"
+              subtext="Your contributions"
+            />
+            <ResultCard
+              label="Investment Growth"
+              value={results.totalGrowth}
               format="currency"
               highlight
-              subtext="Target portfolio"
+              subtext="Earnings from returns"
             />
             <ResultCard
-              label="Years to FIRE"
-              value={results.yearsToFIRE === Infinity ? 'Never' : results.yearsToFIRE}
-              format={results.yearsToFIRE === Infinity ? 'none' : 'years'}
-            />
-            <ResultCard
-              label="Annual Savings"
-              value={results.annualSavings}
+              label="Inflation Impact"
+              value={results.inflationImpact}
               format="currency"
+              subtext="Purchasing power loss"
             />
           </div>
-
-          {/* Savings Rate Chart Reference */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Savings Rate to Years to FIRE</h2>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700">
-                      <th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-gray-100">Savings Rate</th>
-                      <th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-gray-100">Years to FIRE</th>
-                      <th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-gray-100">Category</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[
-                      { rate: 10, years: '51', category: 'Average', color: 'text-gray-600' },
-                      { rate: 20, years: '37', category: 'Good', color: 'text-blue-600' },
-                      { rate: 30, years: '28', category: 'Great', color: 'text-green-600' },
-                      { rate: 40, years: '22', category: 'Aggressive', color: 'text-emerald-600' },
-                      { rate: 50, years: '17', category: 'Very Aggressive', color: 'text-purple-600' },
-                      { rate: 60, years: '12.5', category: 'Extreme', color: 'text-pink-600' },
-                      { rate: 70, years: '8.5', category: 'Ultra Extreme', color: 'text-red-600' },
-                    ].map((row) => (
-                      <tr 
-                        key={row.rate}
-                        className={`border-b border-gray-100 dark:border-gray-800 ${
-                          Math.abs(results.savingsRate * 100 - row.rate) < 5 ? 'bg-indigo-50 dark:bg-indigo-900/20' : ''
-                        }`}
-                      >
-                        <td className="py-2 px-3 font-medium text-gray-900 dark:text-gray-100">{row.rate}%</td>
-                        <td className="py-2 px-3 text-gray-600 dark:text-gray-400">{row.years} years</td>
-                        <td className={`py-2 px-3 font-medium ${row.color} dark:opacity-80`}>{row.category}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                *Assumes 5% real return and starting from $0. Your results may vary.
-              </p>
-            </CardContent>
-          </Card>
 
           {/* Chart */}
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio Projection</h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Investment Growth Projection</h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Compare nominal growth vs. inflation-adjusted purchasing power
+              </p>
             </CardHeader>
             <CardContent>
               <ProjectionChart
                 data={results.projections}
-                fireNumber={results.fireNumber}
+                showInflationAdjusted={true}
+                showMilestones={false}
                 colorScheme="purple"
-                height={350}
+                height={400}
               />
+            </CardContent>
+          </Card>
+
+          {/* Breakdown Details */}
+          <Card>
+            <CardHeader>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Investment Breakdown</h2>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                  <span className="text-gray-600 dark:text-gray-400">Starting Amount</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(params.currentSavings)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {contributionFrequency === 'monthly' ? 'Monthly' : 'Yearly'} Contributions
+                  </span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(contributionAmount)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                  <span className="text-gray-600 dark:text-gray-400">Total Contributions ({yearsInvesting} years)</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(results.totalInvested)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                  <span className="text-gray-600 dark:text-gray-400">Investment Earnings</span>
+                  <span className="font-semibold text-green-600 dark:text-green-400">{formatCurrency(results.totalGrowth)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
+                  <span className="text-gray-600 dark:text-gray-400">Final Balance</span>
+                  <span className="font-bold text-lg text-indigo-600 dark:text-indigo-400">{formatCurrency(results.finalNominalBalance)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-gray-600 dark:text-gray-400">Inflation-Adjusted Value</span>
+                  <span className="font-bold text-lg text-gray-900 dark:text-gray-100">{formatCurrency(results.finalInflationAdjustedBalance)}</span>
+                </div>
+              </div>
+              
+              <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
+                <p className="text-sm text-amber-800 dark:text-amber-200">
+                  <strong>Note:</strong> Inflation will reduce your purchasing power by {formatCurrency(results.inflationImpact)} 
+                  over {yearsInvesting} years at {(params.inflationRate * 100).toFixed(1)}% annual inflation.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </div>

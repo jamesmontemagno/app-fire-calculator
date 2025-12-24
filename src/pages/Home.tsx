@@ -53,6 +53,16 @@ const calculators = [
     audience: 'Best for: Those wanting work-life balance',
   },
   {
+    path: '/reverse',
+    icon: '🔄',
+    name: 'Reverse FIRE',
+    description: 'Work backwards — set your target age and find out how much you need to save monthly.',
+    color: 'from-teal-500 to-cyan-500',
+    bgColor: 'bg-teal-50 dark:bg-teal-900/20',
+    borderColor: 'border-teal-200 dark:border-teal-800',
+    audience: 'Best for: Goal-oriented planners',
+  },
+  {
     path: '/withdrawal',
     icon: '📊',
     name: 'Withdrawal Rate',
@@ -71,16 +81,6 @@ const calculators = [
     bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
     borderColor: 'border-indigo-200 dark:border-indigo-800',
     audience: 'Best for: Understanding your FI timeline',
-  },
-  {
-    path: '/reverse',
-    icon: '🔄',
-    name: 'Reverse FIRE',
-    description: 'Work backwards — set your target age and find out how much you need to save monthly.',
-    color: 'from-teal-500 to-cyan-500',
-    bgColor: 'bg-teal-50 dark:bg-teal-900/20',
-    borderColor: 'border-teal-200 dark:border-teal-800',
-    audience: 'Best for: Goal-oriented planners',
   },
   {
     path: '/healthcare',
