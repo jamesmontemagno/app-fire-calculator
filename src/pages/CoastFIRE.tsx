@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateCoastFIRE, formatCurrency } from '../utils/calculations'
-import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
+import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
@@ -29,7 +29,7 @@ export default function CoastFIRE() {
     : { text: `${results.yearsToCoast.toFixed(1)} years to Coast FIRE`, color: 'text-fire-600 dark:text-fire-400' }
 
   const handleExport = () => {
-    const inputs = {
+    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       currentAge: params.currentAge,
       retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
@@ -38,17 +38,29 @@ export default function CoastFIRE() {
       inflationRate: params.inflationRate,
       annualExpenses: params.annualExpenses,
       withdrawalRate: params.withdrawalRate,
+    })
+
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
+
+    // Define formulas for calculated results
+    const resultFormulas: Record<string, string> = {
+      // FIRE Number = Annual Expenses / Withdrawal Rate
+      fireNumber: '{annualExpenses}/{withdrawalRate}',
+      // Coast Number uses complex present value calculation, so we use calculated value
     }
 
     exportToExcel({
       calculatorName: 'Coast FIRE',
-      inputs: formatInputsForExport(inputs),
-      results: formatResultsForExport(results),
+      inputs: inputValues,
+      results: resultValues,
       projections: results.projections,
       additionalSheets: [{
         name: 'With Contributions',
         data: results.projectionsWithContributions,
       }],
+      inputFormats,
+      resultFormats,
+      resultFormulas,
     })
   }
 

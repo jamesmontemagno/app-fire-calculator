@@ -5,7 +5,7 @@ import {
   calculateAvalanchePayoff, 
   formatCurrency,
 } from '../utils/calculations'
-import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
+import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import type { DebtItem } from '../utils/calculations'
 import { CurrencyInput } from '../components/inputs'
 import DebtListInput from '../components/inputs/DebtListInput'
@@ -81,7 +81,7 @@ export default function DebtPayoff() {
   const handleExport = () => {
     if (!results?.base) return
 
-    const inputs = {
+    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       strategy,
       mode,
       monthlyBudget,
@@ -89,20 +89,22 @@ export default function DebtPayoff() {
       extraPayment,
       totalDebts: debts.length,
       totalDebt,
-    }
+    })
 
     const baseResults = results.base
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(baseResults)
+
     const additionalSheets = []
 
-    // Add debt list
+    // Add debt list (keep formatted for display)
     if (debts.length > 0) {
       additionalSheets.push({
         name: 'Debt List',
         data: debts.map(d => ({
           name: d.name,
-          balance: formatCurrency(d.balance),
-          rate: `${(d.rate * 100).toFixed(2)}%`,
-          minPayment: formatCurrency(d.minPayment),
+          balance: d.balance,
+          rate: d.rate,
+          minPayment: d.minPayment,
         })),
       })
     }
@@ -115,11 +117,15 @@ export default function DebtPayoff() {
       })
     }
 
+    // Note: Debt payoff calculations are complex iterative algorithms,
+    // so we don't provide formulas for the results
     exportToExcel({
       calculatorName: 'Debt Payoff',
-      inputs: formatInputsForExport(inputs),
-      results: formatResultsForExport(baseResults),
+      inputs: inputValues,
+      results: resultValues,
       additionalSheets,
+      inputFormats,
+      resultFormats,
     })
   }
 

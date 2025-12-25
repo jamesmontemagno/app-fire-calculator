@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency } from '../utils/calculations'
-import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
+import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { AgeInput, CurrencyInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import SEO from '../components/SEO'
@@ -92,7 +92,7 @@ export default function HealthcareGap() {
   }, [params, monthlyPremium, annualDeductible, annualOutOfPocket])
 
   const handleExport = () => {
-    const inputs = {
+    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       currentAge: params.currentAge,
       earlyRetirementAge: params.retirementAge,
       medicareAge,
@@ -100,13 +100,26 @@ export default function HealthcareGap() {
       annualDeductible,
       annualOutOfPocket,
       inflationRate: params.inflationRate,
+    })
+
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
+
+    // Define formulas for calculated results
+    const resultFormulas: Record<string, string> = {
+      // Years in Gap = Medicare Age - Early Retirement Age
+      yearsInGap: '{medicareAge}-{earlyRetirementAge}',
+      // Annual Base Cost = (Monthly Premium * 12) + Annual Deductible + Annual Out of Pocket
+      annualBaseCost: '({monthlyPremium}*12)+{annualDeductible}+{annualOutOfPocket}',
     }
 
     exportToExcel({
       calculatorName: 'Healthcare Gap',
-      inputs: formatInputsForExport(inputs),
-      results: formatResultsForExport(results),
+      inputs: inputValues,
+      results: resultValues,
       projections: results.yearlyBreakdown,
+      inputFormats,
+      resultFormats,
+      resultFormulas,
     })
   }
 

@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateLeanFIRE, formatCurrency } from '../utils/calculations'
-import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
+import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
@@ -32,7 +32,7 @@ export default function LeanFIRE() {
   const isLean = params.annualExpenses <= LEAN_THRESHOLD
 
   const handleExport = () => {
-    const inputs = {
+    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       currentAge: params.currentAge,
       retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
@@ -41,13 +41,28 @@ export default function LeanFIRE() {
       inflationRate: params.inflationRate,
       withdrawalRate: params.withdrawalRate,
       annualExpenses: leanExpenses,
+    })
+
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
+
+    // Define formulas for calculated results
+    const resultFormulas: Record<string, string> = {
+      // FIRE Number = Annual Expenses / Withdrawal Rate
+      fireNumber: '{annualExpenses}/{withdrawalRate}',
+      // Savings Rate = Annual Contribution / (Annual Contribution + Annual Expenses)
+      savingsRate: '{annualContribution}/({annualContribution}+{annualExpenses})',
+      // Monthly Contribution = Annual Contribution / 12
+      monthlyContribution: '{annualContribution}/12',
     }
 
     exportToExcel({
       calculatorName: 'Lean FIRE',
-      inputs: formatInputsForExport(inputs),
-      results: formatResultsForExport(results),
+      inputs: inputValues,
+      results: resultValues,
       projections: results.projections,
+      inputFormats,
+      resultFormats,
+      resultFormulas,
     })
   }
 

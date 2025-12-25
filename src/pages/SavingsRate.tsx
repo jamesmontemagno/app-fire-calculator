@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency } from '../utils/calculations'
-import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
+import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
@@ -130,7 +130,7 @@ export default function SavingsRate() {
   }, [params.currentSavings, contributionAmount, contributionFrequency, yearsInvesting, params.expectedReturn, params.inflationRate, annualIncome, params.currentAge])
 
   const handleExport = () => {
-    const inputs = {
+    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       currentSavings: params.currentSavings,
       contributionAmount: contributionFrequency === 'monthly' ? contributionAmount : contributionAmount / 12,
       contributionFrequency,
@@ -139,13 +139,25 @@ export default function SavingsRate() {
       expectedReturn: params.expectedReturn,
       inflationRate: params.inflationRate,
       currentAge: params.currentAge,
+    })
+
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
+
+    // Define formulas for calculated results
+    const resultFormulas: Record<string, string> = {
+      // Savings Rate = (Annual Contribution / Annual Income)
+      // Note: contributionAmount is monthly in inputs, so we multiply by 12
+      savingsRate: '({contributionAmount}*12)/{annualIncome}',
     }
 
     exportToExcel({
       calculatorName: 'Savings & Investment Rate',
-      inputs: formatInputsForExport(inputs),
-      results: formatResultsForExport(results),
+      inputs: inputValues,
+      results: resultValues,
       projections: results.projections,
+      inputFormats,
+      resultFormats,
+      resultFormulas,
     })
   }
 
