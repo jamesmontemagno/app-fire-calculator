@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateBaristaFIRE, formatCurrency } from '../utils/calculations'
-import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
+import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
@@ -28,7 +28,7 @@ export default function BaristaFIRE() {
   const reductionPercent = (portfolioReduction / results.fullFireNumber) * 100
 
   const handleExport = () => {
-    const inputs = {
+    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       currentAge: params.currentAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
@@ -37,13 +37,29 @@ export default function BaristaFIRE() {
       annualExpenses: params.annualExpenses,
       withdrawalRate: params.withdrawalRate,
       partTimeIncome: params.partTimeIncome,
+    })
+
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
+
+    // Define formulas for calculated results
+    const resultFormulas: Record<string, string> = {
+      // Full FIRE Number = Annual Expenses / Withdrawal Rate
+      fullFireNumber: '{annualExpenses}/{withdrawalRate}',
+      // Barista Number = (Annual Expenses - Part Time Income) / Withdrawal Rate
+      baristaNumber: '({annualExpenses}-{partTimeIncome})/{withdrawalRate}',
+      // Part Time Income Needed = Annual Expenses - Barista Number * Withdrawal Rate
+      // This simplifies to: Annual Expenses - Part Time Income (same as input)
+      // So we just reference the input value
     }
 
     exportToExcel({
       calculatorName: 'Barista FIRE',
-      inputs: formatInputsForExport(inputs),
-      results: formatResultsForExport(results),
+      inputs: inputValues,
+      results: resultValues,
       projections: results.projections,
+      inputFormats,
+      resultFormats,
+      resultFormulas,
     })
   }
 

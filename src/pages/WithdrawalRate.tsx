@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateWithdrawal, formatCurrency } from '../utils/calculations'
-import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
+import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, InputGroup } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import { WithdrawalChart } from '../components/charts'
@@ -22,23 +22,36 @@ export default function WithdrawalRate() {
   }, [params])
 
   const handleExport = () => {
-    const inputs = {
+    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       portfolioValue: params.portfolioValue,
       withdrawalRate: params.withdrawalRate,
       expectedReturn: params.expectedReturn,
       inflationRate: params.inflationRate,
       retirementYears: params.retirementYears,
+    })
+
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
+
+    // Define formulas for calculated results
+    const resultFormulas: Record<string, string> = {
+      // Annual Withdrawal = Portfolio Value * Withdrawal Rate
+      annualWithdrawal: '{portfolioValue}*{withdrawalRate}',
+      // Monthly Withdrawal = Annual Withdrawal / 12
+      monthlyWithdrawal: '({portfolioValue}*{withdrawalRate})/12',
     }
 
     exportToExcel({
       calculatorName: 'Withdrawal Rate',
-      inputs: formatInputsForExport(inputs),
-      results: formatResultsForExport(results),
+      inputs: inputValues,
+      results: resultValues,
       projections: results.withdrawalProjections,
       additionalSheets: [{
         name: 'Rate Analysis',
         data: results.rateAnalysis,
       }],
+      inputFormats,
+      resultFormats,
+      resultFormulas,
     })
   }
 

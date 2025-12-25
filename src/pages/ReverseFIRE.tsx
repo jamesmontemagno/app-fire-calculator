@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency, generateProjections } from '../utils/calculations'
-import { exportToExcel, formatInputsForExport, formatResultsForExport } from '../utils/excelExport'
+import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import ProgressToFIRE from '../components/ui/ProgressToFIRE'
@@ -85,7 +85,7 @@ export default function ReverseFIRE() {
   }, [params])
 
   const handleExport = () => {
-    const inputs = {
+    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       currentAge: params.currentAge,
       targetRetirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
@@ -93,13 +93,24 @@ export default function ReverseFIRE() {
       expectedReturn: params.expectedReturn,
       inflationRate: params.inflationRate,
       withdrawalRate: params.withdrawalRate,
+    })
+
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
+
+    // Define formulas for calculated results
+    const resultFormulas: Record<string, string> = {
+      // FIRE Number = Annual Expenses / Withdrawal Rate
+      fireNumber: '{annualExpenses}/{withdrawalRate}',
     }
 
     exportToExcel({
       calculatorName: 'Reverse FIRE',
-      inputs: formatInputsForExport(inputs),
-      results: formatResultsForExport(results),
+      inputs: inputValues,
+      results: resultValues,
       projections: results.projections,
+      inputFormats,
+      resultFormats,
+      resultFormulas,
     })
   }
 
