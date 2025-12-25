@@ -17,6 +17,7 @@ export default function StandardFIRE() {
       retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
+      annualIncome: params.annualIncome,
       expectedReturn: params.expectedReturn,
       inflationRate: params.inflationRate,
       withdrawalRate: params.withdrawalRate,
@@ -30,6 +31,7 @@ export default function StandardFIRE() {
       retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
+      annualIncome: params.annualIncome,
       expectedReturn: params.expectedReturn,
       inflationRate: params.inflationRate,
       withdrawalRate: params.withdrawalRate,
@@ -124,6 +126,13 @@ export default function StandardFIRE() {
               value={params.annualContribution}
               onChange={(v) => setParam('annualContribution', v)}
               tooltip="How much you save and invest per year"
+              allowMonthlyToggle
+            />
+            <CurrencyInput
+              label="Annual Net Income"
+              value={params.annualIncome}
+              onChange={(v) => setParam('annualIncome', v)}
+              tooltip="Your net (take-home) annual income after taxes"
               allowMonthlyToggle
             />
             <CurrencyInput

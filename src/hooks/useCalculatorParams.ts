@@ -8,6 +8,7 @@ interface CalculatorParams {
   retirementAge: number
   currentSavings: number
   annualContribution: number
+  annualIncome: number
   expectedReturn: number
   inflationRate: number
   withdrawalRate: number
@@ -29,6 +30,7 @@ const DEFAULTS: CalculatorParams = {
   retirementAge: 55,
   currentSavings: 100000,
   annualContribution: 24000,
+  annualIncome: 72000,
   expectedReturn: 0.07,
   inflationRate: 0.03,
   withdrawalRate: 0.04,
@@ -49,6 +51,7 @@ const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
   retirementAge: 'retire',
   currentSavings: 'savings',
   annualContribution: 'contrib',
+  annualIncome: 'income',
   expectedReturn: 'return',
   inflationRate: 'inflation',
   withdrawalRate: 'swr',
@@ -99,6 +102,7 @@ export function useCalculatorParams() {
       retirementAge: getParam('retirementAge'),
       currentSavings: getParam('currentSavings'),
       annualContribution: getParam('annualContribution'),
+      annualIncome: getParam('annualIncome'),
       expectedReturn: getParam('expectedReturn'),
       inflationRate: getParam('inflationRate'),
       withdrawalRate: getParam('withdrawalRate'),

@@ -7,6 +7,7 @@ export interface FIREInputs {
   retirementAge: number
   currentSavings: number
   annualContribution: number
+  annualIncome: number // net annual income for savings rate calculation
   expectedReturn: number // as decimal, e.g., 0.07 for 7%
   inflationRate: number // as decimal
   withdrawalRate: number // as decimal, e.g., 0.04 for 4%
@@ -242,6 +243,7 @@ export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
     currentAge, 
     currentSavings, 
     annualContribution, 
+    annualIncome,
     expectedReturn, 
     inflationRate,
     withdrawalRate, 
@@ -262,9 +264,8 @@ export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
   const yearsToRetirement = Math.max(0, inputs.retirementAge - currentAge)
   const coastFireNumber = presentValue(fireNumber, realReturn, yearsToRetirement)
 
-  // Calculate savings rate (assumes income = contributions + expenses)
-  const estimatedIncome = annualContribution + annualExpenses
-  const savingsRate = estimatedIncome > 0 ? annualContribution / estimatedIncome : 0
+  // Calculate savings rate based on annual income
+  const savingsRate = annualIncome > 0 ? annualContribution / annualIncome : 0
 
   // Generate projections
   const projectionYears = Math.min(Math.ceil(yearsToFIRE) + 10, 50)
