@@ -203,14 +203,16 @@ export async function exportToExcel(data: ExportData): Promise<void> {
         const cell = newRow.getCell(colIndex)
         
         if (header === 'portfolio' && hasPortfolio) {
-          // Portfolio formula: Previous Portfolio * (1 + Expected Return) + Contribution
-          const prevRowNum = i + 1 // +1 because row 1 is header
+          // Portfolio formula: Previous Portfolio * (1 + Expected Return) + Current Contribution
+          const currentRowNum = i + 2 // +2 because row 1 is header, row 2 is first data row
+          const prevRowNum = currentRowNum - 1
           const portfolioCol = headers.indexOf('portfolio') + 1
           const contributionsCol = headers.indexOf('contributions') + 1
           const expectedReturnRef = inputCellMap.get('expectedReturn')
           
           if (expectedReturnRef) {
-            cell.value = { formula: `${projectionSheet.getCell(prevRowNum, portfolioCol).address}*(1+${expectedReturnRef})+${projectionSheet.getCell(prevRowNum + 1, contributionsCol).address}` }
+            // Previous portfolio * (1 + return) + current contribution
+            cell.value = { formula: `${projectionSheet.getCell(prevRowNum, portfolioCol).address}*(1+${expectedReturnRef})+${projectionSheet.getCell(currentRowNum, contributionsCol).address}` }
           } else {
             cell.value = row[header]
           }
@@ -230,10 +232,10 @@ export async function exportToExcel(data: ExportData): Promise<void> {
           cell.numFmt = '$#,##0'
         } else if (header === 'totalContributions') {
           // Total contributions: Previous Total + Current Contribution
-          const prevRowNum = i + 1
+          const currentRowNum = i + 2 // +2 because row 1 is header, row 2 is first data row
+          const prevRowNum = currentRowNum - 1
           const totalContributionsCol = headers.indexOf('totalContributions') + 1
           const contributionsCol = headers.indexOf('contributions') + 1
-          const currentRowNum = i + 2
           
           cell.value = { formula: `${projectionSheet.getCell(prevRowNum, totalContributionsCol).address}+${projectionSheet.getCell(currentRowNum, contributionsCol).address}` }
           cell.numFmt = '$#,##0'

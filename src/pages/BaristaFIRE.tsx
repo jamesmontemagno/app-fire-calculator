@@ -47,8 +47,9 @@ export default function BaristaFIRE() {
       fullFireNumber: '{annualExpenses}/{withdrawalRate}',
       // Barista Number = (Annual Expenses - Part Time Income) / Withdrawal Rate
       baristaNumber: '({annualExpenses}-{partTimeIncome})/{withdrawalRate}',
-      // Part Time Income Needed = calculated from expenses and withdrawal rate
-      partTimeIncomeNeeded: '{annualExpenses}-({baristaNumber}*{withdrawalRate})',
+      // Part Time Income Needed = Annual Expenses - Barista Number * Withdrawal Rate
+      // This simplifies to: Annual Expenses - Part Time Income (same as input)
+      // So we just reference the input value
     }
 
     exportToExcel({
