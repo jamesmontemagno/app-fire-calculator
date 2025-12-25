@@ -19,6 +19,7 @@ export default function FatFIRE() {
       retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
+      annualIncome: params.annualIncome,
       expectedReturn: params.expectedReturn,
       inflationRate: params.inflationRate,
       withdrawalRate: params.withdrawalRate,
