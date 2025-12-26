@@ -84,9 +84,14 @@ export default function ProjectionChart({
     return `$${value}`
   }
 
+  // Calculate max portfolio value for Y-axis domain
+  const maxPortfolio = Math.max(...data.map(d => d.portfolio))
+  const yAxisMax = Math.ceil(maxPortfolio * 1.05) // Add 5% padding
+
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const point = payload[0].payload as ProjectionPoint
+      const reachedFire = fireNumber && point.portfolio >= fireNumber
       return (
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
           <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -94,16 +99,22 @@ export default function ProjectionChart({
           </p>
           <div className="space-y-1 text-sm">
             <p className="text-gray-600 dark:text-gray-400">
-              Portfolio: <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(point.portfolio)}</span>
+              Portfolio: <span className="font-medium" style={{ color: colors.primary }}>{formatCurrency(point.portfolio)}</span>
             </p>
             {showInflationAdjusted && (
               <p className="text-gray-600 dark:text-gray-400">
-                Inflation Adjusted: <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(point.inflationAdjusted)}</span>
+                Inflation Adjusted: <span className="font-medium" style={{ color: colors.secondary }}>{formatCurrency(point.inflationAdjusted)}</span>
               </p>
             )}
             <p className="text-gray-600 dark:text-gray-400">
               Total Contributed: <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(point.totalContributions)}</span>
             </p>
+            {fireNumber && (
+              <p className={`${reachedFire ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                FIRE Number: <span className="font-medium">{formatCurrency(fireNumber)}</span>
+                {reachedFire && <span className="ml-1">✓</span>}
+              </p>
+            )}
           </div>
         </div>
       )
@@ -142,6 +153,7 @@ export default function ProjectionChart({
           axisLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
           tickFormatter={formatYAxis}
           width={65}
+          domain={[0, yAxisMax]}
         />
         <Tooltip content={<CustomTooltip />} />
         <Legend 
@@ -194,11 +206,11 @@ export default function ProjectionChart({
             strokeWidth={2}
             strokeDasharray="8 4"
             label={{
-              value: `FIRE: ${formatCurrency(fireNumber)}`,
+              value: 'FIRE',
               fill: isDark ? '#ef4444' : '#dc2626',
-              fontSize: 12,
+              fontSize: 11,
               fontWeight: 600,
-              position: 'right',
+              position: 'insideBottomLeft',
             }}
           />
         )}
