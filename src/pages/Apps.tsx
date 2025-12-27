@@ -18,6 +18,13 @@ const apps: App[] = [
     imageUrl: "https://myfirenumber.com/tallyai.jpg",
     category: "Budget & Tracking"
   },
+  {
+    title: "Track Your Dividends",
+    description: "Comprehensive dividend tracking platform that helps you monitor your dividend income, analyze portfolio performance, and project future passive income. Ideal for dividend-focused FIRE strategies.",
+    url: "https://trackyourdividends.com/",
+    imageUrl: "https://myfirenumber.com/trackyourdividends.png",
+    category: "Investment Tracking"
+  },
 ]
 
 export default function Apps() {
@@ -96,13 +103,13 @@ export default function Apps() {
       {/* Disclaimer */}
       <Card className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
         <CardHeader>
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Affiliate Disclosure</h2>
+          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Disclaimer</h2>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Some of the links above may be affiliate links. If you sign up or purchase through these links, we may earn a small 
-            commission at no additional cost to you. This helps support the development of this free calculator. 
-            We only recommend apps we genuinely believe will help you on your FIRE journey.
+            We are not affiliated with or endorsed by any of the apps listed above. These recommendations are provided 
+            for informational purposes only. We only recommend apps we genuinely believe will help you on your FIRE journey. 
+            Please do your own research before using any third-party service.
           </p>
         </CardContent>
       </Card>
