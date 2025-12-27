@@ -286,6 +286,37 @@ export default function Home() {
         </p>
       </div>
 
+      {/* TallyAI Ad Section */}
+      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
+        <div className="flex flex-col sm:flex-row items-center gap-6">
+          <div className="flex-shrink-0">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <span className="text-3xl" role="img" aria-label="Money emoji">💰</span>
+            </div>
+          </div>
+          <div className="flex-1 text-center sm:text-left">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+              Track Your Progress with Tally AI
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+              Smart financial companion that helps you track spending, manage budgets, and achieve your FIRE goals 
+              with AI-powered insights. Perfect complement to these calculators.
+            </p>
+            <a
+              href="https://tallyai.money/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
+            >
+              Learn More About Tally AI
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* Footer */}
       <footer className="text-center text-sm text-gray-500 dark:text-gray-400 pt-8 border-t border-gray-200 dark:border-gray-800">
         <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 text-xs text-left mb-6">

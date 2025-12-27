@@ -121,6 +121,25 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
           {!isCollapsed && <span>Recommended Books</span>}
         </NavLink>
 
+        {/* Recommended Apps link */}
+        <NavLink
+          to="/apps"
+          onClick={onClose}
+          className={({ isActive }) => `
+            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1
+            font-medium transition-colors
+            ${isCollapsed ? 'justify-center' : ''}
+            ${isActive 
+              ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }
+          `}
+          title={isCollapsed ? 'Recommended Apps' : ''}
+        >
+          <span className="text-xl">📱</span>
+          {!isCollapsed && <span>Recommended Apps</span>}
+        </NavLink>
+
         {/* Quiz link */}
         <NavLink
           to="/quiz"
