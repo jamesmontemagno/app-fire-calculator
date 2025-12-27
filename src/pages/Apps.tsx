@@ -15,7 +15,7 @@ const apps: App[] = [
     title: "Tally AI",
     description: "Smart financial companion that helps you track spending, manage budgets, and achieve your money goals with AI-powered insights. Perfect for anyone on their FIRE journey who wants intelligent financial tracking.",
     url: "https://tallyai.money/",
-    imageUrl: "https://tallyai.money/og-image.png",
+    imageUrl: "https://github.com/user-attachments/assets/dc1e5328-a527-4230-b00b-1f65dae70a00",
     category: "Budget & Tracking"
   },
 ]
