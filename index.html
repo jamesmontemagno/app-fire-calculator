@@ -169,6 +169,8 @@
             const newSearch = params.toString();
             const newUrl = redirectPath + (newSearch ? '?' + newSearch : '');
             
+            // Additional safety: newUrl is guaranteed safe by the validation above
+            // since redirectPath must start with / and cannot contain :// or start with //
             // Replace the URL without adding to history
             window.history.replaceState(null, '', newUrl);
           }

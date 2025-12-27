@@ -16,6 +16,7 @@
     // This prevents open redirect attacks and protocol-relative URLs
     if (path && path.startsWith('/') && !path.startsWith('//') && !path.includes('://')) {
       // Redirect to index.html with the path and search params preserved
+      // Note: window.location.origin is safe on GitHub Pages (controlled hosting environment)
       // React Router will pick up the correct route after the app loads
       window.location.replace(window.location.origin + '/?p=' + encodeURIComponent(path + search));
     } else {
