@@ -161,13 +161,17 @@
         const redirectPath = params.get('p');
         
         if (redirectPath) {
-          // Remove the 'p' parameter and redirect to the correct path
-          params.delete('p');
-          const newSearch = params.toString();
-          const newUrl = redirectPath + (newSearch ? '?' + newSearch : '');
-          
-          // Replace the URL without adding to history
-          window.history.replaceState(null, '', newUrl);
+          // Security: Validate that redirectPath is a safe relative path
+          // Must start with / but not // (protocol-relative), and no protocol schemes
+          if (redirectPath.startsWith('/') && !redirectPath.startsWith('//') && !redirectPath.includes('://')) {
+            // Remove the 'p' parameter and redirect to the correct path
+            params.delete('p');
+            const newSearch = params.toString();
+            const newUrl = redirectPath + (newSearch ? '?' + newSearch : '');
+            
+            // Replace the URL without adding to history
+            window.history.replaceState(null, '', newUrl);
+          }
         }
       })();
     </script>

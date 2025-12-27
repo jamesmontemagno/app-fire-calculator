@@ -12,9 +12,16 @@
     const path = window.location.pathname;
     const search = window.location.search;
     
-    // Redirect to index.html with the path and search params preserved
-    // React Router will pick up the correct route after the app loads
-    window.location.replace(window.location.origin + '/?p=' + encodeURIComponent(path + search));
+    // Security: Only redirect if path is a valid relative path starting with /
+    // This prevents open redirect attacks and protocol-relative URLs
+    if (path && path.startsWith('/') && !path.startsWith('//') && !path.includes('://')) {
+      // Redirect to index.html with the path and search params preserved
+      // React Router will pick up the correct route after the app loads
+      window.location.replace(window.location.origin + '/?p=' + encodeURIComponent(path + search));
+    } else {
+      // Invalid path, redirect to home
+      window.location.replace(window.location.origin);
+    }
   </script>
 </head>
 <body>
