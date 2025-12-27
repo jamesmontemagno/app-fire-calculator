@@ -77,6 +77,12 @@ export const calculatorSEO: Record<string, PageSEO> = {
     keywords: 'FIRE books, financial independence books, early retirement books, personal finance books, investing books, wealth building books',
     canonicalPath: '/books',
   },
+  apps: {
+    title: 'Recommended FIRE Apps - Financial Independence Tools & Software',
+    description: 'Curated list of the best FIRE apps to help you track spending, manage budgets, and achieve financial independence. Essential tools to complement your FIRE calculators.',
+    keywords: 'FIRE apps, financial independence apps, budgeting apps, expense tracking apps, personal finance apps, money management apps',
+    canonicalPath: '/apps',
+  },
   quiz: {
     title: 'FIRE Calculator Quiz - Find Your Perfect FIRE Path',
     description: 'Take our free FIRE quiz to discover which calculator and strategy fits your situation. Answer a few questions and get personalized calculator recommendations with pre-filled values.',

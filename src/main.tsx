@@ -14,6 +14,7 @@ import SavingsRate from './pages/SavingsRate'
 import ReverseFIRE from './pages/ReverseFIRE'
 import HealthcareGap from './pages/HealthcareGap'
 import Books from './pages/Books'
+import Apps from './pages/Apps'
 import FIREQuiz from './pages/FIREQuiz'
 import DebtPayoff from './pages/DebtPayoff'
 import './index.css'
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
       { path: 'reverse', element: <ReverseFIRE /> },
       { path: 'healthcare', element: <HealthcareGap /> },
       { path: 'books', element: <Books /> },
+      { path: 'apps', element: <Apps /> },
       { path: 'quiz', element: <FIREQuiz /> },
     ],
   },
