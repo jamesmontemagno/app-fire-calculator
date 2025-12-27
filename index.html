@@ -153,6 +153,30 @@
         }
       })();
     </script>
+    
+    <!-- Handle GitHub Pages SPA redirect from 404.html -->
+    <script>
+      (function() {
+        const params = new URLSearchParams(window.location.search);
+        const redirectPath = params.get('p');
+        
+        if (redirectPath) {
+          // Security: Validate that redirectPath is a safe relative path
+          // Must start with / but not // (protocol-relative), and no protocol schemes
+          if (redirectPath.startsWith('/') && !redirectPath.startsWith('//') && !redirectPath.includes('://')) {
+            // Remove the 'p' parameter and redirect to the correct path
+            params.delete('p');
+            const newSearch = params.toString();
+            const newUrl = redirectPath + (newSearch ? '?' + newSearch : '');
+            
+            // Additional safety: newUrl is guaranteed safe by the validation above
+            // since redirectPath must start with / and cannot contain :// or start with //
+            // Replace the URL without adding to history
+            window.history.replaceState(null, '', newUrl);
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

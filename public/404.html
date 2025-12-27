@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>FIRE Calculators - Redirecting...</title>
+  <script>
+    // GitHub Pages SPA redirect solution
+    // When a user directly accesses a route like /apps, GitHub Pages returns this 404.html
+    // We redirect to index.html with the path stored so React Router can handle it
+    
+    // Get the current path (e.g., "/apps" from "http://myfirenumber.com/apps")
+    const path = window.location.pathname;
+    const search = window.location.search;
+    
+    // Security: Only redirect if path is a valid relative path starting with /
+    // This prevents open redirect attacks and protocol-relative URLs
+    if (path && path.startsWith('/') && !path.startsWith('//') && !path.includes('://')) {
+      // Redirect to index.html with the path and search params preserved
+      // Note: window.location.origin is safe on GitHub Pages (controlled hosting environment)
+      // React Router will pick up the correct route after the app loads
+      window.location.replace(window.location.origin + '/?p=' + encodeURIComponent(path + search));
+    } else {
+      // Invalid path, redirect to home
+      window.location.replace(window.location.origin);
+    }
+  </script>
+</head>
+<body>
+  <p>Redirecting...</p>
+</body>
+</html>
