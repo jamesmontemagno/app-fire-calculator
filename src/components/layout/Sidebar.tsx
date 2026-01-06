@@ -82,7 +82,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4">
+      <nav className="sidebar-scroll flex-1 overflow-y-auto p-4 overscroll-contain">
         {/* Home link */}
         <NavLink
           to="/"
