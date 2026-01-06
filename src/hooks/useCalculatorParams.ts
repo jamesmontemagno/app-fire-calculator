@@ -135,7 +135,11 @@ export function useCalculatorParams() {
       
       // If no URL value, try localStorage
       if (storedParamsRef.current && key in storedParamsRef.current) {
-        return storedParamsRef.current[key]
+        const storedValue = storedParamsRef.current[key]
+        // Only use stored value if it's not undefined or null
+        if (storedValue !== undefined && storedValue !== null) {
+          return storedValue
+        }
       }
       
       // Fall back to defaults
