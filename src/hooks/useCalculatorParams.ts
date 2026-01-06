@@ -3,6 +3,8 @@ import { useCallback, useMemo, useRef } from 'react'
 
 import type { DebtItem } from '../utils/calculations'
 
+const STORAGE_KEY = 'fire-calc-params'
+
 interface CalculatorParams {
   currentAge: number
   retirementAge: number
@@ -67,34 +69,77 @@ const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
   debtStrategy: 'strategy',
 }
 
+// localStorage utilities
+function loadFromStorage(): Partial<CalculatorParams> | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (!stored) return null
+    return JSON.parse(stored)
+  } catch {
+    return null
+  }
+}
+
+function saveToStorage(params: Partial<CalculatorParams>): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(params))
+  } catch {
+    // Silently fail if storage is unavailable
+  }
+}
+
+function clearStorage(): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem(STORAGE_KEY)
+  } catch {
+    // Silently fail if storage is unavailable
+  }
+}
+
 export function useCalculatorParams() {
   const [searchParams, setSearchParams] = useSearchParams()
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Load stored params immediately (synchronously) during initialization
+  const storedParamsRef = useRef<Partial<CalculatorParams> | null>(loadFromStorage())
 
   const params = useMemo((): CalculatorParams => {
     const getParam = (key: keyof CalculatorParams): any => {
       const urlKey = PARAM_KEYS[key]
-      const value = searchParams.get(urlKey)
-      if (value === null) return DEFAULTS[key]
+      const urlValue = searchParams.get(urlKey)
       
-      // Handle special cases
-      if (key === 'debts') {
-        try {
-          const parsed = JSON.parse(decodeURIComponent(value))
-          return Array.isArray(parsed) ? parsed : DEFAULTS[key]
-        } catch {
-          return DEFAULTS[key]
+      // Priority: URL params > localStorage > defaults
+      // If URL has a value, use it
+      if (urlValue !== null) {
+        // Handle special cases
+        if (key === 'debts') {
+          try {
+            const parsed = JSON.parse(decodeURIComponent(urlValue))
+            return Array.isArray(parsed) ? parsed : DEFAULTS[key]
+          } catch {
+            return DEFAULTS[key]
+          }
         }
-      }
-      if (key === 'debtMode') {
-        return value === 'fixed' || value === 'target' ? value : DEFAULTS[key]
-      }
-      if (key === 'debtStrategy') {
-        return value === 'snowball' || value === 'avalanche' ? value : DEFAULTS[key]
+        if (key === 'debtMode') {
+          return urlValue === 'fixed' || urlValue === 'target' ? urlValue : DEFAULTS[key]
+        }
+        if (key === 'debtStrategy') {
+          return urlValue === 'snowball' || urlValue === 'avalanche' ? urlValue : DEFAULTS[key]
+        }
+        
+        const parsed = parseFloat(urlValue)
+        return isNaN(parsed) ? DEFAULTS[key] : parsed
       }
       
-      const parsed = parseFloat(value)
-      return isNaN(parsed) ? DEFAULTS[key] : parsed
+      // If no URL value, try localStorage
+      if (storedParamsRef.current && key in storedParamsRef.current) {
+        return storedParamsRef.current[key]
+      }
+      
+      // Fall back to defaults
+      return DEFAULTS[key]
     }
 
     return {
@@ -140,6 +185,12 @@ export function useCalculatorParams() {
       }
       return newParams
     }, { replace: true })
+    
+    // Also save to localStorage
+    const currentStored = loadFromStorage() || {}
+    const updatedStored = { ...currentStored, [key]: value }
+    saveToStorage(updatedStored)
+    storedParamsRef.current = updatedStored
   }, [setSearchParams])
 
   // Debounced version of setParam for high-frequency updates (like slider inputs)
@@ -178,10 +229,18 @@ export function useCalculatorParams() {
       })
       return newParams
     }, { replace: true })
+    
+    // Also save all updates to localStorage
+    const currentStored = loadFromStorage() || {}
+    const updatedStored = { ...currentStored, ...updates }
+    saveToStorage(updatedStored)
+    storedParamsRef.current = updatedStored
   }, [setSearchParams])
 
   const resetParams = useCallback(() => {
     setSearchParams(new URLSearchParams(), { replace: true })
+    clearStorage()
+    storedParamsRef.current = null
   }, [setSearchParams])
 
   const copyUrl = useCallback(async () => {
