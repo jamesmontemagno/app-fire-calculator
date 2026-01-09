@@ -9,12 +9,13 @@ A **private**, **offline-first** FIRE (Financial Independence, Retire Early) cal
 ## ✨ Features
 
 ### 🔒 Privacy First
-- **No cookies** - We don't use any cookies
-- **No financial data storage** - Calculator data only in URLs, never stored
-- **UI preferences only** - Only theme and layout preferences stored locally
+- **No cookies** - We don't use any cookies for tracking
+- **Automatic saving** - Your calculator inputs are saved in your browser for convenience
+- **Local storage only** - Data never leaves your device (stored in browser localStorage)
+- **UI preferences only in the past** - Now also includes calculator inputs for seamless experience
 - **No analytics** - Zero tracking scripts
 - **No servers** - All calculations run client-side
-- **URL-based state** - Share your calculations via URL (your choice!)
+- **URL-based sharing** - Share your calculations via URL when you want to (your choice!)
 
 ### 📱 Works Offline
 After first load, the app works completely offline. Install it as a PWA on your device for the best experience.
@@ -91,18 +92,34 @@ Coast Number = FIRE Number / (1 + Real Return)^Years
 Barista Number = (Annual Expenses - Part-Time Income) / Withdrawal Rate
 ```
 
-## 🔗 URL State
+## 🔗 Data Storage & Sharing
 
-All calculator inputs are stored in the URL. This means:
+### Local Storage
+Your calculator inputs are automatically saved in your browser's local storage for convenience:
+- **Persists across sessions** - Your values are remembered when you return
+- **Never leaves your device** - All data stays in your browser
+- **URL takes precedence** - Opening a link with parameters overrides saved values
+- **Easy to clear** - Use the Reset button to clear both URL and saved data
+
+### URL State
+All calculator inputs can also be stored in the URL. This means:
 - ✅ Bookmark your calculations
-- ✅ Share links with specific values
+- ✅ Share links with specific values (saved data is NOT shared in links)
 - ✅ Browser back/forward works
-- ✅ No data stored anywhere
+- ✅ URL parameters override saved values
 
 Example URL:
 ```
 /standard?age=30&retire=55&savings=100000&contrib=24000&expenses=48000
 ```
+
+### What's Stored?
+The app stores only:
+1. **Calculator inputs** (ages, income, savings, etc.) - in localStorage
+2. **Theme preference** (light/dark mode) - in localStorage
+3. **Sidebar state** (open/closed) - in localStorage
+
+**No tracking, no analytics, no cookies, no external storage.**
 
 ## 📝 License
 
