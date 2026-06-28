@@ -332,6 +332,18 @@ export default function Home() {
           Built with privacy in mind. No data ever leaves your browser.
         </p>
         <p className="mt-2">
+          Find more tiny tools like this at{' '}
+          <a
+            href="https://www.tinytooltown.com/"
+            className="text-fire-600 dark:text-fire-400 hover:underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Tiny Tool Town
+          </a>
+          .
+        </p>
+        <p className="mt-2">
           <a 
             href="https://github.com/jamesmontemagno/app-fire-calculator" 
             className="text-fire-600 dark:text-fire-400 hover:underline"
