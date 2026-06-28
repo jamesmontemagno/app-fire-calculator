@@ -6,6 +6,9 @@ A **private**, **offline-first** FIRE (Financial Independence, Retire Early) cal
 ![Privacy First](https://img.shields.io/badge/Privacy-First-green)
 ![Offline Ready](https://img.shields.io/badge/Offline-Ready-blue)
 
+<img width="1429" height="746" alt="image" src="https://github.com/user-attachments/assets/1986b5fa-e4ad-4f4a-bde3-4833b50dc093" />
+
+
 ## ✨ Features
 
 ### 🔒 Privacy First
