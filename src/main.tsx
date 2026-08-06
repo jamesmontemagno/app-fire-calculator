@@ -17,6 +17,7 @@ import Books from './pages/Books'
 import Apps from './pages/Apps'
 import FIREQuiz from './pages/FIREQuiz'
 import DebtPayoff from './pages/DebtPayoff'
+import DeferredCompensation from './pages/DeferredCompensation'
 import './index.css'
 
 const basename = import.meta.env.BASE_URL
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
       { path: 'withdrawal', element: <WithdrawalRate /> },
       { path: 'savings-rate', element: <SavingsRate /> },
       { path: 'debt-payoff', element: <DebtPayoff /> },
+      { path: 'deferred-compensation', element: <DeferredCompensation /> },
       { path: 'reverse', element: <ReverseFIRE /> },
       { path: 'healthcare', element: <HealthcareGap /> },
       { path: 'books', element: <Books /> },
