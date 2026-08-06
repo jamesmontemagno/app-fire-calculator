@@ -127,7 +127,7 @@ export const calculators: CalculatorMetadata[] = [
     audience: 'Best for: US-based early retirees',
   },
   {
-    path: '/deferred-compensation',
+    path: '/retirement-cash-flow',
     icon: '🗓️',
     name: 'Retirement Cash Flow',
     label: 'Retirement Cash Flow',
