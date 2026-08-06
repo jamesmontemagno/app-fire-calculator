@@ -33,7 +33,11 @@ export default function DeferredCompensation() {
     hasCustomParams,
   } = useDeferredCompensationParams()
 
-  const results = useMemo(() => calculateDeferredCompensation(params), [params])
+  const currentYear = new Date().getFullYear()
+  const results = useMemo(
+    () => calculateDeferredCompensation({ ...params, currentYear }),
+    [params, currentYear],
+  )
   const retirementCashFlow = results.projections.filter(
     point => point.age >= params.semiRetirementAge,
   )
@@ -216,6 +220,7 @@ export default function DeferredCompensation() {
               accounts={params.accounts}
               onChange={accounts => setParam('accounts', accounts)}
               currentAge={params.currentAge}
+              currentYear={currentYear}
             />
           </CardContent>
         </Card>

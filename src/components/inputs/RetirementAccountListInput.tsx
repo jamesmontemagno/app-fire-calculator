@@ -13,6 +13,7 @@ interface RetirementAccountListInputProps {
   accounts: RetirementAccount[]
   onChange: (accounts: RetirementAccount[]) => void
   currentAge: number
+  currentYear: number
 }
 
 const ACCOUNT_TYPES: { value: RetirementAccountType; label: string }[] = [
@@ -27,6 +28,7 @@ export default function RetirementAccountListInput({
   accounts,
   onChange,
   currentAge,
+  currentYear,
 }: RetirementAccountListInputProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
@@ -225,7 +227,7 @@ export default function RetirementAccountListInput({
                         tooltip="The first age at which this bucket can provide retirement cash flow."
                       />
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Calendar year {new Date().getFullYear() + account.availableAge - currentAge}
+                        Calendar year {currentYear + account.availableAge - currentAge}
                       </p>
                     </div>
                     {account.type === 'deferred' ? (
