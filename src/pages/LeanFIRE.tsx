@@ -11,7 +11,7 @@ import { calculatorSEO } from '../config/seo'
 const LEAN_THRESHOLD = 40000
 
 export default function LeanFIRE() {
-  const { params, setParam, resetParams, copyUrl, hasCustomParams } = useCalculatorParams()
+  const { params, setParam, resetParams, saveParams, copyUrl, hasCustomParams, hasUnsavedChanges } = useCalculatorParams()
 
   // Use lean-appropriate defaults
   const leanExpenses = Math.min(params.annualExpenses, LEAN_THRESHOLD)
@@ -84,7 +84,7 @@ export default function LeanFIRE() {
           </div>
           <div className="flex flex-wrap gap-2">
             <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+            <UrlActions onReset={resetParams} onSave={saveParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} />
           </div>
       </div>
 

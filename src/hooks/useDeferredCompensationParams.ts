@@ -1,5 +1,5 @@
-import { useCallback, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useCallback, useMemo, useState } from 'react'
+import { useLocation, useSearchParams } from 'react-router-dom'
 import type {
   RetirementAccount,
   RetirementAccountType,
@@ -71,6 +71,36 @@ const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
   accounts: 'dcAccounts',
 }
 
+const STORAGE_KEY_PREFIX = 'fire-calc-deferred-params'
+
+function loadFromStorage(storageKey: string): Partial<DeferredCompensationParams> | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const stored = localStorage.getItem(storageKey)
+    return stored ? JSON.parse(stored) : null
+  } catch {
+    return null
+  }
+}
+
+function saveToStorage(storageKey: string, params: DeferredCompensationParams): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(params))
+  } catch {
+    // Silently fail if storage is unavailable
+  }
+}
+
+function clearStorage(storageKey: string): void {
+  if (typeof window === 'undefined') return
+  try {
+    localStorage.removeItem(storageKey)
+  } catch {
+    // Silently fail if storage is unavailable
+  }
+}
+
 const numberParam = (value: string | null, fallback: number) => {
   if (value === null) return fallback
   const parsed = Number(value)
@@ -112,24 +142,29 @@ const sanitizeAccounts = (value: string | null): RetirementAccount[] => {
 
 export function useDeferredCompensationParams() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
+  const storageKey = `${STORAGE_KEY_PREFIX}:${location.pathname}`
+  const [savedParams, setSavedParams] = useState<Partial<DeferredCompensationParams> | null>(
+    () => loadFromStorage(storageKey),
+  )
 
   const params = useMemo<DeferredCompensationParams>(() => {
     const currentAge = Math.min(100, Math.max(
       18,
-      numberParam(searchParams.get(PARAM_KEYS.currentAge), DEFAULTS.currentAge),
+      numberParam(searchParams.get(PARAM_KEYS.currentAge), savedParams?.currentAge ?? DEFAULTS.currentAge),
     ))
     const semiRetirementAge = Math.min(100, Math.max(
       currentAge,
       numberParam(
         searchParams.get(PARAM_KEYS.semiRetirementAge),
-        DEFAULTS.semiRetirementAge,
+        savedParams?.semiRetirementAge ?? DEFAULTS.semiRetirementAge,
       ),
     ))
     const planThroughAge = Math.min(120, Math.max(
       semiRetirementAge,
       numberParam(
         searchParams.get(PARAM_KEYS.planThroughAge),
-        DEFAULTS.planThroughAge,
+        savedParams?.planThroughAge ?? DEFAULTS.planThroughAge,
       ),
     ))
 
@@ -139,23 +174,23 @@ export function useDeferredCompensationParams() {
       planThroughAge,
       annualExpenses: Math.max(0, numberParam(
         searchParams.get(PARAM_KEYS.annualExpenses),
-        DEFAULTS.annualExpenses,
+        savedParams?.annualExpenses ?? DEFAULTS.annualExpenses,
       )),
       semiRetirementIncome: Math.max(0, numberParam(
         searchParams.get(PARAM_KEYS.semiRetirementIncome),
-        DEFAULTS.semiRetirementIncome,
+        savedParams?.semiRetirementIncome ?? DEFAULTS.semiRetirementIncome,
       )),
       annualDividends: Math.max(0, numberParam(
         searchParams.get(PARAM_KEYS.annualDividends),
-        DEFAULTS.annualDividends,
+        savedParams?.annualDividends ?? DEFAULTS.annualDividends,
       )),
       inflationRate: Math.min(1, Math.max(-1, numberParam(
         searchParams.get(PARAM_KEYS.inflationRate),
-        DEFAULTS.inflationRate,
+        savedParams?.inflationRate ?? DEFAULTS.inflationRate,
       ))),
-      accounts: sanitizeAccounts(searchParams.get(PARAM_KEYS.accounts)),
+      accounts: sanitizeAccounts(searchParams.get(PARAM_KEYS.accounts) ?? JSON.stringify(savedParams?.accounts ?? DEFAULTS.accounts)),
     }
-  }, [searchParams])
+  }, [savedParams, searchParams])
 
   const setParam = useCallback(<Key extends keyof DeferredCompensationParams>(
     key: Key,
@@ -165,14 +200,16 @@ export function useDeferredCompensationParams() {
       const next = new URLSearchParams(previous)
       const defaultValue = DEFAULTS[key]
       const isDefault = JSON.stringify(value) === JSON.stringify(defaultValue)
-      if (isDefault) {
+      const savedValue = savedParams?.[key]
+      const matchesSavedValue = JSON.stringify(value) === JSON.stringify(savedValue)
+      if (isDefault && (savedValue === undefined || matchesSavedValue)) {
         next.delete(PARAM_KEYS[key])
       } else {
         next.set(PARAM_KEYS[key], key === 'accounts' ? JSON.stringify(value) : String(value))
       }
       return next
     }, { replace: true })
-  }, [setSearchParams])
+  }, [savedParams, setSearchParams])
 
   const resetParams = useCallback(() => {
     setSearchParams(previous => {
@@ -180,7 +217,14 @@ export function useDeferredCompensationParams() {
       Object.values(PARAM_KEYS).forEach(key => next.delete(key))
       return next
     }, { replace: true })
-  }, [setSearchParams])
+    clearStorage(storageKey)
+    setSavedParams(null)
+  }, [setSearchParams, storageKey])
+
+  const saveParams = useCallback(() => {
+    saveToStorage(storageKey, params)
+    setSavedParams(params)
+  }, [params, storageKey])
 
   const copyUrl = useCallback(async () => {
     try {
@@ -195,7 +239,9 @@ export function useDeferredCompensationParams() {
     params,
     setParam,
     resetParams,
+    saveParams,
     copyUrl,
     hasCustomParams: Object.values(PARAM_KEYS).some(key => searchParams.has(key)),
+    hasUnsavedChanges: JSON.stringify(params) !== JSON.stringify(savedParams ?? DEFAULTS),
   }
 }

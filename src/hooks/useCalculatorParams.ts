@@ -1,9 +1,9 @@
-import { useSearchParams } from 'react-router-dom'
-import { useCallback, useMemo, useRef } from 'react'
+import { useLocation, useSearchParams } from 'react-router-dom'
+import { useCallback, useMemo, useRef, useState } from 'react'
 
 import type { DebtItem } from '../utils/calculations'
 
-const STORAGE_KEY = 'fire-calc-params'
+const STORAGE_KEY_PREFIX = 'fire-calc-params'
 
 interface CalculatorParams {
   currentAge: number
@@ -70,10 +70,10 @@ const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
 }
 
 // localStorage utilities
-function loadFromStorage(): Partial<CalculatorParams> | null {
+function loadFromStorage(storageKey: string): Partial<CalculatorParams> | null {
   if (typeof window === 'undefined') return null
   try {
-    const stored = localStorage.getItem(STORAGE_KEY)
+    const stored = localStorage.getItem(storageKey)
     if (!stored) return null
     return JSON.parse(stored)
   } catch {
@@ -81,19 +81,19 @@ function loadFromStorage(): Partial<CalculatorParams> | null {
   }
 }
 
-function saveToStorage(params: Partial<CalculatorParams>): void {
+function saveToStorage(storageKey: string, params: CalculatorParams): void {
   if (typeof window === 'undefined') return
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(params))
+    localStorage.setItem(storageKey, JSON.stringify(params))
   } catch {
     // Silently fail if storage is unavailable
   }
 }
 
-function clearStorage(): void {
+function clearStorage(storageKey: string): void {
   if (typeof window === 'undefined') return
   try {
-    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(storageKey)
   } catch {
     // Silently fail if storage is unavailable
   }
@@ -101,16 +101,19 @@ function clearStorage(): void {
 
 export function useCalculatorParams() {
   const [searchParams, setSearchParams] = useSearchParams()
+  const location = useLocation()
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  // Load stored params immediately (synchronously) during initialization
-  const storedParamsRef = useRef<Partial<CalculatorParams> | null>(loadFromStorage())
+  const storageKey = `${STORAGE_KEY_PREFIX}:${location.pathname}`
+  const [savedParams, setSavedParams] = useState<Partial<CalculatorParams> | null>(
+    () => loadFromStorage(storageKey),
+  )
 
   const params = useMemo((): CalculatorParams => {
     const getParam = (key: keyof CalculatorParams): any => {
       const urlKey = PARAM_KEYS[key]
       const urlValue = searchParams.get(urlKey)
       
-      // Priority: URL params > localStorage > defaults
+      // Priority: URL params > saved section values > defaults
       // If URL has a value, use it
       if (urlValue !== null) {
         // Handle special cases
@@ -133,9 +136,9 @@ export function useCalculatorParams() {
         return isNaN(parsed) ? DEFAULTS[key] : parsed
       }
       
-      // If no URL value, try localStorage
-      if (storedParamsRef.current && key in storedParamsRef.current) {
-        const storedValue = storedParamsRef.current[key]
+      // If no URL value, try saved values for this calculator section.
+      if (savedParams && key in savedParams) {
+        const storedValue = savedParams[key]
         // Only use stored value if it's not undefined or null
         if (storedValue !== undefined && storedValue !== null) {
           return storedValue
@@ -166,7 +169,7 @@ export function useCalculatorParams() {
       debtMode: getParam('debtMode'),
       debtStrategy: getParam('debtStrategy'),
     }
-  }, [searchParams])
+  }, [savedParams, searchParams])
 
   const setParam = useCallback((key: keyof CalculatorParams, value: any) => {
     const urlKey = PARAM_KEYS[key]
@@ -179,7 +182,12 @@ export function useCalculatorParams() {
         ? JSON.stringify(value) === JSON.stringify(defaultValue)
         : value === defaultValue
       
-      if (isDefault) {
+      const savedValue = savedParams?.[key]
+      const matchesSavedValue = key === 'debts'
+        ? JSON.stringify(value) === JSON.stringify(savedValue)
+        : value === savedValue
+      
+      if (isDefault && (savedValue === undefined || matchesSavedValue)) {
         newParams.delete(urlKey)
       } else {
         const stringValue = key === 'debts'
@@ -189,13 +197,7 @@ export function useCalculatorParams() {
       }
       return newParams
     }, { replace: true })
-    
-    // Also save to localStorage
-    const currentStored = loadFromStorage() || {}
-    const updatedStored = { ...currentStored, [key]: value }
-    saveToStorage(updatedStored)
-    storedParamsRef.current = updatedStored
-  }, [setSearchParams])
+  }, [savedParams, setSearchParams])
 
   // Debounced version of setParam for high-frequency updates (like slider inputs)
   const setParamDebounced = useCallback((key: keyof CalculatorParams, value: any, delay = 300) => {
@@ -222,7 +224,12 @@ export function useCalculatorParams() {
           ? JSON.stringify(value) === JSON.stringify(defaultValue)
           : value === defaultValue
         
-        if (isDefault) {
+        const savedValue = savedParams?.[typedKey]
+        const matchesSavedValue = typedKey === 'debts'
+          ? JSON.stringify(value) === JSON.stringify(savedValue)
+          : value === savedValue
+
+        if (isDefault && (savedValue === undefined || matchesSavedValue)) {
           newParams.delete(urlKey)
         } else {
           const stringValue = key === 'debts'
@@ -233,19 +240,18 @@ export function useCalculatorParams() {
       })
       return newParams
     }, { replace: true })
-    
-    // Also save all updates to localStorage
-    const currentStored = loadFromStorage() || {}
-    const updatedStored = { ...currentStored, ...updates }
-    saveToStorage(updatedStored)
-    storedParamsRef.current = updatedStored
-  }, [setSearchParams])
+  }, [savedParams, setSearchParams])
 
   const resetParams = useCallback(() => {
     setSearchParams(new URLSearchParams(), { replace: true })
-    clearStorage()
-    storedParamsRef.current = null
-  }, [setSearchParams])
+    clearStorage(storageKey)
+    setSavedParams(null)
+  }, [setSearchParams, storageKey])
+
+  const saveParams = useCallback(() => {
+    saveToStorage(storageKey, params)
+    setSavedParams(params)
+  }, [params, storageKey])
 
   const copyUrl = useCallback(async () => {
     try {
@@ -257,6 +263,7 @@ export function useCalculatorParams() {
   }, [])
 
   const hasCustomParams = searchParams.toString().length > 0
+  const hasUnsavedChanges = JSON.stringify(params) !== JSON.stringify(savedParams ?? DEFAULTS)
 
   return {
     params,
@@ -264,8 +271,10 @@ export function useCalculatorParams() {
     setParamDebounced,
     setParams,
     resetParams,
+    saveParams,
     copyUrl,
     hasCustomParams,
+    hasUnsavedChanges,
   }
 }
 

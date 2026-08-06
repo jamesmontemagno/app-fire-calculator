@@ -9,7 +9,7 @@ import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 
 export default function StandardFIRE() {
-  const { params, setParam, setParams, resetParams, copyUrl, hasCustomParams } = useCalculatorParams()
+  const { params, setParam, setParams, resetParams, saveParams, copyUrl, hasCustomParams, hasUnsavedChanges } = useCalculatorParams()
 
   const results = useMemo(() => {
     return calculateStandardFIRE({
@@ -82,7 +82,7 @@ export default function StandardFIRE() {
           </div>
           <div className="flex flex-wrap gap-2">
             <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+            <UrlActions onReset={resetParams} onSave={saveParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} />
         </div>
       </div>
 

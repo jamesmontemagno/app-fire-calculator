@@ -9,7 +9,7 @@ import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 
 export default function CoastFIRE() {
-  const { params, setParam, resetParams, copyUrl, hasCustomParams } = useCalculatorParams()
+  const { params, setParam, resetParams, saveParams, copyUrl, hasCustomParams, hasUnsavedChanges } = useCalculatorParams()
 
   const results = useMemo(() => {
     return calculateCoastFIRE(
@@ -81,7 +81,7 @@ export default function CoastFIRE() {
           </div>
           <div className="flex flex-wrap gap-2">
             <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+            <UrlActions onReset={resetParams} onSave={saveParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} />
         </div>
       </div>
 

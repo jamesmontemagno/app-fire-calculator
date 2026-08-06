@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { 
   calculateSnowballPayoff, 
@@ -16,15 +16,21 @@ import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 
 export default function DebtPayoff() {
-  const { params, resetParams, copyUrl, hasCustomParams } = useCalculatorParams()
-  
-  // Local state for debts (will sync with URL params)
-  const [debts, setDebts] = useState<DebtItem[]>(params.debts || [])
-  const [mode, setMode] = useState<'fixed' | 'target'>(params.debtMode || 'fixed')
-  const [strategy, setStrategy] = useState<'snowball' | 'avalanche'>(params.debtStrategy || 'snowball')
-  const [monthlyBudget, setMonthlyBudget] = useState(params.debtBudget || 1000)
-  const [targetMonths, setTargetMonths] = useState(params.debtMonths || 36)
-  const [extraPayment, setExtraPayment] = useState(params.debtExtra || 0)
+  const {
+    params,
+    setParam,
+    resetParams,
+    saveParams,
+    copyUrl,
+    hasCustomParams,
+    hasUnsavedChanges,
+  } = useCalculatorParams()
+  const debts: DebtItem[] = params.debts
+  const mode = params.debtMode
+  const strategy = params.debtStrategy
+  const monthlyBudget = params.debtBudget
+  const targetMonths = params.debtMonths
+  const extraPayment = params.debtExtra
 
   // Calculate results
   const results = useMemo(() => {
@@ -146,7 +152,13 @@ export default function DebtPayoff() {
           </div>
           <div className="flex flex-wrap gap-2">
             <ExportButton onExport={handleExport} disabled={!canCalculate} />
-            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+            <UrlActions
+              onReset={resetParams}
+              onSave={saveParams}
+              onCopy={copyUrl}
+              hasCustomParams={hasCustomParams}
+              hasUnsavedChanges={hasUnsavedChanges}
+            />
           </div>
       </div>
 
@@ -170,7 +182,7 @@ export default function DebtPayoff() {
       <div className="flex justify-center">
         <div className="inline-flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
           <button
-            onClick={() => setMode('fixed')}
+            onClick={() => setParam('debtMode', 'fixed')}
             className={`px-6 py-2 rounded-md font-medium transition-colors ${
               mode === 'fixed'
                 ? 'bg-white dark:bg-gray-700 text-fire-700 dark:text-fire-400 shadow-sm'
@@ -180,7 +192,7 @@ export default function DebtPayoff() {
             Fixed Budget
           </button>
           <button
-            onClick={() => setMode('target')}
+            onClick={() => setParam('debtMode', 'target')}
             className={`px-6 py-2 rounded-md font-medium transition-colors ${
               mode === 'target'
                 ? 'bg-white dark:bg-gray-700 text-fire-700 dark:text-fire-400 shadow-sm'
@@ -199,7 +211,7 @@ export default function DebtPayoff() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Debt Information</h2>
           </CardHeader>
           <CardContent className="space-y-6">
-            <DebtListInput debts={debts} onChange={setDebts} />
+            <DebtListInput debts={debts} onChange={(value) => setParam('debts', value)} />
 
             <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
               {mode === 'fixed' ? (
@@ -207,7 +219,7 @@ export default function DebtPayoff() {
                   <CurrencyInput
                     label="Total Monthly Budget"
                     value={monthlyBudget}
-                    onChange={setMonthlyBudget}
+                    onChange={(value) => setParam('debtBudget', value)}
                     tooltip="Total amount you can pay toward debts each month"
                     min={totalMinPayments}
                     showInvalidState={true}
@@ -227,7 +239,7 @@ export default function DebtPayoff() {
                     <input
                       type="number"
                       value={targetMonths}
-                      onChange={(e) => setTargetMonths(Number(e.target.value))}
+                      onChange={(e) => setParam('debtMonths', Number(e.target.value))}
                       min={1}
                       max={360}
                       className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-fire-500 focus:border-transparent text-gray-900 dark:text-gray-100"
@@ -250,7 +262,7 @@ export default function DebtPayoff() {
                   max={1000}
                   step={25}
                   value={extraPayment}
-                  onChange={(e) => setExtraPayment(Number(e.target.value))}
+                  onChange={(e) => setParam('debtExtra', Number(e.target.value))}
                   className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-fire-600"
                 />
                 <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -282,7 +294,7 @@ export default function DebtPayoff() {
               <div className="flex justify-center">
                 <div className="inline-flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
                   <button
-                    onClick={() => setStrategy('snowball')}
+                    onClick={() => setParam('debtStrategy', 'snowball')}
                     className={`px-6 py-2 rounded-md font-medium transition-colors ${
                       strategy === 'snowball'
                         ? 'bg-white dark:bg-gray-700 text-fire-700 dark:text-fire-400 shadow-sm'
@@ -292,7 +304,7 @@ export default function DebtPayoff() {
                     💪 Snowball
                   </button>
                   <button
-                    onClick={() => setStrategy('avalanche')}
+                    onClick={() => setParam('debtStrategy', 'avalanche')}
                     className={`px-6 py-2 rounded-md font-medium transition-colors ${
                       strategy === 'avalanche'
                         ? 'bg-white dark:bg-gray-700 text-fire-700 dark:text-fire-400 shadow-sm'
