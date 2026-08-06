@@ -71,6 +71,12 @@ export const calculatorSEO: Record<string, PageSEO> = {
     keywords: 'healthcare gap calculator, early retirement healthcare, pre-Medicare coverage, healthcare costs, ACA marketplace, retirement healthcare planning',
     canonicalPath: '/healthcare',
   },
+  'deferred-compensation': {
+    title: 'Deferred Compensation Calculator - Retirement Cash Flow Planner',
+    description: 'Plan retirement cash flow across deferred compensation, 401(k), IRA, brokerage, and savings accounts. Model payout timing, withdrawal rates, and semi-retirement income.',
+    keywords: 'deferred compensation calculator, retirement cash flow calculator, 401k withdrawal planner, semi-retirement calculator, retirement account buckets',
+    canonicalPath: '/deferred-compensation',
+  },
   books: {
     title: 'Best FIRE Books - Recommended Financial Independence Reading',
     description: 'Curated list of the best FIRE books to accelerate your financial independence journey. Essential reading on investing, personal finance, early retirement, and wealth building.',

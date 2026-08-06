@@ -126,6 +126,17 @@ export const calculators: CalculatorMetadata[] = [
     borderColor: 'border-rose-200 dark:border-rose-800',
     audience: 'Best for: US-based early retirees',
   },
+  {
+    path: '/deferred-compensation',
+    icon: '🗓️',
+    name: 'Deferred Compensation',
+    label: 'Deferred Comp',
+    description: 'Coordinate deferred payouts, retirement accounts, savings, and semi-retirement income in one cash-flow plan.',
+    color: 'text-indigo-500',
+    bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
+    borderColor: 'border-indigo-200 dark:border-indigo-800',
+    audience: 'Best for: Complex, multi-account retirement plans',
+  },
 ]
 
 /**
