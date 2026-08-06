@@ -80,7 +80,7 @@ export default function DeferredCompensation() {
               Retirement Cash Flow
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Combine deferred payouts, retirement accounts, savings, and semi-retirement income.
+              Combine account withdrawals, deferred payouts, dividends, and semi-retirement income.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
