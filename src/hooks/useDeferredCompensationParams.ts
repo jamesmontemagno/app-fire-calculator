@@ -94,10 +94,10 @@ const sanitizeAccounts = (value: string | null): RetirementAccount[] => {
         type,
         balance: Math.max(0, numeric(account.balance, 0)),
         annualContribution: Math.max(0, numeric(account.annualContribution, 0)),
-        annualReturn: Math.max(-1, numeric(account.annualReturn, 0)),
-        availableAge: Math.max(0, numeric(account.availableAge, 59.5)),
-        withdrawalRate: Math.max(0, numeric(account.withdrawalRate, 0.04)),
-        payoutYears: Math.max(1, Math.round(numeric(account.payoutYears, 1))),
+        annualReturn: Math.min(1, Math.max(-1, numeric(account.annualReturn, 0))),
+        availableAge: Math.min(120, Math.max(0, numeric(account.availableAge, 60))),
+        withdrawalRate: Math.min(1, Math.max(0, numeric(account.withdrawalRate, 0.04))),
+        payoutYears: Math.min(100, Math.max(1, Math.round(numeric(account.payoutYears, 1)))),
       }]
     }).slice(0, 20)
   } catch {
@@ -108,30 +108,45 @@ const sanitizeAccounts = (value: string | null): RetirementAccount[] => {
 export function useDeferredCompensationParams() {
   const [searchParams, setSearchParams] = useSearchParams()
 
-  const params = useMemo<DeferredCompensationParams>(() => ({
-    currentAge: numberParam(searchParams.get(PARAM_KEYS.currentAge), DEFAULTS.currentAge),
-    semiRetirementAge: numberParam(
-      searchParams.get(PARAM_KEYS.semiRetirementAge),
-      DEFAULTS.semiRetirementAge,
-    ),
-    planThroughAge: numberParam(
-      searchParams.get(PARAM_KEYS.planThroughAge),
-      DEFAULTS.planThroughAge,
-    ),
-    annualExpenses: numberParam(
-      searchParams.get(PARAM_KEYS.annualExpenses),
-      DEFAULTS.annualExpenses,
-    ),
-    semiRetirementIncome: numberParam(
-      searchParams.get(PARAM_KEYS.semiRetirementIncome),
-      DEFAULTS.semiRetirementIncome,
-    ),
-    inflationRate: numberParam(
-      searchParams.get(PARAM_KEYS.inflationRate),
-      DEFAULTS.inflationRate,
-    ),
-    accounts: sanitizeAccounts(searchParams.get(PARAM_KEYS.accounts)),
-  }), [searchParams])
+  const params = useMemo<DeferredCompensationParams>(() => {
+    const currentAge = Math.min(100, Math.max(
+      18,
+      numberParam(searchParams.get(PARAM_KEYS.currentAge), DEFAULTS.currentAge),
+    ))
+    const semiRetirementAge = Math.min(100, Math.max(
+      currentAge,
+      numberParam(
+        searchParams.get(PARAM_KEYS.semiRetirementAge),
+        DEFAULTS.semiRetirementAge,
+      ),
+    ))
+    const planThroughAge = Math.min(120, Math.max(
+      semiRetirementAge,
+      numberParam(
+        searchParams.get(PARAM_KEYS.planThroughAge),
+        DEFAULTS.planThroughAge,
+      ),
+    ))
+
+    return {
+      currentAge,
+      semiRetirementAge,
+      planThroughAge,
+      annualExpenses: Math.max(0, numberParam(
+        searchParams.get(PARAM_KEYS.annualExpenses),
+        DEFAULTS.annualExpenses,
+      )),
+      semiRetirementIncome: Math.max(0, numberParam(
+        searchParams.get(PARAM_KEYS.semiRetirementIncome),
+        DEFAULTS.semiRetirementIncome,
+      )),
+      inflationRate: Math.min(1, Math.max(-1, numberParam(
+        searchParams.get(PARAM_KEYS.inflationRate),
+        DEFAULTS.inflationRate,
+      ))),
+      accounts: sanitizeAccounts(searchParams.get(PARAM_KEYS.accounts)),
+    }
+  }, [searchParams])
 
   const setParam = useCallback(<Key extends keyof DeferredCompensationParams>(
     key: Key,

@@ -3,7 +3,7 @@ import type {
   RetirementAccount,
   RetirementAccountType,
 } from '../../utils/deferredCompensation'
-import { formatCurrency, formatPercent } from '../../utils/calculations'
+import { formatCurrency } from '../../utils/calculations'
 import AgeInput from './AgeInput'
 import CurrencyInput from './CurrencyInput'
 import PercentageInput from './PercentageInput'
@@ -12,6 +12,7 @@ import InputGroup from './InputGroup'
 interface RetirementAccountListInputProps {
   accounts: RetirementAccount[]
   onChange: (accounts: RetirementAccount[]) => void
+  currentAge: number
 }
 
 const ACCOUNT_TYPES: { value: RetirementAccountType; label: string }[] = [
@@ -25,6 +26,7 @@ const ACCOUNT_TYPES: { value: RetirementAccountType; label: string }[] = [
 export default function RetirementAccountListInput({
   accounts,
   onChange,
+  currentAge,
 }: RetirementAccountListInputProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
 
@@ -215,12 +217,17 @@ export default function RetirementAccountListInput({
                       min={0}
                       max={0.2}
                     />
-                    <AgeInput
-                      label={account.type === 'deferred' ? 'Payout starts at age' : 'Available at age'}
-                      value={account.availableAge}
-                      onChange={value => updateAccount(account.id, 'availableAge', value)}
-                      tooltip="The first age at which this bucket can provide retirement cash flow."
-                    />
+                    <div>
+                      <AgeInput
+                        label={account.type === 'deferred' ? 'Vests / payout starts at age' : 'Available at age'}
+                        value={account.availableAge}
+                        onChange={value => updateAccount(account.id, 'availableAge', value)}
+                        tooltip="The first age at which this bucket can provide retirement cash flow."
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        Calendar year {new Date().getFullYear() + account.availableAge - currentAge}
+                      </p>
+                    </div>
                     {account.type === 'deferred' ? (
                       <InputGroup
                         label="Payout period"

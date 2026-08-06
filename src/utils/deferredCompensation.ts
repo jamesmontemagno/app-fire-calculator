@@ -88,7 +88,8 @@ export function calculateDeferredCompensation({
       let withdrawal = 0
       if (retired && age >= account.availableAge && balance > 0) {
         if (account.type === 'deferred') {
-          const payoutEndAge = account.availableAge + Math.max(1, account.payoutYears) - 1
+          const payoutStartAge = Math.max(account.availableAge, retirementAge)
+          const payoutEndAge = payoutStartAge + Math.max(1, account.payoutYears) - 1
           if (age <= payoutEndAge) {
             const remainingPayments = payoutEndAge - age + 1
             withdrawal = balance / remainingPayments

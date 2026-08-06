@@ -215,6 +215,7 @@ export default function DeferredCompensation() {
             <RetirementAccountListInput
               accounts={params.accounts}
               onChange={accounts => setParam('accounts', accounts)}
+              currentAge={params.currentAge}
             />
           </CardContent>
         </Card>
