@@ -72,7 +72,7 @@ export const calculatorSEO: Record<string, PageSEO> = {
     canonicalPath: '/healthcare',
   },
   'deferred-compensation': {
-    title: 'Deferred Compensation Calculator - Retirement Cash Flow Planner',
+    title: 'Retirement Cash Flow Calculator - Deferred Compensation Planner',
     description: 'Plan retirement cash flow across deferred compensation, 401(k), IRA, brokerage, and savings accounts. Model payout timing, withdrawal rates, and semi-retirement income.',
     keywords: 'deferred compensation calculator, retirement cash flow calculator, 401k withdrawal planner, semi-retirement calculator, retirement account buckets',
     canonicalPath: '/deferred-compensation',

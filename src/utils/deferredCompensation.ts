@@ -4,6 +4,8 @@ export type RetirementAccountType =
   | 'roth'
   | 'taxable'
   | 'savings'
+  | 'hsa'
+  | 'other'
 
 export interface RetirementAccount {
   id: string
@@ -22,6 +24,7 @@ export interface RetirementCashFlowPoint {
   year: number
   totalBalance: number
   employmentIncome: number
+  dividendIncome: number
   accountIncome: number
   totalIncome: number
   expenses: number
@@ -36,6 +39,7 @@ export interface DeferredCompensationInputs {
   planThroughAge: number
   annualExpenses: number
   semiRetirementIncome: number
+  annualDividends: number
   inflationRate: number
   accounts: RetirementAccount[]
   currentYear?: number
@@ -59,6 +63,7 @@ export function calculateDeferredCompensation({
   planThroughAge,
   annualExpenses,
   semiRetirementIncome,
+  annualDividends,
   inflationRate,
   accounts,
   currentYear = new Date().getFullYear(),
@@ -110,13 +115,15 @@ export function calculateDeferredCompensation({
     const yearsFromNow = age - startAge
     const expenses = Math.max(0, annualExpenses) * Math.pow(1 + Math.max(-1, inflationRate), yearsFromNow)
     const employmentIncome = retired ? Math.max(0, semiRetirementIncome) : 0
-    const totalIncome = employmentIncome + accountIncome
+    const dividendIncome = retired ? Math.max(0, annualDividends) : 0
+    const totalIncome = employmentIncome + dividendIncome + accountIncome
 
     projections.push({
       age,
       year: currentYear + yearsFromNow,
       totalBalance: round(Array.from(balances.values()).reduce((sum, balance) => sum + balance, 0)),
       employmentIncome: round(employmentIncome),
+      dividendIncome: round(dividendIncome),
       accountIncome: round(accountIncome),
       totalIncome: round(totalIncome),
       expenses: round(expenses),

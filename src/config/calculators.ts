@@ -129,8 +129,8 @@ export const calculators: CalculatorMetadata[] = [
   {
     path: '/deferred-compensation',
     icon: '🗓️',
-    name: 'Deferred Compensation',
-    label: 'Deferred Comp',
+    name: 'Retirement Cash Flow',
+    label: 'Retirement Cash Flow',
     description: 'Coordinate deferred payouts, retirement accounts, savings, and semi-retirement income in one cash-flow plan.',
     color: 'text-indigo-500',
     bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',

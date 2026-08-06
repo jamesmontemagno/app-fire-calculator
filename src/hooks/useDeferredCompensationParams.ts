@@ -11,6 +11,7 @@ export interface DeferredCompensationParams {
   planThroughAge: number
   annualExpenses: number
   semiRetirementIncome: number
+  annualDividends: number
   inflationRate: number
   accounts: RetirementAccount[]
 }
@@ -21,6 +22,8 @@ const ACCOUNT_TYPES: RetirementAccountType[] = [
   'roth',
   'taxable',
   'savings',
+  'hsa',
+  'other',
 ]
 
 const DEFAULTS: DeferredCompensationParams = {
@@ -29,6 +32,7 @@ const DEFAULTS: DeferredCompensationParams = {
   planThroughAge: 90,
   annualExpenses: 80000,
   semiRetirementIncome: 20000,
+  annualDividends: 0,
   inflationRate: 0.03,
   accounts: [
     {
@@ -62,6 +66,7 @@ const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
   planThroughAge: 'dcThrough',
   annualExpenses: 'dcExpenses',
   semiRetirementIncome: 'dcIncome',
+  annualDividends: 'dcDividends',
   inflationRate: 'dcInflation',
   accounts: 'dcAccounts',
 }
@@ -139,6 +144,10 @@ export function useDeferredCompensationParams() {
       semiRetirementIncome: Math.max(0, numberParam(
         searchParams.get(PARAM_KEYS.semiRetirementIncome),
         DEFAULTS.semiRetirementIncome,
+      )),
+      annualDividends: Math.max(0, numberParam(
+        searchParams.get(PARAM_KEYS.annualDividends),
+        DEFAULTS.annualDividends,
       )),
       inflationRate: Math.min(1, Math.max(-1, numberParam(
         searchParams.get(PARAM_KEYS.inflationRate),
