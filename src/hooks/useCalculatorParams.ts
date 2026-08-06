@@ -99,6 +99,15 @@ function clearStorage(storageKey: string): void {
   }
 }
 
+function matchesSavedParams(
+  params: CalculatorParams,
+  savedParams: Partial<CalculatorParams> | null,
+): boolean {
+  return (Object.keys(DEFAULTS) as (keyof CalculatorParams)[]).every(key =>
+    JSON.stringify(params[key]) === JSON.stringify(savedParams?.[key] ?? DEFAULTS[key]),
+  )
+}
+
 export function useCalculatorParams() {
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
@@ -263,7 +272,7 @@ export function useCalculatorParams() {
   }, [])
 
   const hasCustomParams = searchParams.toString().length > 0
-  const hasUnsavedChanges = JSON.stringify(params) !== JSON.stringify(savedParams ?? DEFAULTS)
+  const hasUnsavedChanges = !matchesSavedParams(params, savedParams)
 
   return {
     params,

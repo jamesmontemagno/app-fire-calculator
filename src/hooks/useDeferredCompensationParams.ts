@@ -101,6 +101,15 @@ function clearStorage(storageKey: string): void {
   }
 }
 
+function matchesSavedParams(
+  params: DeferredCompensationParams,
+  savedParams: Partial<DeferredCompensationParams> | null,
+): boolean {
+  return (Object.keys(DEFAULTS) as (keyof DeferredCompensationParams)[]).every(key =>
+    JSON.stringify(params[key]) === JSON.stringify(savedParams?.[key] ?? DEFAULTS[key]),
+  )
+}
+
 const numberParam = (value: string | null, fallback: number) => {
   if (value === null) return fallback
   const parsed = Number(value)
@@ -242,6 +251,6 @@ export function useDeferredCompensationParams() {
     saveParams,
     copyUrl,
     hasCustomParams: Object.values(PARAM_KEYS).some(key => searchParams.has(key)),
-    hasUnsavedChanges: JSON.stringify(params) !== JSON.stringify(savedParams ?? DEFAULTS),
+    hasUnsavedChanges: !matchesSavedParams(params, savedParams),
   }
 }
