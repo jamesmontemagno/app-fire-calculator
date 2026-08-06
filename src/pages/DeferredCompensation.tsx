@@ -283,12 +283,15 @@ export default function DeferredCompensation() {
                 </thead>
                 <tbody>
                   {retirementCashFlow.map(point => {
-                    const accountDetails = Object.entries(point.withdrawals).map(([id, withdrawal]) => ({
-                      account: accountsById.get(id)?.account,
-                      index: accountsById.get(id)?.index,
-                      withdrawal,
-                      balance: point.balances[id] ?? 0,
-                    }))
+                    const accountDetails = Object.entries(point.withdrawals).map(([id, withdrawal]) => {
+                      const accountDetail = accountsById.get(id)
+                      return {
+                        account: accountDetail?.account,
+                        index: accountDetail?.index,
+                        withdrawal,
+                        balance: point.balances[id] ?? 0,
+                      }
+                    })
                     const deferredAccounts = accountDetails.filter(
                       detail => detail.account?.type === 'deferred',
                     )

@@ -34,7 +34,40 @@ const COLORS = [
 const compactCurrency = (value: number) => {
   if (Math.abs(value) >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
   if (Math.abs(value) >= 1_000) return `$${(value / 1_000).toFixed(0)}K`
-  return `$${value}`
+  return formatCurrency(value)
+}
+
+interface ChartTooltipProps {
+  active?: boolean
+  payload?: Array<{ payload: RetirementCashFlowPoint }>
+  accounts: RetirementAccount[]
+}
+
+function ChartTooltip({ active, payload, accounts }: ChartTooltipProps) {
+  if (!active || !payload?.length) return null
+  const point = payload[0].payload
+
+  return (
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
+      <p className="font-semibold text-gray-900 dark:text-gray-100">
+        Age {point.age} · {point.year}
+      </p>
+      <div className="space-y-1 text-sm mt-2">
+        {accounts.map((account, index) => (
+          <p key={account.id} className="text-gray-600 dark:text-gray-400">
+            <span
+              className="inline-block w-2 h-2 rounded-full mr-1.5"
+              style={{ backgroundColor: COLORS[index % COLORS.length] }}
+            />
+            {account.name || `Account ${index + 1}`}:{' '}
+            <strong className="text-gray-900 dark:text-gray-100">
+              {formatCurrency(point.balances[account.id] ?? 0)}
+            </strong>
+          </p>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export default function RetirementBucketBalanceChart({
@@ -46,33 +79,6 @@ export default function RetirementBucketBalanceChart({
   const axisColor = isDark ? '#9ca3af' : '#6b7280'
   const gridColor = isDark ? '#374151' : '#e5e7eb'
   const chartData = data.map(point => ({ ...point, ...point.balances }))
-
-  const ChartTooltip = ({ active, payload }: any) => {
-    if (!active || !payload?.length) return null
-    const point = payload[0].payload as RetirementCashFlowPoint
-
-    return (
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
-        <p className="font-semibold text-gray-900 dark:text-gray-100">
-          Age {point.age} · {point.year}
-        </p>
-        <div className="space-y-1 text-sm mt-2">
-          {accounts.map((account, index) => (
-            <p key={account.id} className="text-gray-600 dark:text-gray-400">
-              <span
-                className="inline-block w-2 h-2 rounded-full mr-1.5"
-                style={{ backgroundColor: COLORS[index % COLORS.length] }}
-              />
-              {account.name || `Account ${index + 1}`}:{' '}
-              <strong className="text-gray-900 dark:text-gray-100">
-                {formatCurrency(point.balances[account.id] ?? 0)}
-              </strong>
-            </p>
-          ))}
-        </div>
-      </div>
-    )
-  }
 
   return (
     <ResponsiveContainer width="100%" height={340}>
@@ -92,7 +98,7 @@ export default function RetirementBucketBalanceChart({
           tickFormatter={compactCurrency}
           width={66}
         />
-        <Tooltip content={<ChartTooltip />} />
+        <Tooltip content={<ChartTooltip accounts={accounts} />} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         {accounts.map((account, index) => (
           <Line
