@@ -71,7 +71,7 @@ function calculateHealthcareGap(
 }
 
 export default function HealthcareGap() {
-  const { params, setParam, resetParams, copyUrl, hasCustomParams } = useCalculatorParams()
+  const { params, setParam, resetParams, saveParams, copyUrl, hasCustomParams, hasUnsavedChanges } = useCalculatorParams()
   
   // Healthcare-specific params with configurable defaults
   const [monthlyPremium, setMonthlyPremium] = useState(600) // Default ACA silver plan
@@ -140,7 +140,7 @@ export default function HealthcareGap() {
           </div>
           <div className="flex flex-wrap gap-2">
             <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
+            <UrlActions onReset={resetParams} onSave={saveParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} />
           </div>
         </div>
 

@@ -3,11 +3,19 @@ import Button from './Button'
 
 interface UrlActionsProps {
   onReset: () => void
+  onSave: () => void
   onCopy: () => Promise<boolean>
   hasCustomParams: boolean
+  hasUnsavedChanges: boolean
 }
 
-export default function UrlActions({ onReset, onCopy, hasCustomParams }: UrlActionsProps) {
+export default function UrlActions({
+  onReset,
+  onSave,
+  onCopy,
+  hasCustomParams,
+  hasUnsavedChanges,
+}: UrlActionsProps) {
   const [copied, setCopied] = useState(false)
 
   const handleCopy = async () => {
@@ -20,6 +28,19 @@ export default function UrlActions({ onReset, onCopy, hasCustomParams }: UrlActi
 
   return (
     <div className="flex items-center gap-2">
+      <Button
+        variant={hasUnsavedChanges ? 'primary' : 'outline'}
+        size="sm"
+        onClick={onSave}
+        className="gap-1.5"
+        aria-label={hasUnsavedChanges ? 'Save changes in this browser' : 'Save current values in this browser'}
+      >
+        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 4h11l3 3v13H5V4Zm3 0v6h7V4m-7 16v-6h8v6" />
+        </svg>
+        Save
+        {hasUnsavedChanges && <span className="w-2 h-2 rounded-full bg-current" aria-label="Unsaved changes" />}
+      </Button>
       <Button
         variant="outline"
         size="sm"
@@ -49,7 +70,7 @@ export default function UrlActions({ onReset, onCopy, hasCustomParams }: UrlActi
           size="sm"
           onClick={onReset}
           className="gap-1.5"
-          title="Clear all values (URL and saved data)"
+          title="Reset values and clear saved data"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
