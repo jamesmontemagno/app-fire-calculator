@@ -18,10 +18,12 @@ interface RetirementAccountListInputProps {
 
 const ACCOUNT_TYPES: { value: RetirementAccountType; label: string }[] = [
   { value: 'deferred', label: 'Deferred compensation' },
-  { value: 'traditional', label: '401(k) / Traditional IRA' },
-  { value: 'roth', label: 'Roth account' },
+  { value: 'traditional', label: '401(k) / 403(b) / Traditional IRA' },
+  { value: 'roth', label: 'Roth IRA / Roth 401(k)' },
   { value: 'taxable', label: 'Taxable portfolio' },
   { value: 'savings', label: 'Savings / cash' },
+  { value: 'hsa', label: 'Health Savings Account (HSA)' },
+  { value: 'other', label: 'Other account' },
 ]
 
 export default function RetirementAccountListInput({

@@ -49,13 +49,14 @@ export default function DeferredCompensation() {
       planThroughAge: params.planThroughAge,
       annualExpenses: params.annualExpenses,
       semiRetirementIncome: params.semiRetirementIncome,
+      annualDividends: params.annualDividends,
       inflationRate: params.inflationRate,
       accountCount: params.accounts.length,
     })
     const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
 
     exportToExcel({
-      calculatorName: 'Deferred Compensation',
+      calculatorName: 'Retirement Cash Flow',
       inputs,
       results: resultValues,
       projections: retirementCashFlow,
@@ -76,10 +77,10 @@ export default function DeferredCompensation() {
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
               <span className="text-3xl" role="img" aria-label="Calendar and money">🗓️</span>
-              Deferred Compensation Planner
+              Retirement Cash Flow
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Combine deferred payouts, retirement accounts, savings, and semi-retirement income.
+              Combine account withdrawals, deferred payouts, dividends, and semi-retirement income.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -144,6 +145,12 @@ export default function DeferredCompensation() {
                 value={params.semiRetirementIncome}
                 onChange={value => setParam('semiRetirementIncome', value)}
                 tooltip="Part-time, consulting, rental, or other annual income after semi-retirement."
+              />
+              <CurrencyInput
+                label="Annual dividends"
+                value={params.annualDividends}
+                onChange={value => setParam('annualDividends', value)}
+                tooltip="Expected dividend income per year after semi-retirement."
               />
               <PercentageInput
                 label="Inflation rate"
@@ -236,7 +243,7 @@ export default function DeferredCompensation() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
-                    {['Age / year', 'Deferred & portfolio', 'Other income', 'Expenses', 'Surplus / gap', 'Balance'].map(label => (
+                    {['Age / year', 'Deferred & portfolio', 'Other income', 'Dividends', 'Expenses', 'Surplus / gap', 'Balance'].map(label => (
                       <th key={label} className="text-left py-3 px-3 font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
                         {label}
                       </th>
@@ -251,6 +258,7 @@ export default function DeferredCompensation() {
                       </td>
                       <td className="py-3 px-3">{formatCurrency(point.accountIncome)}</td>
                       <td className="py-3 px-3">{formatCurrency(point.employmentIncome)}</td>
+                      <td className="py-3 px-3">{formatCurrency(point.dividendIncome)}</td>
                       <td className="py-3 px-3">{formatCurrency(point.expenses)}</td>
                       <td className={`py-3 px-3 font-medium ${
                         point.surplus >= 0
