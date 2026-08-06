@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Navigate, RouterProvider, useLocation } from 'react-router-dom'
 import { ThemeProvider } from './context/ThemeContext'
 import AppLayout from './components/layout/AppLayout'
 import Home from './pages/Home'
@@ -22,6 +22,21 @@ import './index.css'
 
 const basename = import.meta.env.BASE_URL
 
+function DeferredCompensationRedirect() {
+  const location = useLocation()
+
+  return (
+    <Navigate
+      to={{
+        pathname: '/retirement-cash-flow',
+        search: location.search,
+        hash: location.hash,
+      }}
+      replace
+    />
+  )
+}
+
 const router = createBrowserRouter([
   {
     path: '/',
@@ -36,7 +51,8 @@ const router = createBrowserRouter([
       { path: 'withdrawal', element: <WithdrawalRate /> },
       { path: 'savings-rate', element: <SavingsRate /> },
       { path: 'debt-payoff', element: <DebtPayoff /> },
-      { path: 'deferred-compensation', element: <DeferredCompensation /> },
+      { path: 'retirement-cash-flow', element: <DeferredCompensation /> },
+      { path: 'deferred-compensation', element: <DeferredCompensationRedirect /> },
       { path: 'reverse', element: <ReverseFIRE /> },
       { path: 'healthcare', element: <HealthcareGap /> },
       { path: 'books', element: <Books /> },
