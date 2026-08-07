@@ -291,7 +291,18 @@ export function useCalculatorParams() {
 
   const loadParams = useCallback(() => {
     if (!storedParams) return
-    setSearchParams(new URLSearchParams(), { replace: true })
+    setSearchParams(() => {
+      const next = new URLSearchParams()
+      ;(Object.keys(DEFAULTS) as (keyof CalculatorParams)[]).forEach(key => {
+        const value = storedParams.params[key]
+        if (value === undefined || value === null) return
+        next.set(
+          PARAM_KEYS[key],
+          key === 'debts' ? encodeURIComponent(JSON.stringify(value)) : String(value),
+        )
+      })
+      return next
+    }, { replace: true })
     setSavedParams(storedParams.params)
   }, [setSearchParams, storedParams])
 

@@ -333,7 +333,17 @@ export function useDeferredCompensationParams() {
     if (!storedParams) return
     setSearchParams(previous => {
       const next = new URLSearchParams(previous)
-      Object.values(PARAM_KEYS).forEach(key => next.delete(key))
+      ;(Object.keys(PARAM_KEYS) as (keyof DeferredCompensationParams)[]).forEach(key => {
+        const value = storedParams.params[key]
+        if (value === undefined || value === null) {
+          next.delete(PARAM_KEYS[key])
+          return
+        }
+        next.set(
+          PARAM_KEYS[key],
+          key === 'accounts' || key === 'incomeSources' ? JSON.stringify(value) : String(value),
+        )
+      })
       return next
     }, { replace: true })
     setSavedParams(storedParams.params)
