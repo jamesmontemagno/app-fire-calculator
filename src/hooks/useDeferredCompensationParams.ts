@@ -3,6 +3,8 @@ import { useLocation, useSearchParams } from 'react-router-dom'
 import type {
   RetirementAccount,
   RetirementAccountType,
+  RetirementIncomeSource,
+  RetirementIncomeType,
 } from '../utils/deferredCompensation'
 
 export interface DeferredCompensationParams {
@@ -10,10 +12,11 @@ export interface DeferredCompensationParams {
   semiRetirementAge: number
   planThroughAge: number
   annualExpenses: number
-  semiRetirementIncome: number
-  annualDividends: number
   inflationRate: number
   accounts: RetirementAccount[]
+  incomeSources: RetirementIncomeSource[]
+  withdrawOnlyAfterRetirement: boolean
+  reinvestSurplus: boolean
 }
 
 const ACCOUNT_TYPES: RetirementAccountType[] = [
@@ -26,13 +29,19 @@ const ACCOUNT_TYPES: RetirementAccountType[] = [
   'other',
 ]
 
+const INCOME_TYPES: RetirementIncomeType[] = [
+  'salary',
+  'pension',
+  'social-security',
+  'rental',
+  'custom',
+]
+
 const DEFAULTS: DeferredCompensationParams = {
   currentAge: 45,
   semiRetirementAge: 55,
   planThroughAge: 90,
   annualExpenses: 80000,
-  semiRetirementIncome: 20000,
-  annualDividends: 0,
   inflationRate: 0.03,
   accounts: [
     {
@@ -58,6 +67,21 @@ const DEFAULTS: DeferredCompensationParams = {
       payoutYears: 1,
     },
   ],
+  incomeSources: [
+    {
+      id: 'part-time-income',
+      name: 'Part-time income',
+      type: 'salary',
+      annualAmount: 20000,
+      startAge: 55,
+      endAge: 65,
+      annualGrowth: 0,
+      isAfterTax: true,
+      taxRate: 0.25,
+    },
+  ],
+  withdrawOnlyAfterRetirement: true,
+  reinvestSurplus: true,
 }
 
 const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
@@ -65,10 +89,11 @@ const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
   semiRetirementAge: 'dcRetire',
   planThroughAge: 'dcThrough',
   annualExpenses: 'dcExpenses',
-  semiRetirementIncome: 'dcIncome',
-  annualDividends: 'dcDividends',
   inflationRate: 'dcInflation',
   accounts: 'dcAccounts',
+  incomeSources: 'dcIncomeSources',
+  withdrawOnlyAfterRetirement: 'dcRetireOnly',
+  reinvestSurplus: 'dcReinvest',
 }
 
 const STORAGE_KEY_PREFIX = 'fire-calc-deferred-params'
@@ -149,6 +174,39 @@ const sanitizeAccounts = (value: string | null): RetirementAccount[] => {
   }
 }
 
+const sanitizeIncomeSources = (value: string | null): RetirementIncomeSource[] => {
+  if (!value) return DEFAULTS.incomeSources
+
+  try {
+    const parsed: unknown = JSON.parse(value)
+    if (!Array.isArray(parsed)) return DEFAULTS.incomeSources
+
+    return parsed.flatMap((item, index) => {
+      if (!item || typeof item !== 'object') return []
+      const source = item as Partial<RetirementIncomeSource>
+      const numeric = (candidate: unknown, fallback: number) =>
+        typeof candidate === 'number' && Number.isFinite(candidate) ? candidate : fallback
+      const type = INCOME_TYPES.includes(source.type as RetirementIncomeType)
+        ? source.type as RetirementIncomeType
+        : 'custom'
+
+      return [{
+        id: typeof source.id === 'string' ? source.id.slice(0, 80) : `income-${index}`,
+        name: typeof source.name === 'string' ? source.name.slice(0, 80) : `Income ${index + 1}`,
+        type,
+        annualAmount: Math.max(0, numeric(source.annualAmount, 0)),
+        startAge: Math.min(120, Math.max(0, Math.floor(numeric(source.startAge, 0)))),
+        endAge: Math.min(120, Math.max(0, Math.floor(numeric(source.endAge, 120)))),
+        annualGrowth: Math.min(1, Math.max(-1, numeric(source.annualGrowth, 0))),
+        isAfterTax: typeof source.isAfterTax === 'boolean' ? source.isAfterTax : true,
+        taxRate: Math.min(1, Math.max(0, numeric(source.taxRate, 0.25))),
+      }]
+    }).slice(0, 20)
+  } catch {
+    return DEFAULTS.incomeSources
+  }
+}
+
 export function useDeferredCompensationParams() {
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
@@ -185,19 +243,21 @@ export function useDeferredCompensationParams() {
         searchParams.get(PARAM_KEYS.annualExpenses),
         savedParams?.annualExpenses ?? DEFAULTS.annualExpenses,
       )),
-      semiRetirementIncome: Math.max(0, numberParam(
-        searchParams.get(PARAM_KEYS.semiRetirementIncome),
-        savedParams?.semiRetirementIncome ?? DEFAULTS.semiRetirementIncome,
-      )),
-      annualDividends: Math.max(0, numberParam(
-        searchParams.get(PARAM_KEYS.annualDividends),
-        savedParams?.annualDividends ?? DEFAULTS.annualDividends,
-      )),
       inflationRate: Math.min(1, Math.max(-1, numberParam(
         searchParams.get(PARAM_KEYS.inflationRate),
         savedParams?.inflationRate ?? DEFAULTS.inflationRate,
       ))),
       accounts: sanitizeAccounts(searchParams.get(PARAM_KEYS.accounts) ?? JSON.stringify(savedParams?.accounts ?? DEFAULTS.accounts)),
+      incomeSources: sanitizeIncomeSources(
+        searchParams.get(PARAM_KEYS.incomeSources)
+          ?? JSON.stringify(savedParams?.incomeSources ?? DEFAULTS.incomeSources),
+      ),
+      withdrawOnlyAfterRetirement: searchParams.get(PARAM_KEYS.withdrawOnlyAfterRetirement)
+        ? searchParams.get(PARAM_KEYS.withdrawOnlyAfterRetirement) === 'true'
+        : savedParams?.withdrawOnlyAfterRetirement ?? DEFAULTS.withdrawOnlyAfterRetirement,
+      reinvestSurplus: searchParams.get(PARAM_KEYS.reinvestSurplus)
+        ? searchParams.get(PARAM_KEYS.reinvestSurplus) === 'true'
+        : savedParams?.reinvestSurplus ?? DEFAULTS.reinvestSurplus,
     }
   }, [savedParams, searchParams])
 
@@ -214,7 +274,10 @@ export function useDeferredCompensationParams() {
       if (isDefault && (savedValue === undefined || matchesSavedValue)) {
         next.delete(PARAM_KEYS[key])
       } else {
-        next.set(PARAM_KEYS[key], key === 'accounts' ? JSON.stringify(value) : String(value))
+        next.set(
+          PARAM_KEYS[key],
+          key === 'accounts' || key === 'incomeSources' ? JSON.stringify(value) : String(value),
+        )
       }
       return next
     }, { replace: true })

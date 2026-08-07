@@ -1,5 +1,5 @@
 import { Fragment, useMemo, useState } from 'react'
-import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, PercentageInput, RetirementIncomeListInput } from '../components/inputs'
 import RetirementAccountListInput from '../components/inputs/RetirementAccountListInput'
 import RetirementCashFlowChart from '../components/charts/RetirementCashFlowChart'
 import RetirementBucketBalanceChart from '../components/charts/RetirementBucketBalanceChart'
@@ -15,9 +15,7 @@ import {
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 import { useDeferredCompensationParams } from '../hooks/useDeferredCompensationParams'
-import {
-  calculateDeferredCompensation,
-} from '../utils/deferredCompensation'
+import { calculateDeferredCompensation } from '../utils/deferredCompensation'
 import { formatCurrency } from '../utils/calculations'
 import {
   exportToExcel,
@@ -25,8 +23,17 @@ import {
   prepareResultsForExport,
 } from '../utils/excelExport'
 
+type ChartView = 'portfolio' | 'withdrawals' | 'income-expenses'
+
+const CHART_VIEWS: { value: ChartView; label: string }[] = [
+  { value: 'portfolio', label: 'Portfolio value' },
+  { value: 'withdrawals', label: 'Portfolio withdrawals' },
+  { value: 'income-expenses', label: 'Income vs. expenses' },
+]
+
 export default function DeferredCompensation() {
   const [expandedAges, setExpandedAges] = useState<Set<number>>(new Set())
+  const [chartView, setChartView] = useState<ChartView>('portfolio')
   const {
     params,
     setParam,
@@ -42,12 +49,9 @@ export default function DeferredCompensation() {
     () => calculateDeferredCompensation({ ...params, currentYear }),
     [params, currentYear],
   )
-  const retirementCashFlow = results.projections.filter(
-    point => point.age >= params.semiRetirementAge,
-  )
-  const accountsById = useMemo(
-    () => new Map(params.accounts.map((account, index) => [account.id, { account, index }])),
-    [params.accounts],
+  const incomeSourcesById = useMemo(
+    () => new Map(params.incomeSources.map((source, index) => [source.id, { source, index }])),
+    [params.incomeSources],
   )
 
   const toggleAnnualDetail = (age: number) => {
@@ -62,12 +66,13 @@ export default function DeferredCompensation() {
   const handleExport = () => {
     const { values: inputs, formats: inputFormats } = prepareInputsForExport({
       currentAge: params.currentAge,
-      semiRetirementAge: params.semiRetirementAge,
+      retirementAge: params.semiRetirementAge,
       planThroughAge: params.planThroughAge,
       annualExpenses: params.annualExpenses,
-      semiRetirementIncome: params.semiRetirementIncome,
-      annualDividends: params.annualDividends,
       inflationRate: params.inflationRate,
+      withdrawOnlyAfterRetirement: params.withdrawOnlyAfterRetirement,
+      reinvestSurplus: params.reinvestSurplus,
+      incomeSourceCount: params.incomeSources.length,
       accountCount: params.accounts.length,
     })
     const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
@@ -76,11 +81,11 @@ export default function DeferredCompensation() {
       calculatorName: 'Retirement Cash Flow',
       inputs,
       results: resultValues,
-      projections: retirementCashFlow,
-      additionalSheets: [{
-        name: 'Accounts',
-        data: params.accounts,
-      }],
+      projections: results.projections,
+      additionalSheets: [
+        { name: 'Income Sources', data: params.incomeSources },
+        { name: 'Accounts', data: params.accounts },
+      ],
       inputFormats,
       resultFormats,
     })
@@ -97,11 +102,11 @@ export default function DeferredCompensation() {
               Retirement Cash Flow
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Combine account withdrawals, deferred payouts, dividends, and semi-retirement income.
+              See how income offsets spending before your portfolio fills the remaining gap.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <ExportButton onExport={handleExport} disabled={params.accounts.length === 0} />
+            <ExportButton onExport={handleExport} />
             <UrlActions
               onReset={resetParams}
               onSave={saveParams}
@@ -114,14 +119,12 @@ export default function DeferredCompensation() {
 
         <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-4">
           <div className="flex gap-3">
-            <span className="text-2xl" aria-hidden="true">🪣</span>
+            <span className="text-2xl" aria-hidden="true">📊</span>
             <div>
-              <h2 className="font-semibold text-indigo-900 dark:text-indigo-100">
-                Plan income across every bucket
-              </h2>
+              <h2 className="font-semibold text-indigo-900 dark:text-indigo-100">Plan the gap, not gross income</h2>
               <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">
-                Deferred compensation is paid over its selected period. Other accounts provide
-                cash flow at their individual withdrawal rates once available.
+                Expenses are shown in today&apos;s dollars and grow with inflation. Each income source lowers
+                the amount your portfolio needs to withdraw.
               </p>
             </div>
           </div>
@@ -130,22 +133,16 @@ export default function DeferredCompensation() {
         <div className="grid lg:grid-cols-3 gap-6">
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                Retirement scenario
-              </h2>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Retirement scenario</h2>
             </CardHeader>
             <CardContent className="space-y-4">
+              <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} />
               <AgeInput
-                label="Current age"
-                value={params.currentAge}
-                onChange={value => setParam('currentAge', value)}
-              />
-              <AgeInput
-                label="Semi-retirement age"
+                label="Retirement age"
                 value={params.semiRetirementAge}
                 onChange={value => setParam('semiRetirementAge', value)}
                 min={params.currentAge}
-                tooltip="Contributions stop and planned retirement cash flow begins at this age."
+                tooltip="Portfolio withdrawals begin at this age unless you allow them earlier."
               />
               <AgeInput
                 label="Plan through age"
@@ -154,22 +151,11 @@ export default function DeferredCompensation() {
                 min={params.semiRetirementAge}
               />
               <CurrencyInput
-                label="Current annual expenses"
+                label="Annual retirement spending"
                 value={params.annualExpenses}
                 onChange={value => setParam('annualExpenses', value)}
-                tooltip="Expenses increase annually with inflation."
-              />
-              <CurrencyInput
-                label="Annual semi-retirement income"
-                value={params.semiRetirementIncome}
-                onChange={value => setParam('semiRetirementIncome', value)}
-                tooltip="Part-time, consulting, rental, or other annual income after semi-retirement."
-              />
-              <CurrencyInput
-                label="Annual dividends"
-                value={params.annualDividends}
-                onChange={value => setParam('annualDividends', value)}
-                tooltip="Expected dividend income per year after semi-retirement."
+                tooltip="Your after-tax annual spending target in today’s dollars."
+                allowMonthlyToggle
               />
               <PercentageInput
                 label="Inflation rate"
@@ -178,71 +164,87 @@ export default function DeferredCompensation() {
                 min={0}
                 max={0.15}
               />
+              <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <input
+                  type="checkbox"
+                  checked={params.withdrawOnlyAfterRetirement}
+                  onChange={event => setParam('withdrawOnlyAfterRetirement', event.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus:ring-fire-500"
+                />
+                <span>
+                  <span className="font-medium">Only withdraw after retirement</span>
+                  <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Turn off to let the portfolio cover a gap before retirement.
+                  </span>
+                </span>
+              </label>
+              <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                <input
+                  type="checkbox"
+                  checked={params.reinvestSurplus}
+                  onChange={event => setParam('reinvestSurplus', event.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus:ring-fire-500"
+                />
+                <span>
+                  <span className="font-medium">Reinvest income surplus</span>
+                  <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    Add income above expenses back into accounts proportionally.
+                  </span>
+                </span>
+              </label>
             </CardContent>
           </Card>
 
           <div className="lg:col-span-2 space-y-6">
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <ResultCard
-                label="At semi-retirement"
-                value={results.balanceAtSemiRetirement}
-                format="currency"
-                highlight
-              />
-              <ResultCard
-                label="First-year income"
-                value={results.firstYearIncome}
-                format="currency"
-              />
+              <ResultCard label="At retirement" value={results.balanceAtSemiRetirement} format="currency" highlight />
+              <ResultCard label="First-year income" value={results.firstYearIncome} format="currency" />
               <ResultCard
                 label="Funded years"
                 value={results.fundedYears}
                 format="years"
-                subtext={`of ${retirementCashFlow.length} projected`}
+                subtext={`of ${results.projections.filter(point => point.age >= params.semiRetirementAge).length} projected`}
               />
-              <ResultCard
-                label="Ending balance"
-                value={results.endingBalance}
-                format="currency"
-              />
+              <ResultCard label="Ending portfolio" value={results.endingBalance} format="currency" />
             </div>
 
             <Card>
               <CardHeader>
-                <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                      Retirement cash flow
-                    </h2>
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Retirement cash flow</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Income and expenses use the left scale; account balance uses the right.
+                      Choose one view at a time to avoid comparing income and portfolio value on one scale.
                     </p>
                   </div>
-                  <span className={`text-sm font-semibold ${
-                    results.firstYearSurplus >= 0
-                      ? 'text-green-600 dark:text-green-400'
-                      : 'text-red-600 dark:text-red-400'
-                  }`}>
-                    First-year {results.firstYearSurplus >= 0 ? 'surplus' : 'gap'}:{' '}
-                    {formatCurrency(Math.abs(results.firstYearSurplus))}
-                  </span>
+                  <div className="flex flex-wrap gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1" role="tablist" aria-label="Cash flow chart view">
+                    {CHART_VIEWS.map(view => (
+                      <button
+                        key={view.value}
+                        type="button"
+                        role="tab"
+                        aria-selected={chartView === view.value}
+                        onClick={() => setChartView(view.value)}
+                        className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                          chartView === view.value
+                            ? 'bg-white dark:bg-gray-700 text-fire-700 dark:text-fire-400 shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                        }`}
+                      >
+                        {view.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <RetirementCashFlowChart data={retirementCashFlow} />
+                <RetirementCashFlowChart data={results.projections} view={chartView} />
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                    Bucket balances over time
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    See how each retirement account grows before withdrawals and changes during retirement.
-                  </p>
-                </div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Bucket balances over time</h2>
               </CardHeader>
               <CardContent>
                 <RetirementBucketBalanceChart data={results.projections} accounts={params.accounts} />
@@ -253,9 +255,20 @@ export default function DeferredCompensation() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Accounts and payout schedules
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Income sources</h2>
+          </CardHeader>
+          <CardContent>
+            <RetirementIncomeListInput
+              sources={params.incomeSources}
+              onChange={sources => setParam('incomeSources', sources)}
+              currentAge={params.currentAge}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Accounts and withdrawal limits</h2>
           </CardHeader>
           <CardContent>
             <RetirementAccountListInput
@@ -269,49 +282,22 @@ export default function DeferredCompensation() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Annual cash-flow detail
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Annual cash-flow detail</h2>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
-                    {['Age / year', 'Income', 'Expenses', 'Surplus / gap', 'Balance'].map(label => (
-                      <th key={label} className="text-left py-3 px-3 font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">
-                        {label}
-                      </th>
+                    {['Age / year', 'Outside income', 'Portfolio withdrawal', 'Expenses', 'Surplus / gap', 'Portfolio'].map(label => (
+                      <th key={label} className="text-left py-3 px-3 font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{label}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {retirementCashFlow.map(point => {
-                    const accountDetails = Object.entries(point.withdrawals).map(([id, withdrawal]) => {
-                      const accountDetail = accountsById.get(id)
-                      return {
-                        account: accountDetail?.account,
-                        index: accountDetail?.index,
-                        withdrawal,
-                        balance: point.balances[id] ?? 0,
-                      }
-                    })
-                    const deferredAccounts = accountDetails.filter(
-                      detail => detail.account?.type === 'deferred',
-                    )
-                    const portfolioAccounts = accountDetails.filter(
-                      detail => detail.account?.type !== 'deferred',
-                    )
-                    const deferredIncome = deferredAccounts.reduce(
-                      (sum, detail) => sum + detail.withdrawal,
-                      0,
-                    )
-                    const portfolioIncome = portfolioAccounts.reduce(
-                      (sum, detail) => sum + detail.withdrawal,
-                      0,
-                    )
+                  {results.projections.map(point => {
                     const expanded = expandedAges.has(point.age)
-
+                    const activeSources = Object.entries(point.incomeBySource).filter(([, amount]) => amount > 0)
                     return (
                       <Fragment key={point.age}>
                         <tr className="border-b border-gray-100 dark:border-gray-800">
@@ -323,86 +309,41 @@ export default function DeferredCompensation() {
                               aria-expanded={expanded}
                               aria-label={`${expanded ? 'Hide' : 'Show'} income sources for age ${point.age}`}
                             >
-                              <svg
-                                className={`w-4 h-4 text-gray-500 transition-transform ${expanded ? 'rotate-90' : ''}`}
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                aria-hidden="true"
-                              >
+                              <svg className={`w-4 h-4 text-gray-500 transition-transform ${expanded ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                               </svg>
-                              <span>
-                                {point.age} <span className="text-gray-500">/ {point.year}</span>
-                              </span>
+                              <span>{point.age} <span className="text-gray-500">/ {point.year}</span></span>
                             </button>
                           </td>
-                          <td className="py-3 px-3">{formatCurrency(point.totalIncome)}</td>
+                          <td className="py-3 px-3">{formatCurrency(point.outsideIncome + point.deferredIncome)}</td>
+                          <td className="py-3 px-3">{formatCurrency(point.portfolioWithdrawals)}</td>
                           <td className="py-3 px-3">{formatCurrency(point.expenses)}</td>
-                          <td className={`py-3 px-3 font-medium ${
-                            point.surplus >= 0
-                              ? 'text-green-600 dark:text-green-400'
-                              : 'text-red-600 dark:text-red-400'
-                          }`}>
+                          <td className={`py-3 px-3 font-medium ${point.surplus >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                             {point.surplus >= 0 ? '+' : '−'}{formatCurrency(Math.abs(point.surplus))}
                           </td>
-                          <td className="py-3 px-3 font-medium text-gray-900 dark:text-gray-100">
-                            {formatCurrency(point.totalBalance)}
-                          </td>
+                          <td className="py-3 px-3 font-medium text-gray-900 dark:text-gray-100">{formatCurrency(point.totalBalance)}</td>
                         </tr>
                         {expanded && (
                           <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
-                            <td colSpan={5} className="p-4">
-                              <div className="grid gap-4 md:grid-cols-3">
-                                <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-                                  <p className="text-xs font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
-                                    Deferred compensation
-                                  </p>
-                                  <p className="mt-1 font-semibold text-gray-900 dark:text-gray-100">
-                                    {formatCurrency(deferredIncome)}
-                                  </p>
-                                  <div className="mt-2 space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                                    {deferredAccounts.map(detail => (
-                                      <div key={detail.account?.id} className="flex justify-between gap-3">
-                                        <span>{detail.account?.name || `Account ${(detail.index ?? 0) + 1}`}</span>
-                                        <span>{formatCurrency(detail.withdrawal)}</span>
-                                      </div>
-                                    ))}
-                                    {deferredAccounts.length === 0 && <span>No deferred payouts</span>}
+                            <td colSpan={6} className="p-4">
+                              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                                {activeSources.map(([id, amount]) => (
+                                  <div key={id} className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
+                                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                      {incomeSourcesById.get(id)?.source.name || `Income source ${(incomeSourcesById.get(id)?.index ?? 0) + 1}`}
+                                    </p>
+                                    <p className="mt-1 font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(amount)}</p>
                                   </div>
-                                </div>
-                                <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-                                  <p className="text-xs font-semibold uppercase tracking-wide text-sky-700 dark:text-sky-300">
-                                    Portfolio withdrawals
-                                  </p>
-                                  <p className="mt-1 font-semibold text-gray-900 dark:text-gray-100">
-                                    {formatCurrency(portfolioIncome)}
-                                  </p>
-                                  <div className="mt-2 space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                                    {portfolioAccounts.map(detail => (
-                                      <div key={detail.account?.id} className="flex justify-between gap-3">
-                                        <span>{detail.account?.name || `Account ${(detail.index ?? 0) + 1}`}</span>
-                                        <span>{formatCurrency(detail.withdrawal)}</span>
-                                      </div>
-                                    ))}
-                                    {portfolioAccounts.length === 0 && <span>No portfolio withdrawals</span>}
+                                ))}
+                                {point.deferredIncome > 0 && (
+                                  <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
+                                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Deferred compensation</p>
+                                    <p className="mt-1 font-semibold text-violet-600 dark:text-violet-400">{formatCurrency(point.deferredIncome)}</p>
                                   </div>
-                                </div>
-                                <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-                                  <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
-                                    Other income
-                                  </p>
-                                  <div className="mt-2 space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                                    <div className="flex justify-between gap-3">
-                                      <span>Semi-retirement income</span>
-                                      <span>{formatCurrency(point.employmentIncome)}</span>
-                                    </div>
-                                    <div className="flex justify-between gap-3">
-                                      <span>Dividends</span>
-                                      <span>{formatCurrency(point.dividendIncome)}</span>
-                                    </div>
-                                  </div>
-                                </div>
+                                )}
+                                {activeSources.length === 0 && point.deferredIncome === 0 && (
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">No active outside income sources.</p>
+                                )}
                               </div>
                             </td>
                           </tr>
