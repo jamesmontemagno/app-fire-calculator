@@ -249,7 +249,7 @@ export default function RetirementAccountListInput({
                         onChange={value => updateAccount(account.id, 'withdrawalRate', value)}
                         min={0}
                         max={0.2}
-                        tooltip="The percentage of the remaining balance withdrawn each year."
+                        tooltip="The maximum percentage of the remaining balance available to cover that year’s gap."
                       />
                     )}
                   </div>
