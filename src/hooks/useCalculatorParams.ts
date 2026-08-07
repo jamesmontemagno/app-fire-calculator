@@ -324,7 +324,7 @@ export function useCalculatorParams() {
   const hasUnsavedChanges = savedParams
     ? !matchesSavedParams(params, savedParams)
     : storedParams
-      ? hasCustomParams
+      ? hasCustomParams && !matchesSavedParams(params, storedParams.params)
       : !matchesSavedParams(params, null)
 
   return {

@@ -369,6 +369,7 @@ export function useDeferredCompensationParams() {
       ? !matchesSavedParams(params, savedParams)
       : storedParams
         ? Object.values(PARAM_KEYS).some(key => searchParams.has(key))
+          && !matchesSavedParams(params, storedParams.params)
         : !matchesSavedParams(params, null),
     hasSavedParams: storedParams !== null,
     savedAt: storedParams?.savedAt ?? null,
