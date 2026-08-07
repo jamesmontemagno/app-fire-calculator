@@ -14,6 +14,7 @@ import { useTheme } from '../../context/ThemeContext'
 
 interface RetirementCashFlowChartProps {
   data: RetirementCashFlowPoint[]
+  view: 'portfolio' | 'withdrawals' | 'income-expenses'
 }
 
 const compactCurrency = (value: number) => {
@@ -22,7 +23,7 @@ const compactCurrency = (value: number) => {
   return `$${value}`
 }
 
-export default function RetirementCashFlowChart({ data }: RetirementCashFlowChartProps) {
+export default function RetirementCashFlowChart({ data, view }: RetirementCashFlowChartProps) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
   const axisColor = isDark ? '#9ca3af' : '#6b7280'
@@ -38,13 +39,16 @@ export default function RetirementCashFlowChart({ data }: RetirementCashFlowChar
         </p>
         <div className="space-y-1 text-sm mt-2">
           <p className="text-gray-600 dark:text-gray-400">
-            Income: <strong className="text-green-600 dark:text-green-400">{formatCurrency(point.totalIncome)}</strong>
+            Outside income: <strong className="text-green-600 dark:text-green-400">{formatCurrency(point.outsideIncome)}</strong>
           </p>
           <p className="text-gray-600 dark:text-gray-400">
             Expenses: <strong className="text-amber-600 dark:text-amber-400">{formatCurrency(point.expenses)}</strong>
           </p>
           <p className="text-gray-600 dark:text-gray-400">
-            Balance: <strong className="text-sky-600 dark:text-sky-400">{formatCurrency(point.totalBalance)}</strong>
+            Portfolio withdrawal: <strong className="text-violet-600 dark:text-violet-400">{formatCurrency(point.portfolioWithdrawals)}</strong>
+          </p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Portfolio value: <strong className="text-sky-600 dark:text-sky-400">{formatCurrency(point.totalBalance)}</strong>
           </p>
         </div>
       </div>
@@ -63,16 +67,6 @@ export default function RetirementCashFlowChart({ data }: RetirementCashFlowChar
           tickFormatter={age => `Age ${age}`}
         />
         <YAxis
-          yAxisId="cashflow"
-          tick={{ fill: axisColor, fontSize: 12 }}
-          axisLine={{ stroke: gridColor }}
-          tickLine={{ stroke: gridColor }}
-          tickFormatter={compactCurrency}
-          width={66}
-        />
-        <YAxis
-          yAxisId="balance"
-          orientation="right"
           tick={{ fill: axisColor, fontSize: 12 }}
           axisLine={{ stroke: gridColor }}
           tickLine={{ stroke: gridColor }}
@@ -81,34 +75,18 @@ export default function RetirementCashFlowChart({ data }: RetirementCashFlowChar
         />
         <Tooltip content={<ChartTooltip />} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Line
-          yAxisId="cashflow"
-          type="monotone"
-          dataKey="totalIncome"
-          name="Available income"
-          stroke="#16a34a"
-          strokeWidth={2}
-          dot={false}
-        />
-        <Line
-          yAxisId="cashflow"
-          type="monotone"
-          dataKey="expenses"
-          name="Expenses"
-          stroke="#f59e0b"
-          strokeWidth={2}
-          dot={false}
-        />
-        <Line
-          yAxisId="balance"
-          type="monotone"
-          dataKey="totalBalance"
-          name="Account balance"
-          stroke="#0ea5e9"
-          strokeWidth={2}
-          strokeDasharray="5 4"
-          dot={false}
-        />
+        {view === 'portfolio' && (
+          <Line type="monotone" dataKey="totalBalance" name="Portfolio value" stroke="#0ea5e9" strokeWidth={2} dot={false} />
+        )}
+        {view === 'withdrawals' && (
+          <Line type="monotone" dataKey="portfolioWithdrawals" name="Portfolio withdrawals" stroke="#8b5cf6" strokeWidth={2} dot={false} />
+        )}
+        {view === 'income-expenses' && (
+          <>
+            <Line type="monotone" dataKey="totalIncome" name="Income available" stroke="#16a34a" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="expenses" name="Expenses" stroke="#f59e0b" strokeWidth={2} dot={false} />
+          </>
+        )}
       </ComposedChart>
     </ResponsiveContainer>
   )

@@ -7,6 +7,13 @@ export type RetirementAccountType =
   | 'hsa'
   | 'other'
 
+export type RetirementIncomeType =
+  | 'salary'
+  | 'pension'
+  | 'social-security'
+  | 'rental'
+  | 'custom'
+
 export interface RetirementAccount {
   id: string
   name: string
@@ -19,18 +26,31 @@ export interface RetirementAccount {
   payoutYears: number
 }
 
+export interface RetirementIncomeSource {
+  id: string
+  name: string
+  type: RetirementIncomeType
+  annualAmount: number
+  startAge: number
+  endAge: number
+  annualGrowth: number
+  isAfterTax: boolean
+  taxRate: number
+}
+
 export interface RetirementCashFlowPoint {
   age: number
   year: number
   totalBalance: number
-  employmentIncome: number
-  dividendIncome: number
-  accountIncome: number
+  outsideIncome: number
+  deferredIncome: number
+  portfolioWithdrawals: number
   totalIncome: number
   expenses: number
   surplus: number
   withdrawals: Record<string, number>
   balances: Record<string, number>
+  incomeBySource: Record<string, number>
 }
 
 export interface DeferredCompensationInputs {
@@ -38,10 +58,11 @@ export interface DeferredCompensationInputs {
   semiRetirementAge: number
   planThroughAge: number
   annualExpenses: number
-  semiRetirementIncome: number
-  annualDividends: number
   inflationRate: number
   accounts: RetirementAccount[]
+  incomeSources: RetirementIncomeSource[]
+  withdrawOnlyAfterRetirement: boolean
+  reinvestSurplus: boolean
   currentYear?: number
 }
 
@@ -57,15 +78,32 @@ export interface DeferredCompensationResult {
 
 const round = (value: number) => Math.round(Math.max(0, value))
 
+const distributeSurplus = (
+  balances: Map<string, number>,
+  accounts: RetirementAccount[],
+  surplus: number,
+) => {
+  if (surplus <= 0 || accounts.length === 0) return
+
+  const totalBalance = accounts.reduce((sum, account) => sum + (balances.get(account.id) ?? 0), 0)
+  for (const account of accounts) {
+    const weight = totalBalance > 0
+      ? (balances.get(account.id) ?? 0) / totalBalance
+      : 1 / accounts.length
+    balances.set(account.id, (balances.get(account.id) ?? 0) + surplus * weight)
+  }
+}
+
 export function calculateDeferredCompensation({
   currentAge,
   semiRetirementAge,
   planThroughAge,
   annualExpenses,
-  semiRetirementIncome,
-  annualDividends,
   inflationRate,
   accounts,
+  incomeSources,
+  withdrawOnlyAfterRetirement,
+  reinvestSurplus,
   currentYear = new Date().getFullYear(),
 }: DeferredCompensationInputs): DeferredCompensationResult {
   const startAge = Math.max(0, Math.floor(currentAge))
@@ -75,66 +113,95 @@ export function calculateDeferredCompensation({
   const projections: RetirementCashFlowPoint[] = []
 
   for (let age = startAge; age <= endAge; age++) {
-    const retired = age >= retirementAge
+    const yearsFromNow = age - startAge
+    const canWithdraw = !withdrawOnlyAfterRetirement || age >= retirementAge
     const accountWithdrawals: Record<string, number> = {}
     const accountBalances: Record<string, number> = {}
-    let accountIncome = 0
+    const incomeBySource: Record<string, number> = {}
 
     for (const account of accounts) {
       let balance = balances.get(account.id) ?? 0
-
       if (age > startAge) {
         balance *= 1 + Math.max(-1, account.annualReturn)
-        if (!retired) {
-          balance += Math.max(0, account.annualContribution)
-        }
+        if (age < retirementAge) balance += Math.max(0, account.annualContribution)
       }
-
-      let withdrawal = 0
-      if (retired && age >= account.availableAge && balance > 0) {
-        if (account.type === 'deferred') {
-          const payoutStartAge = Math.max(account.availableAge, retirementAge)
-          const payoutEndAge = payoutStartAge + Math.max(1, account.payoutYears) - 1
-          if (age <= payoutEndAge) {
-            const remainingPayments = payoutEndAge - age + 1
-            withdrawal = balance / remainingPayments
-          }
-        } else {
-          withdrawal = balance * Math.max(0, account.withdrawalRate)
-        }
-      }
-
-      withdrawal = Math.min(balance, Math.max(0, withdrawal))
-      balance -= withdrawal
       balances.set(account.id, balance)
-      accountWithdrawals[account.id] = round(withdrawal)
-      accountBalances[account.id] = round(balance)
-      accountIncome += withdrawal
     }
 
-    const yearsFromNow = age - startAge
+    let outsideIncome = 0
+    for (const source of incomeSources) {
+      const isActive = age >= source.startAge && age <= source.endAge
+      const grossAmount = isActive
+        ? Math.max(0, source.annualAmount) * Math.pow(1 + Math.max(-1, source.annualGrowth), yearsFromNow)
+        : 0
+      const netAmount = source.isAfterTax
+        ? grossAmount
+        : grossAmount * (1 - Math.min(1, Math.max(0, source.taxRate)))
+      incomeBySource[source.id] = round(netAmount)
+      outsideIncome += netAmount
+    }
+
     const expenses = Math.max(0, annualExpenses) * Math.pow(1 + Math.max(-1, inflationRate), yearsFromNow)
-    const employmentIncome = retired ? Math.max(0, semiRetirementIncome) : 0
-    const dividendIncome = retired ? Math.max(0, annualDividends) : 0
-    const totalIncome = employmentIncome + dividendIncome + accountIncome
+    let deferredIncome = 0
+
+    if (canWithdraw) {
+      for (const account of accounts.filter(account => account.type === 'deferred')) {
+        const balance = balances.get(account.id) ?? 0
+        const payoutStartAge = Math.max(account.availableAge, retirementAge)
+        const payoutEndAge = payoutStartAge + Math.max(1, account.payoutYears) - 1
+        const withdrawal = age >= payoutStartAge && age <= payoutEndAge
+          ? Math.min(balance, balance / (payoutEndAge - age + 1))
+          : 0
+        balances.set(account.id, balance - withdrawal)
+        accountWithdrawals[account.id] = withdrawal
+        deferredIncome += withdrawal
+      }
+    }
+
+    let remainingGap = Math.max(0, expenses - outsideIncome - deferredIncome)
+    let portfolioWithdrawals = 0
+
+    if (canWithdraw) {
+      for (const account of accounts.filter(account => account.type !== 'deferred')) {
+        const balance = balances.get(account.id) ?? 0
+        const withdrawal = Math.min(
+          balance,
+          remainingGap,
+          balance * Math.min(1, Math.max(0, account.withdrawalRate)),
+        )
+        balances.set(account.id, balance - withdrawal)
+        accountWithdrawals[account.id] = withdrawal
+        portfolioWithdrawals += withdrawal
+        remainingGap -= withdrawal
+      }
+    }
+
+    const totalIncome = outsideIncome + deferredIncome + portfolioWithdrawals
+    const surplus = totalIncome - expenses
+    if (reinvestSurplus && surplus > 0) distributeSurplus(balances, accounts, surplus)
+
+    for (const account of accounts) {
+      accountWithdrawals[account.id] = round(accountWithdrawals[account.id] ?? 0)
+      accountBalances[account.id] = round(balances.get(account.id) ?? 0)
+    }
 
     projections.push({
       age,
       year: currentYear + yearsFromNow,
       totalBalance: round(Array.from(balances.values()).reduce((sum, balance) => sum + balance, 0)),
-      employmentIncome: round(employmentIncome),
-      dividendIncome: round(dividendIncome),
-      accountIncome: round(accountIncome),
+      outsideIncome: round(outsideIncome),
+      deferredIncome: round(deferredIncome),
+      portfolioWithdrawals: round(portfolioWithdrawals),
       totalIncome: round(totalIncome),
       expenses: round(expenses),
-      surplus: Math.round(totalIncome - expenses),
+      surplus: Math.round(surplus),
       withdrawals: accountWithdrawals,
       balances: accountBalances,
+      incomeBySource,
     })
   }
 
-  const retirementProjection =
-    projections.find(point => point.age === retirementAge) ?? projections[0]
+  const retirementProjection = projections.find(point => point.age === retirementAge) ?? projections[0]
   const retirementProjections = projections.filter(point => point.age >= retirementAge)
 
   return {
