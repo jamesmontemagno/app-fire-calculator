@@ -150,7 +150,7 @@ export function calculateDeferredCompensation({
         const payoutStartAge = Math.max(account.availableAge, retirementAge)
         const payoutEndAge = payoutStartAge + Math.max(1, account.payoutYears) - 1
         const withdrawal = age >= payoutStartAge && age <= payoutEndAge
-          ? Math.min(balance, balance / (payoutEndAge - age + 1))
+          ? balance / (payoutEndAge - age + 1)
           : 0
         balances.set(account.id, balance - withdrawal)
         accountWithdrawals[account.id] = withdrawal

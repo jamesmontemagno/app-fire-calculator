@@ -42,6 +42,9 @@ export default function RetirementCashFlowChart({ data, view }: RetirementCashFl
             Outside income: <strong className="text-green-600 dark:text-green-400">{formatCurrency(point.outsideIncome)}</strong>
           </p>
           <p className="text-gray-600 dark:text-gray-400">
+            Deferred compensation: <strong className="text-indigo-600 dark:text-indigo-400">{formatCurrency(point.deferredIncome)}</strong>
+          </p>
+          <p className="text-gray-600 dark:text-gray-400">
             Expenses: <strong className="text-amber-600 dark:text-amber-400">{formatCurrency(point.expenses)}</strong>
           </p>
           <p className="text-gray-600 dark:text-gray-400">
