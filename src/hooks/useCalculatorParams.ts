@@ -305,7 +305,11 @@ export function useCalculatorParams() {
   }, [])
 
   const hasCustomParams = searchParams.toString().length > 0
-  const hasUnsavedChanges = !matchesSavedParams(params, savedParams)
+  const hasUnsavedChanges = savedParams
+    ? !matchesSavedParams(params, savedParams)
+    : storedParams
+      ? hasCustomParams
+      : !matchesSavedParams(params, null)
 
   return {
     params,
