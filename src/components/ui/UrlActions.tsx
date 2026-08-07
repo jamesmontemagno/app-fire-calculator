@@ -26,7 +26,7 @@ export default function UrlActions({
   const [confirmingLoad, setConfirmingLoad] = useState(false)
   const savedDate = savedAt
     ? new Date(savedAt).toLocaleString()
-    : 'an unknown date'
+    : 'a previous session'
 
   useEffect(() => {
     if (!hasSavedParams) setConfirmingLoad(false)
