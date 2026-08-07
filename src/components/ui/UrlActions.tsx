@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Button from './Button'
 
 interface UrlActionsProps {
@@ -27,6 +27,10 @@ export default function UrlActions({
   const savedDate = savedAt
     ? new Date(savedAt).toLocaleString()
     : 'an unknown date'
+
+  useEffect(() => {
+    if (!hasSavedParams) setConfirmingLoad(false)
+  }, [hasSavedParams])
 
   const handleCopy = async () => {
     const success = await onCopy()
