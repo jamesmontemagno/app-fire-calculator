@@ -309,14 +309,19 @@ export default function DeferredCompensation() {
                                     <p className="mt-1 font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(amount)}</p>
                                   </div>
                                 ))}
-                                {activeAccountWithdrawals.map(([id, amount]) => (
-                                  <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-                                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                      {accountsById.get(id)?.account.name || `Account ${(accountsById.get(id)?.index ?? 0) + 1}`} withdrawal
-                                    </p>
-                                    <p className="mt-1 font-semibold text-violet-600 dark:text-violet-400">{formatCurrency(amount)}</p>
-                                  </div>
-                                ))}
+                                {activeAccountWithdrawals.map(([id, amount]) => {
+                                  const accountDetails = accountsById.get(id)
+                                  const accountName = accountDetails?.account.name
+                                    || (accountDetails ? `Account ${accountDetails.index + 1}` : 'Account')
+                                  return (
+                                    <div key={id} className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
+                                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        {accountName} withdrawal
+                                      </p>
+                                      <p className="mt-1 font-semibold text-violet-600 dark:text-violet-400">{formatCurrency(amount)}</p>
+                                    </div>
+                                  )
+                                })}
                                 {activeSources.length === 0 && activeAccountWithdrawals.length === 0 && (
                                   <p className="text-sm text-gray-500 dark:text-gray-400">No income or account withdrawals this year.</p>
                                 )}
