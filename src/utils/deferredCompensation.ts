@@ -144,25 +144,25 @@ export function calculateDeferredCompensation({
     const expenses = Math.max(0, annualExpenses) * Math.pow(1 + Math.max(-1, inflationRate), yearsFromNow)
     let deferredIncome = 0
 
-    if (canWithdraw) {
-      for (const account of accounts.filter(account => account.type === 'deferred')) {
-        const balance = balances.get(account.id) ?? 0
-        const payoutStartAge = Math.max(account.availableAge, retirementAge)
-        const payoutEndAge = payoutStartAge + Math.max(1, account.payoutYears) - 1
-        const withdrawal = age >= payoutStartAge && age <= payoutEndAge
-          ? balance / (payoutEndAge - age + 1)
-          : 0
-        balances.set(account.id, balance - withdrawal)
-        accountWithdrawals[account.id] = withdrawal
-        deferredIncome += withdrawal
-      }
+    for (const account of accounts.filter(account => account.type === 'deferred')) {
+      const payoutStartAge = account.availableAge
+      const payoutEndAge = payoutStartAge + Math.max(1, account.payoutYears) - 1
+      if (age < payoutStartAge || age > payoutEndAge) continue
+
+      const balance = balances.get(account.id) ?? 0
+      const withdrawal = balance / (payoutEndAge - age + 1)
+      balances.set(account.id, balance - withdrawal)
+      accountWithdrawals[account.id] = withdrawal
+      deferredIncome += withdrawal
     }
 
     let remainingGap = Math.max(0, expenses - outsideIncome - deferredIncome)
     let portfolioWithdrawals = 0
 
     if (canWithdraw) {
-      for (const account of accounts.filter(account => account.type !== 'deferred')) {
+      for (const account of accounts.filter(
+        account => account.type !== 'deferred' && age >= account.availableAge,
+      )) {
         const balance = balances.get(account.id) ?? 0
         const withdrawal = Math.min(
           balance,

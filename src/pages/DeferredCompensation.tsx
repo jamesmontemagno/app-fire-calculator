@@ -23,17 +23,8 @@ import {
   prepareResultsForExport,
 } from '../utils/excelExport'
 
-type ChartView = 'portfolio' | 'withdrawals' | 'income-expenses'
-
-const CHART_VIEWS: { value: ChartView; label: string }[] = [
-  { value: 'portfolio', label: 'Portfolio value' },
-  { value: 'withdrawals', label: 'Portfolio withdrawals' },
-  { value: 'income-expenses', label: 'Income vs. expenses' },
-]
-
 export default function DeferredCompensation() {
   const [expandedAges, setExpandedAges] = useState<Set<number>>(new Set())
-  const [chartView, setChartView] = useState<ChartView>('portfolio')
   const {
     params,
     setParam,
@@ -52,6 +43,10 @@ export default function DeferredCompensation() {
   const incomeSourcesById = useMemo(
     () => new Map(params.incomeSources.map((source, index) => [source.id, { source, index }])),
     [params.incomeSources],
+  )
+  const accountsById = useMemo(
+    () => new Map(params.accounts.map((account, index) => [account.id, { account, index }])),
+    [params.accounts],
   )
 
   const toggleAnnualDetail = (age: number) => {
@@ -130,12 +125,11 @@ export default function DeferredCompensation() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          <Card>
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Retirement scenario</h2>
-            </CardHeader>
-            <CardContent className="space-y-4">
+        <Card>
+          <CardHeader>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Retirement scenario</h2>
+          </CardHeader>
+          <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} />
               <AgeInput
                 label="Retirement age"
@@ -172,9 +166,9 @@ export default function DeferredCompensation() {
                   className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus:ring-fire-500"
                 />
                 <span>
-                  <span className="font-medium">Only withdraw after retirement</span>
+                  <span className="font-medium">Wait until retirement to withdraw</span>
                   <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Turn off to let the portfolio cover a gap before retirement.
+                    Leave this off to let accounts cover a gap as soon as each is available.
                   </span>
                 </span>
               </label>
@@ -192,65 +186,19 @@ export default function DeferredCompensation() {
                   </span>
                 </span>
               </label>
-            </CardContent>
-          </Card>
+          </CardContent>
+        </Card>
 
-          <div className="lg:col-span-2 space-y-6">
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <ResultCard label="At retirement" value={results.balanceAtSemiRetirement} format="currency" highlight />
-              <ResultCard label="First-year income" value={results.firstYearIncome} format="currency" />
-              <ResultCard
-                label="Funded years"
-                value={results.fundedYears}
-                format="years"
-                subtext={`of ${results.projections.filter(point => point.age >= params.semiRetirementAge).length} projected`}
-              />
-              <ResultCard label="Ending portfolio" value={results.endingBalance} format="currency" />
-            </div>
-
-            <Card>
-              <CardHeader>
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Retirement cash flow</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                      Choose one view at a time to avoid comparing income and portfolio value on one scale.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-1 rounded-lg bg-gray-100 dark:bg-gray-800 p-1" role="tablist" aria-label="Cash flow chart view">
-                    {CHART_VIEWS.map(view => (
-                      <button
-                        key={view.value}
-                        type="button"
-                        role="tab"
-                        aria-selected={chartView === view.value}
-                        onClick={() => setChartView(view.value)}
-                        className={`px-2.5 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                          chartView === view.value
-                            ? 'bg-white dark:bg-gray-700 text-fire-700 dark:text-fire-400 shadow-sm'
-                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-                        }`}
-                      >
-                        {view.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <RetirementCashFlowChart data={results.projections} view={chartView} />
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Bucket balances over time</h2>
-              </CardHeader>
-              <CardContent>
-                <RetirementBucketBalanceChart data={results.projections} accounts={params.accounts} />
-              </CardContent>
-            </Card>
-          </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <ResultCard label="At retirement" value={results.balanceAtSemiRetirement} format="currency" highlight />
+          <ResultCard label="First-year income" value={results.firstYearIncome} format="currency" />
+          <ResultCard
+            label="Funded years"
+            value={results.fundedYears}
+            format="years"
+            subtext={`of ${results.projections.filter(point => point.age >= params.semiRetirementAge).length} projected`}
+          />
+          <ResultCard label="Ending portfolio" value={results.endingBalance} format="currency" />
         </div>
 
         <Card>
@@ -280,6 +228,31 @@ export default function DeferredCompensation() {
           </CardContent>
         </Card>
 
+        <div className="grid xl:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Retirement cash flow</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  Compare income, spending, gap withdrawals, and portfolio value in one view.
+                </p>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <RetirementCashFlowChart data={results.projections} />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Bucket balances over time</h2>
+            </CardHeader>
+            <CardContent>
+              <RetirementBucketBalanceChart data={results.projections} accounts={params.accounts} />
+            </CardContent>
+          </Card>
+        </div>
+
         <Card>
           <CardHeader>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Annual cash-flow detail</h2>
@@ -289,7 +262,7 @@ export default function DeferredCompensation() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
-                    {['Age / year', 'Outside income', 'Portfolio withdrawal', 'Expenses', 'Surplus / gap', 'Portfolio'].map(label => (
+                    {['Age / year', 'Income & required payouts', 'Gap withdrawals', 'Expenses', 'Surplus / gap', 'Portfolio'].map(label => (
                       <th key={label} className="text-left py-3 px-3 font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{label}</th>
                     ))}
                   </tr>
@@ -298,6 +271,7 @@ export default function DeferredCompensation() {
                   {results.projections.map(point => {
                     const expanded = expandedAges.has(point.age)
                     const activeSources = Object.entries(point.incomeBySource).filter(([, amount]) => amount > 0)
+                    const activeAccountWithdrawals = Object.entries(point.withdrawals).filter(([, amount]) => amount > 0)
                     return (
                       <Fragment key={point.age}>
                         <tr className="border-b border-gray-100 dark:border-gray-800">
@@ -307,7 +281,7 @@ export default function DeferredCompensation() {
                               onClick={() => toggleAnnualDetail(point.age)}
                               className="inline-flex items-center gap-2 text-left hover:text-fire-600 dark:hover:text-fire-400"
                               aria-expanded={expanded}
-                              aria-label={`${expanded ? 'Hide' : 'Show'} income sources for age ${point.age}`}
+                              aria-label={`${expanded ? 'Hide' : 'Show'} income and withdrawals for age ${point.age}`}
                             >
                               <svg className={`w-4 h-4 text-gray-500 transition-transform ${expanded ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -335,14 +309,21 @@ export default function DeferredCompensation() {
                                     <p className="mt-1 font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(amount)}</p>
                                   </div>
                                 ))}
-                                {point.deferredIncome > 0 && (
-                                  <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-                                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">Deferred compensation</p>
-                                    <p className="mt-1 font-semibold text-violet-600 dark:text-violet-400">{formatCurrency(point.deferredIncome)}</p>
-                                  </div>
-                                )}
-                                {activeSources.length === 0 && point.deferredIncome === 0 && (
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">No active outside income sources.</p>
+                                {activeAccountWithdrawals.map(([id, amount]) => {
+                                  const accountDetails = accountsById.get(id)
+                                  const accountName = accountDetails?.account.name
+                                    || (accountDetails ? `Account ${accountDetails.index + 1}` : 'Account')
+                                  return (
+                                    <div key={id} className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
+                                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        {accountName} withdrawal
+                                      </p>
+                                      <p className="mt-1 font-semibold text-violet-600 dark:text-violet-400">{formatCurrency(amount)}</p>
+                                    </div>
+                                  )
+                                })}
+                                {activeSources.length === 0 && activeAccountWithdrawals.length === 0 && (
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">No income or account withdrawals this year.</p>
                                 )}
                               </div>
                             </td>

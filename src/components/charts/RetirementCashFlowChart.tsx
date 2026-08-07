@@ -14,7 +14,6 @@ import { useTheme } from '../../context/ThemeContext'
 
 interface RetirementCashFlowChartProps {
   data: RetirementCashFlowPoint[]
-  view: 'portfolio' | 'withdrawals' | 'income-expenses'
 }
 
 const compactCurrency = (value: number) => {
@@ -23,7 +22,7 @@ const compactCurrency = (value: number) => {
   return `$${value}`
 }
 
-export default function RetirementCashFlowChart({ data, view }: RetirementCashFlowChartProps) {
+export default function RetirementCashFlowChart({ data }: RetirementCashFlowChartProps) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
   const axisColor = isDark ? '#9ca3af' : '#6b7280'
@@ -70,6 +69,16 @@ export default function RetirementCashFlowChart({ data, view }: RetirementCashFl
           tickFormatter={age => `Age ${age}`}
         />
         <YAxis
+          yAxisId="cash-flow"
+          tick={{ fill: axisColor, fontSize: 12 }}
+          axisLine={{ stroke: gridColor }}
+          tickLine={{ stroke: gridColor }}
+          tickFormatter={compactCurrency}
+          width={66}
+        />
+        <YAxis
+          yAxisId="portfolio"
+          orientation="right"
           tick={{ fill: axisColor, fontSize: 12 }}
           axisLine={{ stroke: gridColor }}
           tickLine={{ stroke: gridColor }}
@@ -78,18 +87,10 @@ export default function RetirementCashFlowChart({ data, view }: RetirementCashFl
         />
         <Tooltip content={<ChartTooltip />} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        {view === 'portfolio' && (
-          <Line type="monotone" dataKey="totalBalance" name="Portfolio value" stroke="#0ea5e9" strokeWidth={2} dot={false} />
-        )}
-        {view === 'withdrawals' && (
-          <Line type="monotone" dataKey="portfolioWithdrawals" name="Portfolio withdrawals" stroke="#8b5cf6" strokeWidth={2} dot={false} />
-        )}
-        {view === 'income-expenses' && (
-          <>
-            <Line type="monotone" dataKey="totalIncome" name="Income available" stroke="#16a34a" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="expenses" name="Expenses" stroke="#f59e0b" strokeWidth={2} dot={false} />
-          </>
-        )}
+        <Line yAxisId="cash-flow" type="monotone" dataKey="totalIncome" name="Income available" stroke="#16a34a" strokeWidth={2} dot={false} />
+        <Line yAxisId="cash-flow" type="monotone" dataKey="expenses" name="Expenses" stroke="#f59e0b" strokeWidth={2} dot={false} />
+        <Line yAxisId="cash-flow" type="monotone" dataKey="portfolioWithdrawals" name="Gap withdrawals" stroke="#8b5cf6" strokeWidth={2} strokeDasharray="4 4" dot={false} />
+        <Line yAxisId="portfolio" type="monotone" dataKey="totalBalance" name="Portfolio value" stroke="#0ea5e9" strokeWidth={2} dot={false} />
       </ComposedChart>
     </ResponsiveContainer>
   )
