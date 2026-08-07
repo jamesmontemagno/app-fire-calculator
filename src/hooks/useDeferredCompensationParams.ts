@@ -80,7 +80,7 @@ const DEFAULTS: DeferredCompensationParams = {
       taxRate: 0.25,
     },
   ],
-  withdrawOnlyAfterRetirement: true,
+  withdrawOnlyAfterRetirement: false,
   reinvestSurplus: true,
 }
 

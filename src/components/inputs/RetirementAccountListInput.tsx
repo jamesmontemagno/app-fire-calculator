@@ -226,7 +226,9 @@ export default function RetirementAccountListInput({
                         label={account.type === 'deferred' ? 'Vests / payout starts at age' : 'Available at age'}
                         value={account.availableAge}
                         onChange={value => updateAccount(account.id, 'availableAge', value)}
-                        tooltip="The first age at which this bucket can provide retirement cash flow."
+                        tooltip={account.type === 'deferred'
+                          ? 'Required payouts begin at this age, even when other income covers spending.'
+                          : 'The first age at which this bucket can cover a cash-flow gap.'}
                       />
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         Calendar year {currentYear + account.availableAge - currentAge}
