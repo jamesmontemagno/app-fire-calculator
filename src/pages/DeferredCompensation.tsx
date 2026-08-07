@@ -30,9 +30,12 @@ export default function DeferredCompensation() {
     setParam,
     resetParams,
     saveParams,
+    loadParams,
     copyUrl,
     hasCustomParams,
     hasUnsavedChanges,
+    hasSavedParams,
+    savedAt,
   } = useDeferredCompensationParams()
 
   const currentYear = new Date().getFullYear()
@@ -105,9 +108,12 @@ export default function DeferredCompensation() {
             <UrlActions
               onReset={resetParams}
               onSave={saveParams}
+              onLoad={loadParams}
               onCopy={copyUrl}
               hasCustomParams={hasCustomParams}
               hasUnsavedChanges={hasUnsavedChanges}
+              hasSavedParams={hasSavedParams}
+              savedAt={savedAt}
             />
           </div>
         </div>

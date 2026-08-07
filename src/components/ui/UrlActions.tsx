@@ -4,17 +4,23 @@ import Button from './Button'
 interface UrlActionsProps {
   onReset: () => void
   onSave: () => void
+  onLoad: () => void
   onCopy: () => Promise<boolean>
   hasCustomParams: boolean
   hasUnsavedChanges: boolean
+  hasSavedParams: boolean
+  savedAt: string | null
 }
 
 export default function UrlActions({
   onReset,
   onSave,
+  onLoad,
   onCopy,
   hasCustomParams,
   hasUnsavedChanges,
+  hasSavedParams,
+  savedAt,
 }: UrlActionsProps) {
   const [copied, setCopied] = useState(false)
 
@@ -23,6 +29,15 @@ export default function UrlActions({
     if (success) {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+    }
+  }
+
+  const handleLoad = () => {
+    const savedDate = savedAt
+      ? new Date(savedAt).toLocaleString()
+      : 'an unknown date'
+    if (window.confirm(`Load the calculation saved on ${savedDate}?`)) {
+      onLoad()
     }
   }
 
@@ -63,6 +78,21 @@ export default function UrlActions({
           </>
         )}
       </Button>
+      {hasSavedParams && (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleLoad}
+          className="gap-1.5"
+          title={savedAt ? `Saved ${new Date(savedAt).toLocaleString()}` : 'Saved date unavailable'}
+          aria-label={savedAt ? `Load calculation saved ${new Date(savedAt).toLocaleString()}` : 'Load saved calculation'}
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Load
+        </Button>
+      )}
       
       {hasCustomParams && (
         <Button

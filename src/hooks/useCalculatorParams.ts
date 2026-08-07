@@ -5,6 +5,11 @@ import type { DebtItem } from '../utils/calculations'
 
 const STORAGE_KEY_PREFIX = 'fire-calc-params'
 
+interface SavedCalculatorParams {
+  params: Partial<CalculatorParams>
+  savedAt: string | null
+}
+
 interface CalculatorParams {
   currentAge: number
   retirementAge: number
@@ -70,21 +75,36 @@ const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
 }
 
 // localStorage utilities
-function loadFromStorage(storageKey: string): Partial<CalculatorParams> | null {
+function loadFromStorage(storageKey: string): SavedCalculatorParams | null {
   if (typeof window === 'undefined') return null
   try {
     const stored = localStorage.getItem(storageKey)
     if (!stored) return null
-    return JSON.parse(stored)
+    const parsed: unknown = JSON.parse(stored)
+    if (!parsed || typeof parsed !== 'object') return null
+
+    if ('params' in parsed) {
+      const { params, savedAt } = parsed as SavedCalculatorParams
+      if (!params || typeof params !== 'object') return null
+      return {
+        params,
+        savedAt: typeof savedAt === 'string' && !Number.isNaN(Date.parse(savedAt))
+          ? savedAt
+          : null,
+      }
+    }
+
+    // Saved calculations from before timestamps were added remain loadable.
+    return { params: parsed as Partial<CalculatorParams>, savedAt: null }
   } catch {
     return null
   }
 }
 
-function saveToStorage(storageKey: string, params: CalculatorParams): void {
+function saveToStorage(storageKey: string, savedParams: SavedCalculatorParams): void {
   if (typeof window === 'undefined') return
   try {
-    localStorage.setItem(storageKey, JSON.stringify(params))
+    localStorage.setItem(storageKey, JSON.stringify(savedParams))
   } catch {
     // Silently fail if storage is unavailable
   }
@@ -113,9 +133,10 @@ export function useCalculatorParams() {
   const location = useLocation()
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const storageKey = `${STORAGE_KEY_PREFIX}:${location.pathname}`
-  const [savedParams, setSavedParams] = useState<Partial<CalculatorParams> | null>(
+  const [storedParams, setStoredParams] = useState<SavedCalculatorParams | null>(
     () => loadFromStorage(storageKey),
   )
+  const [savedParams, setSavedParams] = useState<Partial<CalculatorParams> | null>(null)
 
   const params = useMemo((): CalculatorParams => {
     const getParam = (key: keyof CalculatorParams): any => {
@@ -254,13 +275,25 @@ export function useCalculatorParams() {
   const resetParams = useCallback(() => {
     setSearchParams(new URLSearchParams(), { replace: true })
     clearStorage(storageKey)
+    setStoredParams(null)
     setSavedParams(null)
   }, [setSearchParams, storageKey])
 
   const saveParams = useCallback(() => {
-    saveToStorage(storageKey, params)
+    const nextSavedParams = {
+      params,
+      savedAt: new Date().toISOString(),
+    }
+    saveToStorage(storageKey, nextSavedParams)
+    setStoredParams(nextSavedParams)
     setSavedParams(params)
   }, [params, storageKey])
+
+  const loadParams = useCallback(() => {
+    if (!storedParams) return
+    setSearchParams(new URLSearchParams(), { replace: true })
+    setSavedParams(storedParams.params)
+  }, [setSearchParams, storedParams])
 
   const copyUrl = useCallback(async () => {
     try {
@@ -284,6 +317,9 @@ export function useCalculatorParams() {
     copyUrl,
     hasCustomParams,
     hasUnsavedChanges,
+    hasSavedParams: storedParams !== null,
+    savedAt: storedParams?.savedAt ?? null,
+    loadParams,
   }
 }
 

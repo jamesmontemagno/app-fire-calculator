@@ -110,7 +110,7 @@ function calculateInvestmentGrowth(
 }
 
 export default function SavingsRate() {
-  const { params, setParam, resetParams, saveParams, copyUrl, hasCustomParams, hasUnsavedChanges } = useCalculatorParams()
+  const { params, setParam, resetParams, saveParams, loadParams, copyUrl, hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt } = useCalculatorParams()
   const [contributionFrequency, setContributionFrequency] = useState<'monthly' | 'yearly'>('monthly')
   const [yearsInvesting, setYearsInvesting] = useState(30)
   const [contributionAmount, setContributionAmount] = useState(500)
@@ -178,7 +178,7 @@ export default function SavingsRate() {
           </div>
           <div className="flex flex-wrap gap-2">
             <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onSave={saveParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} />
+            <UrlActions onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
           </div>
       </div>
 

@@ -98,20 +98,44 @@ const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
 
 const STORAGE_KEY_PREFIX = 'fire-calc-deferred-params'
 
-function loadFromStorage(storageKey: string): Partial<DeferredCompensationParams> | null {
+interface SavedDeferredCompensationParams {
+  params: Partial<DeferredCompensationParams>
+  savedAt: string | null
+}
+
+function loadFromStorage(storageKey: string): SavedDeferredCompensationParams | null {
   if (typeof window === 'undefined') return null
   try {
     const stored = localStorage.getItem(storageKey)
-    return stored ? JSON.parse(stored) : null
+    if (!stored) return null
+    const parsed: unknown = JSON.parse(stored)
+    if (!parsed || typeof parsed !== 'object') return null
+
+    if ('params' in parsed) {
+      const { params, savedAt } = parsed as SavedDeferredCompensationParams
+      if (!params || typeof params !== 'object') return null
+      return {
+        params,
+        savedAt: typeof savedAt === 'string' && !Number.isNaN(Date.parse(savedAt))
+          ? savedAt
+          : null,
+      }
+    }
+
+    // Saved calculations from before timestamps were added remain loadable.
+    return { params: parsed as Partial<DeferredCompensationParams>, savedAt: null }
   } catch {
     return null
   }
 }
 
-function saveToStorage(storageKey: string, params: DeferredCompensationParams): void {
+function saveToStorage(
+  storageKey: string,
+  savedParams: SavedDeferredCompensationParams,
+): void {
   if (typeof window === 'undefined') return
   try {
-    localStorage.setItem(storageKey, JSON.stringify(params))
+    localStorage.setItem(storageKey, JSON.stringify(savedParams))
   } catch {
     // Silently fail if storage is unavailable
   }
@@ -211,9 +235,10 @@ export function useDeferredCompensationParams() {
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
   const storageKey = `${STORAGE_KEY_PREFIX}:${location.pathname}`
-  const [savedParams, setSavedParams] = useState<Partial<DeferredCompensationParams> | null>(
+  const [storedParams, setStoredParams] = useState<SavedDeferredCompensationParams | null>(
     () => loadFromStorage(storageKey),
   )
+  const [savedParams, setSavedParams] = useState<Partial<DeferredCompensationParams> | null>(null)
 
   const params = useMemo<DeferredCompensationParams>(() => {
     const currentAge = Math.min(100, Math.max(
@@ -290,13 +315,29 @@ export function useDeferredCompensationParams() {
       return next
     }, { replace: true })
     clearStorage(storageKey)
+    setStoredParams(null)
     setSavedParams(null)
   }, [setSearchParams, storageKey])
 
   const saveParams = useCallback(() => {
-    saveToStorage(storageKey, params)
+    const nextSavedParams = {
+      params,
+      savedAt: new Date().toISOString(),
+    }
+    saveToStorage(storageKey, nextSavedParams)
+    setStoredParams(nextSavedParams)
     setSavedParams(params)
   }, [params, storageKey])
+
+  const loadParams = useCallback(() => {
+    if (!storedParams) return
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous)
+      Object.values(PARAM_KEYS).forEach(key => next.delete(key))
+      return next
+    }, { replace: true })
+    setSavedParams(storedParams.params)
+  }, [setSearchParams, storedParams])
 
   const copyUrl = useCallback(async () => {
     try {
@@ -315,5 +356,8 @@ export function useDeferredCompensationParams() {
     copyUrl,
     hasCustomParams: Object.values(PARAM_KEYS).some(key => searchParams.has(key)),
     hasUnsavedChanges: !matchesSavedParams(params, savedParams),
+    hasSavedParams: storedParams !== null,
+    savedAt: storedParams?.savedAt ?? null,
+    loadParams,
   }
 }
