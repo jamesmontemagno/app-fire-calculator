@@ -149,10 +149,15 @@ export function useCalculatorParams() {
         // Handle special cases
         if (key === 'debts') {
           try {
-            const parsed = JSON.parse(decodeURIComponent(urlValue))
+            const parsed = JSON.parse(urlValue)
             return Array.isArray(parsed) ? parsed : DEFAULTS[key]
           } catch {
-            return DEFAULTS[key]
+            try {
+              const parsed = JSON.parse(decodeURIComponent(urlValue))
+              return Array.isArray(parsed) ? parsed : DEFAULTS[key]
+            } catch {
+              return DEFAULTS[key]
+            }
           }
         }
         if (key === 'debtMode') {
@@ -221,7 +226,7 @@ export function useCalculatorParams() {
         newParams.delete(urlKey)
       } else {
         const stringValue = key === 'debts'
-          ? encodeURIComponent(JSON.stringify(value))
+          ? JSON.stringify(value)
           : value.toString()
         newParams.set(urlKey, stringValue)
       }
@@ -263,7 +268,7 @@ export function useCalculatorParams() {
           newParams.delete(urlKey)
         } else {
           const stringValue = key === 'debts'
-            ? encodeURIComponent(JSON.stringify(value))
+            ? JSON.stringify(value)
             : value.toString()
           newParams.set(urlKey, stringValue)
         }
@@ -298,7 +303,7 @@ export function useCalculatorParams() {
         if (value === undefined || value === null) return
         next.set(
           PARAM_KEYS[key],
-          key === 'debts' ? encodeURIComponent(JSON.stringify(value)) : String(value),
+          key === 'debts' ? JSON.stringify(value) : String(value),
         )
       })
       return next

@@ -23,6 +23,10 @@ export default function UrlActions({
   savedAt,
 }: UrlActionsProps) {
   const [copied, setCopied] = useState(false)
+  const [confirmingLoad, setConfirmingLoad] = useState(false)
+  const savedDate = savedAt
+    ? new Date(savedAt).toLocaleString()
+    : 'an unknown date'
 
   const handleCopy = async () => {
     const success = await onCopy()
@@ -33,12 +37,12 @@ export default function UrlActions({
   }
 
   const handleLoad = () => {
-    const savedDate = savedAt
-      ? new Date(savedAt).toLocaleString()
-      : 'an unknown date'
-    if (window.confirm(`Load the calculation saved on ${savedDate}?`)) {
-      onLoad()
-    }
+    setConfirmingLoad(true)
+  }
+
+  const confirmLoad = () => {
+    onLoad()
+    setConfirmingLoad(false)
   }
 
   return (
@@ -79,19 +83,33 @@ export default function UrlActions({
         )}
       </Button>
       {hasSavedParams && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleLoad}
-          className="gap-1.5"
-          title={savedAt ? `Saved ${new Date(savedAt).toLocaleString()}` : 'Saved date unavailable'}
-          aria-label={savedAt ? `Load calculation saved ${new Date(savedAt).toLocaleString()}` : 'Load saved calculation'}
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Load
-        </Button>
+        confirmingLoad ? (
+          <>
+            <span className="text-sm text-gray-600 dark:text-gray-400" role="status">
+              Load saved calculation from {savedDate}?
+            </span>
+            <Button variant="primary" size="sm" onClick={confirmLoad}>
+              Load
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setConfirmingLoad(false)}>
+              Cancel
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLoad}
+            className="gap-1.5"
+            title={savedAt ? `Saved ${savedDate}` : 'Saved date unavailable'}
+            aria-label={savedAt ? `Load calculation saved ${savedDate}` : 'Load saved calculation'}
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            Load
+          </Button>
+        )
       )}
       
       {hasCustomParams && (
