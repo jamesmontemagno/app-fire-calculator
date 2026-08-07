@@ -21,9 +21,12 @@ export default function DebtPayoff() {
     setParam,
     resetParams,
     saveParams,
+    loadParams,
     copyUrl,
     hasCustomParams,
     hasUnsavedChanges,
+    hasSavedParams,
+    savedAt,
   } = useCalculatorParams()
   const debts: DebtItem[] = params.debts
   const mode = params.debtMode
@@ -155,9 +158,12 @@ export default function DebtPayoff() {
             <UrlActions
               onReset={resetParams}
               onSave={saveParams}
+              onLoad={loadParams}
               onCopy={copyUrl}
               hasCustomParams={hasCustomParams}
               hasUnsavedChanges={hasUnsavedChanges}
+              hasSavedParams={hasSavedParams}
+              savedAt={savedAt}
             />
           </div>
       </div>

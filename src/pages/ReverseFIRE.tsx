@@ -70,7 +70,7 @@ function calculateReverseFIRE(
 }
 
 export default function ReverseFIRE() {
-  const { params, setParam, resetParams, saveParams, copyUrl, hasCustomParams, hasUnsavedChanges } = useCalculatorParams()
+  const { params, setParam, resetParams, saveParams, loadParams, copyUrl, hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt } = useCalculatorParams()
 
   const results = useMemo(() => {
     return calculateReverseFIRE(
@@ -131,7 +131,7 @@ export default function ReverseFIRE() {
           </div>
           <div className="flex flex-wrap gap-2">
             <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onSave={saveParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} />
+            <UrlActions onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
           </div>
       </div>
 
