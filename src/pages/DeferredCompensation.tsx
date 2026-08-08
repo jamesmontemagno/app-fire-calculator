@@ -1,5 +1,11 @@
 import { Fragment, useMemo, useState } from 'react'
-import { AgeInput, CurrencyInput, PercentageInput, RetirementIncomeListInput } from '../components/inputs'
+import {
+  AgeInput,
+  CurrencyInput,
+  PercentageInput,
+  RetirementExpenseListInput,
+  RetirementIncomeListInput,
+} from '../components/inputs'
 import RetirementAccountListInput from '../components/inputs/RetirementAccountListInput'
 import RetirementCashFlowChart from '../components/charts/RetirementCashFlowChart'
 import RetirementBucketBalanceChart from '../components/charts/RetirementBucketBalanceChart'
@@ -51,6 +57,10 @@ export default function DeferredCompensation() {
     () => new Map(params.accounts.map((account, index) => [account.id, { account, index }])),
     [params.accounts],
   )
+  const expensesById = useMemo(
+    () => new Map(params.additionalExpenses.map((expense, index) => [expense.id, { expense, index }])),
+    [params.additionalExpenses],
+  )
 
   const toggleAnnualDetail = (age: number) => {
     setExpandedAges(previous => {
@@ -72,6 +82,7 @@ export default function DeferredCompensation() {
       reinvestSurplus: params.reinvestSurplus,
       incomeSourceCount: params.incomeSources.length,
       accountCount: params.accounts.length,
+      additionalExpenseCount: params.additionalExpenses.length,
     })
     const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
 
@@ -83,6 +94,7 @@ export default function DeferredCompensation() {
       additionalSheets: [
         { name: 'Income Sources', data: params.incomeSources },
         { name: 'Accounts', data: params.accounts },
+        { name: 'Additional Expenses', data: params.additionalExpenses },
       ],
       inputFormats,
       resultFormats,
@@ -234,6 +246,19 @@ export default function DeferredCompensation() {
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Additional expenses</h2>
+          </CardHeader>
+          <CardContent>
+            <RetirementExpenseListInput
+              expenses={params.additionalExpenses}
+              onChange={expenses => setParam('additionalExpenses', expenses)}
+              currentAge={params.currentAge}
+            />
+          </CardContent>
+        </Card>
+
         <div className="grid xl:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
@@ -278,6 +303,7 @@ export default function DeferredCompensation() {
                     const expanded = expandedAges.has(point.age)
                     const activeSources = Object.entries(point.incomeBySource).filter(([, amount]) => amount > 0)
                     const activeAccountWithdrawals = Object.entries(point.withdrawals).filter(([, amount]) => amount > 0)
+                    const activeAdditionalExpenses = Object.entries(point.expensesByItem).filter(([, amount]) => amount > 0)
                     return (
                       <Fragment key={point.age}>
                         <tr className="border-b border-gray-100 dark:border-gray-800">
@@ -328,7 +354,26 @@ export default function DeferredCompensation() {
                                     </div>
                                   )
                                 })}
-                                {activeSources.length === 0 && activeAccountWithdrawals.length === 0 && (
+                                <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
+                                  <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    Core spending
+                                  </p>
+                                  <p className="mt-1 font-semibold text-amber-600 dark:text-amber-400">{formatCurrency(point.coreExpenses)}</p>
+                                </div>
+                                {activeAdditionalExpenses.map(([id, amount]) => {
+                                  const expenseDetails = expensesById.get(id)
+                                  const expenseName = expenseDetails?.expense.name
+                                    || (expenseDetails ? `Additional expense ${expenseDetails.index + 1}` : 'Additional expense')
+                                  return (
+                                    <div key={id} className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
+                                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                        {expenseName}
+                                      </p>
+                                      <p className="mt-1 font-semibold text-amber-600 dark:text-amber-400">{formatCurrency(amount)}</p>
+                                    </div>
+                                  )
+                                })}
+                                {activeSources.length === 0 && activeAccountWithdrawals.length === 0 && activeAdditionalExpenses.length === 0 && (
                                   <p className="text-sm text-gray-500 dark:text-gray-400">No income or account withdrawals this year.</p>
                                 )}
                               </div>
