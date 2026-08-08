@@ -8,6 +8,7 @@ import type {
   RetirementIncomeSource,
   RetirementIncomeType,
 } from '../utils/deferredCompensation'
+import { DEFERRED_STORAGE_KEY_PREFIX } from '../utils/savedCalculationStorage'
 
 export interface DeferredCompensationParams {
   currentAge: number
@@ -110,8 +111,6 @@ const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
   withdrawOnlyAfterRetirement: 'dcRetireOnly',
   reinvestSurplus: 'dcReinvest',
 }
-
-const STORAGE_KEY_PREFIX = 'fire-calc-deferred-params'
 
 interface SavedDeferredCompensationParams {
   params: Partial<DeferredCompensationParams>
@@ -278,7 +277,7 @@ const sanitizeAdditionalExpenses = (value: string | null): RetirementExpense[] =
 export function useDeferredCompensationParams() {
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
-  const storageKey = `${STORAGE_KEY_PREFIX}:${location.pathname}`
+  const storageKey = `${DEFERRED_STORAGE_KEY_PREFIX}:${location.pathname}`
   const [storedParams, setStoredParams] = useState<SavedDeferredCompensationParams | null>(
     () => loadFromStorage(storageKey),
   )

@@ -3,9 +3,10 @@ import SEO from '../components/SEO'
 import { Button, Card, CardContent, CardHeader } from '../components/ui'
 import ConfirmationDialog from '../components/ui/ConfirmationDialog'
 import { calculators } from '../config/calculators'
-
-const STANDARD_STORAGE_PREFIX = 'fire-calc-params'
-const DEFERRED_STORAGE_PREFIX = 'fire-calc-deferred-params'
+import {
+  DEFERRED_STORAGE_KEY_PREFIX,
+  STANDARD_STORAGE_KEY_PREFIX,
+} from '../utils/savedCalculationStorage'
 
 interface SavedCalculation {
   key: string
@@ -18,8 +19,8 @@ function getSavedCalculations(): SavedCalculation[] {
 
   return calculators.flatMap(calculator => {
     const prefix = calculator.storagePrefix === 'deferred'
-      ? DEFERRED_STORAGE_PREFIX
-      : STANDARD_STORAGE_PREFIX
+      ? DEFERRED_STORAGE_KEY_PREFIX
+      : STANDARD_STORAGE_KEY_PREFIX
     const key = `${prefix}:${calculator.path}`
     const value = localStorage.getItem(key)
     if (!value) return []

@@ -2,8 +2,7 @@ import { useLocation, useSearchParams } from 'react-router-dom'
 import { useCallback, useMemo, useRef, useState } from 'react'
 
 import type { DebtItem } from '../utils/calculations'
-
-const STORAGE_KEY_PREFIX = 'fire-calc-params'
+import { STANDARD_STORAGE_KEY_PREFIX } from '../utils/savedCalculationStorage'
 
 interface SavedCalculatorParams {
   params: Partial<CalculatorParams>
@@ -132,7 +131,7 @@ export function useCalculatorParams() {
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const storageKey = `${STORAGE_KEY_PREFIX}:${location.pathname}`
+  const storageKey = `${STANDARD_STORAGE_KEY_PREFIX}:${location.pathname}`
   const [storedParams, setStoredParams] = useState<SavedCalculatorParams | null>(
     () => loadFromStorage(storageKey),
   )
