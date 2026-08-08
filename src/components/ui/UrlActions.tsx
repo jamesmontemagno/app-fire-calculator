@@ -1,5 +1,6 @@
-import { type ReactNode, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import Button from './Button'
+import ConfirmationDialog from './ConfirmationDialog'
 
 interface UrlActionsProps {
   onReset: () => void
@@ -145,41 +146,5 @@ export default function UrlActions({
         </ConfirmationDialog>
       )}
     </>
-  )
-}
-
-interface ConfirmationDialogProps {
-  title: string
-  children: ReactNode
-  confirmLabel: string
-  onCancel: () => void
-  onConfirm: () => void
-}
-
-function ConfirmationDialog({
-  title,
-  children,
-  confirmLabel,
-  onCancel,
-  onConfirm,
-}: ConfirmationDialogProps) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="presentation">
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="confirmation-dialog-title"
-        className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-900"
-      >
-        <h2 id="confirmation-dialog-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          {title}
-        </h2>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">{children}</p>
-        <div className="mt-6 flex justify-end gap-3">
-          <Button variant="ghost" onClick={onCancel}>Cancel</Button>
-          <Button onClick={onConfirm}>{confirmLabel}</Button>
-        </div>
-      </div>
-    </div>
   )
 }

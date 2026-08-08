@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import SEO from '../components/SEO'
 import { Button, Card, CardContent, CardHeader } from '../components/ui'
+import ConfirmationDialog from '../components/ui/ConfirmationDialog'
 import { calculators } from '../config/calculators'
 
 const STANDARD_STORAGE_PREFIX = 'fire-calc-params'
@@ -16,7 +17,7 @@ function getSavedCalculations(): SavedCalculation[] {
   if (typeof window === 'undefined') return []
 
   return calculators.flatMap(calculator => {
-    const prefix = calculator.path === '/retirement-cash-flow'
+    const prefix = calculator.storagePrefix === 'deferred'
       ? DEFERRED_STORAGE_PREFIX
       : STANDARD_STORAGE_PREFIX
     const key = `${prefix}:${calculator.path}`
@@ -121,18 +122,14 @@ export default function Settings() {
       </div>
 
       {confirmingClearAll && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" role="presentation">
-          <div role="dialog" aria-modal="true" aria-labelledby="clear-all-title" className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl dark:bg-gray-900">
-            <h2 id="clear-all-title" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Delete all saved calculations?</h2>
-            <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              This permanently removes all saved calculator data from this browser.
-            </p>
-            <div className="mt-6 flex justify-end gap-3">
-              <Button variant="ghost" onClick={() => setConfirmingClearAll(false)}>Cancel</Button>
-              <Button onClick={clearAllCalculations}>Delete all</Button>
-            </div>
-          </div>
-        </div>
+        <ConfirmationDialog
+          title="Delete all saved calculations?"
+          confirmLabel="Delete all"
+          onCancel={() => setConfirmingClearAll(false)}
+          onConfirm={clearAllCalculations}
+        >
+          This permanently removes all saved calculator data from this browser.
+        </ConfirmationDialog>
       )}
     </>
   )

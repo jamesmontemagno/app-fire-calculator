@@ -13,6 +13,7 @@ export interface CalculatorMetadata {
   bgColor: string // Background color class
   borderColor: string // Border color class
   audience: string // Target audience description
+  storagePrefix?: 'standard' | 'deferred'
 }
 
 export const calculators: CalculatorMetadata[] = [
@@ -136,6 +137,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
     borderColor: 'border-indigo-200 dark:border-indigo-800',
     audience: 'Best for: Complex, multi-account retirement plans',
+    storagePrefix: 'deferred',
   },
 ]
 
