@@ -14,6 +14,15 @@ export type RetirementIncomeType =
   | 'rental'
   | 'custom'
 
+export type RetirementExpenseType =
+  | 'healthcare'
+  | 'travel'
+  | 'housing'
+  | 'family'
+  | 'education'
+  | 'long-term-care'
+  | 'custom'
+
 export interface RetirementAccount {
   id: string
   name: string
@@ -38,6 +47,14 @@ export interface RetirementIncomeSource {
   taxRate: number
 }
 
+export interface RetirementExpense {
+  id: string
+  name: string
+  type: RetirementExpenseType
+  annualAmount: number
+  startAge: number
+}
+
 export interface RetirementCashFlowPoint {
   age: number
   year: number
@@ -51,6 +68,9 @@ export interface RetirementCashFlowPoint {
   withdrawals: Record<string, number>
   balances: Record<string, number>
   incomeBySource: Record<string, number>
+  coreExpenses: number
+  additionalExpenses: number
+  expensesByItem: Record<string, number>
 }
 
 export interface DeferredCompensationInputs {
@@ -61,6 +81,7 @@ export interface DeferredCompensationInputs {
   inflationRate: number
   accounts: RetirementAccount[]
   incomeSources: RetirementIncomeSource[]
+  additionalExpenses: RetirementExpense[]
   withdrawOnlyAfterRetirement: boolean
   reinvestSurplus: boolean
   currentYear?: number
@@ -102,6 +123,7 @@ export function calculateDeferredCompensation({
   inflationRate,
   accounts,
   incomeSources,
+  additionalExpenses,
   withdrawOnlyAfterRetirement,
   reinvestSurplus,
   currentYear = new Date().getFullYear(),
@@ -118,6 +140,7 @@ export function calculateDeferredCompensation({
     const accountWithdrawals: Record<string, number> = {}
     const accountBalances: Record<string, number> = {}
     const incomeBySource: Record<string, number> = {}
+    const expensesByItem: Record<string, number> = {}
 
     for (const account of accounts) {
       let balance = balances.get(account.id) ?? 0
@@ -141,7 +164,17 @@ export function calculateDeferredCompensation({
       outsideIncome += netAmount
     }
 
-    const expenses = Math.max(0, annualExpenses) * Math.pow(1 + Math.max(-1, inflationRate), yearsFromNow)
+    const inflationMultiplier = Math.pow(1 + Math.max(-1, inflationRate), yearsFromNow)
+    const coreExpenses = Math.max(0, annualExpenses) * inflationMultiplier
+    let additionalExpenseTotal = 0
+    for (const expense of additionalExpenses) {
+      const amount = age >= expense.startAge
+        ? Math.max(0, expense.annualAmount) * inflationMultiplier
+        : 0
+      expensesByItem[expense.id] = round(amount)
+      additionalExpenseTotal += amount
+    }
+    const expenses = coreExpenses + additionalExpenseTotal
     let deferredIncome = 0
 
     for (const account of accounts.filter(account => account.type === 'deferred')) {
@@ -194,10 +227,13 @@ export function calculateDeferredCompensation({
       portfolioWithdrawals: round(portfolioWithdrawals),
       totalIncome: round(totalIncome),
       expenses: round(expenses),
+      coreExpenses: round(coreExpenses),
+      additionalExpenses: round(additionalExpenseTotal),
       surplus: Math.round(surplus),
       withdrawals: accountWithdrawals,
       balances: accountBalances,
       incomeBySource,
+      expensesByItem,
     })
   }
 

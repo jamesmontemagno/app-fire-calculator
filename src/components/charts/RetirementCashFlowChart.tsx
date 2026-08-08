@@ -44,7 +44,15 @@ export default function RetirementCashFlowChart({ data }: RetirementCashFlowChar
             Deferred compensation: <strong className="text-indigo-600 dark:text-indigo-400">{formatCurrency(point.deferredIncome)}</strong>
           </p>
           <p className="text-gray-600 dark:text-gray-400">
-            Expenses: <strong className="text-amber-600 dark:text-amber-400">{formatCurrency(point.expenses)}</strong>
+            Core expenses: <strong className="text-amber-600 dark:text-amber-400">{formatCurrency(point.coreExpenses)}</strong>
+          </p>
+          {point.additionalExpenses > 0 && (
+            <p className="text-gray-600 dark:text-gray-400">
+              Additional expenses: <strong className="text-orange-600 dark:text-orange-400">{formatCurrency(point.additionalExpenses)}</strong>
+            </p>
+          )}
+          <p className="text-gray-600 dark:text-gray-400">
+            Total expenses: <strong className="text-amber-600 dark:text-amber-400">{formatCurrency(point.expenses)}</strong>
           </p>
           <p className="text-gray-600 dark:text-gray-400">
             Portfolio withdrawal: <strong className="text-violet-600 dark:text-violet-400">{formatCurrency(point.portfolioWithdrawals)}</strong>

@@ -3,6 +3,8 @@ import { useLocation, useSearchParams } from 'react-router-dom'
 import type {
   RetirementAccount,
   RetirementAccountType,
+  RetirementExpense,
+  RetirementExpenseType,
   RetirementIncomeSource,
   RetirementIncomeType,
 } from '../utils/deferredCompensation'
@@ -15,6 +17,7 @@ export interface DeferredCompensationParams {
   inflationRate: number
   accounts: RetirementAccount[]
   incomeSources: RetirementIncomeSource[]
+  additionalExpenses: RetirementExpense[]
   withdrawOnlyAfterRetirement: boolean
   reinvestSurplus: boolean
 }
@@ -34,6 +37,16 @@ const INCOME_TYPES: RetirementIncomeType[] = [
   'pension',
   'social-security',
   'rental',
+  'custom',
+]
+
+const EXPENSE_TYPES: RetirementExpenseType[] = [
+  'healthcare',
+  'travel',
+  'housing',
+  'family',
+  'education',
+  'long-term-care',
   'custom',
 ]
 
@@ -80,6 +93,7 @@ const DEFAULTS: DeferredCompensationParams = {
       taxRate: 0.25,
     },
   ],
+  additionalExpenses: [],
   withdrawOnlyAfterRetirement: true,
   reinvestSurplus: true,
 }
@@ -92,6 +106,7 @@ const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
   inflationRate: 'dcInflation',
   accounts: 'dcAccounts',
   incomeSources: 'dcIncomeSources',
+  additionalExpenses: 'dcAdditionalExpenses',
   withdrawOnlyAfterRetirement: 'dcRetireOnly',
   reinvestSurplus: 'dcReinvest',
 }
@@ -231,6 +246,35 @@ const sanitizeIncomeSources = (value: string | null): RetirementIncomeSource[] =
   }
 }
 
+const sanitizeAdditionalExpenses = (value: string | null): RetirementExpense[] => {
+  if (!value) return DEFAULTS.additionalExpenses
+
+  try {
+    const parsed: unknown = JSON.parse(value)
+    if (!Array.isArray(parsed)) return DEFAULTS.additionalExpenses
+
+    return parsed.flatMap((item, index) => {
+      if (!item || typeof item !== 'object') return []
+      const expense = item as Partial<RetirementExpense>
+      const numeric = (candidate: unknown, fallback: number) =>
+        typeof candidate === 'number' && Number.isFinite(candidate) ? candidate : fallback
+      const type = EXPENSE_TYPES.includes(expense.type as RetirementExpenseType)
+        ? expense.type as RetirementExpenseType
+        : 'custom'
+
+      return [{
+        id: typeof expense.id === 'string' ? expense.id.slice(0, 80) : `expense-${index}`,
+        name: typeof expense.name === 'string' ? expense.name.slice(0, 80) : `Expense ${index + 1}`,
+        type,
+        annualAmount: Math.max(0, numeric(expense.annualAmount, 0)),
+        startAge: Math.min(120, Math.max(0, Math.floor(numeric(expense.startAge, 0)))),
+      }]
+    }).slice(0, 20)
+  } catch {
+    return DEFAULTS.additionalExpenses
+  }
+}
+
 export function useDeferredCompensationParams() {
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
@@ -277,6 +321,10 @@ export function useDeferredCompensationParams() {
         searchParams.get(PARAM_KEYS.incomeSources)
           ?? JSON.stringify(savedParams?.incomeSources ?? DEFAULTS.incomeSources),
       ),
+      additionalExpenses: sanitizeAdditionalExpenses(
+        searchParams.get(PARAM_KEYS.additionalExpenses)
+          ?? JSON.stringify(savedParams?.additionalExpenses ?? DEFAULTS.additionalExpenses),
+      ),
       withdrawOnlyAfterRetirement: searchParams.get(PARAM_KEYS.withdrawOnlyAfterRetirement)
         ? searchParams.get(PARAM_KEYS.withdrawOnlyAfterRetirement) === 'true'
         : savedParams?.withdrawOnlyAfterRetirement ?? DEFAULTS.withdrawOnlyAfterRetirement,
@@ -301,7 +349,9 @@ export function useDeferredCompensationParams() {
       } else {
         next.set(
           PARAM_KEYS[key],
-          key === 'accounts' || key === 'incomeSources' ? JSON.stringify(value) : String(value),
+          key === 'accounts' || key === 'incomeSources' || key === 'additionalExpenses'
+            ? JSON.stringify(value)
+            : String(value),
         )
       }
       return next
@@ -341,7 +391,9 @@ export function useDeferredCompensationParams() {
         }
         next.set(
           PARAM_KEYS[key],
-          key === 'accounts' || key === 'incomeSources' ? JSON.stringify(value) : String(value),
+          key === 'accounts' || key === 'incomeSources' || key === 'additionalExpenses'
+            ? JSON.stringify(value)
+            : String(value),
         )
       })
       return next
