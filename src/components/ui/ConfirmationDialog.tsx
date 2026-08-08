@@ -35,7 +35,7 @@ export default function ConfirmationDialog({
       if (event.key !== 'Tab') return
 
       const focusableElements = dialogRef.current?.querySelectorAll<HTMLElement>(
-        'button:not([disabled])',
+        'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
       )
       if (!focusableElements?.length) return
 
@@ -60,7 +60,6 @@ export default function ConfirmationDialog({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      role="presentation"
       onClick={onCancel}
     >
       <div
