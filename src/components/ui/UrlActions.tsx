@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { type ReactNode, useEffect, useState } from 'react'
 import Button from './Button'
 
 interface UrlActionsProps {
@@ -150,7 +150,7 @@ export default function UrlActions({
 
 interface ConfirmationDialogProps {
   title: string
-  children: string
+  children: ReactNode
   confirmLabel: string
   onCancel: () => void
   onConfirm: () => void
