@@ -18,8 +18,12 @@ export default function ConfirmationDialog({
 }: ConfirmationDialogProps) {
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
+  const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
+    previouslyFocusedElementRef.current = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null
     dialogRef.current?.querySelector<HTMLButtonElement>('button:not([disabled])')?.focus()
 
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -47,7 +51,10 @@ export default function ConfirmationDialog({
     }
 
     window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      previouslyFocusedElementRef.current?.focus()
+    }
   }, [onCancel])
 
   return (
