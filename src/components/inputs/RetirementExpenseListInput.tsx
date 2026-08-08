@@ -206,7 +206,6 @@ export default function RetirementExpenseListInput({
                     <AgeInput
                       label="Starts at age"
                       value={expense.startAge}
-                      min={currentAge}
                       onChange={value => updateExpense(expense.id, 'startAge', value)}
                       tooltip="This annual expense is included from this age through the end of the plan."
                     />
