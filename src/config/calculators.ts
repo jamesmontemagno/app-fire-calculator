@@ -13,6 +13,7 @@ export interface CalculatorMetadata {
   bgColor: string // Background color class
   borderColor: string // Border color class
   audience: string // Target audience description
+  storagePrefix: 'standard' | 'deferred'
 }
 
 export const calculators: CalculatorMetadata[] = [
@@ -26,6 +27,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-orange-50 dark:bg-orange-900/20',
     borderColor: 'border-orange-200 dark:border-orange-800',
     audience: 'Best for: Anyone starting their FI journey',
+    storagePrefix: 'standard',
   },
   {
     path: '/coast',
@@ -37,6 +39,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-blue-50 dark:bg-blue-900/20',
     borderColor: 'border-blue-200 dark:border-blue-800',
     audience: 'Best for: Young savers wanting flexibility',
+    storagePrefix: 'standard',
   },
   {
     path: '/lean',
@@ -48,6 +51,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-green-50 dark:bg-green-900/20',
     borderColor: 'border-green-200 dark:border-green-800',
     audience: 'Best for: Minimalists & early retirees',
+    storagePrefix: 'standard',
   },
   {
     path: '/fat',
@@ -59,6 +63,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-purple-50 dark:bg-purple-900/20',
     borderColor: 'border-purple-200 dark:border-purple-800',
     audience: 'Best for: High earners & luxury seekers',
+    storagePrefix: 'standard',
   },
   {
     path: '/barista',
@@ -70,6 +75,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-amber-50 dark:bg-amber-900/20',
     borderColor: 'border-amber-200 dark:border-amber-800',
     audience: 'Best for: Those wanting work-life balance',
+    storagePrefix: 'standard',
   },
   {
     path: '/reverse',
@@ -81,6 +87,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-teal-50 dark:bg-teal-900/20',
     borderColor: 'border-teal-200 dark:border-teal-800',
     audience: 'Best for: Goal-oriented planners',
+    storagePrefix: 'standard',
   },
   {
     path: '/withdrawal',
@@ -92,6 +99,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-sky-50 dark:bg-sky-900/20',
     borderColor: 'border-sky-200 dark:border-sky-800',
     audience: 'Best for: Those at or near FIRE',
+    storagePrefix: 'standard',
   },
   {
     path: '/savings-rate',
@@ -103,6 +111,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
     borderColor: 'border-indigo-200 dark:border-indigo-800',
     audience: 'Best for: Understanding your FI timeline',
+    storagePrefix: 'standard',
   },
   {
     path: '/debt-payoff',
@@ -114,6 +123,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-red-50 dark:bg-red-900/20',
     borderColor: 'border-red-200 dark:border-red-800',
     audience: 'Best for: Tackling multiple debts strategically',
+    storagePrefix: 'standard',
   },
   {
     path: '/healthcare',
@@ -125,6 +135,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-rose-50 dark:bg-rose-900/20',
     borderColor: 'border-rose-200 dark:border-rose-800',
     audience: 'Best for: US-based early retirees',
+    storagePrefix: 'standard',
   },
   {
     path: '/retirement-cash-flow',
@@ -136,6 +147,7 @@ export const calculators: CalculatorMetadata[] = [
     bgColor: 'bg-indigo-50 dark:bg-indigo-900/20',
     borderColor: 'border-indigo-200 dark:border-indigo-800',
     audience: 'Best for: Complex, multi-account retirement plans',
+    storagePrefix: 'deferred',
   },
 ]
 
