@@ -18,6 +18,7 @@ import Apps from './pages/Apps'
 import FIREQuiz from './pages/FIREQuiz'
 import DebtPayoff from './pages/DebtPayoff'
 import DeferredCompensation from './pages/DeferredCompensation'
+import Settings from './pages/Settings'
 import './index.css'
 
 const basename = import.meta.env.BASE_URL
@@ -58,6 +59,7 @@ const router = createBrowserRouter([
       { path: 'books', element: <Books /> },
       { path: 'apps', element: <Apps /> },
       { path: 'quiz', element: <FIREQuiz /> },
+      { path: 'settings', element: <Settings /> },
     ],
   },
 ], { basename })

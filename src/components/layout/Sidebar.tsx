@@ -159,6 +159,24 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
           {!isCollapsed && <span>Find Your Path</span>}
         </NavLink>
 
+        <NavLink
+          to="/settings"
+          onClick={onClose}
+          className={({ isActive }) => `
+            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-2
+            font-medium transition-colors
+            ${isCollapsed ? 'justify-center' : ''}
+            ${isActive
+              ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400'
+              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+            }
+          `}
+          title={isCollapsed ? 'Settings' : ''}
+        >
+          <span className="text-xl">⚙️</span>
+          {!isCollapsed && <span>Settings</span>}
+        </NavLink>
+
         {!isCollapsed && (
           <div className="mt-4 mb-3 px-3">
             <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
