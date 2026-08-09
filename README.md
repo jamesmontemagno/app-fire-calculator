@@ -56,6 +56,7 @@ After first load, the app works completely offline. Install it as a PWA on your 
 # Clone the repository
 git clone https://github.com/jamesmontemagno/app-fire-calculator.git
 cd app-fire-calculator
+cd web
 
 # Install dependencies
 npm install
@@ -66,6 +67,19 @@ npm run dev
 # Build for production
 npm run build
 ```
+
+### Build the .NET MAUI App
+
+```bash
+# From the repository root
+dotnet build app/MyFireNumber/MyFireNumber.csproj -f net10.0-android
+dotnet build app/MyFireNumber/MyFireNumber.csproj -f net10.0-ios
+```
+
+Pull requests that change `app/**` run Android and iOS validation workflows. Manual workflow runs
+can also create signed Android App Bundles and iOS archives. See
+[Mobile Release Secrets](docs/MOBILE_RELEASE_SECRETS.md) for the required credentials and setup
+steps.
 
 ## 🛠️ Tech Stack
 

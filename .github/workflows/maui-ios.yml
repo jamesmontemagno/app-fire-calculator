@@ -1,0 +1,182 @@
+name: Build and Package iOS
+
+on:
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'tests/**'
+      - 'MyFireNumber.slnx'
+      - '.github/workflows/maui-ios.yml'
+  workflow_dispatch:
+    inputs:
+      build_release:
+        description: 'Build and sign a release IPA'
+        required: false
+        default: false
+        type: boolean
+      upload_testflight:
+        description: 'Upload the signed IPA to TestFlight'
+        required: false
+        default: false
+        type: boolean
+      base_version:
+        description: 'Application display version (for example, 1.0.0)'
+        required: false
+        default: '1.0.0'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maui-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios:
+    name: iOS
+    runs-on: macos-26
+    timeout-minutes: 45
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      PROJECT_PATH: app/MyFireNumber/MyFireNumber.csproj
+      TEST_PROJECT: tests/MyFireNumber.Tests/MyFireNumber.Tests.csproj
+      TARGET_FRAMEWORK: net10.0-ios
+      RUNTIME_ID: ios-arm64
+      BUNDLE_ID: com.refractored.myfirenumber
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate workflow inputs
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_testflight && !inputs.build_release }}
+        run: |
+          echo "build_release must be enabled when upload_testflight is enabled" >&2
+          exit 1
+
+      - name: Select Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore .NET workloads
+        run: dotnet workload restore "${{ env.PROJECT_PATH }}"
+
+      - name: Restore
+        run: dotnet restore "${{ env.PROJECT_PATH }}" -p:TargetFramework="${{ env.TARGET_FRAMEWORK }}"
+
+      - name: Test calculation, storage, and export layers
+        run: dotnet test "${{ env.TEST_PROJECT }}" -c Release
+
+      - name: Build iOS simulator app
+        if: ${{ github.event_name == 'pull_request' || !inputs.build_release }}
+        run: >-
+          dotnet build "${{ env.PROJECT_PATH }}"
+          -c Debug
+          -f "${{ env.TARGET_FRAMEWORK }}"
+          -p:RuntimeIdentifier=iossimulator-arm64
+
+      - name: Compute release version
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        id: version
+        env:
+          BASE_VERSION: ${{ inputs.base_version }}
+        run: |
+          if [[ ! "$BASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "base_version must be a valid version such as 1.0.0" >&2
+            exit 1
+          fi
+
+          echo "display-version=$BASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "app-version=$((100 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
+
+      - name: Import signing certificate
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        uses: apple-actions/import-codesign-certs@v4
+        with:
+          create-keychain: true
+          keychain-password: ${{ secrets.APPSTORE_CERTIFICATE_P12_PASSWORD }}
+          p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATE_P12 }}
+          p12-password: ${{ secrets.APPSTORE_CERTIFICATE_P12_PASSWORD }}
+
+      - name: Install provisioning profile
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        id: provisioning-profile
+        env:
+          IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.APPLE_IOS_APPSTORE_PROFILE }}
+        run: |
+          if [ -z "$IOS_APPSTORE_PROFILE_BASE64" ]; then
+            echo "APPLE_IOS_APPSTORE_PROFILE secret is required for a release build" >&2
+            exit 1
+          fi
+
+          profile_path="${{ runner.temp }}/myfirenumber.mobileprovision"
+          profile_plist="${{ runner.temp }}/myfirenumber-profile.plist"
+          profiles_directory="$HOME/Library/MobileDevice/Provisioning Profiles"
+
+          printf '%s' "$IOS_APPSTORE_PROFILE_BASE64" | base64 --decode > "$profile_path"
+          security cms -D -i "$profile_path" > "$profile_plist"
+          profile_uuid=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$profile_plist")
+
+          mkdir -p "$profiles_directory"
+          cp "$profile_path" "$profiles_directory/$profile_uuid.mobileprovision"
+          echo "uuid=$profile_uuid" >> "$GITHUB_OUTPUT"
+
+      - name: Publish signed iOS archive
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        env:
+          CODESIGN_KEY: ${{ secrets.APPSTORE_CODESIGN_KEY }}
+        run: |
+          if [ -z "$CODESIGN_KEY" ]; then
+            echo "APPSTORE_CODESIGN_KEY secret is required for a release build" >&2
+            exit 1
+          fi
+
+          dotnet publish "${{ env.PROJECT_PATH }}" \
+            -c Release \
+            -f "${{ env.TARGET_FRAMEWORK }}" \
+            -p:ArchiveOnBuild=true \
+            -p:RuntimeIdentifier="${{ env.RUNTIME_ID }}" \
+            -p:ApplicationDisplayVersion="${{ steps.version.outputs.display-version }}" \
+            -p:ApplicationVersion="${{ steps.version.outputs.app-version }}" \
+            -p:CodesignKey="$CODESIGN_KEY" \
+            -p:CodesignProvision="${{ steps.provisioning-profile.outputs.uuid }}"
+
+      - name: Locate iOS archive
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        id: ios-artifact
+        run: |
+          artifact_path=$(find "app/MyFireNumber/bin/Release/${{ env.TARGET_FRAMEWORK }}/${{ env.RUNTIME_ID }}/publish" -maxdepth 1 -name '*.ipa' -print -quit)
+          if [ -z "$artifact_path" ]; then
+            echo "Signed iOS archive was not produced" >&2
+            exit 1
+          fi
+
+          echo "path=$artifact_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload to TestFlight
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release && inputs.upload_testflight }}
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-type: ios
+          app-path: ${{ steps.ios-artifact.outputs.path }}
+          issuer-id: ${{ secrets.APPLE_REFRACTORED_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPLE_REFRACTORED_KEY_ID }}
+          api-private-key: ${{ secrets.APPLE_REFRACTORED_P8_KEY }}
+
+      - name: Upload iOS archive
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: myfirenumber-ios-ipa
+          path: ${{ steps.ios-artifact.outputs.path }}
+          if-no-files-found: error

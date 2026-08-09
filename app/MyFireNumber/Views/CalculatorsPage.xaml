@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:catalog="clr-namespace:MyFireNumber.Core.Calculators;assembly=MyFireNumber.Core"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.CalculatorsPage"
+             x:DataType="viewModels:CalculatorCatalogViewModel"
+             Title="Calculators"
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+
+    <Grid Padding="20,16">
+        <CollectionView ItemsSource="{Binding FilteredCalculatorGroups}"
+                        IsGrouped="True"
+                        SelectionMode="None">
+            <CollectionView.Header>
+                <VerticalStackLayout Spacing="14" Margin="0,0,0,14">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Text="&#xf1ec;"
+                               FontFamily="FontAwesomeSolid"
+                               VerticalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               FontSize="24"
+                               SemanticProperties.Description="Calculators" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="All calculators"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="24"
+                                   SemanticProperties.HeadingLevel="Level1" />
+                            <Label Text="Explore FIRE, finance, and cash flow tools."
+                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   FontSize="13" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <SearchBar AutomationId="CalculatorSearch"
+                               Placeholder="Search calculators"
+                               Text="{Binding SearchText, Mode=TwoWay}"
+                               Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                               PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                               SemanticProperties.Description="Search available calculators" />
+                </VerticalStackLayout>
+            </CollectionView.Header>
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate x:DataType="viewModels:CalculatorGroup">
+                    <Grid ColumnDefinitions="Auto,*"
+                          ColumnSpacing="8"
+                          Padding="4,12,4,10">
+                        <Label Text="{Binding IconGlyph}"
+                               FontFamily="FontAwesomeSolid"
+                               FontSize="17"
+                               VerticalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               SemanticProperties.Description="{Binding Name, StringFormat='{0} calculators'}" />
+                        <Label Grid.Column="1"
+                               Text="{Binding Name}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                               SemanticProperties.HeadingLevel="Level2" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="catalog:CalculatorDefinition">
+                    <Border Margin="0,0,0,10"
+                            Padding="16"
+                            Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                            Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                            StrokeShape="RoundRectangle 12"
+                            SemanticProperties.Description="{Binding Title, StringFormat='Open {0} calculator'}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:CalculatorCatalogViewModel}}, Path=OpenCalculatorCommand}"
+                                                  CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12">
+                            <Border WidthRequest="44"
+                                    HeightRequest="44"
+                                    Padding="0"
+                                    Background="{AppThemeBinding Light=#E6F0EA, Dark=#29483A}"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12">
+                                <Label Text="{Binding IconGlyph}"
+                                       FontFamily="FontAwesomeSolid"
+                                       FontSize="19"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light=#2F6B57, Dark=#9ACCB3}"
+                                       SemanticProperties.Description="{Binding Title, StringFormat='{0} icon'}" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                <Label Text="{Binding Title}"
+                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                       FontAttributes="Bold"
+                                       FontSize="18" />
+                                <Label Text="{Binding Summary}"
+                                       TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                       FontSize="13" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="2"
+                                   Text="&#xf054;"
+                                   FontFamily="FontAwesomeSolid"
+                                   FontSize="14"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                   SemanticProperties.Description="Open" />
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                  <VerticalStackLayout VerticalOptions="Center" Spacing="8">
+                      <Label Text="&#xf002;"
+                              FontFamily="FontAwesomeSolid"
+                              VerticalTextAlignment="Center"
+                          TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                          FontSize="28"
+                           SemanticProperties.Description="Search" />
+                      <Label Text="No calculators match that search."
+                          HorizontalTextAlignment="Center"
+                          VerticalTextAlignment="Center" />
+                  </VerticalStackLayout>
+            </CollectionView.EmptyView>
+            <CollectionView.Footer>
+                <controls:EducationalDisclaimerView Margin="0,8,0,4" />
+            </CollectionView.Footer>
+        </CollectionView>
+    </Grid>
+</ContentPage>

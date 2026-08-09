@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+             xmlns:services="clr-namespace:MyFireNumber.Services"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.SettingsPage"
+             x:DataType="viewModels:SettingsViewModel"
+             Title="Settings"
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="24" Spacing="18">
+                  <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                      <Label Text="&#xf013;"
+                              FontFamily="FontAwesomeSolid"
+                              VerticalTextAlignment="Center"
+                          TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                          FontSize="28"
+                           SemanticProperties.Description="Settings" />
+                      <Label Grid.Column="1"
+                          Text="Settings"
+                          TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                          FontAttributes="Bold"
+                          FontSize="30"
+                          SemanticProperties.HeadingLevel="Level1" />
+                  </Grid>
+                <Border Padding="18"
+                       Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                       Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                       StrokeShape="RoundRectangle 12">
+                   <VerticalStackLayout Spacing="12">
+                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                           <Label Text="&#xf53f;"
+                                  FontFamily="FontAwesomeSolid"
+                                  VerticalTextAlignment="Center"
+                                  TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                  SemanticProperties.Description="Appearance" />
+                           <Label Grid.Column="1"
+                                  Text="Appearance"
+                                  TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                  FontAttributes="Bold"
+                                  FontSize="18" />
+                       </Grid>
+                       <Label Text="Choose whether the app follows your device or stays light or dark."
+                              TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                              LineHeight="1.3" />
+                       <Border Padding="4"
+                               Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                               StrokeThickness="0"
+                               StrokeShape="RoundRectangle 12">
+                           <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                               <Button AutomationId="SystemThemeButton"
+                                       Text="&#xf108;"
+                                       FontFamily="FontAwesomeSolid"
+                                       FontSize="16"
+                                       Command="{Binding SetThemeCommand}"
+                                       CommandParameter="{x:Static services:ThemePreference.System}"
+                                       Background="Transparent"
+                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       CornerRadius="9"
+                                       SemanticProperties.Description="Use the device appearance.">
+                                   <Button.Triggers>
+                                       <DataTrigger TargetType="Button" Binding="{Binding SelectedTheme}" Value="System">
+                                           <Setter Property="Background" Value="#2F6B57" />
+                                           <Setter Property="TextColor" Value="#FFFFFF" />
+                                       </DataTrigger>
+                                   </Button.Triggers>
+                               </Button>
+                               <Button AutomationId="LightThemeButton"
+                                       Grid.Column="1"
+                                       Text="&#xf185;"
+                                       FontFamily="FontAwesomeSolid"
+                                       FontSize="16"
+                                       Command="{Binding SetThemeCommand}"
+                                       CommandParameter="{x:Static services:ThemePreference.Light}"
+                                       Background="Transparent"
+                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       CornerRadius="9"
+                                       SemanticProperties.Description="Always use the light appearance.">
+                                   <Button.Triggers>
+                                       <DataTrigger TargetType="Button" Binding="{Binding SelectedTheme}" Value="Light">
+                                           <Setter Property="Background" Value="#2F6B57" />
+                                           <Setter Property="TextColor" Value="#FFFFFF" />
+                                       </DataTrigger>
+                                   </Button.Triggers>
+                               </Button>
+                               <Button AutomationId="DarkThemeButton"
+                                       Grid.Column="2"
+                                       Text="&#xf186;"
+                                       FontFamily="FontAwesomeSolid"
+                                       FontSize="16"
+                                       Command="{Binding SetThemeCommand}"
+                                       CommandParameter="{x:Static services:ThemePreference.Dark}"
+                                       Background="Transparent"
+                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       CornerRadius="9"
+                                       SemanticProperties.Description="Always use the dark appearance.">
+                                   <Button.Triggers>
+                                       <DataTrigger TargetType="Button" Binding="{Binding SelectedTheme}" Value="Dark">
+                                           <Setter Property="Background" Value="#2F6B57" />
+                                           <Setter Property="TextColor" Value="#FFFFFF" />
+                                       </DataTrigger>
+                                   </Button.Triggers>
+                               </Button>
+                           </Grid>
+                       </Border>
+                   </VerticalStackLayout>
+                </Border>
+                <Border Padding="18"
+                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Label Text="&#xf085;"
+                                   FontFamily="FontAwesomeSolid"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   SemanticProperties.Description="App behavior and accessibility" />
+                            <Label Grid.Column="1"
+                                   Text="Behavior &amp; accessibility"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="18" />
+                        </Grid>
+                        <Label Text="Choose the tab My Fire # opens after onboarding."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                        <Border Padding="4"
+                                Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 12">
+                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                                <Button AutomationId="LaunchHomeButton"
+                                        Text="Home"
+                                        Command="{Binding SetLaunchDestinationCommand}"
+                                        CommandParameter="{x:Static services:LaunchDestination.Home}"
+                                        Background="Transparent"
+                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding SelectedLaunchDestination}" Value="Home">
+                                            <Setter Property="Background" Value="#2F6B57" />
+                                            <Setter Property="TextColor" Value="#FFFFFF" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button AutomationId="LaunchCalculatorsButton"
+                                        Grid.Column="1"
+                                        Text="Calculators"
+                                        Command="{Binding SetLaunchDestinationCommand}"
+                                        CommandParameter="{x:Static services:LaunchDestination.Calculators}"
+                                        Background="Transparent"
+                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding SelectedLaunchDestination}" Value="Calculators">
+                                            <Setter Property="Background" Value="#2F6B57" />
+                                            <Setter Property="TextColor" Value="#FFFFFF" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button AutomationId="LaunchPlansButton"
+                                        Grid.Column="2"
+                                        Text="Plans"
+                                        Command="{Binding SetLaunchDestinationCommand}"
+                                        CommandParameter="{x:Static services:LaunchDestination.Plans}"
+                                        Background="Transparent"
+                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding SelectedLaunchDestination}" Value="Plans">
+                                            <Setter Property="Background" Value="#2F6B57" />
+                                            <Setter Property="TextColor" Value="#FFFFFF" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                            </Grid>
+                        </Border>
+                        <Label AutomationId="LaunchDestinationStatus"
+                               Text="{Binding LaunchDestinationDescription}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                               SemanticProperties.Description="{Binding LaunchDestinationDescription}" />
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="10">
+                            <Label Text="Restore latest calculator drafts" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="RestoreDraftsSwitch" Grid.Column="1" IsToggled="{Binding RestoreDrafts}" OnColor="#2F6B57" />
+                            <Label Grid.Row="1" Text="Confirm before deleting plans" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="ConfirmPlanDeletionSwitch" Grid.Row="1" Grid.Column="1" IsToggled="{Binding ConfirmPlanDeletion}" OnColor="#2F6B57" />
+                            <Label Grid.Row="2" Text="Interaction haptics" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="HapticsSwitch" Grid.Row="2" Grid.Column="1" IsToggled="{Binding HapticsEnabled}" OnColor="#2F6B57" />
+                            <Label Grid.Row="3" Text="Reduce chart motion" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="ReduceMotionSwitch" Grid.Row="3" Grid.Column="1" IsToggled="{Binding ReduceMotion}" OnColor="#2F6B57" />
+                            <Label Grid.Row="4" Text="High contrast dark palette" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="HighContrastSwitch" Grid.Row="4" Grid.Column="1" IsToggled="{Binding HighContrast}" OnColor="#2F6B57" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+                <Border Padding="18"
+                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Label Text="&#xf1ec;"
+                                   FontFamily="FontAwesomeSolid"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   SemanticProperties.Description="Calculator defaults" />
+                            <Label Grid.Column="1"
+                                   Text="Calculator defaults"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="18" />
+                        </Grid>
+                        <Label Text="Set starting assumptions for new calculators. Existing drafts and saved plans never change."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               LineHeight="1.3" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Currency"
+                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   FontSize="13" />
+                            <Picker AutomationId="CurrencyPicker"
+                                    ItemsSource="{Binding CurrencyOptions}"
+                                    SelectedItem="{Binding SelectedCurrencyOption}"
+                                    Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                    TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                    TitleColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                    SemanticProperties.Description="Currency used to display calculator results" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="12">
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,96" ColumnSpacing="10">
+                                <Label Text="Expected return"
+                                       VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       FontSize="13" />
+                                <Entry AutomationId="ExpectedReturnDefaultEntry"
+                                       Grid.Column="1"
+                                       Text="{Binding ExpectedReturnPercent}"
+                                       Keyboard="Numeric"
+                                       Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                       SemanticProperties.Description="Default expected annual return percentage" />
+                                <Slider AutomationId="ExpectedReturnDefaultSlider"
+                                        Grid.Row="1"
+                                        Grid.ColumnSpan="2"
+                                        Minimum="1"
+                                        Maximum="15"
+                                        Value="{Binding ExpectedReturnSlider}"
+                                        MinimumTrackColor="#2F6B57"
+                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                                        ThumbColor="#2F6B57"
+                                        SemanticProperties.Description="Adjust default expected annual return percentage" />
+                            </Grid>
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,96" ColumnSpacing="10">
+                                <Label Text="Inflation"
+                                       VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       FontSize="13" />
+                                <Entry AutomationId="InflationDefaultEntry"
+                                       Grid.Column="1"
+                                       Text="{Binding InflationRatePercent}"
+                                       Keyboard="Numeric"
+                                       Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                       SemanticProperties.Description="Default annual inflation percentage" />
+                                <Slider AutomationId="InflationDefaultSlider"
+                                        Grid.Row="1"
+                                        Grid.ColumnSpan="2"
+                                        Minimum="0"
+                                        Maximum="10"
+                                        Value="{Binding InflationRateSlider}"
+                                        MinimumTrackColor="#2F6B57"
+                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                                        ThumbColor="#2F6B57"
+                                        SemanticProperties.Description="Adjust default annual inflation percentage" />
+                            </Grid>
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,96" ColumnSpacing="10">
+                                <Label Text="Withdrawal rate"
+                                       VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       FontSize="13" />
+                                <Entry AutomationId="WithdrawalDefaultEntry"
+                                       Grid.Column="1"
+                                       Text="{Binding WithdrawalRatePercent}"
+                                       Keyboard="Numeric"
+                                       Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                       SemanticProperties.Description="Default safe withdrawal percentage" />
+                                <Slider AutomationId="WithdrawalDefaultSlider"
+                                        Grid.Row="1"
+                                        Grid.ColumnSpan="2"
+                                        Minimum="1"
+                                        Maximum="10"
+                                        Value="{Binding WithdrawalRateSlider}"
+                                        MinimumTrackColor="#2F6B57"
+                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                                        ThumbColor="#2F6B57"
+                                        SemanticProperties.Description="Adjust default safe withdrawal percentage" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Current age"
+                                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                           FontSize="13" />
+                                    <Entry AutomationId="CurrentAgeDefaultEntry"
+                                           Text="{Binding DefaultCurrentAge}"
+                                           Keyboard="Numeric"
+                                           Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                           PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                           SemanticProperties.Description="Default current age" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                    <Label Text="Retirement age"
+                                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                           FontSize="13" />
+                                    <Entry AutomationId="RetirementAgeDefaultEntry"
+                                           Text="{Binding DefaultRetirementAge}"
+                                           Keyboard="Numeric"
+                                           Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                           PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                           SemanticProperties.Description="Default retirement age" />
+                                </VerticalStackLayout>
+                            </Grid>
+                            <Button Text="Save defaults"
+                                    Command="{Binding SaveCalculatorDefaultsCommand}"
+                                    Background="#2F6B57"
+                                    TextColor="#FFFFFF"
+                                    SemanticProperties.Description="Save calculator defaults for new calculators." />
+                        </VerticalStackLayout>
+                        <Label Text="{Binding DefaultsStatus}"
+                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               FontSize="13" />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Padding="18"
+                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="10">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Home calculators"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="18" />
+                            <Label Text="Choose the calculators shown on Home and arrange their order."
+                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   LineHeight="1.3" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="10"
+                                             BindableLayout.ItemsSource="{Binding CalculatorPreferences}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:CalculatorPreferenceItem">
+                                <Grid ColumnDefinitions="*,44,44,44" ColumnSpacing="6">
+                                    <Label Text="{Binding Title}"
+                                           VerticalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                                    <Button Grid.Column="1"
+                                            Text="&#xf062;"
+                                            FontFamily="FontAwesomeSolid"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=MoveCalculatorUpCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                            TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                            FontSize="14"
+                                            Padding="0"
+                                            SemanticProperties.Description="{Binding Title, StringFormat='Move {0} earlier on Home.'}" />
+                                    <Button Grid.Column="2"
+                                            Text="&#xf063;"
+                                            FontFamily="FontAwesomeSolid"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=MoveCalculatorDownCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                            TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                            FontSize="14"
+                                            Padding="0"
+                                            SemanticProperties.Description="{Binding Title, StringFormat='Move {0} later on Home.'}" />
+                                    <Button Grid.Column="3"
+                                            Text="{Binding VisibilityIcon}"
+                                            FontFamily="FontAwesomeSolid"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=ToggleCalculatorVisibilityCommand}"
+                                            CommandParameter="{Binding .}"
+                                            Background="#2F6B57"
+                                            TextColor="#FFFFFF"
+                                            FontSize="14"
+                                            Padding="0"
+                                            SemanticProperties.Description="{Binding VisibilityDescription}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Button Text="Reset Home calculators"
+                                Command="{Binding ResetCalculatorPreferencesCommand}"
+                                Background="#E4F0E9"
+                                TextColor="#245744"
+                                SemanticProperties.Description="Show all calculators and restore the default Home order after confirmation." />
+                    </VerticalStackLayout>
+                </Border>
+                <Border Padding="18"
+                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Label Text="&#xf1c0;"
+                                   FontFamily="FontAwesomeSolid"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   SemanticProperties.Description="Your data" />
+                            <Label Grid.Column="1"
+                                   Text="Your data"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="18" />
+                        </Grid>
+                        <Label Text="Create a private backup or restore one you exported earlier. Nothing is uploaded automatically."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               LineHeight="1.3" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Text="Export backup"
+                                    Command="{Binding ExportDataCommand}"
+                                    Background="#2F6B57"
+                                    TextColor="#FFFFFF"
+                                    SemanticProperties.Description="Create and share a local backup of all app data." />
+                            <Button Grid.Column="1"
+                                    Text="Import backup"
+                                    Command="{Binding ImportDataCommand}"
+                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                    SemanticProperties.Description="Choose a backup file to replace local app data after confirmation." />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+                <Button Text="Retake FIRE Quiz"
+                        Command="{Binding RetakeQuizCommand}"
+                        Background="#2F6B57"
+                        TextColor="#FFFFFF">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf01e;" Color="#FFFFFF" Size="14" />
+                    </Button.ImageSource>
+                </Button>
+                <Border Padding="18"
+                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Label Text="&#xf023;"
+                                   FontFamily="FontAwesomeSolid"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   SemanticProperties.Description="Privacy" />
+                            <Label Grid.Column="1"
+                                   Text="Privacy first"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="18" />
+                        </Grid>
+                        <Label Text="Your financial inputs stay in local app storage. My Fire Number does not use analytics or transmit them. Your operating system may include app data in an encrypted device backup when backups are enabled."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               LineHeight="1.3" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Text="Terms"
+                                    Command="{Binding OpenTermsCommand}"
+                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                    SemanticProperties.Description="Open the My Fire Number terms on the website." />
+                            <Button Grid.Column="1"
+                                    Text="Privacy policy"
+                                    Command="{Binding OpenPrivacyCommand}"
+                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                    SemanticProperties.Description="Open the My Fire Number privacy policy on the website." />
+                        </Grid>
+                        <Button Text="Delete all app data"
+                                Command="{Binding ResetAppCommand}"
+                                Background="#9A4335"
+                                TextColor="#FFFFFF"
+                                SemanticProperties.Description="Permanently delete all local app data after confirmation and restart with the FIRE Quiz." />
+                    </VerticalStackLayout>
+                </Border>
+                <controls:EducationalDisclaimerView />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>
