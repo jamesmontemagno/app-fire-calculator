@@ -68,7 +68,7 @@ presets, input semantics, result metrics, projection data, explanatory copy, and
 
 ### Included Supporting Features
 
-- [ ] Home dashboard with enabled calculators in user-defined order
+- [~] Home dashboard with enabled calculators in user-defined order (implemented; device validation pending)
 - [ ] All Calculators catalog with search and visibility controls
 - [ ] First-run and repeatable FIRE Quiz
 - [ ] Automatic per-calculator drafts
