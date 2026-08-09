@@ -9,9 +9,10 @@
              Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
 
     <Grid Padding="20,16" RowDefinitions="Auto,*" RowSpacing="16">
-        <SearchBar Placeholder="Search calculators"
+        <SearchBar AutomationId="CalculatorSearch"
+                   Placeholder="Search calculators"
                    Text="{Binding SearchText, Mode=TwoWay}"
-                   Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                   Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
                    TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                    PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
                    SemanticProperties.Description="Search available calculators" />

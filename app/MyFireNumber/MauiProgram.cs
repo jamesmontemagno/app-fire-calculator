@@ -6,6 +6,10 @@ using MyFireNumber.Storage;
 using MyFireNumber.ViewModels;
 using MyFireNumber.Views;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+#if IOS
+using Microsoft.Maui.Handlers;
+using Microsoft.Maui.Platform;
+#endif
 #if MAUI_DEVFLOW
 using Microsoft.Maui.DevFlow.Agent;
 #endif
@@ -16,6 +20,19 @@ public static class MauiProgram
 {
 	public static MauiApp CreateMauiApp()
 	{
+#if IOS
+		SearchBarHandler.Mapper.AppendToMapping(
+			nameof(SearchBar.Background),
+			static (handler, _) =>
+			{
+				if (handler.VirtualView is SearchBar searchBar &&
+					searchBar.Background is SolidColorBrush brush)
+				{
+					handler.PlatformView.SearchTextField.BackgroundColor = brush.Color.ToPlatform();
+				}
+			});
+#endif
+
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()

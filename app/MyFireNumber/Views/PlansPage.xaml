@@ -31,7 +31,7 @@
                     </Grid>
 
                     <Border Padding="10,6"
-                            Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                            Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
                             Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                             StrokeShape="RoundRectangle 12">
                         <Grid RowDefinitions="Auto,1,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="8">
@@ -41,10 +41,11 @@
                                    VerticalTextAlignment="Center"
                                    TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                    SemanticProperties.Description="Search" />
-                            <SearchBar Grid.Column="1"
+                            <SearchBar AutomationId="PlanSearch"
+                                       Grid.Column="1"
                                        Placeholder="Search saved plans"
                                        Text="{Binding SearchText, Mode=TwoWay}"
-                                       Background="Transparent"
+                                       Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                                        PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
                                        SemanticProperties.Description="Search saved plans by name." />
@@ -60,7 +61,8 @@
                                    VerticalTextAlignment="Center"
                                    TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                    SemanticProperties.Description="Filter" />
-                            <Picker Grid.Row="2"
+                            <Picker AutomationId="PlanCalculatorFilter"
+                                    Grid.Row="2"
                                     Grid.Column="1"
                                     Title="All calculators"
                                     ItemsSource="{Binding CalculatorFilters}"
