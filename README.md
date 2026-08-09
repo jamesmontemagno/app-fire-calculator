@@ -56,6 +56,7 @@ After first load, the app works completely offline. Install it as a PWA on your 
 # Clone the repository
 git clone https://github.com/jamesmontemagno/app-fire-calculator.git
 cd app-fire-calculator
+cd web
 
 # Install dependencies
 npm install

@@ -19,7 +19,7 @@ We implement a standard "404 redirect trick" for SPAs on GitHub Pages:
 
 ## Implementation Details
 
-### 404.html (`public/404.html`)
+### 404.html (`web/public/404.html`)
 
 When GitHub Pages can't find a file, it serves this custom 404 page:
 
@@ -38,7 +38,7 @@ if (path && path.startsWith('/') && !path.startsWith('//') && !path.includes(':/
 }
 ```
 
-### index.html (root page)
+### index.html (`web/index.html`)
 
 The root page includes a script that runs before React loads:
 
@@ -118,6 +118,7 @@ This solution maintains all existing application features:
 To test this solution locally:
 
 ```bash
+cd web
 npm run build
 npm run preview
 ```
