@@ -1,0 +1,135 @@
+name: Build and Package Android
+
+on:
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'app/**'
+      - 'MyFireNumber.slnx'
+      - '.github/workflows/maui-android.yml'
+  workflow_dispatch:
+    inputs:
+      build_release:
+        description: 'Build and sign a release AAB'
+        required: false
+        default: false
+        type: boolean
+      base_version:
+        description: 'Application display version (for example, 1.0.0)'
+        required: false
+        default: '1.0.0'
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maui-android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-android:
+    name: Android
+    runs-on: macos-15
+    timeout-minutes: 45
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      PROJECT_PATH: app/MyFireNumber/MyFireNumber.csproj
+      TARGET_FRAMEWORK: net10.0-android
+      RUNTIME_ID: android-arm64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: microsoft
+          java-version: '21'
+
+      - name: Install .NET MAUI Android workload
+        run: dotnet workload install maui-android
+
+      - name: Restore
+        run: dotnet restore "${{ env.PROJECT_PATH }}" -p:TargetFramework="${{ env.TARGET_FRAMEWORK }}"
+
+      - name: Build Android
+        if: ${{ github.event_name == 'pull_request' || !inputs.build_release }}
+        run: dotnet build "${{ env.PROJECT_PATH }}" -c Debug -f "${{ env.TARGET_FRAMEWORK }}"
+
+      - name: Compute release version
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        id: version
+        env:
+          BASE_VERSION: ${{ inputs.base_version }}
+        run: |
+          if [[ ! "$BASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+            echo "base_version must be a valid version such as 1.0.0" >&2
+            exit 1
+          fi
+
+          echo "display-version=$BASE_VERSION" >> "$GITHUB_OUTPUT"
+          echo "app-version=$((100 + GITHUB_RUN_NUMBER))" >> "$GITHUB_OUTPUT"
+
+      - name: Decode Android keystore
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE_BASE64" ]; then
+            echo "ANDROID_KEYSTORE secret is required for a release build" >&2
+            exit 1
+          fi
+
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "${{ runner.temp }}/myfirenumber.keystore"
+
+      - name: Publish signed Android App Bundle
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          if [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ]; then
+            echo "ANDROID_KEYSTORE_PASSWORD and ANDROID_KEY_ALIAS secrets are required" >&2
+            exit 1
+          fi
+
+          dotnet publish "${{ env.PROJECT_PATH }}" \
+            -c Release \
+            -f "${{ env.TARGET_FRAMEWORK }}" \
+            -p:RuntimeIdentifier="${{ env.RUNTIME_ID }}" \
+            -p:ApplicationDisplayVersion="${{ steps.version.outputs.display-version }}" \
+            -p:ApplicationVersion="${{ steps.version.outputs.app-version }}" \
+            -p:AndroidPackageFormat=aab \
+            -p:AndroidKeyStore=true \
+            -p:AndroidSigningKeyStore="${{ runner.temp }}/myfirenumber.keystore" \
+            -p:AndroidSigningKeyAlias="$KEY_ALIAS" \
+            -p:AndroidSigningKeyPass=env:KEYSTORE_PASSWORD \
+            -p:AndroidSigningStorePass=env:KEYSTORE_PASSWORD
+
+      - name: Locate Android App Bundle
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        id: android-artifact
+        run: |
+          artifact_path=$(find "app/MyFireNumber/bin/Release/${{ env.TARGET_FRAMEWORK }}/${{ env.RUNTIME_ID }}/publish" -maxdepth 1 -name '*-Signed.aab' -print -quit)
+          if [ -z "$artifact_path" ]; then
+            echo "Signed Android App Bundle was not produced" >&2
+            exit 1
+          fi
+
+          echo "path=$artifact_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Android App Bundle
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: myfirenumber-android-aab
+          path: ${{ steps.android-artifact.outputs.path }}
+          if-no-files-found: error

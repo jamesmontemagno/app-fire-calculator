@@ -3,9 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: ['main']
-    paths-ignore:
-      - 'blogs/**'
-      - '*.md'
+    paths:
+      - 'web/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 permissions:

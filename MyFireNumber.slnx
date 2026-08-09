@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/app/">
+    <Project Path="app/MyFireNumber/MyFireNumber.csproj" />
+  </Folder>
+</Solution>

@@ -20,5 +20,27 @@ dist-ssr
 *.suo
 *.ntvs*
 *.njsproj
-*.sln
 *.sw?
+
+# .NET and .NET MAUI build output
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+*.pidb
+*.booproj
+*.svclog
+*.scc
+TestResults/
+*.nupkg
+*.snupkg
+
+# Mobile signing credentials
+*.keystore
+*.jks
+*.mobileprovision
+*.p12
+*.pfx

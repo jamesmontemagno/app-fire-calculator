@@ -68,6 +68,19 @@ npm run dev
 npm run build
 ```
 
+### Build the .NET MAUI App
+
+```bash
+# From the repository root
+dotnet build app/MyFireNumber/MyFireNumber.csproj -f net10.0-android
+dotnet build app/MyFireNumber/MyFireNumber.csproj -f net10.0-ios
+```
+
+Pull requests that change `app/**` run Android and iOS validation workflows. Manual workflow runs can also create signed Android App Bundles and iOS archives. Signed releases require these repository secrets:
+
+- Android: `ANDROID_KEYSTORE`, `ANDROID_KEYSTORE_PASSWORD`, and `ANDROID_KEY_ALIAS`
+- iOS/App Store Connect: `APPSTORE_CERTIFICATE_P12`, `APPSTORE_CERTIFICATE_P12_PASSWORD`, `APPSTORE_CODESIGN_KEY`, `APPSTORE_ISSUER_ID`, `APPSTORE_KEY_ID`, and `APPSTORE_PRIVATE_KEY`
+
 ## 🛠️ Tech Stack
 
 - **React 19** - UI framework
