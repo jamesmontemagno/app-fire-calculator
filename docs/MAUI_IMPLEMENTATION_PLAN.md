@@ -436,7 +436,7 @@ them with MAUI `Share`. Do not retain exports indefinitely.
 
 - [~] Record clean iOS simulator and Android emulator launches
 - [x] Wire MauiDevFlow for Debug validation
-- [ ] Add test project to `MyFireNumber.slnx`
+- [x] Add test project to `MyFireNumber.slnx`
 - [x] Add selected packages
 - [ ] Prove a LiveCharts2 chart renders on iOS and Android
 - [ ] Prove a SQLite write/read/migration cycle on iOS and Android
@@ -453,6 +453,7 @@ Exit gate: all technical risks have small running proofs on both target platform
 | 2026-08-08 | DevFlow extension | VS Code MAUI extension 1.17.156 failed with `MSB4099`; a documented temporary local scalar-property workaround allows the exact IDE build path to succeed. | Local workaround active |
 | 2026-08-08 | iOS baseline | MyFireNumber launches on standard iPhone 17 at 402x874. DevFlow 0.1.0-preview.12.26368.2 connects on port 10223; visible labels and button have non-zero bounds. Tapping the button changes `Click me` to `Clicked 1 time`. | Complete |
 | 2026-08-08 | iOS accessibility baseline | Button runtime colors are TextColor `#FFFFFF` on BackgroundColor `#512BD4`; screenshot confirms readable contrast and no overlap. | Complete |
+| 2026-08-08 | Test harness | .NET 10 xUnit project is registered in `MyFireNumber.slnx`; one convention test is discovered and passes. | Complete |
 
 #### Temporary DevFlow Extension Workaround
 
