@@ -615,11 +615,18 @@ Exit gate: collection editing, calculations, charts, plans, and exports pass on 
 - [ ] Port quiz questions and recommendation rules
 - [ ] Implement Skip, completion, retake, and draft-overwrite confirmation
 - [ ] Build Home with enabled calculators in selected order
-- [ ] Build searchable All Calculators catalog
-- [ ] Build Plans list and plan management workflows
+- [~] Build searchable All Calculators catalog
+- [~] Build Plans list and plan management workflows
 - [ ] Verify hidden calculators remain discoverable
 
 Exit gate: all top-level navigation and discovery workflows are complete.
+
+#### Phase 6 Evidence
+
+| Date | Item | Evidence | Status |
+| --- | --- | --- | --- |
+| 2026-08-09 | Calculator catalog interaction and theming | Calculator cards are full-width tap targets with distinct Font Awesome icons and no redundant Open buttons. On iPhone 17, tapping the Standard FIRE card opens its detail route. The dark SearchBar reports TextColor `#F2F7F3` and PlaceholderColor `#B9D1C2`; screenshot evidence confirms readable native field contrast. | iOS complete; hidden-calculator discovery and Android pending |
+| 2026-08-09 | Plans interaction and discovery | Saved-plan cards are full-width tap targets with no redundant Open buttons. Tapping `iOS Validation Plan` opens the saved Standard FIRE scenario. Rename, Duplicate, and Delete are exposed as native right-side swipe actions, and search plus calculator filtering now share one clearly grouped surface. | iOS tap and layout complete; swipe gesture automation and Android pending |
 
 ### Phase 7: Full Settings
 

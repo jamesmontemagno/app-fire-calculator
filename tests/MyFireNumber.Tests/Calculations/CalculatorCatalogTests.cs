@@ -12,6 +12,7 @@ public class CalculatorCatalogTests
         Assert.Equal(11, catalog.All.Count);
         Assert.Equal(catalog.All.Count, catalog.All.Select(definition => definition.Id).Distinct().Count());
         Assert.All(catalog.All, definition => Assert.Equal($"calculator/{definition.Id}", definition.Route));
+        Assert.All(catalog.All, definition => Assert.False(string.IsNullOrWhiteSpace(definition.IconGlyph)));
     }
 
     [Fact]

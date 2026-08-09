@@ -11,9 +11,9 @@
     <Grid Padding="20,16" RowDefinitions="Auto,*" RowSpacing="16">
         <SearchBar Placeholder="Search calculators"
                    Text="{Binding SearchText, Mode=TwoWay}"
-                   Background="#FFFFFF"
-                   TextColor="#17352C"
-                   PlaceholderColor="#587068"
+                   Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                   PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
                    SemanticProperties.Description="Search available calculators" />
 
         <CollectionView Grid.Row="1" ItemsSource="{Binding FilteredCalculators}" SelectionMode="None">
@@ -23,9 +23,28 @@
                             Padding="16"
                             Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                             Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                            StrokeShape="RoundRectangle 8">
-                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                            <VerticalStackLayout Spacing="4">
+                            StrokeShape="RoundRectangle 12"
+                            SemanticProperties.Description="{Binding Title, StringFormat='Open {0} calculator'}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:CalculatorCatalogViewModel}}, Path=OpenCalculatorCommand}"
+                                                  CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12">
+                            <Border WidthRequest="44"
+                                    HeightRequest="44"
+                                    Padding="0"
+                                    Background="{AppThemeBinding Light=#E6F0EA, Dark=#29483A}"
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12">
+                                <Label Text="{Binding IconGlyph}"
+                                       FontFamily="FontAwesomeSolid"
+                                       FontSize="19"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light=#2F6B57, Dark=#9ACCB3}"
+                                       SemanticProperties.Description="{Binding Title, StringFormat='{0} icon'}" />
+                            </Border>
+                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
                                 <Label Text="{Binding Title}"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                                        FontAttributes="Bold"
@@ -34,18 +53,13 @@
                                        TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
                                        FontSize="13" />
                             </VerticalStackLayout>
-                            <Button Grid.Column="1"
-                                    Text="Open"
-                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:CalculatorCatalogViewModel}}, Path=OpenCalculatorCommand}"
-                                    CommandParameter="{Binding .}"
-                                    Background="#2F6B57"
-                                    TextColor="#FFFFFF"
-                                    FontSize="12"
-                                    MinimumWidthRequest="78">
-                                <Button.ImageSource>
-                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf061;" Color="#FFFFFF" Size="12" />
-                                </Button.ImageSource>
-                            </Button>
+                            <Label Grid.Column="2"
+                                   Text="&#xf054;"
+                                   FontFamily="FontAwesomeSolid"
+                                   FontSize="14"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                   SemanticProperties.Description="Open" />
                         </Grid>
                     </Border>
                 </DataTemplate>
