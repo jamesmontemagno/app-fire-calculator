@@ -108,15 +108,28 @@ jobs:
           p12-file-base64: ${{ secrets.APPSTORE_CERTIFICATE_P12 }}
           p12-password: ${{ secrets.APPSTORE_CERTIFICATE_P12_PASSWORD }}
 
-      - name: Download provisioning profile
+      - name: Install provisioning profile
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
-        uses: apple-actions/download-provisioning-profiles@v4
-        with:
-          bundle-id: ${{ env.BUNDLE_ID }}
-          profile-type: IOS_APP_STORE
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        id: provisioning-profile
+        env:
+          IOS_APPSTORE_PROFILE_BASE64: ${{ secrets.APPLE_IOS_APPSTORE_PROFILE }}
+        run: |
+          if [ -z "$IOS_APPSTORE_PROFILE_BASE64" ]; then
+            echo "APPLE_IOS_APPSTORE_PROFILE secret is required for a release build" >&2
+            exit 1
+          fi
+
+          profile_path="${{ runner.temp }}/myfirenumber.mobileprovision"
+          profile_plist="${{ runner.temp }}/myfirenumber-profile.plist"
+          profiles_directory="$HOME/Library/MobileDevice/Provisioning Profiles"
+
+          printf '%s' "$IOS_APPSTORE_PROFILE_BASE64" | base64 --decode > "$profile_path"
+          security cms -D -i "$profile_path" > "$profile_plist"
+          profile_uuid=$(/usr/libexec/PlistBuddy -c 'Print :UUID' "$profile_plist")
+
+          mkdir -p "$profiles_directory"
+          cp "$profile_path" "$profiles_directory/$profile_uuid.mobileprovision"
+          echo "uuid=$profile_uuid" >> "$GITHUB_OUTPUT"
 
       - name: Publish signed iOS archive
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
@@ -135,7 +148,8 @@ jobs:
             -p:RuntimeIdentifier="${{ env.RUNTIME_ID }}" \
             -p:ApplicationDisplayVersion="${{ steps.version.outputs.display-version }}" \
             -p:ApplicationVersion="${{ steps.version.outputs.app-version }}" \
-            -p:CodesignKey="$CODESIGN_KEY"
+            -p:CodesignKey="$CODESIGN_KEY" \
+            -p:CodesignProvision="${{ steps.provisioning-profile.outputs.uuid }}"
 
       - name: Locate iOS archive
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}
@@ -155,9 +169,9 @@ jobs:
         with:
           app-type: ios
           app-path: ${{ steps.ios-artifact.outputs.path }}
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+          issuer-id: ${{ secrets.APPLE_REFRACTORED_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPLE_REFRACTORED_KEY_ID }}
+          api-private-key: ${{ secrets.APPLE_REFRACTORED_P8_KEY }}
 
       - name: Upload iOS archive
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}

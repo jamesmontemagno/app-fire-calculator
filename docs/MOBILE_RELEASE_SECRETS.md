@@ -34,23 +34,26 @@ Signing key-upgrade or recovery process.
 | `APPSTORE_CERTIFICATE_P12` | Base64-encoded Apple Distribution certificate exported as `.p12` |
 | `APPSTORE_CERTIFICATE_P12_PASSWORD` | Password selected when exporting the `.p12` |
 | `APPSTORE_CODESIGN_KEY` | Full certificate identity, such as `Apple Distribution: Name (TEAMID)` |
-| `APPSTORE_ISSUER_ID` | App Store Connect API issuer ID |
-| `APPSTORE_KEY_ID` | App Store Connect API key ID |
-| `APPSTORE_PRIVATE_KEY` | Complete contents of the matching `AuthKey_KEYID.p8` file |
+| `APPLE_IOS_APPSTORE_PROFILE` | Base64-encoded App Store `.mobileprovision` profile for `com.refractored.myfirenumber` |
+| `APPLE_REFRACTORED_ISSUER_ID` | App Store Connect API issuer ID |
+| `APPLE_REFRACTORED_KEY_ID` | App Store Connect API key ID |
+| `APPLE_REFRACTORED_P8_KEY` | Complete contents of the matching `AuthKey_KEYID.p8` file |
 
-Create an App Store Connect API key with permission to manage provisioning profiles and upload
-builds. Apple permits downloading its `.p8` private key only once, so retain it securely.
+Create an App Store Connect API key with permission to upload builds to TestFlight. Apple permits
+downloading its `.p8` private key only once, so retain it securely.
 
 Upload the certificate and API credentials:
 
 ```bash
 openssl base64 -A -in /path/to/distribution.p12 |
   gh secret set APPSTORE_CERTIFICATE_P12
+openssl base64 -A -in /path/to/MyFireNumber_AppStore.mobileprovision |
+  gh secret set APPLE_IOS_APPSTORE_PROFILE
 gh secret set APPSTORE_CERTIFICATE_P12_PASSWORD
 gh secret set APPSTORE_CODESIGN_KEY
-gh secret set APPSTORE_ISSUER_ID
-gh secret set APPSTORE_KEY_ID
-gh secret set APPSTORE_PRIVATE_KEY < /path/to/AuthKey_KEYID.p8
+gh secret set APPLE_REFRACTORED_ISSUER_ID
+gh secret set APPLE_REFRACTORED_KEY_ID
+gh secret set APPLE_REFRACTORED_P8_KEY < /path/to/AuthKey_KEYID.p8
 ```
 
 To find the exact code-signing identity on a Mac where the certificate is installed:
