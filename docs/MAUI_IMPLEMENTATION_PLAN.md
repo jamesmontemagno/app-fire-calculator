@@ -70,7 +70,7 @@ presets, input semantics, result metrics, projection data, explanatory copy, and
 
 - [~] Home dashboard with enabled calculators in user-defined order (implemented; device validation pending)
 - [ ] All Calculators catalog with search and visibility controls
-- [ ] First-run and repeatable FIRE Quiz
+- [x] First-run and repeatable FIRE Quiz
 - [ ] Automatic per-calculator drafts
 - [ ] Multiple named plans with save, rename, duplicate, load, and delete
 - [ ] Quick presets where supplied by the web app
@@ -86,6 +86,27 @@ presets, input semantics, result metrics, projection data, explanatory copy, and
 - [ ] Delete all local data
 - [ ] Educational explanations and financial-advice disclaimers
 - [ ] Fully offline calculator, plan, quiz, and settings workflows
+
+### Active User UX Queue
+
+This queue records direct product-review feedback separately from phase evidence so later
+implementation passes cannot lose requested refinements.
+
+- [x] Retirement Cash Flow supports custom accounts, income sources, and expenses.
+- [x] Calculator and plan cards open when the card is tapped; redundant Open buttons are removed.
+- [~] Plans expose Rename, Duplicate, and Delete swipe actions; direct iOS swipe automation and Android validation remain.
+- [x] Root tabs hide the navigation bar while pushed calculators restore a contextual title and toolbar.
+- [x] Settings uses icon controls for calculator order/visibility and an appearance-first segmented selector.
+- [~] Plans search and filtering share one surface; move the compact controls into the list header to reduce top-of-screen weight.
+- [x] Calculator search is theme-aware and calculator cards have distinct icons.
+- [x] Home shows the three most recently used calculators and opened plans.
+- [ ] Home shows onboarding/recommendation guidance only before meaningful calculator or plan activity; afterward, navigation tabs replace the large starter catalog. Include quiz recommendation and retake actions.
+- [ ] Replace the default .NET app icon and splash screen with branded My Fire Number assets.
+- [ ] Remove the duplicate large calculator title/summary block when the native navigation bar already identifies the calculator.
+- [ ] Move Privacy to the bottom of Settings, link Terms and Privacy to the website, and update web Terms to cover the mobile app.
+- [ ] Make Retirement Cash Flow input/result sections collapsible with polished native controls; prefer an in-repository implementation unless a toolkit dependency materially improves accessibility or behavior.
+- [ ] Use context-aware plan actions: fresh drafts say Save to Plans, loaded plans say Update Plan. Keep Duplicate in Plans and remove redundant Save As.
+- [ ] Group the Calculators catalog into FIRE, Finance, and Cash Flow sections while preserving search and hidden-calculator discovery.
 
 ### Explicitly Excluded From Version 1
 
@@ -634,8 +655,8 @@ Exit gate: collection editing, calculations, charts, plans, and exports pass on 
 
 ### Phase 6: Quiz, Home, Catalog, and Plans
 
-- [ ] Port quiz questions and recommendation rules
-- [ ] Implement Skip, completion, retake, and draft-overwrite confirmation
+- [x] Port quiz questions and recommendation rules
+- [x] Implement Skip, completion, retake, and draft-overwrite confirmation
 - [ ] Build Home with enabled calculators in selected order
 - [~] Build searchable All Calculators catalog
 - [~] Build Plans list and plan management workflows
@@ -652,6 +673,7 @@ Exit gate: all top-level navigation and discovery workflows are complete.
 | 2026-08-09 | Contextual navigation chrome | Root Home, Calculators, Plans, and Settings tabs hide the redundant top navigation bar while preserving the bottom tab bar. Pushed calculator routes restore the native bar with a back action, the bound calculator name, and Save/Export toolbar icons. iPhone 17 screenshots verify both states and the Standard FIRE title at non-zero bounds. | iOS complete; plan-specific toolbar actions and Android pending |
 | 2026-08-09 | Home recent activity | A bounded SQLite history stores only calculator IDs, plan IDs, and local timestamps. Home resolves and shows up to three recently used calculators and three recently opened plans without changing plan modification dates. Two focused repository/migration tests pass; iPhone 17 shows both sections at non-zero bounds and retains them after process relaunch. | iOS complete; Android pending |
 | 2026-08-09 | Explicit Save As | Calculator details now expose Save, Save As, and Export as distinct native toolbar actions. Save updates the loaded plan while Save As always generates a new plan ID and makes the new copy the active plan. The native prompt now receives its suggested name as an editable initial value instead of placeholder text, fixing the same issue for Rename and Duplicate. iPhone 17 renders all three toolbar icons without title overlap and shows `My Standard FIRE Plan copy` selected in the Save As prompt. | iOS complete; prompt submission automation and Android pending |
+| 2026-08-09 | Native FIRE Quiz | The eight-question native quiz matches the web recommendation priority and creates calculator-specific typed drafts from local answers. Seven focused rule tests cover every recommendation path and the full suite passes with 71 tests. On iPhone 17, Lean FIRE renders at non-zero bounds, the existing-draft path shows a native Replace/Cancel confirmation, and a clean Reverse FIRE path opens with quiz-prefilled ages 40/50, `$200,000` savings, and `$60,000` expenses. The dark native Entry reports TextColor `#F2F7F3`, PlaceholderColor `#B9D1C2`, and a transparent MAUI outer background; screenshot evidence confirms readable contrast. | iOS complete; Android pending |
 
 ### Phase 7: Full Settings
 
