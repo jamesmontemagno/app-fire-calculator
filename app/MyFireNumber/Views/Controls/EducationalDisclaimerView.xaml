@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyFireNumber.Views.Controls.EducationalDisclaimerView"
+             AutomationId="EducationalDisclaimer">
+    <Grid RowDefinitions="1,Auto"
+          Padding="4,8,4,0">
+        <BoxView Background="{AppThemeBinding Light=#D7DED8, Dark=#365244}" />
+        <Grid Grid.Row="1"
+              Margin="0,8,0,0"
+              ColumnDefinitions="Auto,*"
+              ColumnSpacing="7">
+            <Label Text="&#xf071;"
+                   FontFamily="FontAwesomeSolid"
+                   FontSize="11"
+                   VerticalTextAlignment="Start"
+                   TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                   SemanticProperties.Description="Disclaimer" />
+            <Label Grid.Column="1"
+                   Text="Educational and informational purposes only. Not financial, investment, tax, or legal advice. Projections are hypothetical; actual results will vary."
+                   FontSize="11"
+                   LineHeight="1.25"
+                   TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                   SemanticProperties.Description="Educational and informational purposes only. Not financial, investment, tax, or legal advice. Projections are hypothetical; actual results will vary." />
+        </Grid>
+    </Grid>
+</ContentView>

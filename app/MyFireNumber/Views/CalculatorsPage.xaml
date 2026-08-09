@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:catalog="clr-namespace:MyFireNumber.Core.Calculators;assembly=MyFireNumber.Core"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
              xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
              x:Class="MyFireNumber.Views.CalculatorsPage"
              x:DataType="viewModels:CalculatorCatalogViewModel"
@@ -121,6 +122,9 @@
                           VerticalTextAlignment="Center" />
                   </VerticalStackLayout>
             </CollectionView.EmptyView>
+            <CollectionView.Footer>
+                <controls:EducationalDisclaimerView Margin="0,8,0,4" />
+            </CollectionView.Footer>
         </CollectionView>
     </Grid>
 </ContentPage>

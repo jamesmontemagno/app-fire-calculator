@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
              xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
              x:Class="MyFireNumber.Views.DefaultsOnboardingPage"
              x:DataType="viewModels:DefaultsOnboardingViewModel"
@@ -152,10 +153,7 @@
                         TextColor="#FFFFFF"
                         SemanticProperties.Description="Save these defaults and continue to the FIRE Quiz." />
 
-                <Label Text="These assumptions are educational starting points, not financial advice."
-                       TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                       FontSize="13"
-                       LineHeight="1.3" />
+                <controls:EducationalDisclaimerView />
             </VerticalStackLayout>
         </ScrollView>
     </Grid>
