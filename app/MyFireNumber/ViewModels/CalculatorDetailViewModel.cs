@@ -33,6 +33,8 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly IPlanRepository planRepository;
     private CancellationTokenSource? saveCancellationTokenSource;
     private bool isApplyingDraft;
+    private DateTime? loadedPlanCreatedAtUtc;
+    private string? loadedPlanId;
 
     public ObservableCollection<DebtEditorItem> DebtItems { get; } = [];
 
@@ -453,6 +455,8 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     public async Task LoadAsync(string calculatorId, string? planId = null)
     {
+        loadedPlanId = null;
+        loadedPlanCreatedAtUtc = null;
         var definition = catalog.GetRequired(calculatorId);
         Title = definition.Title;
         Summary = definition.Summary;
@@ -509,60 +513,70 @@ public partial class CalculatorDetailViewModel : ObservableObject
                     var draft = JsonSerializer.Deserialize<StandardFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? StandardFireDraft.Default);
+                    TrackLoadedPlan(savedPlan);
                 }
                 else if (IsCoastFire && savedPlan.PayloadVersion == CoastFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<CoastFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? CoastFireDraft.Default);
+                    TrackLoadedPlan(savedPlan);
                 }
                 else if (IsLeanFire && savedPlan.PayloadVersion == LeanFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<LeanFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? LeanFireDraft.Default);
+                    TrackLoadedPlan(savedPlan);
                 }
                 else if (IsFatFire && savedPlan.PayloadVersion == FatFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<FatFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? FatFireDraft.Default);
+                    TrackLoadedPlan(savedPlan);
                 }
                 else if (IsBaristaFire && savedPlan.PayloadVersion == BaristaFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<BaristaFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? BaristaFireDraft.Default);
+                    TrackLoadedPlan(savedPlan);
                 }
                 else if (IsReverseFire && savedPlan.PayloadVersion == ReverseFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<ReverseFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? ReverseFireDraft.Default);
+                    TrackLoadedPlan(savedPlan);
                 }
                 else if (IsWithdrawalRate && savedPlan.PayloadVersion == WithdrawalRateDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<WithdrawalRateDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? WithdrawalRateDraft.Default);
+                    TrackLoadedPlan(savedPlan);
                 }
                 else if (IsSavingsInvestmentRate && savedPlan.PayloadVersion == SavingsInvestmentDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<SavingsInvestmentDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? SavingsInvestmentDraft.Default);
+                    TrackLoadedPlan(savedPlan);
                 }
                 else if (IsHealthcareGap && savedPlan.PayloadVersion == HealthcareGapDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<HealthcareGapDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? HealthcareGapDraft.Default);
+                    TrackLoadedPlan(savedPlan);
                 }
                 else if (IsDebtPayoff && savedPlan.PayloadVersion == DebtPayoffDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<DebtPayoffDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? DebtPayoffDraft.Default);
+                    TrackLoadedPlan(savedPlan);
                 }
                 else
                 {
@@ -744,15 +758,21 @@ public partial class CalculatorDetailViewModel : ObservableObject
         try
         {
             var now = DateTime.UtcNow;
+            var isUpdatingLoadedPlan = loadedPlanId is not null;
+            var planIdToSave = loadedPlanId ?? Guid.NewGuid().ToString("N");
             await planRepository.SaveAsync(new PlanRecord(
-                Guid.NewGuid().ToString("N"),
+                planIdToSave,
                 calculatorId,
                 PlanNameText.Trim(),
                 payloadVersion,
                 payloadJson,
-                now,
+                loadedPlanCreatedAtUtc ?? now,
                 now));
-            PlanStatusMessage = $"Saved \"{PlanNameText.Trim()}\" to Plans.";
+            loadedPlanId = planIdToSave;
+            loadedPlanCreatedAtUtc ??= now;
+            PlanStatusMessage = isUpdatingLoadedPlan
+                ? $"Updated \"{PlanNameText.Trim()}\" in Plans."
+                : $"Saved \"{PlanNameText.Trim()}\" to Plans.";
         }
         catch (Exception)
         {
@@ -1736,6 +1756,12 @@ public partial class CalculatorDetailViewModel : ObservableObject
         }
 
         RecalculateAndSave();
+    }
+
+    private void TrackLoadedPlan(PlanRecord plan)
+    {
+        loadedPlanId = plan.Id;
+        loadedPlanCreatedAtUtc = plan.CreatedAtUtc;
     }
 
     private void UpdateProjectionChart(StandardFireResult result)

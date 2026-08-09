@@ -365,7 +365,7 @@ stack layout.
 
 - Saving a draft as a new plan requests a name.
 - Editing a loaded plan changes working state, not the stored plan, until Save is invoked.
-- Save updates the loaded plan; Save As creates another plan.
+- [~] Save updates the loaded plan; Save As creates another plan. Normal saves now update loaded supported plans; an explicit Save As action remains pending.
 - Duplicate creates a new ID and requests or generates a distinct name.
 - Deletion requires confirmation and does not delete the calculator draft.
 - Navigating away does not lose edits because the draft is automatic.
