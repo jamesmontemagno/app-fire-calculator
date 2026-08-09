@@ -332,6 +332,15 @@ export default function Home() {
           Built with privacy in mind. No data ever leaves your browser.
         </p>
         <p className="mt-2">
+          <Link to="/legal#terms" className="text-fire-600 dark:text-fire-400 hover:underline">
+            Terms of use
+          </Link>
+          {' · '}
+          <Link to="/legal#privacy" className="text-fire-600 dark:text-fire-400 hover:underline">
+            Privacy policy
+          </Link>
+        </p>
+        <p className="mt-2">
           Find more tiny tools like this at{' '}
           <a
             href="https://www.tinytooltown.com/"
