@@ -466,6 +466,7 @@ Exit gate: all technical risks have small running proofs on both target platform
 | 2026-08-09 | iOS SQLite proof | Fresh iPhone 17 launch creates an app-private database, writes a v1 row, adds a nullable v2 column, updates it to schema version 2, and reads the expected values back. The visible status label has non-zero bounds and TextColor `#425D54`; Android remains pending. | iOS complete |
 | 2026-08-09 | iOS Open XML and share proof | Fresh iPhone 17 launch creates `my-fire-number-proof.xlsx` in app cache. Tapping the visible share action opens the iOS native share sheet, which names the workbook and offers Copy and Save to Files. Runtime button colors are TextColor `#FFFFFF` on BackgroundColor `#512BD4`; Android remains pending. | iOS complete |
 | 2026-08-09 | Debug build configuration | Debug builds define `MAUI_DEVFLOW` only when the IDE sets `MauiDevFlowEnabled=true`, matching extension package injection. Standalone iOS simulator and Android builds both succeed without a missing DevFlow assembly; 56 native tests pass. | Complete; IDE runtime inspection remains required |
+| 2026-08-09 | DevFlow CLI recovery | The MAUI CLI broker, iPhone 17 simulator, and instrumented iOS build connect successfully. Settings renders at 402x874; selecting Dark makes the native Picker TextColor `#F2F7F3` and TitleColor `#B9D1C2`, and those values persist after a full process relaunch. | iOS complete |
 
 #### Temporary DevFlow Extension Workaround
 

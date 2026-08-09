@@ -79,6 +79,10 @@
 		<ProjectReference Include="..\..\src\MyFireNumber.Storage\MyFireNumber.Storage.csproj" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(MauiDevFlowEnabled)' == 'true'">
+		<PackageReference Include="Microsoft.Maui.DevFlow.Agent" Version="0.1.0-preview.12.26358.3" PrivateAssets="all" />
+	</ItemGroup>
+
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(MauiDevFlowEnabled)' == 'true'">
 		<DefineConstants>$(DefineConstants);MAUI_DEVFLOW</DefineConstants>
 	</PropertyGroup>
