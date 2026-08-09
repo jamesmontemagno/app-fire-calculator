@@ -4,6 +4,7 @@
   </Folder>
   <Folder Name="/src/">
     <Project Path="src/MyFireNumber.Core/MyFireNumber.Core.csproj" />
+    <Project Path="src/MyFireNumber.Storage/MyFireNumber.Storage.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/MyFireNumber.Tests/MyFireNumber.Tests.csproj" />

@@ -502,8 +502,8 @@ Exit gate: all calculation tests pass without referencing MAUI.
 - [x] Implement central catalog and Shell routes
 - [x] Implement four-tab Shell with icons
 - [~] Establish resources, themes, typography, and shared styles
-- [~] Register pages, view models, repositories, and services in DI
-- [ ] Implement SQLite initialization and migrations
+- [x] Register pages, view models, repositories, and services in DI
+- [~] Implement SQLite initialization and migrations
 - [~] Implement preferences and theme services
 - [x] Implement first-run routing
 - [ ] Add global error presentation that does not expose financial values
@@ -518,6 +518,7 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 | 2026-08-09 | Four-tab navigation | Fresh iPhone 17 launch renders Home, Calculators, Plans, and Settings tabs with generated PNG tab assets, visible labels, and non-zero bounds. | iOS complete |
 | 2026-08-09 | Onboarding routing | A first-run launch opens the skippable FIRE Quiz. Skip reaches Home and the completion preference survives a subsequent fresh iPhone 17 launch. Settings can reset onboarding and re-open the Quiz. | iOS complete |
 | 2026-08-09 | Search accessibility | The iOS SearchBar renders dark entered text (`#17352C`) and a muted placeholder (`#587068`) on the native white field. MAUI reports the outer SearchBar background as transparent, so screenshot evidence confirms the actual native field contrast. | iOS complete |
+| 2026-08-09 | Local storage foundation | The platform-neutral SQLite storage project initializes versioned drafts, plans, and calculator preferences. Three focused repository tests validate draft upsert/round trip, plan ordering, and preference upsert; a fresh iPhone 17 launch includes the repository DI registrations without a startup failure. | iOS complete; future migrations pending |
 
 ### Phase 3: Standard FIRE Vertical Slice
 

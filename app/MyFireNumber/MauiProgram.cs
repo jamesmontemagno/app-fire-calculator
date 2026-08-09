@@ -2,6 +2,7 @@
 using LiveChartsCore.SkiaSharpView.Maui;
 using MyFireNumber.Core.Calculators;
 using MyFireNumber.Services;
+using MyFireNumber.Storage;
 using MyFireNumber.ViewModels;
 using MyFireNumber.Views;
 using SkiaSharp.Views.Maui.Controls.Hosting;
@@ -29,6 +30,10 @@ public static class MauiProgram
 		builder.Services.AddSingleton<ICalculatorCatalog, CalculatorCatalog>();
 		builder.Services.AddSingleton<IOnboardingService, OnboardingService>();
 		builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
+		builder.Services.AddSingleton(_ => new LocalDatabase(Path.Combine(FileSystem.AppDataDirectory, "my-fire-number.db3")));
+		builder.Services.AddSingleton<IDraftRepository, SqliteDraftRepository>();
+		builder.Services.AddSingleton<IPlanRepository, SqlitePlanRepository>();
+		builder.Services.AddSingleton<ICalculatorPreferencesRepository, SqliteCalculatorPreferencesRepository>();
 		builder.Services.AddSingleton<AppShell>();
 		builder.Services.AddSingleton<App>();
 		builder.Services.AddSingleton<HomePage>();

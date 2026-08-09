@@ -79,6 +79,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\src\MyFireNumber.Core\MyFireNumber.Core.csproj" />
+		<ProjectReference Include="..\..\src\MyFireNumber.Storage\MyFireNumber.Storage.csproj" />
 	</ItemGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
