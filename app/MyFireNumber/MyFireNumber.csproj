@@ -28,7 +28,7 @@
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
 		<!-- Display name -->
-		<ApplicationTitle>MyFireNumber</ApplicationTitle>
+		<ApplicationTitle>My Fire #</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.refractored.myfirenumber</ApplicationId>
