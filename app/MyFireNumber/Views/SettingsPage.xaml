@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.SettingsPage"
+             x:DataType="viewModels:SettingsViewModel"
+             Title="Settings"
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="24" Spacing="18">
+                <Label Text="Settings"
+                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                       FontAttributes="Bold"
+                       FontSize="30"
+                       SemanticProperties.HeadingLevel="Level1" />
+                <Border Padding="18"
+                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        StrokeShape="RoundRectangle 8">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Privacy first"
+                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                               FontAttributes="Bold"
+                               FontSize="18" />
+                        <Label Text="Your financial inputs are stored locally on this device. My Fire Number does not use analytics or transmit financial data."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               LineHeight="1.3" />
+                    </VerticalStackLayout>
+                </Border>
+                <Button Text="Retake FIRE Quiz"
+                        Command="{Binding RetakeQuizCommand}"
+                        Background="#2F6B57"
+                        TextColor="#FFFFFF" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

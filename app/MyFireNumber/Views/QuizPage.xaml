@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.QuizPage"
+             x:DataType="viewModels:QuizViewModel"
+             Title="FIRE Quiz"
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+
+    <Grid Padding="24">
+        <VerticalStackLayout VerticalOptions="Center" Spacing="20">
+            <Label Text="Find your FIRE starting point"
+                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                   FontAttributes="Bold"
+                   FontSize="30"
+                   LineHeight="1.1"
+                   SemanticProperties.HeadingLevel="Level1" />
+            <Label Text="The guided quiz will recommend a calculator and prepare a local draft. You can skip it and begin with any calculator now."
+                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                   FontSize="16"
+                   LineHeight="1.35" />
+            <Button Text="Skip for now"
+                    Command="{Binding SkipCommand}"
+                    Background="#2F6B57"
+                    TextColor="#FFFFFF"
+                    SemanticProperties.Description="Skip the FIRE Quiz and open the Home tab." />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

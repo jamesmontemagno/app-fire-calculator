@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:catalog="clr-namespace:MyFireNumber.Core.Calculators;assembly=MyFireNumber.Core"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.HomePage"
+             x:DataType="viewModels:HomeViewModel"
+             Title="Home"
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="24,24,24,32" Spacing="24">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="MY FIRE NUMBER"
+                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                           FontAttributes="Bold"
+                           FontSize="12"
+                           CharacterSpacing="1.2" />
+                    <Label Text="Build your financial independence plan."
+                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                           FontAttributes="Bold"
+                           FontSize="30"
+                           LineHeight="1.1"
+                           SemanticProperties.HeadingLevel="Level1" />
+                    <Label Text="Every calculation stays on this device. Results are estimates, not financial advice."
+                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                           FontSize="15"
+                           LineHeight="1.3" />
+                </VerticalStackLayout>
+
+                <Border Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Padding="18"
+                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        StrokeShape="RoundRectangle 8">
+                    <VerticalStackLayout Spacing="14">
+                        <Label Text="Start with a calculator"
+                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                               FontAttributes="Bold"
+                               FontSize="20" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding FeaturedCalculators}" Spacing="10">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="catalog:CalculatorDefinition">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{Binding Title}"
+                                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                                   FontAttributes="Bold" />
+                                            <Label Text="{Binding Summary}"
+                                                   TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                                   FontSize="13" />
+                                        </VerticalStackLayout>
+                                        <Button Grid.Column="1"
+                                                Text="Open"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=OpenCalculatorCommand}"
+                                                CommandParameter="{Binding .}"
+                                                Background="#2F6B57"
+                                                TextColor="#FFFFFF"
+                                                FontSize="12"
+                                                MinimumWidthRequest="62" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        <Button Text="Browse all calculators"
+                                Command="{Binding BrowseCalculatorsCommand}"
+                                Background="#E4F0E9"
+                                TextColor="#245744" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

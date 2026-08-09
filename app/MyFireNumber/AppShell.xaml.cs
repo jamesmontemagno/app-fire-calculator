@@ -1,9 +1,57 @@
-﻿namespace MyFireNumber;
+﻿using MyFireNumber.Services;
+using MyFireNumber.Views;
+
+namespace MyFireNumber;
 
 public partial class AppShell : Shell
 {
-	public AppShell()
+	private readonly IOnboardingService onboardingService;
+	private bool hasPresentedOnboarding;
+
+	public AppShell(
+		HomePage homePage,
+		CalculatorsPage calculatorsPage,
+		PlansPage plansPage,
+		SettingsPage settingsPage,
+		IOnboardingService onboardingService)
 	{
 		InitializeComponent();
+		this.onboardingService = onboardingService;
+
+		Items.Add(CreateTab("Home", "home", "tab_home.png", homePage));
+		Items.Add(CreateTab("Calculators", "calculators", "tab_calculators.png", calculatorsPage));
+		Items.Add(CreateTab("Plans", "plans", "tab_plans.png", plansPage));
+		Items.Add(CreateTab("Settings", "settings", "tab_settings.png", settingsPage));
+
+		Routing.RegisterRoute("quiz", typeof(QuizPage));
+		Routing.RegisterRoute("calculator", typeof(CalculatorDetailPage));
+		Loaded += OnLoaded;
+	}
+
+	private static Tab CreateTab(string title, string route, string icon, Page page)
+	{
+		var shellContent = new ShellContent
+		{
+			Title = title,
+			Route = route,
+			Icon = icon,
+			ContentTemplate = new DataTemplate(() => page)
+		};
+
+		var tab = new Tab { Title = title, Route = route, Icon = icon };
+		tab.Items.Add(shellContent);
+		return tab;
+	}
+
+	private async void OnLoaded(object? sender, EventArgs eventArgs)
+	{
+		Loaded -= OnLoaded;
+		if (hasPresentedOnboarding || onboardingService.IsComplete)
+		{
+			return;
+		}
+
+		hasPresentedOnboarding = true;
+		await GoToAsync("quiz");
 	}
 }

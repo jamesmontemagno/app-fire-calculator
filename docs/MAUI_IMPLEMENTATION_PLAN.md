@@ -499,16 +499,25 @@ Exit gate: all calculation tests pass without referencing MAUI.
 
 ### Phase 2: App Foundation
 
-- [ ] Implement central catalog and Shell routes
-- [ ] Implement four-tab Shell with icons
-- [ ] Establish resources, themes, typography, and shared styles
-- [ ] Register pages, view models, repositories, and services in DI
+- [x] Implement central catalog and Shell routes
+- [x] Implement four-tab Shell with icons
+- [~] Establish resources, themes, typography, and shared styles
+- [~] Register pages, view models, repositories, and services in DI
 - [ ] Implement SQLite initialization and migrations
-- [ ] Implement preferences and theme services
-- [ ] Implement first-run routing
+- [~] Implement preferences and theme services
+- [x] Implement first-run routing
 - [ ] Add global error presentation that does not expose financial values
 
 Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
+
+#### Phase 2 Evidence
+
+| Date | Item | Evidence | Status |
+| --- | --- | --- | --- |
+| 2026-08-09 | Catalog and Shell | A central typed catalog exposes 11 stable calculator IDs and routes; two focused catalog tests pass. iPhone 17 renders catalog search results and query-bound calculator detail content. | iOS complete |
+| 2026-08-09 | Four-tab navigation | Fresh iPhone 17 launch renders Home, Calculators, Plans, and Settings tabs with generated PNG tab assets, visible labels, and non-zero bounds. | iOS complete |
+| 2026-08-09 | Onboarding routing | A first-run launch opens the skippable FIRE Quiz. Skip reaches Home and the completion preference survives a subsequent fresh iPhone 17 launch. Settings can reset onboarding and re-open the Quiz. | iOS complete |
+| 2026-08-09 | Search accessibility | The iOS SearchBar renders dark entered text (`#17352C`) and a muted placeholder (`#587068`) on the native white field. MAUI reports the outer SearchBar background as transparent, so screenshot evidence confirms the actual native field contrast. | iOS complete |
 
 ### Phase 3: Standard FIRE Vertical Slice
 
