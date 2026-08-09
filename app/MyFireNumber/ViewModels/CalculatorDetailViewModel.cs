@@ -40,6 +40,9 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private string? loadedPlanId;
 
     public ObservableCollection<DebtEditorItem> DebtItems { get; } = [];
+    public ObservableCollection<RetirementAccountEditorItem> RetirementAccounts { get; } = [];
+    public ObservableCollection<RetirementIncomeEditorItem> RetirementIncomeSources { get; } = [];
+    public ObservableCollection<RetirementExpenseEditorItem> RetirementAdditionalExpenses { get; } = [];
 
     public CalculatorDetailViewModel(
         IBaristaFireExportService baristaExportService,
@@ -72,6 +75,9 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.exportService = exportService;
         this.withdrawalRateExportService = withdrawalRateExportService;
         DebtItems.CollectionChanged += OnDebtItemsChanged;
+        RetirementAccounts.CollectionChanged += OnRetirementAccountsChanged;
+        RetirementIncomeSources.CollectionChanged += OnRetirementIncomeSourcesChanged;
+        RetirementAdditionalExpenses.CollectionChanged += OnRetirementExpensesChanged;
         ApplyDraft(StandardFireDraft.Default);
     }
 
@@ -122,7 +128,14 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private bool isDebtPayoff;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
     private bool isRetirementCashFlow;
+
+    [ObservableProperty]
+    private bool withdrawOnlyAfterRetirement = true;
+
+    [ObservableProperty]
+    private bool reinvestRetirementSurplus = true;
 
     [ObservableProperty]
     private bool isLoading;
@@ -581,6 +594,13 @@ public partial class CalculatorDetailViewModel : ObservableObject
                     ApplyDraft(draft ?? DebtPayoffDraft.Default);
                     TrackLoadedPlan(savedPlan);
                 }
+                else if (IsRetirementCashFlow && savedPlan.PayloadVersion == DeferredCompensationDraft.PayloadVersion)
+                {
+                    var draft = JsonSerializer.Deserialize<DeferredCompensationDraft>(savedPlan.PayloadJson);
+                    PlanNameText = savedPlan.Name;
+                    ApplyDeferredCompensationDraft(draft ?? DeferredCompensationDraft.Default);
+                    TrackLoadedPlan(savedPlan);
+                }
                 else
                 {
                     ValidationMessage = "This saved plan uses an unsupported format. Default values are shown.";
@@ -643,6 +663,11 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 {
                     var draft = JsonSerializer.Deserialize<DebtPayoffDraft>(savedDraft.PayloadJson);
                     ApplyDraft(draft ?? DebtPayoffDraft.Default);
+                }
+                else if (IsRetirementCashFlow && savedDraft.PayloadVersion == DeferredCompensationDraft.PayloadVersion)
+                {
+                    var draft = JsonSerializer.Deserialize<DeferredCompensationDraft>(savedDraft.PayloadJson);
+                    ApplyDeferredCompensationDraft(draft ?? DeferredCompensationDraft.Default);
                 }
                 else
                 {
@@ -937,6 +962,8 @@ public partial class CalculatorDetailViewModel : ObservableObject
     partial void OnDebtTargetMonthsTextChanged(string value) => OnDraftInputChanged();
     partial void OnDebtPayoffModeChanged(DebtPayoffMode value) => OnDraftInputChanged();
     partial void OnDebtPayoffStrategyChanged(DebtPayoffStrategy value) => OnDraftInputChanged();
+    partial void OnWithdrawOnlyAfterRetirementChanged(bool value) => OnDraftInputChanged();
+    partial void OnReinvestRetirementSurplusChanged(bool value) => OnDraftInputChanged();
     partial void OnExpectedReturnTextChanged(string value) => OnDraftInputChanged();
     partial void OnInflationRateTextChanged(string value) => OnDraftInputChanged();
     partial void OnWithdrawalRateTextChanged(string value) => OnDraftInputChanged();
@@ -978,6 +1005,64 @@ public partial class CalculatorDetailViewModel : ObservableObject
         if (debt is not null)
         {
             DebtItems.Remove(debt);
+        }
+    }
+
+    [RelayCommand]
+    private void AddRetirementAccount()
+    {
+        RetirementAccounts.Add(new RetirementAccountEditorItem
+        {
+            Name = "New retirement account",
+            AvailableAgeText = RetirementSemiAgeText
+        });
+    }
+
+    [RelayCommand]
+    private void RemoveRetirementAccount(RetirementAccountEditorItem? account)
+    {
+        if (account is not null)
+        {
+            RetirementAccounts.Remove(account);
+        }
+    }
+
+    [RelayCommand]
+    private void AddRetirementIncome()
+    {
+        RetirementIncomeSources.Add(new RetirementIncomeEditorItem
+        {
+            Name = "New retirement income",
+            StartAgeText = RetirementSemiAgeText,
+            EndAgeText = RetirementPlanThroughAgeText
+        });
+    }
+
+    [RelayCommand]
+    private void RemoveRetirementIncome(RetirementIncomeEditorItem? income)
+    {
+        if (income is not null)
+        {
+            RetirementIncomeSources.Remove(income);
+        }
+    }
+
+    [RelayCommand]
+    private void AddRetirementExpense()
+    {
+        RetirementAdditionalExpenses.Add(new RetirementExpenseEditorItem
+        {
+            Name = "New retirement expense",
+            StartAgeText = RetirementSemiAgeText
+        });
+    }
+
+    [RelayCommand]
+    private void RemoveRetirementExpense(RetirementExpenseEditorItem? expense)
+    {
+        if (expense is not null)
+        {
+            RetirementAdditionalExpenses.Remove(expense);
         }
     }
 
@@ -1184,6 +1269,10 @@ public partial class CalculatorDetailViewModel : ObservableObject
         else if (IsDebtPayoff)
         {
             ApplyDraft(DebtPayoffDraft.Default);
+        }
+        else if (IsRetirementCashFlow)
+        {
+            ApplyDeferredCompensationDraft(DeferredCompensationDraft.Default);
         }
     }
 
@@ -1431,6 +1520,11 @@ public partial class CalculatorDetailViewModel : ObservableObject
         RetirementPlanThroughAgeText = draft.PlanThroughAge.ToString(CultureInfo.CurrentCulture);
         RetirementExpensesText = draft.AnnualExpenses.ToString("0.##", CultureInfo.CurrentCulture);
         RetirementInflationText = (draft.InflationRate * 100).ToString("0.##", CultureInfo.CurrentCulture);
+        WithdrawOnlyAfterRetirement = draft.WithdrawOnlyAfterRetirement;
+        ReinvestRetirementSurplus = draft.ReinvestSurplus;
+        ReplaceRetirementAccounts(draft.Accounts);
+        ReplaceRetirementIncomeSources(draft.IncomeSources);
+        ReplaceRetirementExpenses(draft.AdditionalExpenses);
         isApplyingDraft = false;
         RecalculateAndSave();
     }
@@ -1451,14 +1545,53 @@ public partial class CalculatorDetailViewModel : ObservableObject
             return false;
         }
 
-        draft = DeferredCompensationDraft.Default with
+        var accounts = new List<RetirementAccount>();
+        foreach (var editor in RetirementAccounts)
         {
-            CurrentAge = currentAge,
-            SemiRetirementAge = semiAge,
-            PlanThroughAge = planThroughAge,
-            AnnualExpenses = annualExpenses,
-            InflationRate = inflationRate
-        };
+            if (!editor.TryCreateAccount(out var account))
+            {
+                ValidationMessage = "Complete every retirement account with valid amounts, percentages, and an available age from 18 to 100.";
+                return false;
+            }
+
+            accounts.Add(account);
+        }
+
+        var incomeSources = new List<RetirementIncomeSource>();
+        foreach (var editor in RetirementIncomeSources)
+        {
+            if (!editor.TryCreateIncome(out var income))
+            {
+                ValidationMessage = "Complete every income source with valid amounts, percentages, and chronological ages.";
+                return false;
+            }
+
+            incomeSources.Add(income);
+        }
+
+        var additionalExpenses = new List<RetirementExpense>();
+        foreach (var editor in RetirementAdditionalExpenses)
+        {
+            if (!editor.TryCreateExpense(out var expense))
+            {
+                ValidationMessage = "Complete every additional expense with a valid annual amount and start age.";
+                return false;
+            }
+
+            additionalExpenses.Add(expense);
+        }
+
+        draft = new DeferredCompensationDraft(
+            currentAge,
+            semiAge,
+            planThroughAge,
+            annualExpenses,
+            inflationRate,
+            accounts,
+            incomeSources,
+            additionalExpenses,
+            WithdrawOnlyAfterRetirement,
+            ReinvestRetirementSurplus);
         return true;
     }
 
@@ -2082,6 +2215,98 @@ public partial class CalculatorDetailViewModel : ObservableObject
         foreach (var debt in debts)
         {
             DebtItems.Add(DebtEditorItem.FromDebt(debt));
+        }
+    }
+
+    private void OnRetirementAccountsChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
+    {
+        if (eventArgs.OldItems is not null)
+        {
+            foreach (RetirementAccountEditorItem account in eventArgs.OldItems)
+            {
+                account.Changed -= OnRetirementEditorChanged;
+            }
+        }
+
+        if (eventArgs.NewItems is not null)
+        {
+            foreach (RetirementAccountEditorItem account in eventArgs.NewItems)
+            {
+                account.Changed += OnRetirementEditorChanged;
+            }
+        }
+
+        OnDraftInputChanged();
+    }
+
+    private void OnRetirementIncomeSourcesChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
+    {
+        if (eventArgs.OldItems is not null)
+        {
+            foreach (RetirementIncomeEditorItem income in eventArgs.OldItems)
+            {
+                income.Changed -= OnRetirementEditorChanged;
+            }
+        }
+
+        if (eventArgs.NewItems is not null)
+        {
+            foreach (RetirementIncomeEditorItem income in eventArgs.NewItems)
+            {
+                income.Changed += OnRetirementEditorChanged;
+            }
+        }
+
+        OnDraftInputChanged();
+    }
+
+    private void OnRetirementExpensesChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
+    {
+        if (eventArgs.OldItems is not null)
+        {
+            foreach (RetirementExpenseEditorItem expense in eventArgs.OldItems)
+            {
+                expense.Changed -= OnRetirementEditorChanged;
+            }
+        }
+
+        if (eventArgs.NewItems is not null)
+        {
+            foreach (RetirementExpenseEditorItem expense in eventArgs.NewItems)
+            {
+                expense.Changed += OnRetirementEditorChanged;
+            }
+        }
+
+        OnDraftInputChanged();
+    }
+
+    private void OnRetirementEditorChanged(object? sender, EventArgs eventArgs) => OnDraftInputChanged();
+
+    private void ReplaceRetirementAccounts(IReadOnlyList<RetirementAccount> accounts)
+    {
+        RetirementAccounts.Clear();
+        foreach (var account in accounts)
+        {
+            RetirementAccounts.Add(RetirementAccountEditorItem.FromAccount(account));
+        }
+    }
+
+    private void ReplaceRetirementIncomeSources(IReadOnlyList<RetirementIncomeSource> incomeSources)
+    {
+        RetirementIncomeSources.Clear();
+        foreach (var income in incomeSources)
+        {
+            RetirementIncomeSources.Add(RetirementIncomeEditorItem.FromIncome(income));
+        }
+    }
+
+    private void ReplaceRetirementExpenses(IReadOnlyList<RetirementExpense> expenses)
+    {
+        RetirementAdditionalExpenses.Clear();
+        foreach (var expense in expenses)
+        {
+            RetirementAdditionalExpenses.Add(RetirementExpenseEditorItem.FromExpense(expense));
         }
     }
 

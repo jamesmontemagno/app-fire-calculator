@@ -28,6 +28,30 @@ public static class DeferredCompensationWorkbook
         AddWorksheet(workbookPart, sheets, "Results", 2,
         [new Row(Text("A1", "Retirement Cash Flow Results")), new Row(Text("A4", "Result"), Text("B4", "Value")), new Row(Text("A5", "Current balance"), Number("B5", result.CurrentBalance, CurrencyStyleIndex)), new Row(Text("A6", "Balance at semi-retirement"), Number("B6", result.BalanceAtSemiRetirement, CurrencyStyleIndex)), new Row(Text("A7", "First-year income"), Number("B7", result.FirstYearIncome, CurrencyStyleIndex)), new Row(Text("A8", "First-year surplus"), Number("B8", result.FirstYearSurplus, CurrencyStyleIndex)), new Row(Text("A9", "Ending balance"), Number("B9", result.EndingBalance, CurrencyStyleIndex)), new Row(Text("A10", "Funded years"), Number("B10", result.FundedYears, DecimalStyleIndex))], 34, 24);
         AddWorksheet(workbookPart, sheets, "Annual Cash Flow", 3, result.Projections.Select((point, index) => new Row(Number($"A{index + 2}", point.Age, DecimalStyleIndex), Number($"B{index + 2}", point.Year, DecimalStyleIndex), Number($"C{index + 2}", point.TotalBalance, CurrencyStyleIndex), Number($"D{index + 2}", point.TotalIncome, CurrencyStyleIndex), Number($"E{index + 2}", point.Expenses, CurrencyStyleIndex), Number($"F{index + 2}", point.Surplus, CurrencyStyleIndex))).Prepend(new Row(Text("A1", "Age"), Text("B1", "Year"), Text("C1", "Total balance"), Text("D1", "Income"), Text("E1", "Expenses"), Text("F1", "Surplus"))), 12, 14, 20, 20, 20, 20);
+        AddWorksheet(workbookPart, sheets, "Accounts", 4, draft.Accounts.Select((account, index) => new Row(
+            Text($"A{index + 2}", account.Name),
+            Text($"B{index + 2}", account.Type.ToString()),
+            Number($"C{index + 2}", account.Balance, CurrencyStyleIndex),
+            Number($"D{index + 2}", account.AnnualContribution, CurrencyStyleIndex),
+            Number($"E{index + 2}", account.AnnualReturn, PercentageStyleIndex),
+            Number($"F{index + 2}", account.AvailableAge, DecimalStyleIndex),
+            Number($"G{index + 2}", account.WithdrawalRate, PercentageStyleIndex),
+            Number($"H{index + 2}", account.PayoutYears, DecimalStyleIndex)))
+            .Prepend(new Row(Text("A1", "Name"), Text("B1", "Type"), Text("C1", "Balance"), Text("D1", "Annual contribution"), Text("E1", "Annual return"), Text("F1", "Available age"), Text("G1", "Withdrawal rate"), Text("H1", "Payout years"))), 28, 18, 18, 22, 18, 16, 18, 16);
+        AddWorksheet(workbookPart, sheets, "Income Sources", 5, draft.IncomeSources.Select((income, index) => new Row(
+            Text($"A{index + 2}", income.Name),
+            Number($"B{index + 2}", income.AnnualAmount, CurrencyStyleIndex),
+            Number($"C{index + 2}", income.StartAge, DecimalStyleIndex),
+            Number($"D{index + 2}", income.EndAge, DecimalStyleIndex),
+            Number($"E{index + 2}", income.AnnualGrowth, PercentageStyleIndex),
+            Text($"F{index + 2}", income.IsAfterTax ? "Yes" : "No"),
+            Number($"G{index + 2}", income.TaxRate, PercentageStyleIndex)))
+            .Prepend(new Row(Text("A1", "Name"), Text("B1", "Annual amount"), Text("C1", "Start age"), Text("D1", "End age"), Text("E1", "Annual growth"), Text("F1", "After tax"), Text("G1", "Tax rate"))), 28, 20, 14, 14, 18, 14, 16);
+        AddWorksheet(workbookPart, sheets, "Additional Expenses", 6, draft.AdditionalExpenses.Select((expense, index) => new Row(
+            Text($"A{index + 2}", expense.Name),
+            Number($"B{index + 2}", expense.AnnualAmount, CurrencyStyleIndex),
+            Number($"C{index + 2}", expense.StartAge, DecimalStyleIndex)))
+            .Prepend(new Row(Text("A1", "Name"), Text("B1", "Annual amount"), Text("C1", "Start age"))), 30, 20, 14);
         workbookPart.Workbook.Save();
     }
 

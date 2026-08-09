@@ -597,19 +597,26 @@ Exit gate: nine shared-form calculators are complete on both platforms.
 - [x] Snowball and Avalanche comparison
 - [ ] Debt balance and breakdown charts (balance projection is implemented; payment-breakdown chart remains)
 - [x] Retirement Cash Flow scenario inputs
-- [ ] Income, account, and additional-expense editors
+- [x] Income, account, and additional-expense editors
 - [ ] Retirement cash-flow and bucket charts (cash-flow projection is implemented; account bucket chart remains)
 - [ ] Expandable annual cash-flow detail
-- [ ] Complex calculator exports and persistence (Debt export and typed drafts are implemented; Retirement plan load and all editor persistence remain)
+- [x] Complex calculator exports and persistence
 
 Exit gate: collection editing, calculations, charts, plans, and exports pass on both platforms.
 
 #### 2026-08-09 Checkpoint
 
 - Debt Payoff now has typed drafts, editable debts, fixed-budget and target-timeline modes, Snowball/Avalanche comparison, a balance projection, named-plan saves, and a local Open XML workbook/share service. Focused `DebtPayoffWorkbookTests` pass.
-- Retirement Cash Flow now has a typed web-parity default scenario, validated core scenario inputs, a cash-flow projection, typed draft saves, and a local Open XML workbook/share service. Its account, income, and additional-expense editors, bucket chart, annual detail, and plan-load support remain to be built.
+- Retirement Cash Flow started this checkpoint with a typed web-parity scenario, validated Core inputs, a cash-flow projection, typed draft saves, and a local Open XML workbook/share service. The later collection-editor checkpoint below completes its account, income, expense, plan-load, and collection-export gaps; bucket visualization and annual detail remain.
 - Focused `DeferredCompensationDraftTests` pass. The iOS target builds successfully with `MauiDevFlowEnabled=true`.
 - DevFlow recovery is in progress. On the iPhone 17 simulator, `dotnet_maui_debugProject` launches successfully but `maui_wait(app: "MyFireNumber", timeout: 30)` times out. Diagnostics report a healthy broker at port `19223`, `agentCount=0`, no version mismatch, and no runtime app output. The manual `Microsoft.Maui.DevFlow.Agent` reference was removed so the VS Code extension can inject its compatible debug agent on the next launch. No visual-tree, screenshot, or runtime color validation is yet available for Phase 5.
+
+#### 2026-08-09 Retirement Collection Editor Checkpoint
+
+- Retirement Cash Flow now supports editable account, income-source, and additional-expense collections. Each collection supports add, field editing, and remove; account type, availability, returns, withdrawals, payout years, income tax/growth/age ranges, and expense start ages flow into the Core calculation contract.
+- Typed local drafts and named plans now restore all three Retirement Cash Flow collections. On iPhone 17, a newly added account, income source, and expense survived immediate navigation, process termination, relaunch, and route restoration.
+- The Open XML workbook now includes Accounts, Income Sources, and Additional Expenses sheets. Five focused Retirement Cash Flow tests cover web-parity defaults, custom JSON round trips, workbook collection output, and calculation fixtures.
+- iPhone 17 renders the collection editors with non-zero bounds. The visible dark native Entry reports TextColor `#F2F7F3`, PlaceholderColor `#B9D1C2`, and transparent MAUI outer background; the account Picker reports the same text/title colors, and screenshot evidence confirms readable native fields.
 
 ### Phase 6: Quiz, Home, Catalog, and Plans
 

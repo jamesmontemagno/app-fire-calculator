@@ -1,0 +1,68 @@
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Exports;
+
+namespace MyFireNumber.Tests.Exports;
+
+public sealed class DeferredCompensationWorkbookTests : IDisposable
+{
+    private readonly string workbookPath = Path.Combine(Path.GetTempPath(), $"my-fire-number-retirement-{Guid.NewGuid():N}.xlsx");
+
+    [Fact]
+    public void Create_WritesEveryCustomCollection()
+    {
+        var draft = DeferredCompensationDraft.Default with
+        {
+            Accounts =
+            [
+                new RetirementAccount("roth", "Custom Roth", RetirementAccountType.Roth, 125_000, 7_000, 0.06, 59, 0.04, 1)
+            ],
+            IncomeSources =
+            [
+                new RetirementIncomeSource("pension", "Custom Pension", 30_000, 62, 90, 0.02, false, 0.2)
+            ],
+            AdditionalExpenses =
+            [
+                new RetirementExpense("travel", "Custom Travel", 12_000, 60)
+            ]
+        };
+        var result = DeferredCompensationCalculator.Calculate(draft.ToInputs(2026));
+
+        DeferredCompensationWorkbook.Create(
+            workbookPath,
+            draft,
+            result,
+            new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
+
+        using var document = SpreadsheetDocument.Open(workbookPath, false);
+        var workbookPart = document.WorkbookPart ?? throw new InvalidOperationException("Workbook part was not created.");
+        var sheets = (workbookPart.Workbook?.Sheets ?? throw new InvalidOperationException("Workbook sheets were not created."))
+            .Elements<Sheet>()
+            .ToArray();
+
+        Assert.Equal(
+            ["Inputs", "Results", "Annual Cash Flow", "Accounts", "Income Sources", "Additional Expenses"],
+            sheets.Select(sheet => sheet.Name!.Value));
+        Assert.Equal("Custom Roth", GetCell(workbookPart, sheets[3], "A2").InlineString!.Text!.Text);
+        Assert.Equal("Custom Pension", GetCell(workbookPart, sheets[4], "A2").InlineString!.Text!.Text);
+        Assert.Equal("Custom Travel", GetCell(workbookPart, sheets[5], "A2").InlineString!.Text!.Text);
+    }
+
+    public void Dispose()
+    {
+        if (File.Exists(workbookPath))
+        {
+            File.Delete(workbookPath);
+        }
+    }
+
+    private static Cell GetCell(WorkbookPart workbookPart, Sheet sheet, string cellReference)
+    {
+        var worksheetPart = (WorksheetPart)workbookPart.GetPartById(
+            sheet.Id?.Value ?? throw new InvalidOperationException("Worksheet relationship ID was not created."));
+        return Assert.Single(
+            (worksheetPart.Worksheet ?? throw new InvalidOperationException("Worksheet was not created.")).Descendants<Cell>(),
+            cell => cell.CellReference?.Value == cellReference);
+    }
+}
