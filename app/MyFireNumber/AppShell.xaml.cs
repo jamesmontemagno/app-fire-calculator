@@ -25,6 +25,7 @@ public partial class AppShell : Shell
 
 		Routing.RegisterRoute("quiz", typeof(QuizPage));
 		Routing.RegisterRoute("calculator", typeof(CalculatorDetailPage));
+		Routing.RegisterRoute("retirement-annual-details", typeof(RetirementAnnualDetailsPage));
 		Loaded += OnLoaded;
 	}
 

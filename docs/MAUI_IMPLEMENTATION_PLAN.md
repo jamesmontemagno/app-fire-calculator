@@ -600,7 +600,7 @@ Exit gate: nine shared-form calculators are complete on both platforms.
 - [x] Retirement Cash Flow scenario inputs
 - [x] Income, account, and additional-expense editors
 - [~] Retirement cash-flow and bucket charts (implemented and validated on iOS; Android pending)
-- [ ] Expandable annual cash-flow detail
+- [~] Expandable annual cash-flow detail (implemented and validated on iOS; Android pending)
 - [x] Complex calculator exports and persistence
 
 Exit gate: collection editing, calculations, charts, plans, and exports pass on both platforms.
@@ -624,6 +624,12 @@ Exit gate: collection editing, calculations, charts, plans, and exports pass on 
 - Debt Payoff now includes a cumulative principal-and-interest stacked-area chart matching the web breakdown semantics. On iPhone 17, the chart renders at 328x260 and its visible text alternative reports `$1,000` principal and `$33` interest for the exercised scenario.
 - Retirement Cash Flow now includes one balance series per account across the full age projection, matching the web account-bucket chart. On iPhone 17, the chart renders at 328x260 and its visible text alternative lists every ending account balance.
 - The dark native Debt budget Entry and Retirement plan-name Entry report TextColor `#F2F7F3`, PlaceholderColor `#B9D1C2`, and transparent MAUI outer backgrounds; screenshots confirm readable native fields and chart canvases. All 61 tests pass.
+
+#### 2026-08-09 Retirement Annual Detail Checkpoint
+
+- Retirement Cash Flow now opens a dedicated Shell detail route with a virtualized `CollectionView` for the full projection horizon. Each year is a tappable 44-point-or-larger target that expands in place to show total income, expenses, annual surplus or shortfall, named income and withdrawal sources, expense items, and every account balance.
+- On iPhone 17, the list renders at 362x602. Expanding age 45 grows its row from 92 to 406 points and reveals the expected `$0` income, `$80,000` expenses, `-$80,000` shortfall, and `$800,000` combined account balance without clipping or nested scrolling.
+- The pushed page restores the native navigation bar, uses the contextual `Annual Cash Flow` title, hides the root tab bar, and returns to the calculator through the standard Shell back action. All 61 tests pass.
 
 ### Phase 6: Quiz, Home, Catalog, and Plans
 

@@ -26,6 +26,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly IFatFireExportService fatExportService;
     private readonly IHealthcareGapExportService healthcareGapExportService;
     private readonly ILeanFireExportService leanExportService;
+    private readonly INavigationService navigationService;
     private readonly IReverseFireExportService reverseExportService;
     private readonly ISavingsInvestmentExportService savingsInvestmentExportService;
     private readonly IStandardFireExportService exportService;
@@ -54,6 +55,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         IFatFireExportService fatExportService,
         IHealthcareGapExportService healthcareGapExportService,
         ILeanFireExportService leanExportService,
+        INavigationService navigationService,
         IPlanRepository planRepository,
         IReverseFireExportService reverseExportService,
         ISavingsInvestmentExportService savingsInvestmentExportService,
@@ -69,6 +71,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.fatExportService = fatExportService;
         this.healthcareGapExportService = healthcareGapExportService;
         this.leanExportService = leanExportService;
+        this.navigationService = navigationService;
         this.planRepository = planRepository;
         this.reverseExportService = reverseExportService;
         this.savingsInvestmentExportService = savingsInvestmentExportService;
@@ -2132,6 +2135,54 @@ public partial class CalculatorDetailViewModel : ObservableObject
             $"{(string.IsNullOrWhiteSpace(account.Name) ? $"Account {index + 1}" : account.Name)} {FormatCurrency(endingPoint.Balances.GetValueOrDefault(account.Id))}");
         RetirementBucketDescription = $"Account balances from age {result.Projections[0].Age} through age {endingPoint.Age}.";
         RetirementBucketSummary = $"At age {endingPoint.Age}, projected account balances are {string.Join(", ", endingBalances)}.";
+    }
+
+    [RelayCommand]
+    private async Task ViewRetirementAnnualDetailsAsync()
+    {
+        if (!TryCreateDeferredCompensationDraft(out var draft))
+        {
+            return;
+        }
+
+        var result = DeferredCompensationCalculator.Calculate(draft.ToInputs());
+        var details = result.Projections
+            .Select(point => CreateRetirementAnnualDetail(draft, point))
+            .ToArray();
+        await navigationService.GoToAsync(
+            "retirement-annual-details",
+            new Dictionary<string, object> { ["details"] = details });
+    }
+
+    private static RetirementAnnualDetailItem CreateRetirementAnnualDetail(
+        DeferredCompensationDraft draft,
+        RetirementCashFlowPoint point)
+    {
+        var incomeParts = draft.IncomeSources
+            .Select(source => (source.Name, Amount: point.IncomeBySource.GetValueOrDefault(source.Id)))
+            .Where(item => item.Amount > 0)
+            .Select(item => $"{item.Name}: {FormatCurrency(item.Amount)}")
+            .Concat(draft.Accounts
+                .Select(account => (account.Name, Amount: point.Withdrawals.GetValueOrDefault(account.Id)))
+                .Where(item => item.Amount > 0)
+                .Select(item => $"{item.Name} withdrawal: {FormatCurrency(item.Amount)}"));
+        var expenseParts = new[] { $"Core expenses: {FormatCurrency(point.CoreExpenses)}" }
+            .Concat(draft.AdditionalExpenses
+                .Select(expense => (expense.Name, Amount: point.ExpensesByItem.GetValueOrDefault(expense.Id)))
+                .Where(item => item.Amount > 0)
+                .Select(item => $"{item.Name}: {FormatCurrency(item.Amount)}"));
+        var balanceParts = draft.Accounts.Select((account, index) =>
+            $"{(string.IsNullOrWhiteSpace(account.Name) ? $"Account {index + 1}" : account.Name)}: {FormatCurrency(point.Balances.GetValueOrDefault(account.Id))}");
+
+        return new RetirementAnnualDetailItem(
+            $"Age {point.Age} - {point.Year}",
+            FormatCurrency(point.TotalBalance),
+            FormatCurrency(point.TotalIncome),
+            FormatCurrency(point.Expenses),
+            FormatCurrency(point.Surplus),
+            incomeParts.Any() ? string.Join(Environment.NewLine, incomeParts) : "No income or account withdrawals this year.",
+            string.Join(Environment.NewLine, expenseParts),
+            string.Join(Environment.NewLine, balanceParts));
     }
 
     private static LineSeries<double> CreateProjectionSeries(string name, IEnumerable<double> values, SKColor color)

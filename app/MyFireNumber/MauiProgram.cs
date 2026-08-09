@@ -59,12 +59,14 @@ public static class MauiProgram
 		builder.Services.AddSingleton<SettingsPage>();
 		builder.Services.AddTransient<CalculatorDetailPage>();
 		builder.Services.AddTransient<QuizPage>();
+		builder.Services.AddTransient<RetirementAnnualDetailsPage>();
 		builder.Services.AddSingleton<HomeViewModel>();
 		builder.Services.AddSingleton<CalculatorCatalogViewModel>();
 		builder.Services.AddSingleton<PlansViewModel>();
 		builder.Services.AddSingleton<SettingsViewModel>();
 		builder.Services.AddTransient<CalculatorDetailViewModel>();
 		builder.Services.AddTransient<QuizViewModel>();
+		builder.Services.AddTransient<RetirementAnnualDetailsViewModel>();
 
 #if MAUI_DEVFLOW
 		builder.AddMauiDevFlowAgent();
