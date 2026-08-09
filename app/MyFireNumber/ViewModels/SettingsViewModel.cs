@@ -16,6 +16,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly ICalculatorCatalog catalog;
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
+    private readonly ICurrencyPreferencesService currencyPreferencesService;
     private readonly IAppResetService appResetService;
     private readonly IAppDataTransferService appDataTransferService;
     private readonly IConfirmationService confirmationService;
@@ -30,6 +31,7 @@ public partial class SettingsViewModel : ObservableObject
         ICalculatorCatalog catalog,
         ICalculatorDefaultsService calculatorDefaultsService,
         IAppBehaviorPreferencesService behaviorPreferencesService,
+        ICurrencyPreferencesService currencyPreferencesService,
         IAppResetService appResetService,
         IAppDataTransferService appDataTransferService,
         ICalculatorPreferencesRepository preferencesRepository,
@@ -43,6 +45,7 @@ public partial class SettingsViewModel : ObservableObject
         this.catalog = catalog;
         this.calculatorDefaultsService = calculatorDefaultsService;
         this.behaviorPreferencesService = behaviorPreferencesService;
+        this.currencyPreferencesService = currencyPreferencesService;
         this.appResetService = appResetService;
         this.appDataTransferService = appDataTransferService;
         this.preferencesRepository = preferencesRepository;
@@ -58,11 +61,13 @@ public partial class SettingsViewModel : ObservableObject
         hapticsEnabled = behavior.Haptics;
         reduceMotion = behavior.ReduceMotion;
         highContrast = behavior.HighContrast;
+        selectedCurrencyOption = currencyPreferencesService.SelectedOption;
         LoadCalculatorDefaults();
     }
 
     public IReadOnlyList<ThemePreference> ThemeOptions { get; } = Enum.GetValues<ThemePreference>();
     public IReadOnlyList<LaunchDestination> LaunchOptions { get; } = Enum.GetValues<LaunchDestination>();
+    public IReadOnlyList<string> CurrencyOptions => currencyPreferencesService.Options;
     public ObservableCollection<CalculatorPreferenceItem> CalculatorPreferences { get; } = [];
 
     [ObservableProperty]
@@ -85,6 +90,11 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private string defaultsStatus = string.Empty;
+
+    [ObservableProperty]
+    private string selectedCurrencyOption = CurrencyPreferencesService.DeviceRegion;
+
+    partial void OnSelectedCurrencyOptionChanged(string value) => currencyPreferencesService.Save(value);
 
     partial void OnSelectedThemeChanged(ThemePreference value) =>
         themeService.Apply(HighContrast ? ThemePreference.Dark : value);

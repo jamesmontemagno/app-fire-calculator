@@ -21,6 +21,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
     private readonly ICalculatorCatalog catalog;
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
+    private readonly ICurrencyPreferencesService currencyPreferencesService;
     private readonly ICoastFireExportService coastExportService;
     private readonly ICorruptPayloadRepository corruptPayloadRepository;
     private readonly IDeferredCompensationExportService deferredCompensationExportService;
@@ -57,6 +58,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         IAppBehaviorPreferencesService behaviorPreferencesService,
         ICalculatorCatalog catalog,
         ICalculatorDefaultsService calculatorDefaultsService,
+        ICurrencyPreferencesService currencyPreferencesService,
         ICoastFireExportService coastExportService,
         ICorruptPayloadRepository corruptPayloadRepository,
         IDeferredCompensationExportService deferredCompensationExportService,
@@ -76,6 +78,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.behaviorPreferencesService = behaviorPreferencesService;
         this.catalog = catalog;
         this.calculatorDefaultsService = calculatorDefaultsService;
+        this.currencyPreferencesService = currencyPreferencesService;
         this.coastExportService = coastExportService;
         this.corruptPayloadRepository = corruptPayloadRepository;
         this.deferredCompensationExportService = deferredCompensationExportService;
@@ -2229,7 +2232,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
             new Dictionary<string, object> { ["details"] = details });
     }
 
-    private static RetirementAnnualDetailItem CreateRetirementAnnualDetail(
+    private RetirementAnnualDetailItem CreateRetirementAnnualDetail(
         DeferredCompensationDraft draft,
         RetirementCashFlowPoint point)
     {
@@ -2604,8 +2607,8 @@ public partial class CalculatorDetailViewModel : ObservableObject
         return value.ToString("0.##", CultureInfo.CurrentCulture);
     }
 
-    private static string FormatCurrency(double value)
+    private string FormatCurrency(double value)
     {
-        return value.ToString("C0", CultureInfo.CurrentCulture);
+        return currencyPreferencesService.Format(value);
     }
 }

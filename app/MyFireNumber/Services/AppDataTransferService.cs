@@ -13,7 +13,10 @@ public interface IAppDataTransferService
 public sealed class AppDataTransferService(
     ILocalDataArchiveRepository archiveRepository,
     IOnboardingService onboardingService,
-    IThemeService themeService) : IAppDataTransferService
+    IThemeService themeService,
+    ICalculatorDefaultsService calculatorDefaultsService,
+    IAppBehaviorPreferencesService behaviorPreferencesService,
+    ICurrencyPreferencesService currencyPreferencesService) : IAppDataTransferService
 {
     private const int ArchiveVersion = 1;
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
@@ -29,7 +32,10 @@ public sealed class AppDataTransferService(
             await archiveRepository.ExportAsync(),
             themeService.Preference,
             onboardingService.IsComplete,
-            onboardingService.RecommendationCalculatorId);
+            onboardingService.RecommendationCalculatorId,
+            calculatorDefaultsService.Current,
+            behaviorPreferencesService.Current,
+            currencyPreferencesService.SelectedOption);
         var filePath = Path.Combine(
             FileSystem.CacheDirectory,
             $"my-fire-number-backup-{DateTime.UtcNow:yyyyMMdd-HHmmss}.json");
@@ -63,7 +69,20 @@ public sealed class AppDataTransferService(
 
         await archiveRepository.ImportAsync(envelope.LocalData);
         Preferences.Default.Clear();
-        themeService.Apply(envelope.Theme);
+        if (envelope.CalculatorDefaults is not null)
+        {
+            calculatorDefaultsService.Save(envelope.CalculatorDefaults);
+        }
+
+        if (envelope.BehaviorPreferences is not null)
+        {
+            behaviorPreferencesService.Save(envelope.BehaviorPreferences);
+        }
+
+        currencyPreferencesService.Save(envelope.CurrencyOption ?? CurrencyPreferencesService.DeviceRegion);
+        themeService.Apply(envelope.BehaviorPreferences?.HighContrast == true
+            ? ThemePreference.Dark
+            : envelope.Theme);
         if (envelope.OnboardingComplete)
         {
             onboardingService.Complete();
@@ -83,5 +102,8 @@ public sealed class AppDataTransferService(
         LocalDataArchive LocalData,
         ThemePreference Theme,
         bool OnboardingComplete,
-        string? RecommendationCalculatorId);
+        string? RecommendationCalculatorId,
+        CalculatorDefaults? CalculatorDefaults,
+        AppBehaviorPreferences? BehaviorPreferences,
+        string? CurrencyOption);
 }

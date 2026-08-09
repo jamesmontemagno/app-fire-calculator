@@ -205,6 +205,18 @@
                         <Label Text="Set starting assumptions for new calculators. Existing drafts and saved plans never change."
                                TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                                LineHeight="1.3" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Currency"
+                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   FontSize="13" />
+                            <Picker AutomationId="CurrencyPicker"
+                                    ItemsSource="{Binding CurrencyOptions}"
+                                    SelectedItem="{Binding SelectedCurrencyOption}"
+                                    Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                    TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                    TitleColor="{AppThemeBinding Light=#60756C, Dark=#8EAA9B}"
+                                    SemanticProperties.Description="Currency used to display calculator results" />
+                        </VerticalStackLayout>
                         <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
                             <VerticalStackLayout Spacing="4">
                                 <Label Text="Expected return (%)"
