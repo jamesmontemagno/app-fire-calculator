@@ -76,10 +76,10 @@ dotnet build app/MyFireNumber/MyFireNumber.csproj -f net10.0-android
 dotnet build app/MyFireNumber/MyFireNumber.csproj -f net10.0-ios
 ```
 
-Pull requests that change `app/**` run Android and iOS validation workflows. Manual workflow runs can also create signed Android App Bundles and iOS archives. Signed releases require these repository secrets:
-
-- Android: `ANDROID_KEYSTORE`, `ANDROID_KEYSTORE_PASSWORD`, and `ANDROID_KEY_ALIAS`
-- iOS/App Store Connect: `APPSTORE_CERTIFICATE_P12`, `APPSTORE_CERTIFICATE_P12_PASSWORD`, `APPSTORE_CODESIGN_KEY`, `APPSTORE_ISSUER_ID`, `APPSTORE_KEY_ID`, and `APPSTORE_PRIVATE_KEY`
+Pull requests that change `app/**` run Android and iOS validation workflows. Manual workflow runs
+can also create signed Android App Bundles and iOS archives. See
+[Mobile Release Secrets](docs/MOBILE_RELEASE_SECRETS.md) for the required credentials and setup
+steps.
 
 ## 🛠️ Tech Stack
 
