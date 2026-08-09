@@ -31,7 +31,10 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly IStandardFireExportService exportService;
     private readonly IWithdrawalRateExportService withdrawalRateExportService;
     private readonly IPlanRepository planRepository;
+    private readonly SemaphoreSlim draftSaveLock = new(1, 1);
+    private readonly object pendingDraftLock = new();
     private CancellationTokenSource? saveCancellationTokenSource;
+    private DraftRecord? pendingDraft;
     private bool isApplyingDraft;
     private DateTime? loadedPlanCreatedAtUtc;
     private string? loadedPlanId;
@@ -2084,20 +2087,47 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private void ScheduleSave(string calculatorId, int payloadVersion, string payloadJson)
     {
-        saveCancellationTokenSource?.Cancel();
-        saveCancellationTokenSource?.Dispose();
-        saveCancellationTokenSource = new CancellationTokenSource();
-        _ = SaveDraftAsync(calculatorId, payloadVersion, payloadJson, saveCancellationTokenSource.Token);
+        lock (pendingDraftLock)
+        {
+            pendingDraft = new DraftRecord(calculatorId, payloadVersion, payloadJson, DateTime.UtcNow);
+            saveCancellationTokenSource?.Cancel();
+            saveCancellationTokenSource?.Dispose();
+            saveCancellationTokenSource = new CancellationTokenSource();
+            _ = SaveDraftAsync(pendingDraft, saveCancellationTokenSource.Token);
+        }
     }
 
-    private async Task SaveDraftAsync(string calculatorId, int payloadVersion, string payloadJson, CancellationToken cancellationToken)
+    public async Task FlushPendingDraftAsync()
+    {
+        DraftRecord? draft;
+        lock (pendingDraftLock)
+        {
+            draft = pendingDraft;
+            pendingDraft = null;
+            saveCancellationTokenSource?.Cancel();
+            saveCancellationTokenSource?.Dispose();
+            saveCancellationTokenSource = null;
+        }
+
+        if (draft is not null)
+        {
+            await SaveDraftRecordAsync(draft, CancellationToken.None);
+        }
+    }
+
+    private async Task SaveDraftAsync(DraftRecord draft, CancellationToken cancellationToken)
     {
         try
         {
             await Task.Delay(TimeSpan.FromMilliseconds(400), cancellationToken);
-            await draftRepository.SaveAsync(
-                new DraftRecord(calculatorId, payloadVersion, payloadJson, DateTime.UtcNow),
-                cancellationToken);
+            await SaveDraftRecordAsync(draft, cancellationToken);
+            lock (pendingDraftLock)
+            {
+                if (pendingDraft == draft)
+                {
+                    pendingDraft = null;
+                }
+            }
         }
         catch (OperationCanceledException)
         {
@@ -2105,6 +2135,19 @@ public partial class CalculatorDetailViewModel : ObservableObject
         catch (Exception)
         {
             ValidationMessage = "Your changes are shown here, but could not be saved locally yet.";
+        }
+    }
+
+    private async Task SaveDraftRecordAsync(DraftRecord draft, CancellationToken cancellationToken)
+    {
+        await draftSaveLock.WaitAsync(cancellationToken);
+        try
+        {
+            await draftRepository.SaveAsync(draft with { UpdatedAtUtc = DateTime.UtcNow }, cancellationToken);
+        }
+        finally
+        {
+            draftSaveLock.Release();
         }
     }
 

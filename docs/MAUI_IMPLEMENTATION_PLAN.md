@@ -266,7 +266,7 @@ Use MAUI `Preferences` only for small, non-sensitive values:
 - [ ] Connection initialization is asynchronous and idempotent
 - [ ] WAL and other pragmas are evaluated on both iOS and Android
 - [ ] All writes use repository methods and transactions where multiple records must agree
-- [ ] Draft saves are debounced and flushed when the app stops or deactivates
+- [x] Draft saves are debounced and flushed when the app stops or deactivates
 - [ ] Corrupt payloads fail safely and remain recoverable/exportable when possible
 - [ ] Payload migrations are explicit and covered by tests
 - [ ] Database migrations are monotonic and covered by upgrade tests
@@ -558,6 +558,7 @@ Exit gate: Standard FIRE is complete end to end on iOS and Android.
 | 2026-08-09 | Standard FIRE presets | Four typed Core presets provide complete StandardFireDraft values. On iPhone 17, selecting Aggressive applies age 45, `$150,000` savings, `$48,000` contribution, `$96,000` income, and the computed `50.0%` savings rate. The native Picker reports TextColor `#17352C`, TitleColor `#587068`, and transparent MAUI outer BackgroundColor; screenshot confirms the native light field is readable. | iOS complete |
 | 2026-08-09 | Standard FIRE projection chart | A fresh iPhone 17 launch renders a 328x260 LiveCharts CartesianChart with portfolio, inflation-adjusted, and FIRE-target series. The visible chart shows its age axis and target line; its runtime accessibility label gives the age range, starting portfolio, and FIRE target, with the textual projection summary directly beneath it. | iOS complete |
 | 2026-08-09 | Standard FIRE draft lifecycle | Editing Annual Contribution to `$36,000` recalculates the savings rate to `37.5%` and survives a fresh iPhone 17 debug relaunch. Reset then restores the default `$24,000` contribution, `$1,200,000` FIRE Number, and 24.4-year projection. | iOS complete |
+| 2026-08-09 | Immediate draft flush | On iPhone 17, Annual Contribution was changed to `$43,210` and navigation left the calculator immediately, before the 400 ms debounce elapsed. After process termination and relaunch, Standard FIRE restored `$43,210`, proving the page/window lifecycle flush persisted the pending draft. | iOS complete |
 | 2026-08-09 | Standard FIRE Excel export | A focused Open XML test opens the generated workbook and verifies Inputs, Results, and Projections sheets with formula-backed FIRE Number and projection cells. On iPhone 17, Export to Excel opens the native share sheet with `standard-fire-20260809-032846.xlsx`, including Copy and Save to Files actions. | iOS complete |
 | 2026-08-09 | Standard FIRE dark mode | iPhone 17 system dark mode renders the form, Export action, and portfolio chart without overlap. Native Entry and Picker text is `#F2F7F3`, with placeholder/title `#B9D1C2`; screenshots confirm readable contrast on the dark native fields and chart canvas. | iOS complete; offline, dynamic text, and VoiceOver validation pending |
 

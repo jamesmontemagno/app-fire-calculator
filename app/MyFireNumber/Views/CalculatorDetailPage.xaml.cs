@@ -5,6 +5,7 @@ namespace MyFireNumber.Views;
 public partial class CalculatorDetailPage : ContentPage, IQueryAttributable
 {
     private readonly CalculatorDetailViewModel viewModel;
+    private Window? subscribedWindow;
 
     public CalculatorDetailPage(CalculatorDetailViewModel viewModel)
     {
@@ -22,5 +23,40 @@ public partial class CalculatorDetailPage : ContentPage, IQueryAttributable
                 : null;
             await viewModel.LoadAsync(Uri.UnescapeDataString(value), planId);
         }
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        subscribedWindow = Window;
+        if (subscribedWindow is not null)
+        {
+            subscribedWindow.Deactivated += OnWindowSuspending;
+            subscribedWindow.Stopped += OnWindowSuspending;
+        }
+    }
+
+    protected override async void OnDisappearing()
+    {
+        UnsubscribeWindowEvents();
+        await viewModel.FlushPendingDraftAsync();
+        base.OnDisappearing();
+    }
+
+    private async void OnWindowSuspending(object? sender, EventArgs eventArgs)
+    {
+        await viewModel.FlushPendingDraftAsync();
+    }
+
+    private void UnsubscribeWindowEvents()
+    {
+        if (subscribedWindow is null)
+        {
+            return;
+        }
+
+        subscribedWindow.Deactivated -= OnWindowSuspending;
+        subscribedWindow.Stopped -= OnWindowSuspending;
+        subscribedWindow = null;
     }
 }
