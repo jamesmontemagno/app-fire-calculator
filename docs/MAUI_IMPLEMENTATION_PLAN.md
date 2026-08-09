@@ -106,7 +106,7 @@ implementation passes cannot lose requested refinements.
 - [ ] Move Privacy to the bottom of Settings, link Terms and Privacy to the website, and update web Terms to cover the mobile app.
 - [ ] Make Retirement Cash Flow input/result sections collapsible with polished native controls; prefer an in-repository implementation unless a toolkit dependency materially improves accessibility or behavior.
 - [x] Use context-aware plan actions: fresh drafts say Save to Plans, loaded plans say Update Plan. Keep Duplicate in Plans and remove redundant Save As.
-- [ ] Group the Calculators catalog into FIRE, Finance, and Cash Flow sections while preserving search and hidden-calculator discovery.
+- [x] Group the Calculators catalog into FIRE, Finance, and Cash Flow sections while preserving search and hidden-calculator discovery.
 
 ### Explicitly Excluded From Version 1
 
@@ -675,6 +675,7 @@ Exit gate: all top-level navigation and discovery workflows are complete.
 | 2026-08-09 | Explicit Save As | Calculator details initially exposed Save, Save As, and Export as distinct native toolbar actions. The native prompt received its suggested name as an editable initial value instead of placeholder text, fixing the same issue for Rename and Duplicate. Product review later removed Save As in favor of context-aware Save/Update plus Duplicate in Plans. | Superseded by simplified plan actions |
 | 2026-08-09 | Native FIRE Quiz | The eight-question native quiz matches the web recommendation priority and creates calculator-specific typed drafts from local answers. Seven focused rule tests cover every recommendation path and the full suite passes with 71 tests. On iPhone 17, Lean FIRE renders at non-zero bounds, the existing-draft path shows a native Replace/Cancel confirmation, and a clean Reverse FIRE path opens with quiz-prefilled ages 40/50, `$200,000` savings, and `$60,000` expenses. The dark native Entry reports TextColor `#F2F7F3`, PlaceholderColor `#B9D1C2`, and a transparent MAUI outer background; screenshot evidence confirms readable contrast. | iOS complete; Android pending |
 | 2026-08-09 | Streamlined plans and calculator chrome | Plans search and calculator filtering now scroll in a compact `CollectionView` header; the list renders at 362x697 on iPhone 17. Calculator pages begin directly with calculator content beneath the contextual native title, without a duplicate 30-point heading. Fresh drafts expose Save to Plans and loaded plans expose Update Plan in both toolbar and page actions; Save As is removed because Plans already provides Duplicate. The dark Plans SearchBar reports TextColor `#F2F7F3` and PlaceholderColor `#B9D1C2`; the exercised calculator Entry reports the same readable colors. All 71 tests pass. | iOS complete; Android pending |
+| 2026-08-09 | Grouped calculator catalog | The All Calculators `CollectionView` now presents FIRE, Finance, and Cash Flow groups with distinct accessible headers while retaining full-card navigation and search. On iPhone 17, all three headers render at non-zero bounds; searching `debt` collapses the list to the Finance header and Debt Payoff card. The dark native SearchBar reports TextColor `#F2F7F3`, PlaceholderColor `#B9D1C2`, and a transparent MAUI outer background. All 71 tests pass. | iOS complete; Android pending |
 
 ### Phase 7: Full Settings
 

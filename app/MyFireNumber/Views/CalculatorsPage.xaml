@@ -16,7 +16,30 @@
                    PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
                    SemanticProperties.Description="Search available calculators" />
 
-        <CollectionView Grid.Row="1" ItemsSource="{Binding FilteredCalculators}" SelectionMode="None">
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding FilteredCalculatorGroups}"
+                        IsGrouped="True"
+                        SelectionMode="None">
+            <CollectionView.GroupHeaderTemplate>
+                <DataTemplate x:DataType="viewModels:CalculatorGroup">
+                    <Grid ColumnDefinitions="Auto,*"
+                          ColumnSpacing="8"
+                          Padding="4,12,4,10">
+                        <Label Text="{Binding IconGlyph}"
+                               FontFamily="FontAwesomeSolid"
+                               FontSize="17"
+                               VerticalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               SemanticProperties.Description="{Binding Name, StringFormat='{0} calculators'}" />
+                        <Label Grid.Column="1"
+                               Text="{Binding Name}"
+                               FontSize="20"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                               SemanticProperties.HeadingLevel="Level2" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.GroupHeaderTemplate>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="catalog:CalculatorDefinition">
                     <Border Margin="0,0,0,10"
