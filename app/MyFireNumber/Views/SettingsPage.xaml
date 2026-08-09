@@ -110,6 +110,87 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="12">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Label Text="&#xf085;"
+                                   FontFamily="FontAwesomeSolid"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   SemanticProperties.Description="App behavior and accessibility" />
+                            <Label Grid.Column="1"
+                                   Text="Behavior &amp; accessibility"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="18" />
+                        </Grid>
+                        <Label Text="Start each visit where it is most useful to you."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                        <Border Padding="4"
+                                Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 12">
+                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                                <Button AutomationId="LaunchHomeButton"
+                                        Text="Home"
+                                        Command="{Binding SetLaunchDestinationCommand}"
+                                        CommandParameter="{x:Static services:LaunchDestination.Home}"
+                                        Background="Transparent"
+                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding SelectedLaunchDestination}" Value="Home">
+                                            <Setter Property="Background" Value="#2F6B57" />
+                                            <Setter Property="TextColor" Value="#FFFFFF" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button AutomationId="LaunchCalculatorsButton"
+                                        Grid.Column="1"
+                                        Text="Calculators"
+                                        Command="{Binding SetLaunchDestinationCommand}"
+                                        CommandParameter="{x:Static services:LaunchDestination.Calculators}"
+                                        Background="Transparent"
+                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding SelectedLaunchDestination}" Value="Calculators">
+                                            <Setter Property="Background" Value="#2F6B57" />
+                                            <Setter Property="TextColor" Value="#FFFFFF" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button AutomationId="LaunchPlansButton"
+                                        Grid.Column="2"
+                                        Text="Plans"
+                                        Command="{Binding SetLaunchDestinationCommand}"
+                                        CommandParameter="{x:Static services:LaunchDestination.Plans}"
+                                        Background="Transparent"
+                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding SelectedLaunchDestination}" Value="Plans">
+                                            <Setter Property="Background" Value="#2F6B57" />
+                                            <Setter Property="TextColor" Value="#FFFFFF" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                            </Grid>
+                        </Border>
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="10">
+                            <Label Text="Restore latest calculator drafts" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="RestoreDraftsSwitch" Grid.Column="1" IsToggled="{Binding RestoreDrafts}" OnColor="#2F6B57" />
+                            <Label Grid.Row="1" Text="Confirm before deleting plans" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="ConfirmPlanDeletionSwitch" Grid.Row="1" Grid.Column="1" IsToggled="{Binding ConfirmPlanDeletion}" OnColor="#2F6B57" />
+                            <Label Grid.Row="2" Text="Interaction haptics" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="HapticsSwitch" Grid.Row="2" Grid.Column="1" IsToggled="{Binding HapticsEnabled}" OnColor="#2F6B57" />
+                            <Label Grid.Row="3" Text="Reduce chart motion" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="ReduceMotionSwitch" Grid.Row="3" Grid.Column="1" IsToggled="{Binding ReduceMotion}" OnColor="#2F6B57" />
+                            <Label Grid.Row="4" Text="High contrast dark palette" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="HighContrastSwitch" Grid.Row="4" Grid.Column="1" IsToggled="{Binding HighContrast}" OnColor="#2F6B57" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+                <Border Padding="18"
+                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                             <Label Text="&#xf1ec;"
                                    FontFamily="FontAwesomeSolid"
                                    VerticalTextAlignment="Center"

@@ -6,6 +6,7 @@ namespace MyFireNumber;
 public partial class AppShell : Shell
 {
 	private readonly IOnboardingService onboardingService;
+	private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
 	private bool hasPresentedOnboarding;
 
 	public AppShell(
@@ -13,10 +14,12 @@ public partial class AppShell : Shell
 		CalculatorsPage calculatorsPage,
 		PlansPage plansPage,
 		SettingsPage settingsPage,
-		IOnboardingService onboardingService)
+		IOnboardingService onboardingService,
+		IAppBehaviorPreferencesService behaviorPreferencesService)
 	{
 		InitializeComponent();
 		this.onboardingService = onboardingService;
+		this.behaviorPreferencesService = behaviorPreferencesService;
 
 		Items.Add(CreateTab("Home", "home", "tab_home.png", homePage));
 		Items.Add(CreateTab("Calculators", "calculators", "tab_calculators.png", calculatorsPage));
@@ -49,12 +52,24 @@ public partial class AppShell : Shell
 	private async void OnLoaded(object? sender, EventArgs eventArgs)
 	{
 		Loaded -= OnLoaded;
-		if (hasPresentedOnboarding || onboardingService.IsComplete)
+		if (hasPresentedOnboarding)
 		{
 			return;
 		}
 
 		hasPresentedOnboarding = true;
-		await GoToAsync("quiz");
+		if (!onboardingService.IsComplete)
+		{
+			await GoToAsync("quiz");
+			return;
+		}
+
+		var route = behaviorPreferencesService.Current.LaunchDestination switch
+		{
+			LaunchDestination.Calculators => "//calculators",
+			LaunchDestination.Plans => "//plans",
+			_ => "//home"
+		};
+		await GoToAsync(route);
 	}
 }

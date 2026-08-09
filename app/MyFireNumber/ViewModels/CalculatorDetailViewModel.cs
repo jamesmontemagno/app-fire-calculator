@@ -18,6 +18,7 @@ namespace MyFireNumber.ViewModels;
 public partial class CalculatorDetailViewModel : ObservableObject
 {
     private readonly IBaristaFireExportService baristaExportService;
+    private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
     private readonly ICalculatorCatalog catalog;
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly ICoastFireExportService coastExportService;
@@ -47,8 +48,13 @@ public partial class CalculatorDetailViewModel : ObservableObject
     public ObservableCollection<RetirementIncomeEditorItem> RetirementIncomeSources { get; } = [];
     public ObservableCollection<RetirementExpenseEditorItem> RetirementAdditionalExpenses { get; } = [];
 
+    public TimeSpan ChartAnimationsSpeed => behaviorPreferencesService.Current.ReduceMotion
+        ? TimeSpan.Zero
+        : TimeSpan.FromMilliseconds(800);
+
     public CalculatorDetailViewModel(
         IBaristaFireExportService baristaExportService,
+        IAppBehaviorPreferencesService behaviorPreferencesService,
         ICalculatorCatalog catalog,
         ICalculatorDefaultsService calculatorDefaultsService,
         ICoastFireExportService coastExportService,
@@ -67,6 +73,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         IWithdrawalRateExportService withdrawalRateExportService)
     {
         this.baristaExportService = baristaExportService;
+        this.behaviorPreferencesService = behaviorPreferencesService;
         this.catalog = catalog;
         this.calculatorDefaultsService = calculatorDefaultsService;
         this.coastExportService = coastExportService;
@@ -647,7 +654,9 @@ public partial class CalculatorDetailViewModel : ObservableObject
             }
             else
             {
-                var savedDraft = await draftRepository.GetAsync(calculatorId);
+                var savedDraft = behaviorPreferencesService.Current.RestoreDrafts
+                    ? await draftRepository.GetAsync(calculatorId)
+                    : null;
                 if (savedDraft is null)
                 {
                     ApplyDefaultDraft();
@@ -883,6 +892,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
             PlanStatusMessage = isUpdatingLoadedPlan
                 ? $"Updated \"{PlanNameText.Trim()}\" in Plans."
                 : $"Saved \"{PlanNameText.Trim()}\" to Plans.";
+            behaviorPreferencesService.PerformHaptic();
         }
         catch (Exception)
         {

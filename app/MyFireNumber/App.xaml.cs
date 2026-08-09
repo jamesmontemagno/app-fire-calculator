@@ -6,11 +6,16 @@ public partial class App : Application
 {
 	private readonly AppShell appShell;
 
-	public App(AppShell appShell, IThemeService themeService)
+	public App(
+		AppShell appShell,
+		IThemeService themeService,
+		IAppBehaviorPreferencesService behaviorPreferencesService)
 	{
 		InitializeComponent();
 		this.appShell = appShell;
-		themeService.Apply(themeService.Preference);
+		themeService.Apply(behaviorPreferencesService.Current.HighContrast
+			? ThemePreference.Dark
+			: themeService.Preference);
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

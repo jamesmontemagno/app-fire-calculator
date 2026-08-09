@@ -15,6 +15,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly INavigationService navigationService;
     private readonly ICalculatorCatalog catalog;
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
+    private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
     private readonly IAppResetService appResetService;
     private readonly IAppDataTransferService appDataTransferService;
     private readonly IConfirmationService confirmationService;
@@ -28,6 +29,7 @@ public partial class SettingsViewModel : ObservableObject
         INavigationService navigationService,
         ICalculatorCatalog catalog,
         ICalculatorDefaultsService calculatorDefaultsService,
+        IAppBehaviorPreferencesService behaviorPreferencesService,
         IAppResetService appResetService,
         IAppDataTransferService appDataTransferService,
         ICalculatorPreferencesRepository preferencesRepository,
@@ -40,6 +42,7 @@ public partial class SettingsViewModel : ObservableObject
         this.navigationService = navigationService;
         this.catalog = catalog;
         this.calculatorDefaultsService = calculatorDefaultsService;
+        this.behaviorPreferencesService = behaviorPreferencesService;
         this.appResetService = appResetService;
         this.appDataTransferService = appDataTransferService;
         this.preferencesRepository = preferencesRepository;
@@ -48,10 +51,18 @@ public partial class SettingsViewModel : ObservableObject
         this.errorPresentationService = errorPresentationService;
         this.themeService = themeService;
         selectedTheme = themeService.Preference;
+        var behavior = behaviorPreferencesService.Current;
+        selectedLaunchDestination = behavior.LaunchDestination;
+        restoreDrafts = behavior.RestoreDrafts;
+        confirmPlanDeletion = behavior.ConfirmPlanDeletion;
+        hapticsEnabled = behavior.Haptics;
+        reduceMotion = behavior.ReduceMotion;
+        highContrast = behavior.HighContrast;
         LoadCalculatorDefaults();
     }
 
     public IReadOnlyList<ThemePreference> ThemeOptions { get; } = Enum.GetValues<ThemePreference>();
+    public IReadOnlyList<LaunchDestination> LaunchOptions { get; } = Enum.GetValues<LaunchDestination>();
     public ObservableCollection<CalculatorPreferenceItem> CalculatorPreferences { get; } = [];
 
     [ObservableProperty]
@@ -75,10 +86,44 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string defaultsStatus = string.Empty;
 
-    partial void OnSelectedThemeChanged(ThemePreference value) => themeService.Apply(value);
+    partial void OnSelectedThemeChanged(ThemePreference value) =>
+        themeService.Apply(HighContrast ? ThemePreference.Dark : value);
+
+    [ObservableProperty]
+    private LaunchDestination selectedLaunchDestination;
+
+    [ObservableProperty]
+    private bool restoreDrafts;
+
+    [ObservableProperty]
+    private bool confirmPlanDeletion;
+
+    [ObservableProperty]
+    private bool hapticsEnabled;
+
+    [ObservableProperty]
+    private bool reduceMotion;
+
+    [ObservableProperty]
+    private bool highContrast;
+
+    partial void OnSelectedLaunchDestinationChanged(LaunchDestination value) => SaveBehaviorPreferences();
+    partial void OnRestoreDraftsChanged(bool value) => SaveBehaviorPreferences();
+    partial void OnConfirmPlanDeletionChanged(bool value) => SaveBehaviorPreferences();
+    partial void OnHapticsEnabledChanged(bool value) => SaveBehaviorPreferences();
+    partial void OnReduceMotionChanged(bool value) => SaveBehaviorPreferences();
+
+    partial void OnHighContrastChanged(bool value)
+    {
+        SaveBehaviorPreferences();
+        themeService.Apply(value ? ThemePreference.Dark : SelectedTheme);
+    }
 
     [RelayCommand]
     private void SetTheme(ThemePreference preference) => SelectedTheme = preference;
+
+    [RelayCommand]
+    private void SetLaunchDestination(LaunchDestination destination) => SelectedLaunchDestination = destination;
 
     [RelayCommand]
     private void SaveCalculatorDefaults()
@@ -301,5 +346,16 @@ public partial class SettingsViewModel : ObservableObject
 
         value = 0;
         return false;
+    }
+
+    private void SaveBehaviorPreferences()
+    {
+        behaviorPreferencesService.Save(new AppBehaviorPreferences(
+            SelectedLaunchDestination,
+            RestoreDrafts,
+            ConfirmPlanDeletion,
+            HapticsEnabled,
+            ReduceMotion,
+            HighContrast));
     }
 }

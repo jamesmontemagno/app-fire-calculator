@@ -13,6 +13,7 @@ public sealed record CalculatorFilter(string? CalculatorId, string Name);
 public partial class PlansViewModel : ObservableObject
 {
     private readonly IPlanRepository planRepository;
+    private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
     private readonly ICalculatorCatalog catalog;
     private readonly IConfirmationService confirmationService;
     private readonly IErrorPresentationService errorPresentationService;
@@ -23,6 +24,7 @@ public partial class PlansViewModel : ObservableObject
 
     public PlansViewModel(
         IPlanRepository planRepository,
+        IAppBehaviorPreferencesService behaviorPreferencesService,
         ICalculatorCatalog catalog,
         INavigationService navigationService,
         IConfirmationService confirmationService,
@@ -31,6 +33,7 @@ public partial class PlansViewModel : ObservableObject
         IRecentActivityRepository recentActivityRepository)
     {
         this.planRepository = planRepository;
+        this.behaviorPreferencesService = behaviorPreferencesService;
         this.catalog = catalog;
         this.navigationService = navigationService;
         this.confirmationService = confirmationService;
@@ -193,11 +196,12 @@ public partial class PlansViewModel : ObservableObject
     [RelayCommand]
     private async Task DeletePlanAsync(PlanListItem plan)
     {
-        var confirmed = await confirmationService.ConfirmAsync(
-            "Delete saved plan?",
-            $"Delete \"{plan.Name}\"? Your current calculator draft will not be changed.",
-            "Delete",
-            "Cancel");
+        var confirmed = !behaviorPreferencesService.Current.ConfirmPlanDeletion
+            || await confirmationService.ConfirmAsync(
+                "Delete saved plan?",
+                $"Delete \"{plan.Name}\"? Your current calculator draft will not be changed.",
+                "Delete",
+                "Cancel");
         if (!confirmed)
         {
             return;
@@ -206,6 +210,7 @@ public partial class PlansViewModel : ObservableObject
         try
         {
             await planRepository.DeleteAsync(plan.Id);
+            behaviorPreferencesService.PerformHaptic();
             await LoadAsync();
         }
         catch (Exception)

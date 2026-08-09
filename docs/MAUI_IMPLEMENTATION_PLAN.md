@@ -404,8 +404,8 @@ stack layout.
 
 - [~] System, light, and dark theme (implemented and persisted; device validation pending)
 - [ ] Chart palette suitable for the active theme
-- [ ] Follow system reduced motion by default
-- [ ] Optional high-contrast override
+- [~] Follow system reduced motion by default (chart motion override implemented and validated on iOS; OS preference detection and Android pending)
+- [~] Optional high-contrast override (dark high-contrast palette implemented and validated on iOS; Android pending)
 
 ### Defaults and Assumptions
 
@@ -422,15 +422,15 @@ Changing defaults must not silently rewrite existing drafts or named scenarios.
 
 ### App Behavior
 
-- [ ] Default launch destination after onboarding
-- [ ] Automatic draft restoration toggle
-- [ ] Destructive-action confirmation toggle where appropriate
-- [ ] Haptics toggle
+- [~] Default launch destination after onboarding (implemented and validated on iOS; Android pending)
+- [~] Automatic draft restoration toggle (implemented and validated on iOS; Android pending)
+- [~] Destructive-action confirmation toggle where appropriate (plan deletion implemented; iOS validation complete, Android pending)
+- [~] Haptics toggle (implemented for plan save/delete; physical-device validation pending)
 - [~] Retake FIRE Quiz (implemented and validated on iOS; Android pending)
 
 ### Privacy and Data
 
-- [ ] Explain on-device storage and OS backup behavior
+- [~] Explain on-device storage and OS backup behavior (local-only storage and user-invoked export documented; platform backup disclosure pending)
 - [ ] Export all local app data
 - [ ] Import a validated app-data archive
 - [ ] Delete all local data with explicit confirmation
@@ -702,6 +702,7 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 | 2026-08-09 | Confirmed app reset | The final Privacy-first Settings card offers a deliberate `Delete all app data` action. On iPhone 17, it opens a destructive confirmation explaining that drafts, plans, calculator settings, and quiz progress will be deleted before the first-run FIRE Quiz resumes. The storage-layer reset atomically clears every local data table; a focused test and the full 72-test suite pass. | iOS confirmation visual and storage behavior complete; direct confirmation-button automation and Android pending |
 | 2026-08-09 | Local backup and restore | Settings now creates a versioned JSON archive containing every draft, plan, calculator preference, recent activity entry, quarantined payload, theme, and onboarding preference. Export opens the iOS native share sheet without automatic upload. Import requires replacement confirmation, rejects unsupported or invalid archives before mutation, and restores data transactionally. Two focused archive tests and all 74 native tests pass; both 153x44-point controls render with readable dark-state contrast on iPhone 17. | iOS complete; Android file-picker/share validation pending |
 | 2026-08-09 | Calculator defaults | Settings now persists expected return, inflation, withdrawal rate, current age, and retirement age as decimal-backed assumptions for newly created calculators. Existing drafts and named plans remain untouched. On iPhone 17, all five numeric fields render in a compact two-column card, validation explains invalid ranges, save confirmation appears in-page, and the native expected-return Entry reports TextColor `#F2F7F3` and PlaceholderColor `#8EAA9B` over the visually verified `#15211C` field surface. | iOS complete; Android pending |
+| 2026-08-09 | Behavior and accessibility preferences | Settings now persists a post-onboarding launch destination, latest-draft restoration, plan-delete confirmation, haptics, reduced chart motion, and a high-contrast dark palette. Relaunching iPhone 17 after selecting Calculators opens that tab; enabling reduced motion gives the live Standard FIRE chart `AnimationsSpeed=00:00:00`; disabling it restores motion. The behavior card renders all controls with non-zero bounds, and its selected action reports white text while the page's native numeric Entry remains `#F2F7F3` with `#8EAA9B` placeholder text on the verified dark field surface. | iOS simulator complete; physical haptics and Android pending |
 
 ### Phase 8: Release Hardening
 
