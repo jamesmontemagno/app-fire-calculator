@@ -101,7 +101,7 @@ implementation passes cannot lose requested refinements.
 - [x] Calculator search is theme-aware and calculator cards have distinct icons.
 - [x] Home shows the three most recently used calculators and opened plans.
 - [x] Home shows onboarding/recommendation guidance only before meaningful calculator or plan activity; afterward, navigation tabs replace the large starter catalog. Include quiz recommendation and retake actions.
-- [ ] Replace the default .NET app icon and splash screen with branded My Fire Number assets.
+- [~] Replace the default .NET app icon and splash screen with branded My Fire Number assets.
 - [x] Remove the duplicate large calculator title/summary block when the native navigation bar already identifies the calculator.
 - [~] Move Privacy to the bottom of Settings, link Terms and Privacy to the website, and update web Terms to cover the mobile app.
 - [x] Keep Retirement Cash Flow's main sections visible and use polished row-level accordions for individual accounts, income sources, and additional expenses. New rows expand for editing; existing rows start collapsed.
@@ -696,6 +696,7 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 | --- | --- | --- | --- |
 | 2026-08-09 | Settings interaction redesign | Appearance is the first Settings section and uses a compact, accessible monitor/sun/moon segmented selector. Home calculator rows use 44x44 icon actions for move earlier, move later, show, and hide, with calculator-specific semantic descriptions. iPhone 17 screenshots verify readable light and dark states and visible selected segments. | iOS interaction complete; remaining Settings groups and Android pending |
 | 2026-08-09 | Privacy legal links | Privacy is the final Settings card with clear Terms and Privacy policy actions. Both actions use the platform launcher to open anchored website legal content; the new `/legal` route documents the educational-use terms and local-only financial-data handling for both the website and My Fire Number. The instrumented iOS build, 71 native tests, TypeScript production build, and design detector pass. | iOS visual/launcher verification and Android pending |
+| 2026-08-09 | Branded icon and splash | Replaced the MAUI template's purple/.NET assets with a shared evergreen flame-and-check mark that matches the native palette and represents confident FIRE planning. The iOS asset pipeline compiles both the composed app icon and splash mark successfully. | iOS simulator and Android device visual verification pending |
 
 ### Phase 8: Release Hardening
 
