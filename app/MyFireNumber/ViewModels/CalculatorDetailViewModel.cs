@@ -1093,7 +1093,8 @@ public partial class CalculatorDetailViewModel : ObservableObject
         RetirementAccounts.Add(new RetirementAccountEditorItem
         {
             Name = "New retirement account",
-            AvailableAgeText = RetirementSemiAgeText
+            AvailableAgeText = RetirementSemiAgeText,
+            IsExpanded = true
         });
     }
 
@@ -1113,7 +1114,8 @@ public partial class CalculatorDetailViewModel : ObservableObject
         {
             Name = "New retirement income",
             StartAgeText = RetirementSemiAgeText,
-            EndAgeText = RetirementPlanThroughAgeText
+            EndAgeText = RetirementPlanThroughAgeText,
+            IsExpanded = true
         });
     }
 
@@ -1132,7 +1134,8 @@ public partial class CalculatorDetailViewModel : ObservableObject
         RetirementAdditionalExpenses.Add(new RetirementExpenseEditorItem
         {
             Name = "New retirement expense",
-            StartAgeText = RetirementSemiAgeText
+            StartAgeText = RetirementSemiAgeText,
+            IsExpanded = true
         });
     }
 

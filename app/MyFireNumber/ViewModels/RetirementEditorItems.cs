@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MyFireNumber.Core.Calculations;
 using System.Globalization;
 
@@ -34,6 +35,12 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
 
     [ObservableProperty]
     private string payoutYearsText = "5";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
+    private bool isExpanded;
+
+    public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
 
     public event EventHandler? Changed;
 
@@ -87,6 +94,9 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
     partial void OnWithdrawalRateTextChanged(string value) => RaiseChanged();
     partial void OnPayoutYearsTextChanged(string value) => RaiseChanged();
 
+    [RelayCommand]
+    private void ToggleExpanded() => IsExpanded = !IsExpanded;
+
     private void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
     private static string Format(double value) => value.ToString("0.##", CultureInfo.CurrentCulture);
     private static bool TryNonNegative(string text, out double value) =>
@@ -129,6 +139,12 @@ public sealed partial class RetirementIncomeEditorItem : ObservableObject
     [ObservableProperty]
     private string taxRateText = "0";
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
+    private bool isExpanded;
+
+    public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
+
     public event EventHandler? Changed;
 
     public static RetirementIncomeEditorItem FromIncome(RetirementIncomeSource income) => new()
@@ -169,6 +185,9 @@ public sealed partial class RetirementIncomeEditorItem : ObservableObject
     partial void OnIsAfterTaxChanged(bool value) => RaiseChanged();
     partial void OnTaxRateTextChanged(string value) => RaiseChanged();
 
+    [RelayCommand]
+    private void ToggleExpanded() => IsExpanded = !IsExpanded;
+
     private void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
     private static string Format(double value) => value.ToString("0.##", CultureInfo.CurrentCulture);
     private static bool TryNonNegative(string text, out double value) =>
@@ -199,6 +218,12 @@ public sealed partial class RetirementExpenseEditorItem : ObservableObject
     [ObservableProperty]
     private string startAgeText = "55";
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
+    private bool isExpanded;
+
+    public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
+
     public event EventHandler? Changed;
 
     public static RetirementExpenseEditorItem FromExpense(RetirementExpense expense) => new()
@@ -228,6 +253,9 @@ public sealed partial class RetirementExpenseEditorItem : ObservableObject
     partial void OnNameChanged(string value) => RaiseChanged();
     partial void OnAnnualAmountTextChanged(string value) => RaiseChanged();
     partial void OnStartAgeTextChanged(string value) => RaiseChanged();
+
+    [RelayCommand]
+    private void ToggleExpanded() => IsExpanded = !IsExpanded;
 
     private void RaiseChanged() => Changed?.Invoke(this, EventArgs.Empty);
 }
