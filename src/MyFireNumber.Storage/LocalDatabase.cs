@@ -5,7 +5,7 @@ namespace MyFireNumber.Storage;
 public sealed class LocalDatabase
 {
     private const string SchemaVersionKey = "schema-version";
-    private const int CurrentSchemaVersion = 1;
+    private const int CurrentSchemaVersion = 2;
 
     private readonly SQLiteAsyncConnection connection;
     private readonly SemaphoreSlim initializationLock = new(1, 1);
@@ -33,9 +33,6 @@ public sealed class LocalDatabase
                 return;
             }
 
-            await connection.CreateTableAsync<DraftEntity>();
-            await connection.CreateTableAsync<PlanEntity>();
-            await connection.CreateTableAsync<CalculatorPreferenceEntity>();
             await connection.CreateTableAsync<SchemaMetadataEntity>();
 
             var schemaVersion = await connection.Table<SchemaMetadataEntity>()
@@ -44,6 +41,7 @@ public sealed class LocalDatabase
 
             if (schemaVersion is null)
             {
+                await CreateCurrentSchemaAsync();
                 await connection.InsertAsync(new SchemaMetadataEntity
                 {
                     Key = SchemaVersionKey,
@@ -54,12 +52,45 @@ public sealed class LocalDatabase
             {
                 throw new InvalidOperationException("The local data schema is not supported by this version of My Fire Number.");
             }
+            else
+            {
+                await ApplyMigrationsAsync(storedVersion, schemaVersion);
+            }
 
             isInitialized = true;
         }
         finally
         {
             initializationLock.Release();
+        }
+    }
+
+    private async Task CreateCurrentSchemaAsync()
+    {
+        await connection.CreateTableAsync<DraftEntity>();
+        await connection.CreateTableAsync<PlanEntity>();
+        await connection.CreateTableAsync<CalculatorPreferenceEntity>();
+        await connection.CreateTableAsync<RecentActivityEntity>();
+    }
+
+    private async Task ApplyMigrationsAsync(int storedVersion, SchemaMetadataEntity schemaVersion)
+    {
+        if (storedVersion < 1)
+        {
+            await connection.CreateTableAsync<DraftEntity>();
+            await connection.CreateTableAsync<PlanEntity>();
+            await connection.CreateTableAsync<CalculatorPreferenceEntity>();
+        }
+
+        if (storedVersion < 2)
+        {
+            await connection.CreateTableAsync<RecentActivityEntity>();
+        }
+
+        if (storedVersion != CurrentSchemaVersion)
+        {
+            schemaVersion.Value = CurrentSchemaVersion.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            await connection.UpdateAsync(schemaVersion);
         }
     }
 }
@@ -116,6 +147,22 @@ internal sealed class CalculatorPreferenceEntity
 
     [NotNull]
     public int SortOrder { get; set; }
+}
+
+[Table("recent_activity")]
+internal sealed class RecentActivityEntity
+{
+    [PrimaryKey]
+    public string Key { get; set; } = string.Empty;
+
+    [NotNull]
+    public string Kind { get; set; } = string.Empty;
+
+    [NotNull]
+    public string ItemId { get; set; } = string.Empty;
+
+    [NotNull]
+    public string LastOpenedAtUtc { get; set; } = string.Empty;
 }
 
 [Table("schema_metadata")]

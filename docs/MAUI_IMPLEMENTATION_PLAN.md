@@ -516,7 +516,7 @@ Exit gate: all calculation tests pass without referencing MAUI.
 - [x] Implement four-tab Shell with icons
 - [~] Establish resources, themes, typography, and shared styles
 - [x] Register pages, view models, repositories, and services in DI
-- [~] Implement SQLite initialization and migrations
+- [x] Implement SQLite initialization and migrations
 - [~] Implement preferences and theme services
 - [x] Implement first-run routing
 - [x] Add global error presentation that does not expose financial values
@@ -534,6 +534,7 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 | 2026-08-09 | Local storage foundation | The platform-neutral SQLite storage project initializes versioned drafts, plans, and calculator preferences. Three focused repository tests validate draft upsert/round trip, plan ordering, and preference upsert; a fresh iPhone 17 launch includes the repository DI registrations without a startup failure. | iOS complete; future migrations pending |
 | 2026-08-09 | Icon system | Font Awesome Free Solid 6.7.2 is bundled and registered for landmark glyphs and `FontImageSource` action icons. A fresh iPhone 17 launch renders the glyphs without the prior `IconGlyph` StaticResource XAML exception. | iOS complete |
 | 2026-08-09 | Global error presentation | A singleton error presenter marshals generic messages to the UI thread without accepting exception or payload data. Plans load, rename, duplicate, and delete failures use it. The full 57-test suite passes, and a fresh iPhone 17 launch resolves Plans through DI and renders its heading at non-zero bounds. | iOS complete |
+| 2026-08-09 | Schema v2 migration | `LocalDatabase` now applies explicit ordered migrations and updates schema metadata. A focused upgrade test creates a version-1 database, initializes the version-2 recent-activity table, persists a record, and verifies metadata advanced to version 2 without replacing existing tables. | Complete |
 
 ### Phase 3: Standard FIRE Vertical Slice
 
@@ -628,6 +629,7 @@ Exit gate: all top-level navigation and discovery workflows are complete.
 | 2026-08-09 | Calculator catalog interaction and theming | Calculator cards are full-width tap targets with distinct Font Awesome icons and no redundant Open buttons. On iPhone 17, tapping the Standard FIRE card opens its detail route. The dark SearchBar reports TextColor `#F2F7F3` and PlaceholderColor `#B9D1C2`; screenshot evidence confirms readable native field contrast. | iOS complete; hidden-calculator discovery and Android pending |
 | 2026-08-09 | Plans interaction and discovery | Saved-plan cards are full-width tap targets with no redundant Open buttons. Tapping `iOS Validation Plan` opens the saved Standard FIRE scenario. Rename, Duplicate, and Delete are exposed as native right-side swipe actions, and search plus calculator filtering now share one clearly grouped surface. | iOS tap and layout complete; swipe gesture automation and Android pending |
 | 2026-08-09 | Contextual navigation chrome | Root Home, Calculators, Plans, and Settings tabs hide the redundant top navigation bar while preserving the bottom tab bar. Pushed calculator routes restore the native bar with a back action, the bound calculator name, and Save/Export toolbar icons. iPhone 17 screenshots verify both states and the Standard FIRE title at non-zero bounds. | iOS complete; plan-specific toolbar actions and Android pending |
+| 2026-08-09 | Home recent activity | A bounded SQLite history stores only calculator IDs, plan IDs, and local timestamps. Home resolves and shows up to three recently used calculators and three recently opened plans without changing plan modification dates. Two focused repository/migration tests pass; iPhone 17 shows both sections at non-zero bounds and retains them after process relaunch. | iOS complete; Android pending |
 
 ### Phase 7: Full Settings
 

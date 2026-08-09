@@ -130,3 +130,61 @@ public sealed class SqliteCalculatorPreferencesRepository(LocalDatabase database
         });
     }
 }
+
+public sealed class SqliteRecentActivityRepository(LocalDatabase database) : IRecentActivityRepository
+{
+    private const int MaximumEntriesPerKind = 20;
+
+    public async Task<IReadOnlyList<RecentActivityRecord>> ListAsync(
+        RecentActivityKind kind,
+        int limit,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(limit);
+
+        await database.InitializeAsync(cancellationToken);
+        var kindValue = kind.ToString();
+        var entities = await database.Connection.Table<RecentActivityEntity>()
+            .Where(activity => activity.Kind == kindValue)
+            .OrderByDescending(activity => activity.LastOpenedAtUtc)
+            .Take(limit)
+            .ToListAsync();
+
+        return entities.Select(ToRecord).ToArray();
+    }
+
+    public async Task TrackAsync(RecentActivityRecord activity, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(activity.ItemId);
+
+        await database.InitializeAsync(cancellationToken);
+        var kindValue = activity.Kind.ToString();
+        await database.Connection.InsertOrReplaceAsync(new RecentActivityEntity
+        {
+            Key = CreateKey(activity.Kind, activity.ItemId),
+            Kind = kindValue,
+            ItemId = activity.ItemId,
+            LastOpenedAtUtc = activity.LastOpenedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)
+        });
+
+        var staleEntries = await database.Connection.Table<RecentActivityEntity>()
+            .Where(entry => entry.Kind == kindValue)
+            .OrderByDescending(entry => entry.LastOpenedAtUtc)
+            .Skip(MaximumEntriesPerKind)
+            .ToListAsync();
+        foreach (var staleEntry in staleEntries)
+        {
+            await database.Connection.DeleteAsync(staleEntry);
+        }
+    }
+
+    private static string CreateKey(RecentActivityKind kind, string itemId) => $"{kind}:{itemId}";
+
+    private static RecentActivityRecord ToRecord(RecentActivityEntity entity)
+    {
+        return new RecentActivityRecord(
+            Enum.Parse<RecentActivityKind>(entity.Kind),
+            entity.ItemId,
+            DateTime.Parse(entity.LastOpenedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
+    }
+}

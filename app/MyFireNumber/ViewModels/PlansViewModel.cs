@@ -18,6 +18,7 @@ public partial class PlansViewModel : ObservableObject
     private readonly IErrorPresentationService errorPresentationService;
     private readonly INavigationService navigationService;
     private readonly IPlanNamePromptService planNamePromptService;
+    private readonly IRecentActivityRepository recentActivityRepository;
     private readonly List<PlanListItem> allPlans = [];
 
     public PlansViewModel(
@@ -26,7 +27,8 @@ public partial class PlansViewModel : ObservableObject
         INavigationService navigationService,
         IConfirmationService confirmationService,
         IErrorPresentationService errorPresentationService,
-        IPlanNamePromptService planNamePromptService)
+        IPlanNamePromptService planNamePromptService,
+        IRecentActivityRepository recentActivityRepository)
     {
         this.planRepository = planRepository;
         this.catalog = catalog;
@@ -34,6 +36,7 @@ public partial class PlansViewModel : ObservableObject
         this.confirmationService = confirmationService;
         this.errorPresentationService = errorPresentationService;
         this.planNamePromptService = planNamePromptService;
+        this.recentActivityRepository = recentActivityRepository;
         CalculatorFilters.Add(new CalculatorFilter(null, "All calculators"));
         foreach (var definition in catalog.All)
         {
@@ -99,10 +102,19 @@ public partial class PlansViewModel : ObservableObject
     partial void OnSelectedCalculatorFilterChanged(CalculatorFilter? value) => ApplyFilters();
 
     [RelayCommand]
-    private Task OpenPlanAsync(PlanListItem plan)
+    private async Task OpenPlanAsync(PlanListItem plan)
     {
+        var now = DateTime.UtcNow;
+        await recentActivityRepository.TrackAsync(new RecentActivityRecord(
+            RecentActivityKind.Calculator,
+            plan.CalculatorId,
+            now));
+        await recentActivityRepository.TrackAsync(new RecentActivityRecord(
+            RecentActivityKind.Plan,
+            plan.Id,
+            now));
         var route = $"calculator?calculatorId={Uri.EscapeDataString(plan.CalculatorId)}&planId={Uri.EscapeDataString(plan.Id)}";
-        return navigationService.GoToAsync(route);
+        await navigationService.GoToAsync(route);
     }
 
     [RelayCommand]

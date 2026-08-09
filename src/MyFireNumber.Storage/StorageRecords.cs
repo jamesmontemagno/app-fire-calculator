@@ -20,6 +20,17 @@ public sealed record CalculatorPreferenceRecord(
     bool IsVisible,
     int SortOrder);
 
+public enum RecentActivityKind
+{
+    Calculator,
+    Plan
+}
+
+public sealed record RecentActivityRecord(
+    RecentActivityKind Kind,
+    string ItemId,
+    DateTime LastOpenedAtUtc);
+
 public interface IDraftRepository
 {
     Task<DraftRecord?> GetAsync(string calculatorId, CancellationToken cancellationToken = default);
@@ -45,4 +56,14 @@ public interface ICalculatorPreferencesRepository
     Task<IReadOnlyList<CalculatorPreferenceRecord>> ListAsync(CancellationToken cancellationToken = default);
 
     Task SaveAsync(CalculatorPreferenceRecord preference, CancellationToken cancellationToken = default);
+}
+
+public interface IRecentActivityRepository
+{
+    Task<IReadOnlyList<RecentActivityRecord>> ListAsync(
+        RecentActivityKind kind,
+        int limit,
+        CancellationToken cancellationToken = default);
+
+    Task TrackAsync(RecentActivityRecord activity, CancellationToken cancellationToken = default);
 }

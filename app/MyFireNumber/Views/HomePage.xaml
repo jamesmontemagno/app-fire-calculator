@@ -37,6 +37,116 @@
                     </VerticalStackLayout>
                 </Grid>
 
+                <Border IsVisible="{Binding HasRecentCalculators}"
+                       Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                       Padding="18"
+                       Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                       StrokeShape="RoundRectangle 12">
+                   <VerticalStackLayout Spacing="12">
+                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                           <Label Text="&#xf1da;"
+                                  FontFamily="FontAwesomeSolid"
+                                  VerticalTextAlignment="Center"
+                                  TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                  SemanticProperties.Description="Recent calculators" />
+                           <Label Grid.Column="1"
+                                  Text="Recently used calculators"
+                                  TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                  FontAttributes="Bold"
+                                  FontSize="20" />
+                       </Grid>
+                       <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentCalculators}" Spacing="8">
+                           <BindableLayout.ItemTemplate>
+                               <DataTemplate x:DataType="catalog:CalculatorDefinition">
+                                   <Border Padding="12"
+                                           Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                                           StrokeThickness="0"
+                                           StrokeShape="RoundRectangle 10"
+                                           SemanticProperties.Description="{Binding Title, StringFormat='Open recent {0} calculator'}">
+                                       <Border.GestureRecognizers>
+                                           <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=OpenCalculatorCommand}"
+                                                                 CommandParameter="{Binding .}" />
+                                       </Border.GestureRecognizers>
+                                       <Grid ColumnDefinitions="32,*,Auto" ColumnSpacing="10">
+                                           <Label Text="{Binding IconGlyph}"
+                                                  FontFamily="FontAwesomeSolid"
+                                                  FontSize="16"
+                                                  HorizontalTextAlignment="Center"
+                                                  VerticalTextAlignment="Center"
+                                                  TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                                  SemanticProperties.Description="{Binding Title, StringFormat='{0} icon'}" />
+                                           <Label Grid.Column="1"
+                                                  Text="{Binding Title}"
+                                                  VerticalTextAlignment="Center"
+                                                  TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                                  FontAttributes="Bold" />
+                                           <Label Grid.Column="2"
+                                                  Text="&#xf054;"
+                                                  FontFamily="FontAwesomeSolid"
+                                                  VerticalTextAlignment="Center"
+                                                  TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                                  SemanticProperties.Description="Open" />
+                                       </Grid>
+                                   </Border>
+                               </DataTemplate>
+                           </BindableLayout.ItemTemplate>
+                       </VerticalStackLayout>
+                   </VerticalStackLayout>
+                </Border>
+
+                <Border IsVisible="{Binding HasRecentPlans}"
+                       Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                       Padding="18"
+                       Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                       StrokeShape="RoundRectangle 12">
+                   <VerticalStackLayout Spacing="12">
+                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                           <Label Text="&#xf15c;"
+                                  FontFamily="FontAwesomeSolid"
+                                  VerticalTextAlignment="Center"
+                                  TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                  SemanticProperties.Description="Recent plans" />
+                           <Label Grid.Column="1"
+                                  Text="Recently opened plans"
+                                  TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                  FontAttributes="Bold"
+                                  FontSize="20" />
+                       </Grid>
+                       <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentPlans}" Spacing="8">
+                           <BindableLayout.ItemTemplate>
+                               <DataTemplate x:DataType="viewModels:RecentPlanItem">
+                                   <Border Padding="12"
+                                           Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                                           StrokeThickness="0"
+                                           StrokeShape="RoundRectangle 10"
+                                           SemanticProperties.Description="{Binding Name, StringFormat='Open recent plan {0}'}">
+                                       <Border.GestureRecognizers>
+                                           <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=OpenPlanCommand}"
+                                                                 CommandParameter="{Binding .}" />
+                                       </Border.GestureRecognizers>
+                                       <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                           <VerticalStackLayout Spacing="2">
+                                               <Label Text="{Binding Name}"
+                                                      TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                                      FontAttributes="Bold" />
+                                               <Label Text="{Binding CalculatorTitle}"
+                                                      TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                                      FontSize="12" />
+                                           </VerticalStackLayout>
+                                           <Label Grid.Column="1"
+                                                  Text="&#xf054;"
+                                                  FontFamily="FontAwesomeSolid"
+                                                  VerticalTextAlignment="Center"
+                                                  TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                                  SemanticProperties.Description="Open" />
+                                       </Grid>
+                                   </Border>
+                               </DataTemplate>
+                           </BindableLayout.ItemTemplate>
+                       </VerticalStackLayout>
+                   </VerticalStackLayout>
+                </Border>
+
                 <Border Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                         Padding="18"
                         Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
@@ -57,28 +167,31 @@
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding FeaturedCalculators}" Spacing="10">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="catalog:CalculatorDefinition">
-                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                                        <VerticalStackLayout Spacing="2">
-                                            <Label Text="{Binding Title}"
-                                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                                   FontAttributes="Bold" />
-                                            <Label Text="{Binding Summary}"
+                                    <Border Padding="10,8"
+                                            StrokeThickness="0"
+                                            Background="Transparent"
+                                            SemanticProperties.Description="{Binding Title, StringFormat='Open {0} calculator'}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=OpenCalculatorCommand}"
+                                                                  CommandParameter="{Binding .}" />
+                                        </Border.GestureRecognizers>
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                            <VerticalStackLayout Spacing="2">
+                                                <Label Text="{Binding Title}"
+                                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                                       FontAttributes="Bold" />
+                                                <Label Text="{Binding Summary}"
+                                                       TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                                       FontSize="13" />
+                                            </VerticalStackLayout>
+                                            <Label Grid.Column="1"
+                                                   Text="&#xf054;"
+                                                   FontFamily="FontAwesomeSolid"
+                                                   VerticalTextAlignment="Center"
                                                    TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                                                   FontSize="13" />
-                                        </VerticalStackLayout>
-                                        <Button Grid.Column="1"
-                                                Text="Open"
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=OpenCalculatorCommand}"
-                                                CommandParameter="{Binding .}"
-                                                Background="#2F6B57"
-                                                TextColor="#FFFFFF"
-                                                FontSize="12"
-                                                MinimumWidthRequest="78">
-                                            <Button.ImageSource>
-                                                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf061;" Color="#FFFFFF" Size="12" />
-                                            </Button.ImageSource>
-                                        </Button>
-                                    </Grid>
+                                                   SemanticProperties.Description="Open" />
+                                        </Grid>
+                                    </Border>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyFireNumber.Core.Calculators;
 using MyFireNumber.Services;
+using MyFireNumber.Storage;
 
 namespace MyFireNumber.ViewModels;
 
@@ -9,11 +10,16 @@ public partial class CalculatorCatalogViewModel : ObservableObject
 {
     private readonly ICalculatorCatalog catalog;
     private readonly INavigationService navigationService;
+    private readonly IRecentActivityRepository recentActivityRepository;
 
-    public CalculatorCatalogViewModel(ICalculatorCatalog catalog, INavigationService navigationService)
+    public CalculatorCatalogViewModel(
+        ICalculatorCatalog catalog,
+        INavigationService navigationService,
+        IRecentActivityRepository recentActivityRepository)
     {
         this.catalog = catalog;
         this.navigationService = navigationService;
+        this.recentActivityRepository = recentActivityRepository;
     }
 
     [ObservableProperty]
@@ -27,8 +33,12 @@ public partial class CalculatorCatalogViewModel : ObservableObject
         .ToArray();
 
     [RelayCommand]
-    private Task OpenCalculatorAsync(CalculatorDefinition definition)
+    private async Task OpenCalculatorAsync(CalculatorDefinition definition)
     {
-        return navigationService.GoToAsync($"calculator?calculatorId={Uri.EscapeDataString(definition.Id)}");
+        await recentActivityRepository.TrackAsync(new RecentActivityRecord(
+            RecentActivityKind.Calculator,
+            definition.Id,
+            DateTime.UtcNow));
+        await navigationService.GoToAsync($"calculator?calculatorId={Uri.EscapeDataString(definition.Id)}");
     }
 }
