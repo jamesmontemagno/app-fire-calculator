@@ -3,7 +3,11 @@ using Android.Runtime;
 
 namespace MyFireNumber;
 
+#if MAUI_DEVFLOW
+[Application(UsesCleartextTraffic = true)]
+#else
 [Application]
+#endif
 public class MainApplication : MauiApplication
 {
 	public MainApplication(IntPtr handle, JniHandleOwnership ownership)

@@ -415,7 +415,7 @@
                                    FontAttributes="Bold"
                                    FontSize="18" />
                         </Grid>
-                        <Label Text="Your financial inputs stay locally on this device. My Fire Number does not use analytics or transmit financial data."
+                        <Label Text="Your financial inputs stay in local app storage. My Fire Number does not use analytics or transmit them. Your operating system may include app data in an encrypted device backup when backups are enabled."
                                TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                                LineHeight="1.3" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="10">

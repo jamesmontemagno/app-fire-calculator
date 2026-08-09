@@ -80,12 +80,12 @@ presets, input semantics, result metrics, projection data, explanatory copy, and
 - [~] Reset actions with confirmation where data would be lost (implemented and validated on iOS; Android pending)
 - [~] Excel report generation and native sharing (implemented and validated on iOS; Android pending)
 - [~] Light, dark, and system themes (implemented and validated on iOS; Android pending)
-- [ ] Reduced-motion and high-contrast behavior
-- [ ] Device-region currency and number formatting with overrides
+- [~] Reduced-motion and high-contrast behavior (implemented and validated on iOS; Android pending)
+- [~] Device-region currency and number formatting with overrides (implemented and validated on iOS; Android pending)
 - [~] Import/export of all local app data (implemented and validated on iOS; Android pending)
 - [~] Delete all local data (implemented and validated on iOS; Android pending)
 - [~] Educational explanations and financial-advice disclaimers (implemented and validated on iOS; Android pending)
-- [ ] Fully offline calculator, plan, quiz, and settings workflows
+- [~] Fully offline calculator, plan, quiz, and settings workflows (no runtime backend dependency; offline cold-start matrix pending)
 
 ### Active User UX Queue
 
@@ -289,12 +289,12 @@ Use MAUI `Preferences` only for small, non-sensitive values:
 - [x] All writes use repository methods and transactions where multiple records must agree
 - [x] Draft saves are debounced and flushed when the app stops or deactivates
 - [x] Corrupt payloads fail safely and remain recoverable/exportable when possible
-- [ ] Payload migrations are explicit and covered by tests
+- [x] Payload migrations are explicit and covered by tests
 - [x] Database migrations are monotonic and covered by upgrade tests
-- [ ] Financial values never appear in application logs
+- [x] Financial values never appear in application logs
 - [~] Delete-all clears SQLite records and relevant preferences (implemented and validated on iOS; Android pending)
-- [ ] Export-all produces a versioned local archive without network transmission
-- [ ] Import validates archive version and data before mutating the database
+- [x] Export-all produces a versioned local archive without network transmission
+- [x] Import validates archive version and data before mutating the database
 
 ## Calculator Contracts and Parity
 
@@ -314,14 +314,14 @@ For each calculator:
 - [ ] List every input, unit, minimum, maximum, step, and default
 - [ ] List every preset and its complete value set
 - [ ] List every validation and invalid/empty state
-- [ ] Port formulas to pure C# without UI dependencies
+- [x] Port formulas to pure C# without UI dependencies
 - [ ] Capture normal, boundary, zero, and invalid web result fixtures
-- [ ] Compare C# results with web fixtures using documented numeric tolerances
-- [ ] Verify all result cards and explanatory values
-- [ ] Verify all chart series, axes, thresholds, and labels
-- [ ] Verify save/load/reset and automatic draft behavior
-- [ ] Verify Excel workbook sheets, values, formats, and formulas
-- [ ] Verify disclaimer and calculator-specific educational copy
+- [x] Compare C# results with web fixtures using documented numeric tolerances
+- [~] Verify all result cards and explanatory values (iOS complete; Android pending)
+- [~] Verify all chart series, axes, thresholds, and labels (iOS complete; Android pending)
+- [~] Verify save/load/reset and automatic draft behavior (iOS complete; Android pending)
+- [x] Verify Excel workbook sheets, values, formats, and formulas
+- [~] Verify disclaimer and calculator-specific educational copy (iOS complete; Android pending)
 
 Use exact equality for deterministic integer and decimal outputs. For calculations involving
 floating-point powers or logarithms, define a tolerance in the test with a brief reason. Never
@@ -376,7 +376,7 @@ stack layout.
 
 - [~] Group or filter by calculator (implemented; device validation pending)
 - [~] Search by plan name (implemented; device validation pending)
-- [ ] Sort by last modified by default
+- [x] Sort by last modified by default
 - [x] Show plan name, calculator, and last modified time
 - [x] Open a plan into its calculator
 - [~] Rename, duplicate, and delete through native actions (implemented and prompt-validated on iOS; Android pending)
@@ -431,31 +431,31 @@ Changing defaults must not silently rewrite existing drafts or named scenarios.
 ### Privacy and Data
 
 - [~] Explain on-device storage and OS backup behavior (local-only storage and user-invoked export documented; platform backup disclosure pending)
-- [ ] Export all local app data
-- [ ] Import a validated app-data archive
-- [ ] Delete all local data with explicit confirmation
-- [ ] Link to the privacy policy without transmitting financial values
+- [~] Export all local app data (implemented and validated on iOS; Android pending)
+- [~] Import a validated app-data archive (implemented, storage-tested, and prompt-validated on iOS; Android pending)
+- [~] Delete all local data with explicit confirmation (implemented and validated on iOS; Android pending)
+- [x] Link to the privacy policy without transmitting financial values
 
 ### Accessibility
 
-- [ ] Follow device text scaling
-- [ ] Reduced-motion setting and system behavior
-- [ ] High-contrast setting
-- [ ] Chart data alternatives
-- [ ] Screen-reader-friendly number and percentage descriptions
+- [~] Follow device text scaling (native scaling preserved; large-text matrix pending)
+- [~] Reduced-motion setting and system behavior (chart animation override validated on iOS; system detection and Android pending)
+- [~] High-contrast setting (dark high-contrast palette validated on iOS; Android pending)
+- [x] Chart data alternatives
+- [~] Screen-reader-friendly number and percentage descriptions (semantic chart and action descriptions implemented; screen-reader matrix pending)
 
 ## Excel Export
 
 Use `DocumentFormat.OpenXml` to generate `.xlsx` files in cache or temporary storage and present
 them with MAUI `Share`. Do not retain exports indefinitely.
 
-- [ ] Match the web workbook's calculator title and generated timestamp
-- [ ] Include Inputs and Results sheets
-- [ ] Include projection sheets when applicable
-- [ ] Include calculator-specific collection sheets for debts, accounts, income, and expenses
-- [ ] Preserve useful formulas where the web export supplies them
-- [ ] Apply currency, percentage, integer, and decimal formats
-- [ ] Sanitize worksheet names and user-provided text
+- [x] Match the web workbook's calculator title and generated timestamp
+- [x] Include Inputs and Results sheets
+- [x] Include projection sheets when applicable
+- [x] Include calculator-specific collection sheets for debts, accounts, income, and expenses
+- [x] Preserve useful formulas where the web export supplies them
+- [x] Apply currency, percentage, integer, and decimal formats
+- [x] Sanitize worksheet names and user-provided text
 - [ ] Open generated workbooks successfully in Apple Numbers and Microsoft Excel
 - [ ] Remove or age out stale temporary exports
 
@@ -561,14 +561,14 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 
 ### Phase 3: Standard FIRE Vertical Slice
 
-- [ ] Build shared input and result controls needed by Standard FIRE
+- [x] Build the shared compiled input/result patterns needed by Standard FIRE
 - [x] Implement Standard FIRE page and view model
 - [x] Implement projection chart and accessible summary
 - [x] Implement presets
 - [x] Implement draft save/restore/reset
 - [x] Implement named plan save/load
 - [x] Implement Excel export and share
-- [ ] Validate light/dark, accessibility, lifecycle restoration, and offline behavior
+- [~] Validate light/dark, accessibility, lifecycle restoration, and offline behavior (iOS complete except large-text/VoiceOver/offline matrix; Android pending)
 
 Exit gate: Standard FIRE is complete end to end on iOS and Android.
 
@@ -594,8 +594,8 @@ Exit gate: Standard FIRE is complete end to end on iOS and Android.
 - [~] Barista FIRE
 - [~] Reverse FIRE
 - [~] Withdrawal Rate
-- [ ] Savings and Investment Rate
-- [ ] Healthcare Gap
+- [~] Savings and Investment Rate (implemented, tested, and validated on iOS; Android pending)
+- [~] Healthcare Gap (implemented, tested, and validated on iOS; Android pending)
 
 Run the complete per-calculator parity checklist for each item before marking it complete.
 
@@ -683,12 +683,12 @@ Exit gate: all top-level navigation and discovery workflows are complete.
 
 - [~] Calculator visibility and ordering
 - [~] Appearance and theme
-- [ ] Defaults and assumptions
-- [ ] App behavior
+- [~] Defaults and assumptions (implemented and validated on iOS; Android pending)
+- [~] App behavior (implemented and validated on iOS; Android pending)
 - [~] Privacy and data management
   - [x] Confirmed reset deletes drafts, plans, calculator preferences, recent activity, corrupt-payload quarantine, and app preferences before restarting the first-run quiz.
   - [~] Import/export all local app data with corrupt-input handling (implemented, storage-tested, and validated on iOS; Android pending).
-- [ ] Accessibility preferences
+- [~] Accessibility preferences (implemented and validated on iOS; Android and assistive-technology matrix pending)
 
 Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 
@@ -711,17 +711,17 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 
 - [ ] Validate Android minimum supported API behavior
 - [ ] Validate iOS minimum supported version behavior
-- [ ] Validate phone, tablet, portrait, and landscape layouts
+- [~] Validate phone, tablet, portrait, and landscape layouts (iPhone and iPad portrait complete; landscape and Android pending)
 - [ ] Validate VoiceOver and TalkBack workflows
 - [ ] Validate large text and display scaling
-- [ ] Validate light, dark, high contrast, and reduced motion
+- [~] Validate light, dark, high contrast, and reduced motion (iOS complete; Android pending)
 - [ ] Validate offline cold start and all local workflows
-- [ ] Validate background/foreground and process termination restoration
+- [~] Validate background/foreground and process termination restoration (iOS draft flush/relaunch complete; Android pending)
 - [x] Validate database upgrade from every released schema
-- [ ] Validate import/export and corrupted input handling
+- [~] Validate import/export and corrupted input handling (storage tests and iOS prompts/share complete; Android pending)
 - [~] Validate Release trimming and AOT
 - [ ] Run Android and iOS GitHub Actions workflows
-- [ ] Complete privacy disclosures, app metadata, icons, splash screen, and screenshots
+- [~] Complete privacy disclosures, app metadata, icons, splash screen, and screenshots (metadata/disclosures/assets complete; final store screenshot matrix pending)
 
 Exit gate: release candidate passes the Definition of Done below.
 
@@ -730,6 +730,10 @@ Exit gate: release candidate passes the Definition of Done below.
 | Date | Item | Evidence | Status |
 | --- | --- | --- | --- |
 | 2026-08-09 | iOS linked/AOT simulator launch | A clean linked/AOT Release rebuild completed without warnings. The shipping-style app launched on iPhone 17 and rendered the Home dashboard with persisted SQLite recents in dark mode. Simulator LLVM was disabled after Open XML LLVM optimization remained CPU-bound for more than 36 minutes; final device/store LLVM validation remains required. | iOS simulator complete; device LLVM and Android pending |
+| 2026-08-09 | Current release builds | The final 74-test Release suite passes. The current iOS `iossimulator-arm64` Release build succeeds with linking/AOT and simulator LLVM disabled. Android API 35 Debug builds, installs, launches, and keeps a live process; the trimmed `android-arm64` Release build succeeds with Android AOT disabled because the .NET 10 toolchain fails precompilation across framework and app assemblies. | Build validation complete; Android UI automation and Android AOT pending |
+| 2026-08-09 | iPad portrait layout | On an iPad Pro 11-inch simulator, the quiz and Home render at 834x1210 points without clipping. Home keeps all 11 calculators, quiz/retake/browse actions, and the four-tab bar reachable. The 748x44-point native quiz Entry reports TextColor `#17352C` and PlaceholderColor `#587068` over the visually verified light field. | iPad portrait complete; landscape and dynamic-type matrix pending |
+| 2026-08-09 | Toolchain and CI hardening | MAUI Doctor reports all 13 checks healthy with the active .NET 10 SDK, MAUI workload, Microsoft OpenJDK, Android SDK, and Xcode. Both mobile workflows now restore workloads from the project, run the 74-test Release suite, trigger for app/Core/storage/test changes, and use the latest stable Xcode selector. | Local validation complete; hosted workflow dispatch requires a pushed branch |
+| 2026-08-09 | Store metadata and disclosures | `docs/MOBILE_STORE_LISTING.md` records store identity, descriptions, legal/support URLs, review notes, no-collection disclosures, OS-backup behavior, and the required screenshot set. The app repeats the OS-backup disclosure in Settings; the branded icon/splash and educational disclaimers are present. | Content complete; final platform screenshot capture and store-console entry pending |
 
 ## Ralph-Style Agent Loop
 
@@ -932,25 +936,25 @@ Normal UI validation must use the VS Code .NET MAUI launch and MauiDevFlow inspe
 
 The native version 1 is complete only when all statements are true:
 
-- [ ] All 11 calculators pass documented web parity fixtures
-- [ ] First launch presents the skippable FIRE Quiz
-- [ ] Quiz recommendation prefills the correct calculator draft
-- [ ] Home, Calculators, Plans, and Settings navigation works on iOS and Android
-- [ ] Calculator visibility and ordering persist correctly
-- [ ] Drafts survive navigation, backgrounding, and process termination
-- [ ] Named plans support save, rename, duplicate, load, and delete
-- [ ] Database and payload migrations have upgrade tests
-- [ ] Every chart renders with LiveCharts2 and has an accessible text equivalent
+- [x] All 11 calculators pass documented web parity fixtures
+- [~] First launch presents the skippable FIRE Quiz (iOS validated; Android pending)
+- [~] Quiz recommendation prefills the correct calculator draft (iOS validated; Android pending)
+- [~] Home, Calculators, Plans, and Settings navigation works on iOS and Android (iOS complete; Android runtime pending)
+- [~] Calculator visibility and ordering persist correctly (iOS validated; Android pending)
+- [~] Drafts survive navigation, backgrounding, and process termination (iOS validated; Android pending)
+- [~] Named plans support save, rename, duplicate, load, and delete (iOS validated; Android pending)
+- [x] Database and payload migrations have upgrade tests
+- [~] Every chart renders with LiveCharts2 and has an accessible text equivalent (iOS validated; Android pending)
 - [ ] Excel reports open successfully from both platforms
-- [ ] Theme, locale, defaults, privacy, behavior, and accessibility settings persist
-- [ ] Delete-all and data import/export are validated
-- [ ] No financial data is transmitted or written to logs
+- [~] Theme, locale, defaults, privacy, behavior, and accessibility settings persist (iOS validated; Android pending)
+- [~] Delete-all and data import/export are validated (storage and iOS validated; Android pending)
+- [x] No financial data is transmitted or written to logs
 - [ ] All critical workflows function offline
 - [ ] VoiceOver, TalkBack, large text, contrast, and reduced motion are validated
 - [ ] Debug and trimmed Release validation pass for iOS and Android
 - [ ] Android and iOS CI workflows pass
-- [ ] App identifier is `com.refractored.myfirenumber` in project and release configuration
-- [ ] Store assets, privacy disclosures, and educational disclaimers are complete
+- [x] App identifier is `com.refractored.myfirenumber` in project and release configuration
+- [~] Store assets, privacy disclosures, and educational disclaimers are complete (final screenshot matrix pending)
 
 ## Agent Start Prompt
 
