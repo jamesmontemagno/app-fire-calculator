@@ -30,6 +30,8 @@ public partial class AppShell : Shell
 
 	private static Tab CreateTab(string title, string route, string icon, Page page)
 	{
+		Shell.SetNavBarIsVisible(page, false);
+
 		var shellContent = new ShellContent
 		{
 			Title = title,

@@ -627,6 +627,7 @@ Exit gate: all top-level navigation and discovery workflows are complete.
 | --- | --- | --- | --- |
 | 2026-08-09 | Calculator catalog interaction and theming | Calculator cards are full-width tap targets with distinct Font Awesome icons and no redundant Open buttons. On iPhone 17, tapping the Standard FIRE card opens its detail route. The dark SearchBar reports TextColor `#F2F7F3` and PlaceholderColor `#B9D1C2`; screenshot evidence confirms readable native field contrast. | iOS complete; hidden-calculator discovery and Android pending |
 | 2026-08-09 | Plans interaction and discovery | Saved-plan cards are full-width tap targets with no redundant Open buttons. Tapping `iOS Validation Plan` opens the saved Standard FIRE scenario. Rename, Duplicate, and Delete are exposed as native right-side swipe actions, and search plus calculator filtering now share one clearly grouped surface. | iOS tap and layout complete; swipe gesture automation and Android pending |
+| 2026-08-09 | Contextual navigation chrome | Root Home, Calculators, Plans, and Settings tabs hide the redundant top navigation bar while preserving the bottom tab bar. Pushed calculator routes restore the native bar with a back action, the bound calculator name, and Save/Export toolbar icons. iPhone 17 screenshots verify both states and the Standard FIRE title at non-zero bounds. | iOS complete; plan-specific toolbar actions and Android pending |
 
 ### Phase 7: Full Settings
 
