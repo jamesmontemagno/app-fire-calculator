@@ -52,6 +52,11 @@
 		<RunAOTCompilation>false</RunAOTCompilation>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' and '$(Configuration)' == 'Release'">
+		<!-- Spreadsheet exports are infrequent, and interpreting OpenXML avoids its expensive iOS AOT compilation. -->
+		<MtouchInterpreter>DocumentFormat.OpenXml,DocumentFormat.OpenXml.Framework</MtouchInterpreter>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#17352C" />
