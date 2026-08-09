@@ -50,7 +50,8 @@
                                StrokeThickness="0"
                                StrokeShape="RoundRectangle 12">
                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
-                               <Button Text="&#xf108;"
+                               <Button AutomationId="SystemThemeButton"
+                                       Text="&#xf108;"
                                        FontFamily="FontAwesomeSolid"
                                        FontSize="16"
                                        Command="{Binding SetThemeCommand}"
@@ -66,7 +67,8 @@
                                        </DataTrigger>
                                    </Button.Triggers>
                                </Button>
-                               <Button Grid.Column="1"
+                               <Button AutomationId="LightThemeButton"
+                                       Grid.Column="1"
                                        Text="&#xf185;"
                                        FontFamily="FontAwesomeSolid"
                                        FontSize="16"
@@ -83,7 +85,8 @@
                                        </DataTrigger>
                                    </Button.Triggers>
                                </Button>
-                               <Button Grid.Column="2"
+                               <Button AutomationId="DarkThemeButton"
+                                       Grid.Column="2"
                                        Text="&#xf186;"
                                        FontFamily="FontAwesomeSolid"
                                        FontSize="16"
@@ -121,7 +124,7 @@
                                    FontAttributes="Bold"
                                    FontSize="18" />
                         </Grid>
-                        <Label Text="Start each visit where it is most useful to you."
+                        <Label Text="Choose the tab My Fire # opens after onboarding."
                                TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
                         <Border Padding="4"
                                 Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
@@ -171,6 +174,11 @@
                                 </Button>
                             </Grid>
                         </Border>
+                        <Label AutomationId="LaunchDestinationStatus"
+                               Text="{Binding LaunchDestinationDescription}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                               SemanticProperties.Description="{Binding LaunchDestinationDescription}" />
                         <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="10">
                             <Label Text="Restore latest calculator drafts" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
                             <Switch AutomationId="RestoreDraftsSwitch" Grid.Column="1" IsToggled="{Binding RestoreDrafts}" OnColor="#2F6B57" />
@@ -214,79 +222,114 @@
                                     SelectedItem="{Binding SelectedCurrencyOption}"
                                     Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
                                     TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                    TitleColor="{AppThemeBinding Light=#60756C, Dark=#8EAA9B}"
+                                    TitleColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
                                     SemanticProperties.Description="Currency used to display calculator results" />
                         </VerticalStackLayout>
-                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="Expected return (%)"
+                        <VerticalStackLayout Spacing="12">
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,96" ColumnSpacing="10">
+                                <Label Text="Expected return"
+                                       VerticalTextAlignment="Center"
                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                                        FontSize="13" />
                                 <Entry AutomationId="ExpectedReturnDefaultEntry"
+                                       Grid.Column="1"
                                        Text="{Binding ExpectedReturnPercent}"
                                        Keyboard="Numeric"
                                        Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                       PlaceholderColor="{AppThemeBinding Light=#60756C, Dark=#8EAA9B}"
+                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
                                        SemanticProperties.Description="Default expected annual return percentage" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                <Label Text="Inflation (%)"
+                                <Slider AutomationId="ExpectedReturnDefaultSlider"
+                                        Grid.Row="1"
+                                        Grid.ColumnSpan="2"
+                                        Minimum="1"
+                                        Maximum="15"
+                                        Value="{Binding ExpectedReturnSlider}"
+                                        MinimumTrackColor="#2F6B57"
+                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                                        ThumbColor="#2F6B57"
+                                        SemanticProperties.Description="Adjust default expected annual return percentage" />
+                            </Grid>
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,96" ColumnSpacing="10">
+                                <Label Text="Inflation"
+                                       VerticalTextAlignment="Center"
                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                                        FontSize="13" />
                                 <Entry AutomationId="InflationDefaultEntry"
+                                       Grid.Column="1"
                                        Text="{Binding InflationRatePercent}"
                                        Keyboard="Numeric"
                                        Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                       PlaceholderColor="{AppThemeBinding Light=#60756C, Dark=#8EAA9B}"
+                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
                                        SemanticProperties.Description="Default annual inflation percentage" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Row="1" Spacing="4">
-                                <Label Text="Withdrawal rate (%)"
+                                <Slider AutomationId="InflationDefaultSlider"
+                                        Grid.Row="1"
+                                        Grid.ColumnSpan="2"
+                                        Minimum="0"
+                                        Maximum="10"
+                                        Value="{Binding InflationRateSlider}"
+                                        MinimumTrackColor="#2F6B57"
+                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                                        ThumbColor="#2F6B57"
+                                        SemanticProperties.Description="Adjust default annual inflation percentage" />
+                            </Grid>
+                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,96" ColumnSpacing="10">
+                                <Label Text="Withdrawal rate"
+                                       VerticalTextAlignment="Center"
                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                                        FontSize="13" />
                                 <Entry AutomationId="WithdrawalDefaultEntry"
+                                       Grid.Column="1"
                                        Text="{Binding WithdrawalRatePercent}"
                                        Keyboard="Numeric"
                                        Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                       PlaceholderColor="{AppThemeBinding Light=#60756C, Dark=#8EAA9B}"
+                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
                                        SemanticProperties.Description="Default safe withdrawal percentage" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4">
-                                <Label Text="Current age"
-                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                                       FontSize="13" />
-                                <Entry AutomationId="CurrentAgeDefaultEntry"
-                                       Text="{Binding DefaultCurrentAge}"
-                                       Keyboard="Numeric"
-                                       Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                       PlaceholderColor="{AppThemeBinding Light=#60756C, Dark=#8EAA9B}"
-                                       SemanticProperties.Description="Default current age" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Row="2" Spacing="4">
-                                <Label Text="Retirement age"
-                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                                       FontSize="13" />
-                                <Entry AutomationId="RetirementAgeDefaultEntry"
-                                       Text="{Binding DefaultRetirementAge}"
-                                       Keyboard="Numeric"
-                                       Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                       PlaceholderColor="{AppThemeBinding Light=#60756C, Dark=#8EAA9B}"
-                                       SemanticProperties.Description="Default retirement age" />
-                            </VerticalStackLayout>
-                            <Button Grid.Row="2"
-                                    Grid.Column="1"
-                                    Text="Save defaults"
+                                <Slider AutomationId="WithdrawalDefaultSlider"
+                                        Grid.Row="1"
+                                        Grid.ColumnSpan="2"
+                                        Minimum="1"
+                                        Maximum="10"
+                                        Value="{Binding WithdrawalRateSlider}"
+                                        MinimumTrackColor="#2F6B57"
+                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                                        ThumbColor="#2F6B57"
+                                        SemanticProperties.Description="Adjust default safe withdrawal percentage" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Current age"
+                                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                           FontSize="13" />
+                                    <Entry AutomationId="CurrentAgeDefaultEntry"
+                                           Text="{Binding DefaultCurrentAge}"
+                                           Keyboard="Numeric"
+                                           Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                           PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                           SemanticProperties.Description="Default current age" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                    <Label Text="Retirement age"
+                                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                           FontSize="13" />
+                                    <Entry AutomationId="RetirementAgeDefaultEntry"
+                                           Text="{Binding DefaultRetirementAge}"
+                                           Keyboard="Numeric"
+                                           Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                           PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                           SemanticProperties.Description="Default retirement age" />
+                                </VerticalStackLayout>
+                            </Grid>
+                            <Button Text="Save defaults"
                                     Command="{Binding SaveCalculatorDefaultsCommand}"
                                     Background="#2F6B57"
                                     TextColor="#FFFFFF"
-                                    VerticalOptions="End"
                                     SemanticProperties.Description="Save calculator defaults for new calculators." />
-                        </Grid>
+                        </VerticalStackLayout>
                         <Label Text="{Binding DefaultsStatus}"
                                TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                FontSize="13" />

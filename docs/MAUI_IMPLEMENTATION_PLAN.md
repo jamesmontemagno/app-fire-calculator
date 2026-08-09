@@ -112,6 +112,11 @@ implementation passes cannot lose requested refinements.
 - [x] Keep Retirement Cash Flow's main sections visible and use polished row-level accordions for individual accounts, income sources, and additional expenses. New rows expand for editing; existing rows start collapsed.
 - [x] Use context-aware plan actions: fresh drafts say Save to Plans, loaded plans say Update Plan. Keep Duplicate in Plans and remove redundant Save As.
 - [x] Group the Calculators catalog into FIRE, Finance, and Cash Flow sections while preserving search and hidden-calculator discovery.
+- [x] Add a skippable first-run defaults step before the FIRE Quiz, backed by the existing calculator-defaults service.
+- [x] Pair expected return, inflation, and withdrawal-rate defaults with synchronized sliders in Settings.
+- [x] Move calculator search into a scrolling CollectionView header with tab-consistent title, icon, and supporting copy.
+- [x] Clarify the Settings launch-tab selector with immediate persisted-selection feedback.
+- [x] Verify Settings theme icons and saved-plan search colors in light mode.
 
 ### Explicitly Excluded From Version 1
 
@@ -744,6 +749,7 @@ Exit gate: release candidate passes the Definition of Done below.
 | 2026-08-09 | SQLite pragma evaluation | The app uses one shared sqlite-net async connection, serializes access, and wraps destructive replacement in transactions. WAL would not add useful reader/writer concurrency but would add sidecar-file recovery and sensitive-data-retention complexity, so the shared iOS/Android storage layer intentionally retains the platform SQLite defaults. iOS runtime inspection confirmed `journal_mode=delete`, `synchronous=FULL`, no foreign-key graph, and no busy timeout; the same repository architecture is compiled for Android. | Complete; re-evaluate if multiple connections or background writers are introduced |
 | 2026-08-09 | iOS large text and cold start | On iPad, the quiz relaunches at the accessibility-extra-extra-large content size with the heading, question, helper text, 748x58-point native Entry, and both navigation actions visible without clipping. The Entry reports TextColor `#17352C` and PlaceholderColor `#587068` over the visually verified light field. A separate full process termination/relaunch generated zero captured HTTP requests; source audit found no runtime client/backend dependency, only explicit user-initiated legal links. | iOS large-text and zero-network cold start complete; VoiceOver and physically disconnected-radio checks pending |
 | 2026-08-09 | Workbook consumer validation | A fresh Standard FIRE workbook was generated through the native export action. Microsoft Excel opened and retained a live file handle to the `.xlsx`; focused Open XML tests already verify its sheets, formulas, values, and formats. Apple Numbers is not installed on this host. | Excel complete on macOS; Numbers and mobile share-target checks pending |
+| 2026-08-09 | Defaults onboarding and tab refinements | First launch now presents a skippable defaults step before the FIRE Quiz with five local-only sliders; saving persists percentages as decimals and continues to the quiz. Settings keeps percentage entries and sliders synchronized, shows where the app will open, and the selected destination survives process relaunch. Calculators now owns its icon, title, supporting copy, and search inside the scrolling CollectionView header. On iPad light mode, theme icons render at 6.25:1 selected and 6.34:1 unselected contrast; Settings native Entry and Picker secondary text was strengthened to `#587068` for 4.71:1 contrast; saved-plan search reports the same readable `#587068` placeholder on `#F5F7F2`. | iOS complete; Android pending |
 
 ## Ralph-Style Agent Loop
 

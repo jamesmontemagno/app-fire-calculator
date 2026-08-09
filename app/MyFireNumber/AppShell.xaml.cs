@@ -27,6 +27,7 @@ public partial class AppShell : Shell
 		Items.Add(CreateTab("Settings", "settings", "tab_settings.png", settingsPage));
 
 		Routing.RegisterRoute("quiz", typeof(QuizPage));
+		Routing.RegisterRoute("onboarding-defaults", typeof(DefaultsOnboardingPage));
 		Routing.RegisterRoute("calculator", typeof(CalculatorDetailPage));
 		Routing.RegisterRoute("retirement-annual-details", typeof(RetirementAnnualDetailsPage));
 		Loaded += OnLoaded;
@@ -60,7 +61,7 @@ public partial class AppShell : Shell
 		hasPresentedOnboarding = true;
 		if (!onboardingService.IsComplete)
 		{
-			await GoToAsync("quiz");
+			await GoToAsync("onboarding-defaults");
 			return;
 		}
 

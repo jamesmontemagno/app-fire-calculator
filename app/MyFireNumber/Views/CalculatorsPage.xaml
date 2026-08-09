@@ -8,19 +8,39 @@
              Title="Calculators"
              Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
 
-    <Grid Padding="20,16" RowDefinitions="Auto,*" RowSpacing="16">
-        <SearchBar AutomationId="CalculatorSearch"
-                   Placeholder="Search calculators"
-                   Text="{Binding SearchText, Mode=TwoWay}"
-                   Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                   PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                   SemanticProperties.Description="Search available calculators" />
-
-        <CollectionView Grid.Row="1"
-                        ItemsSource="{Binding FilteredCalculatorGroups}"
+    <Grid Padding="20,16">
+        <CollectionView ItemsSource="{Binding FilteredCalculatorGroups}"
                         IsGrouped="True"
                         SelectionMode="None">
+            <CollectionView.Header>
+                <VerticalStackLayout Spacing="14" Margin="0,0,0,14">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Text="&#xf1ec;"
+                               FontFamily="FontAwesomeSolid"
+                               VerticalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               FontSize="24"
+                               SemanticProperties.Description="Calculators" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="All calculators"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="24"
+                                   SemanticProperties.HeadingLevel="Level1" />
+                            <Label Text="Explore FIRE, finance, and cash flow tools."
+                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   FontSize="13" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <SearchBar AutomationId="CalculatorSearch"
+                               Placeholder="Search calculators"
+                               Text="{Binding SearchText, Mode=TwoWay}"
+                               Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                               PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                               SemanticProperties.Description="Search available calculators" />
+                </VerticalStackLayout>
+            </CollectionView.Header>
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate x:DataType="viewModels:CalculatorGroup">
                     <Grid ColumnDefinitions="Auto,*"
