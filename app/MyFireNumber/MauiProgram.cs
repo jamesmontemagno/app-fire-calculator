@@ -29,8 +29,20 @@ public static class MauiProgram
 			});
 
 		builder.Services.AddSingleton<ICalculatorCatalog, CalculatorCatalog>();
+		builder.Services.AddSingleton<IConfirmationService, ConfirmationService>();
 		builder.Services.AddSingleton<IOnboardingService, OnboardingService>();
 		builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
+		builder.Services.AddSingleton<IBaristaFireExportService, BaristaFireExportService>();
+		builder.Services.AddSingleton<ICoastFireExportService, CoastFireExportService>();
+		builder.Services.AddSingleton<IDebtPayoffExportService, DebtPayoffExportService>();
+		builder.Services.AddSingleton<IDeferredCompensationExportService, DeferredCompensationExportService>();
+		builder.Services.AddSingleton<IFatFireExportService, FatFireExportService>();
+		builder.Services.AddSingleton<IHealthcareGapExportService, HealthcareGapExportService>();
+		builder.Services.AddSingleton<ILeanFireExportService, LeanFireExportService>();
+		builder.Services.AddSingleton<IReverseFireExportService, ReverseFireExportService>();
+		builder.Services.AddSingleton<ISavingsInvestmentExportService, SavingsInvestmentExportService>();
+		builder.Services.AddSingleton<IStandardFireExportService, StandardFireExportService>();
+		builder.Services.AddSingleton<IWithdrawalRateExportService, WithdrawalRateExportService>();
 		builder.Services.AddSingleton(_ => new LocalDatabase(Path.Combine(FileSystem.AppDataDirectory, "my-fire-number.db3")));
 		builder.Services.AddSingleton<IDraftRepository, SqliteDraftRepository>();
 		builder.Services.AddSingleton<IPlanRepository, SqlitePlanRepository>();
@@ -45,6 +57,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<QuizPage>();
 		builder.Services.AddSingleton<HomeViewModel>();
 		builder.Services.AddSingleton<CalculatorCatalogViewModel>();
+		builder.Services.AddSingleton<PlansViewModel>();
 		builder.Services.AddSingleton<SettingsViewModel>();
 		builder.Services.AddTransient<CalculatorDetailViewModel>();
 		builder.Services.AddTransient<QuizViewModel>();

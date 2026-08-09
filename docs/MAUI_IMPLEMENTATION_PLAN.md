@@ -356,8 +356,8 @@ stack layout.
 - [ ] Group or filter by calculator
 - [ ] Search by plan name
 - [ ] Sort by last modified by default
-- [ ] Show plan name, calculator, and last modified time
-- [ ] Open a plan into its calculator
+- [x] Show plan name, calculator, and last modified time
+- [x] Open a plan into its calculator
 - [ ] Rename, duplicate, and delete through native actions
 - [ ] Show an intentional empty state
 
@@ -527,17 +527,17 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 | 2026-08-09 | Onboarding routing | A first-run launch opens the skippable FIRE Quiz. Skip reaches Home and the completion preference survives a subsequent fresh iPhone 17 launch. Settings can reset onboarding and re-open the Quiz. | iOS complete |
 | 2026-08-09 | Search accessibility | The iOS SearchBar renders dark entered text (`#17352C`) and a muted placeholder (`#587068`) on the native white field. MAUI reports the outer SearchBar background as transparent, so screenshot evidence confirms the actual native field contrast. | iOS complete |
 | 2026-08-09 | Local storage foundation | The platform-neutral SQLite storage project initializes versioned drafts, plans, and calculator preferences. Three focused repository tests validate draft upsert/round trip, plan ordering, and preference upsert; a fresh iPhone 17 launch includes the repository DI registrations without a startup failure. | iOS complete; future migrations pending |
-| 2026-08-08 | Icon system | Font Awesome Free Solid 6.7.2 is bundled and registered for landmark glyphs and `FontImageSource` action icons. The iOS simulator target compiles and 20 unit tests pass. DevFlow registration succeeds, but its iOS automation endpoint does not answer status/tree/screenshot requests after a clean restart, so visual verification remains pending. | iOS visual validation pending |
+| 2026-08-09 | Icon system | Font Awesome Free Solid 6.7.2 is bundled and registered for landmark glyphs and `FontImageSource` action icons. A fresh iPhone 17 launch renders the glyphs without the prior `IconGlyph` StaticResource XAML exception. | iOS complete |
 
 ### Phase 3: Standard FIRE Vertical Slice
 
 - [ ] Build shared input and result controls needed by Standard FIRE
-- [~] Implement Standard FIRE page and view model
-- [ ] Implement projection chart and accessible summary
-- [ ] Implement presets
-- [ ] Implement draft save/restore/reset
-- [ ] Implement named plan save/load
-- [ ] Implement Excel export and share
+- [x] Implement Standard FIRE page and view model
+- [x] Implement projection chart and accessible summary
+- [x] Implement presets
+- [x] Implement draft save/restore/reset
+- [x] Implement named plan save/load
+- [x] Implement Excel export and share
 - [ ] Validate light/dark, accessibility, lifecycle restoration, and offline behavior
 
 Exit gate: Standard FIRE is complete end to end on iOS and Android.
@@ -546,17 +546,23 @@ Exit gate: Standard FIRE is complete end to end on iOS and Android.
 
 | Date | Item | Evidence | Status |
 | --- | --- | --- | --- |
-| 2026-08-08 | Standard FIRE inputs and draft | A typed, versioned Standard FIRE draft matches web defaults in a focused unit test. The detail route restores and debounces writes to the local SQLite draft, validates user input, and calculates its live metrics through the tested pure Core calculator. The iOS simulator target compiles. | iOS visual validation pending |
-| 2026-08-08 | Runtime verification blocker | Fresh iPhone 17 launch registers DevFlow 0.1.0-preview.12.26368.2 on port 10225, but `maui_status` does not answer. Independent diagnostics show an active broker, one matching registered agent, and no app exception; visual-tree, screenshot, interaction, and native Entry contrast verification remain blocked at the DevFlow transport layer. | Environment blocker |
+| 2026-08-09 | Standard FIRE inputs and draft | A typed, versioned Standard FIRE draft matches web defaults in a focused unit test. A fresh iPhone 17 launch renders the input form and the default `$1,200,000` FIRE Number with its textual projection summary. The detail route restores and debounces writes to the local SQLite draft, validates user input, and calculates live metrics through the tested pure Core calculator. | iOS complete |
+| 2026-08-09 | Standard FIRE accessibility | On iPhone 17, the native Current Savings Entry reports TextColor `#17352C`, PlaceholderColor `#587068`, and transparent MAUI outer BackgroundColor; the screenshot confirms the native light field has readable contrast. | iOS complete |
+| 2026-08-09 | Standard FIRE named plans | Saving `Accelerated FIRE` with Current Savings `$250,000` lists the name, calculator, and modification time in Plans. Opening it restores the name and `$250,000` entry, with the distinct `21% of your FIRE Number is currently funded` result. Three focused SQLite plan repository tests, including the typed StandardFireDraft JSON round trip, pass. | iOS complete; rename, duplicate, delete, and update semantics pending |
+| 2026-08-09 | Standard FIRE presets | Four typed Core presets provide complete StandardFireDraft values. On iPhone 17, selecting Aggressive applies age 45, `$150,000` savings, `$48,000` contribution, `$96,000` income, and the computed `50.0%` savings rate. The native Picker reports TextColor `#17352C`, TitleColor `#587068`, and transparent MAUI outer BackgroundColor; screenshot confirms the native light field is readable. | iOS complete |
+| 2026-08-09 | Standard FIRE projection chart | A fresh iPhone 17 launch renders a 328x260 LiveCharts CartesianChart with portfolio, inflation-adjusted, and FIRE-target series. The visible chart shows its age axis and target line; its runtime accessibility label gives the age range, starting portfolio, and FIRE target, with the textual projection summary directly beneath it. | iOS complete |
+| 2026-08-09 | Standard FIRE draft lifecycle | Editing Annual Contribution to `$36,000` recalculates the savings rate to `37.5%` and survives a fresh iPhone 17 debug relaunch. Reset then restores the default `$24,000` contribution, `$1,200,000` FIRE Number, and 24.4-year projection. | iOS complete |
+| 2026-08-09 | Standard FIRE Excel export | A focused Open XML test opens the generated workbook and verifies Inputs, Results, and Projections sheets with formula-backed FIRE Number and projection cells. On iPhone 17, Export to Excel opens the native share sheet with `standard-fire-20260809-032846.xlsx`, including Copy and Save to Files actions. | iOS complete |
+| 2026-08-09 | Standard FIRE dark mode | iPhone 17 system dark mode renders the form, Export action, and portfolio chart without overlap. Native Entry and Picker text is `#F2F7F3`, with placeholder/title `#B9D1C2`; screenshots confirm readable contrast on the dark native fields and chart canvas. | iOS complete; offline, dynamic text, and VoiceOver validation pending |
 
 ### Phase 4: Shared FIRE Calculators
 
-- [ ] Coast FIRE
-- [ ] Lean FIRE
-- [ ] Fat FIRE
-- [ ] Barista FIRE
-- [ ] Reverse FIRE
-- [ ] Withdrawal Rate
+- [~] Coast FIRE
+- [~] Lean FIRE
+- [~] Fat FIRE
+- [~] Barista FIRE
+- [~] Reverse FIRE
+- [~] Withdrawal Rate
 - [ ] Savings and Investment Rate
 - [ ] Healthcare Gap
 
@@ -564,18 +570,38 @@ Run the complete per-calculator parity checklist for each item before marking it
 
 Exit gate: nine shared-form calculators are complete on both platforms.
 
+#### Phase 4 Evidence
+
+| Date | Item | Evidence | Status |
+| --- | --- | --- | --- |
+| 2026-08-09 | Coast FIRE initial slice | Typed Coast FIRE defaults map to the shared Core input contract in a focused unit test. A fresh iPhone 17 launch renders the default `$462,932` Coast FIRE Number and `10.7 years to Coast FIRE`; changing savings to `$500,000` switches to the already-Coast status and survives a fresh relaunch. In dark mode, the visible native savings Entry reports TextColor `#F2F7F3` and PlaceholderColor `#B9D1C2` on the dark native field. | iOS initial inputs, results, drafts, chart, plans, and export complete; Android pending |
+| 2026-08-09 | Coast FIRE comparison chart | A fresh iPhone 17 launch renders a 328x260 LiveCharts comparison with Coast, continued-contribution, and full-FIRE-target lines. The light-mode screenshot confirms the chart and age axis render without overlap; its runtime accessibility label explains the two paths and target, and the textual summary reports both age-65 outcomes. | iOS complete; Android pending |
+| 2026-08-09 | Coast FIRE named plans | A Coast scenario with `$500,000` savings saves as `Coast Complete`, appears in Plans with the `Coast FIRE` calculator title, and opens through its routed detail page with the saved name, savings, and already-Coast result intact. Focused SQLite tests cover the typed Coast draft JSON round trip. | iOS complete; plan update, rename, duplicate, delete, and Android validation pending |
+| 2026-08-09 | Coast FIRE Excel export | A focused Open XML test verifies Inputs, Results, Coast Projection, and Contributions Projection sheets, including the full-FIRE formula and both projection formulas. On iPhone 17, Export to Excel opens the native share sheet with `coast-fire-20260809-035225.xlsx`, including Copy and Save to Files actions. | iOS complete; Android validation pending |
+| 2026-08-09 | Lean FIRE vertical slice | A typed Lean draft preserves entered expenses while capping the calculation to the web’s `$40,000` Lean guideline. On iPhone 17, the default `$48,000` expense input displays the threshold warning and computes a `$1,000,000` Lean FIRE Number in `21.3 years`; the form, textual progress, and LiveCharts projection use Lean-specific labels. The visible native savings Entry reports TextColor `#17352C` and PlaceholderColor `#587068` on the readable light native field. | iOS inputs, results, chart, and drafts complete; Android pending |
+| 2026-08-09 | Lean FIRE named plans and export | `Lean Complete` saves to Plans with the `Lean FIRE` calculator title and restores its name and `$48,000` input through the detail route. Focused SQLite tests cover the typed Lean draft JSON round trip. A focused Open XML test verifies the Lean workbook title and `$40,000` capped calculation input; on iPhone 17, the Lean export action exposes the correct accessibility description and opens the native share sheet with `lean-fire-20260809-054654.xlsx`, including Copy and Save to Files actions. | iOS complete; plan update, rename, duplicate, delete, and Android validation pending |
+| 2026-08-09 | Fat FIRE vertical slice | A typed Fat draft preserves entered expenses without applying a cap. On iPhone 17, the `$48,000` default renders its below-threshold guidance and a `$1,200,000` target; changing expenses to `$125,000` switches to the Fat FIRE status and recomputes the target to `$3,125,000` in 43.3 years. The visible native expense Entry reports TextColor `#17352C` and PlaceholderColor `#587068` on the readable light native field. | iOS inputs, results, chart, and drafts complete; Android pending |
+| 2026-08-09 | Fat FIRE named plans and export | The `$125,000` scenario saves as `Fat Complete` with the correct Fat plan accessibility name. Focused SQLite tests cover typed Fat draft JSON round trips. A focused Open XML test verifies the Fat workbook title and `$125,000` input; on iPhone 17, the Fat export exposes a Fat-specific accessibility description and opens the native share sheet with `fat-fire-20260809-055122.xlsx`, including Copy and Save to Files actions. | iOS complete; plan update, rename, duplicate, delete, and Android validation pending |
+
 ### Phase 5: Complex Calculators
 
-- [ ] Debt Payoff editable debt workflow
-- [ ] Snowball and Avalanche comparison
-- [ ] Debt balance and breakdown charts
-- [ ] Retirement Cash Flow scenario inputs
+- [x] Debt Payoff editable debt workflow
+- [x] Snowball and Avalanche comparison
+- [ ] Debt balance and breakdown charts (balance projection is implemented; payment-breakdown chart remains)
+- [x] Retirement Cash Flow scenario inputs
 - [ ] Income, account, and additional-expense editors
-- [ ] Retirement cash-flow and bucket charts
+- [ ] Retirement cash-flow and bucket charts (cash-flow projection is implemented; account bucket chart remains)
 - [ ] Expandable annual cash-flow detail
-- [ ] Complex calculator exports and persistence
+- [ ] Complex calculator exports and persistence (Debt export and typed drafts are implemented; Retirement plan load and all editor persistence remain)
 
 Exit gate: collection editing, calculations, charts, plans, and exports pass on both platforms.
+
+#### 2026-08-09 Checkpoint
+
+- Debt Payoff now has typed drafts, editable debts, fixed-budget and target-timeline modes, Snowball/Avalanche comparison, a balance projection, named-plan saves, and a local Open XML workbook/share service. Focused `DebtPayoffWorkbookTests` pass.
+- Retirement Cash Flow now has a typed web-parity default scenario, validated core scenario inputs, a cash-flow projection, typed draft saves, and a local Open XML workbook/share service. Its account, income, and additional-expense editors, bucket chart, annual detail, and plan-load support remain to be built.
+- Focused `DeferredCompensationDraftTests` pass. The iOS target builds successfully with `MauiDevFlowEnabled=true`.
+- DevFlow recovery is in progress. On the iPhone 17 simulator, `dotnet_maui_debugProject` launches successfully but `maui_wait(app: "MyFireNumber", timeout: 30)` times out. Diagnostics report a healthy broker at port `19223`, `agentCount=0`, no version mismatch, and no runtime app output. The manual `Microsoft.Maui.DevFlow.Agent` reference was removed so the VS Code extension can inject its compatible debug agent on the next launch. No visual-tree, screenshot, or runtime color validation is yet available for Phase 5.
 
 ### Phase 6: Quiz, Home, Catalog, and Plans
 

@@ -1,28 +1,106 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
              x:Class="MyFireNumber.Views.PlansPage"
+             x:DataType="viewModels:PlansViewModel"
              Title="Plans"
              Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
 
-    <Grid Padding="24">
-        <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="12">
-             <Label Text="&#xf15c;"
-                     FontFamily="FontAwesomeSolid"
-                     VerticalTextAlignment="Center"
-                 TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
-                 FontSize="34"
-                   SemanticProperties.Description="Saved plan document" />
-            <Label Text="Saved plans"
-                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                   FontAttributes="Bold"
-                   FontSize="26"
-                   HorizontalTextAlignment="Center"
-                   SemanticProperties.HeadingLevel="Level1" />
-            <Label Text="Save a calculator scenario to compare your plans here."
-                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                   HorizontalTextAlignment="Center"
-                   LineHeight="1.3" />
-        </VerticalStackLayout>
+    <Grid Padding="20,16" RowDefinitions="Auto,Auto,*" RowSpacing="14">
+        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <Label Text="&#xf15c;"
+                   FontFamily="FontAwesomeSolid"
+                   VerticalTextAlignment="Center"
+                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                   FontSize="28"
+                   SemanticProperties.Description="Saved plans" />
+            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                <Label Text="Saved plans"
+                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                       FontAttributes="Bold"
+                       FontSize="28"
+                       SemanticProperties.HeadingLevel="Level1" />
+                <Label Text="Your scenarios are stored locally on this device."
+                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                       FontSize="14" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <ActivityIndicator Grid.Row="1"
+                           IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalOptions="Center"
+                           SemanticProperties.Description="Loading saved plans." />
+
+        <CollectionView Grid.Row="2" ItemsSource="{Binding Plans}" SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="viewModels:PlanListItem">
+                    <Border Margin="0,0,0,10"
+                            Padding="16"
+                            Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                            Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                            StrokeShape="RoundRectangle 8">
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="{Binding Name}"
+                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                       FontAttributes="Bold"
+                                       FontSize="18" />
+                                <Label Text="{Binding CalculatorTitle}"
+                                       TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                       FontSize="13" />
+                                <Label Text="{Binding UpdatedDescription}"
+                                       TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                       FontSize="12" />
+                            </VerticalStackLayout>
+                            <Button Grid.Column="1"
+                                    Text="Open"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=OpenPlanCommand}"
+                                    CommandParameter="{Binding .}"
+                                    Background="#2F6B57"
+                                    TextColor="#FFFFFF"
+                                    FontSize="12"
+                                    MinimumWidthRequest="78">
+                                <Button.ImageSource>
+                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf061;" Color="#FFFFFF" Size="12" />
+                                </Button.ImageSource>
+                            </Button>
+                            <Button Grid.Column="2"
+                                    Text="Delete"
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=DeletePlanCommand}"
+                                    CommandParameter="{Binding .}"
+                                    Background="#A33A31"
+                                    TextColor="#FFFFFF"
+                                    FontSize="12"
+                                    MinimumWidthRequest="78"
+                                    SemanticProperties.Description="Delete this saved plan after confirmation.">
+                                <Button.ImageSource>
+                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf2ed;" Color="#FFFFFF" Size="12" />
+                                </Button.ImageSource>
+                            </Button>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+            <CollectionView.EmptyView>
+                <VerticalStackLayout VerticalOptions="Center" Spacing="10">
+                    <Label Text="&#xf15c;"
+                           FontFamily="FontAwesomeSolid"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                           FontSize="34"
+                           SemanticProperties.Description="No saved plans" />
+                    <Label Text="No saved plans yet."
+                           HorizontalTextAlignment="Center"
+                           FontAttributes="Bold"
+                           FontSize="18" />
+                    <Label Text="Save a calculator scenario to compare it here."
+                           HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                           LineHeight="1.3" />
+                </VerticalStackLayout>
+            </CollectionView.EmptyView>
+        </CollectionView>
     </Grid>
 </ContentPage>

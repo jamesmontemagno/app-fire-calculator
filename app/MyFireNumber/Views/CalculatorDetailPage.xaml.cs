@@ -17,7 +17,10 @@ public partial class CalculatorDetailPage : ContentPage, IQueryAttributable
     {
         if (query.TryGetValue("calculatorId", out var calculatorId) && calculatorId is string value)
         {
-            await viewModel.LoadAsync(Uri.UnescapeDataString(value));
+            var planId = query.TryGetValue("planId", out var savedPlanId) && savedPlanId is string id
+                ? Uri.UnescapeDataString(id)
+                : null;
+            await viewModel.LoadAsync(Uri.UnescapeDataString(value), planId);
         }
     }
 }

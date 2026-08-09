@@ -82,6 +82,17 @@ public class FinancialCalculatorTests
     }
 
     [Fact]
+    public void BaristaFireDraft_DefaultMatchesWebPartTimeIncome()
+    {
+        var draft = BaristaFireDraft.Default;
+        var result = FinancialCalculator.CalculateBaristaFire(draft.ToFireInputs(2026), draft.PartTimeAnnualIncome);
+
+        Assert.Equal(20_000, draft.PartTimeAnnualIncome);
+        Assert.Equal(700_000, result.BaristaNumber);
+        Assert.Equal(1_200_000, result.FullFireNumber);
+    }
+
+    [Fact]
     public void Withdrawal_MatchesWebInflationAdjustedDrawdown()
     {
         var result = FinancialCalculator.CalculateWithdrawal(1_000_000, 0.04, 0.07, 0.03, 30);
