@@ -4,6 +4,9 @@
 
 - `web/` contains the deployed React Progressive Web App.
 - `app/MyFireNumber/` contains the .NET MAUI companion app.
+- `app/MyFireNumber.Core/` contains the shared, platform-neutral calculations and workbook exports.
+- `app/MyFireNumber.Storage/` contains the shared SQLite persistence layer.
+- `app/MyFireNumber.Tests/` contains the unit tests for the shared calculation and storage libraries.
 - `MyFireNumber.slnx` is the solution entry point for the MAUI app.
 - `.github/workflows/deploy.yml` builds and deploys only the web app.
 
