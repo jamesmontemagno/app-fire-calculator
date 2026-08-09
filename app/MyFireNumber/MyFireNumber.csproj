@@ -77,6 +77,10 @@
 		<PackageReference Include="sqlite-net-pcl" Version="1.11.285" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\MyFireNumber.Core\MyFireNumber.Core.csproj" />
+	</ItemGroup>
+
 	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
 		<DefineConstants>$(DefineConstants);MAUI_DEVFLOW</DefineConstants>
 	</PropertyGroup>

@@ -18,4 +18,8 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\MyFireNumber.Core\MyFireNumber.Core.csproj" />
+  </ItemGroup>
+
 </Project>

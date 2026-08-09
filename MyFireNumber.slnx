@@ -2,6 +2,9 @@
   <Folder Name="/app/">
     <Project Path="app/MyFireNumber/MyFireNumber.csproj" />
   </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/MyFireNumber.Core/MyFireNumber.Core.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/MyFireNumber.Tests/MyFireNumber.Tests.csproj" />
   </Folder>

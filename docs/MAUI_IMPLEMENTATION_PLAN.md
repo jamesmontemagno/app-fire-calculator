@@ -480,7 +480,7 @@ This patch is local development-machine state and must never be copied into the 
 
 - [ ] Define typed calculator input and result models
 - [ ] Create golden web fixtures for all calculators
-- [ ] Port common financial math
+- [x] Port common financial math
 - [ ] Port Standard, Coast, Lean, Fat, Barista, and Withdrawal calculations
 - [ ] Port Reverse, Savings Rate, and Healthcare calculations currently located in pages
 - [ ] Port Debt Payoff calculations
