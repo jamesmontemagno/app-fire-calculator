@@ -31,6 +31,24 @@ public sealed record RecentActivityRecord(
     string ItemId,
     DateTime LastOpenedAtUtc);
 
+public enum CorruptPayloadSourceKind
+{
+    Draft,
+    Plan
+}
+
+public sealed record CorruptPayloadRecord(
+    string Id,
+    CorruptPayloadSourceKind SourceKind,
+    string SourceId,
+    string CalculatorId,
+    string? DisplayName,
+    int PayloadVersion,
+    string PayloadJson,
+    DateTime? OriginalCreatedAtUtc,
+    DateTime OriginalUpdatedAtUtc,
+    DateTime QuarantinedAtUtc);
+
 public interface IDraftRepository
 {
     Task<DraftRecord?> GetAsync(string calculatorId, CancellationToken cancellationToken = default);
@@ -66,4 +84,13 @@ public interface IRecentActivityRepository
         CancellationToken cancellationToken = default);
 
     Task TrackAsync(RecentActivityRecord activity, CancellationToken cancellationToken = default);
+}
+
+public interface ICorruptPayloadRepository
+{
+    Task<IReadOnlyList<CorruptPayloadRecord>> ListAsync(CancellationToken cancellationToken = default);
+
+    Task QuarantineDraftAsync(DraftRecord draft, CancellationToken cancellationToken = default);
+
+    Task QuarantinePlanAsync(PlanRecord plan, CancellationToken cancellationToken = default);
 }

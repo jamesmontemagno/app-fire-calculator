@@ -5,7 +5,7 @@ namespace MyFireNumber.Storage;
 public sealed class LocalDatabase
 {
     private const string SchemaVersionKey = "schema-version";
-    private const int CurrentSchemaVersion = 2;
+    private const int CurrentSchemaVersion = 3;
 
     private readonly SQLiteAsyncConnection connection;
     private readonly SemaphoreSlim initializationLock = new(1, 1);
@@ -71,6 +71,7 @@ public sealed class LocalDatabase
         await connection.CreateTableAsync<PlanEntity>();
         await connection.CreateTableAsync<CalculatorPreferenceEntity>();
         await connection.CreateTableAsync<RecentActivityEntity>();
+        await connection.CreateTableAsync<CorruptPayloadEntity>();
     }
 
     private async Task ApplyMigrationsAsync(int storedVersion, SchemaMetadataEntity schemaVersion)
@@ -85,6 +86,11 @@ public sealed class LocalDatabase
         if (storedVersion < 2)
         {
             await connection.CreateTableAsync<RecentActivityEntity>();
+        }
+
+        if (storedVersion < 3)
+        {
+            await connection.CreateTableAsync<CorruptPayloadEntity>();
         }
 
         if (storedVersion != CurrentSchemaVersion)
@@ -173,4 +179,36 @@ internal sealed class SchemaMetadataEntity
 
     [NotNull]
     public string Value { get; set; } = string.Empty;
+}
+
+[Table("corrupt_payloads")]
+internal sealed class CorruptPayloadEntity
+{
+    [PrimaryKey]
+    public string Id { get; set; } = string.Empty;
+
+    [NotNull]
+    public string SourceKind { get; set; } = string.Empty;
+
+    [NotNull]
+    public string SourceId { get; set; } = string.Empty;
+
+    [NotNull]
+    public string CalculatorId { get; set; } = string.Empty;
+
+    public string? DisplayName { get; set; }
+
+    [NotNull]
+    public int PayloadVersion { get; set; }
+
+    [NotNull]
+    public string PayloadJson { get; set; } = string.Empty;
+
+    public string? OriginalCreatedAtUtc { get; set; }
+
+    [NotNull]
+    public string OriginalUpdatedAtUtc { get; set; } = string.Empty;
+
+    [NotNull]
+    public string QuarantinedAtUtc { get; set; } = string.Empty;
 }

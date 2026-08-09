@@ -20,6 +20,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly IBaristaFireExportService baristaExportService;
     private readonly ICalculatorCatalog catalog;
     private readonly ICoastFireExportService coastExportService;
+    private readonly ICorruptPayloadRepository corruptPayloadRepository;
     private readonly IDeferredCompensationExportService deferredCompensationExportService;
     private readonly IDebtPayoffExportService debtPayoffExportService;
     private readonly IDraftRepository draftRepository;
@@ -50,6 +51,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         IBaristaFireExportService baristaExportService,
         ICalculatorCatalog catalog,
         ICoastFireExportService coastExportService,
+        ICorruptPayloadRepository corruptPayloadRepository,
         IDeferredCompensationExportService deferredCompensationExportService,
         IDebtPayoffExportService debtPayoffExportService,
         IDraftRepository draftRepository,
@@ -67,6 +69,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.baristaExportService = baristaExportService;
         this.catalog = catalog;
         this.coastExportService = coastExportService;
+        this.corruptPayloadRepository = corruptPayloadRepository;
         this.deferredCompensationExportService = deferredCompensationExportService;
         this.debtPayoffExportService = debtPayoffExportService;
         this.draftRepository = draftRepository;
@@ -702,9 +705,13 @@ public partial class CalculatorDetailViewModel : ObservableObject
         }
         catch (JsonException)
         {
-            ValidationMessage = "This saved draft could not be read. Default values are shown.";
+            var wasQuarantined = await QuarantineCorruptPayloadAsync(calculatorId, planId);
+            ValidationMessage = wasQuarantined
+                ? "Unreadable saved data was moved to local recovery storage. Default values are shown."
+                : "Saved data could not be read or moved to recovery storage. Default values are shown.";
             ApplyDefaultDraft();
         }
+
         catch (Exception)
         {
             ValidationMessage = "Your saved draft could not be restored. You can continue with the values shown.";
@@ -713,6 +720,39 @@ public partial class CalculatorDetailViewModel : ObservableObject
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    private async Task<bool> QuarantineCorruptPayloadAsync(string calculatorId, string? planId)
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(planId))
+            {
+                var plan = await planRepository.GetAsync(planId);
+                if (plan is null)
+                {
+                    return false;
+                }
+
+                await corruptPayloadRepository.QuarantinePlanAsync(plan);
+                loadedPlanId = null;
+                loadedPlanCreatedAtUtc = null;
+                return true;
+            }
+
+            var draft = await draftRepository.GetAsync(calculatorId);
+            if (draft is null)
+            {
+                return false;
+            }
+
+            await corruptPayloadRepository.QuarantineDraftAsync(draft);
+            return true;
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 

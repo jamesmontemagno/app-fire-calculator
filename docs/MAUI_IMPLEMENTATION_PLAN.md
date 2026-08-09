@@ -262,14 +262,14 @@ Use MAUI `Preferences` only for small, non-sensitive values:
 
 ### Persistence Rules
 
-- [ ] Database path uses `FileSystem.AppDataDirectory`
-- [ ] Connection initialization is asynchronous and idempotent
+- [x] Database path uses `FileSystem.AppDataDirectory`
+- [x] Connection initialization is asynchronous and idempotent
 - [ ] WAL and other pragmas are evaluated on both iOS and Android
 - [ ] All writes use repository methods and transactions where multiple records must agree
 - [x] Draft saves are debounced and flushed when the app stops or deactivates
-- [ ] Corrupt payloads fail safely and remain recoverable/exportable when possible
+- [x] Corrupt payloads fail safely and remain recoverable/exportable when possible
 - [ ] Payload migrations are explicit and covered by tests
-- [ ] Database migrations are monotonic and covered by upgrade tests
+- [x] Database migrations are monotonic and covered by upgrade tests
 - [ ] Financial values never appear in application logs
 - [ ] Delete-all clears SQLite records and relevant preferences
 - [ ] Export-all produces a versioned local archive without network transmission
@@ -536,6 +536,7 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 | 2026-08-09 | Global error presentation | A singleton error presenter marshals generic messages to the UI thread without accepting exception or payload data. Plans load, rename, duplicate, and delete failures use it. The full 57-test suite passes, and a fresh iPhone 17 launch resolves Plans through DI and renders its heading at non-zero bounds. | iOS complete |
 | 2026-08-09 | Schema v2 migration | `LocalDatabase` now applies explicit ordered migrations and updates schema metadata. A focused upgrade test creates a version-1 database, initializes the version-2 recent-activity table, persists a record, and verifies metadata advanced to version 2 without replacing existing tables. | Complete |
 | 2026-08-09 | Linked iOS Release proof | A clean `net10.0-ios` `iossimulator-arm64` Release rebuild completed with linking/AOT enabled and simulator LLVM disabled, with no warnings or errors. The uninstrumented app launched on iPhone 17 and rendered persisted SQLite calculator and plan recents; the bundle retains LiveCharts2, Open XML, SQLite, SQLitePCLRaw, and SQLite AOT artifacts. Command-line Release DevFlow instrumentation exits before agent registration, while the shipping-style build runs normally, so runtime inspection remains a Debug-only validation path. | iOS simulator complete; device LLVM and Android pending |
+| 2026-08-09 | Schema v3 payload recovery | A monotonic v3 migration adds app-private corrupt-payload recovery storage. Malformed drafts and plans are copied with their source metadata and original local JSON, then removed from active storage in the same SQLite transaction so calculators can recover without data loss or repeated launch failures. Three focused tests cover draft and plan quarantine plus v2-to-v3 upgrade; the prior v1 upgrade test now advances through v3. The existing iOS database reports schema `3`, contains the recovery table, and still renders persisted Home recents. | Complete |
 
 ### Phase 3: Standard FIRE Vertical Slice
 
@@ -679,7 +680,7 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 - [ ] Validate light, dark, high contrast, and reduced motion
 - [ ] Validate offline cold start and all local workflows
 - [ ] Validate background/foreground and process termination restoration
-- [ ] Validate database upgrade from every released schema
+- [x] Validate database upgrade from every released schema
 - [ ] Validate import/export and corrupted input handling
 - [~] Validate Release trimming and AOT
 - [ ] Run Android and iOS GitHub Actions workflows

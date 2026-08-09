@@ -188,3 +188,102 @@ public sealed class SqliteRecentActivityRepository(LocalDatabase database) : IRe
             DateTime.Parse(entity.LastOpenedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
     }
 }
+
+public sealed class SqliteCorruptPayloadRepository(LocalDatabase database) : ICorruptPayloadRepository
+{
+    public async Task<IReadOnlyList<CorruptPayloadRecord>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        await database.InitializeAsync(cancellationToken);
+        var entities = await database.Connection.Table<CorruptPayloadEntity>()
+            .OrderByDescending(payload => payload.QuarantinedAtUtc)
+            .ToListAsync();
+        return entities.Select(ToRecord).ToArray();
+    }
+
+    public async Task QuarantineDraftAsync(DraftRecord draft, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(draft.CalculatorId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(draft.PayloadJson);
+
+        await database.InitializeAsync(cancellationToken);
+        var entity = CreateEntity(
+            CorruptPayloadSourceKind.Draft,
+            draft.CalculatorId,
+            draft.CalculatorId,
+            null,
+            draft.PayloadVersion,
+            draft.PayloadJson,
+            null,
+            draft.UpdatedAtUtc);
+        await database.Connection.RunInTransactionAsync(connection =>
+        {
+            connection.Insert(entity);
+            connection.Delete<DraftEntity>(draft.CalculatorId);
+        });
+    }
+
+    public async Task QuarantinePlanAsync(PlanRecord plan, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(plan.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(plan.CalculatorId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(plan.PayloadJson);
+
+        await database.InitializeAsync(cancellationToken);
+        var entity = CreateEntity(
+            CorruptPayloadSourceKind.Plan,
+            plan.Id,
+            plan.CalculatorId,
+            plan.Name,
+            plan.PayloadVersion,
+            plan.PayloadJson,
+            plan.CreatedAtUtc,
+            plan.UpdatedAtUtc);
+        await database.Connection.RunInTransactionAsync(connection =>
+        {
+            connection.Insert(entity);
+            connection.Delete<PlanEntity>(plan.Id);
+        });
+    }
+
+    private static CorruptPayloadEntity CreateEntity(
+        CorruptPayloadSourceKind sourceKind,
+        string sourceId,
+        string calculatorId,
+        string? displayName,
+        int payloadVersion,
+        string payloadJson,
+        DateTime? originalCreatedAtUtc,
+        DateTime originalUpdatedAtUtc)
+    {
+        return new CorruptPayloadEntity
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            SourceKind = sourceKind.ToString(),
+            SourceId = sourceId,
+            CalculatorId = calculatorId,
+            DisplayName = displayName,
+            PayloadVersion = payloadVersion,
+            PayloadJson = payloadJson,
+            OriginalCreatedAtUtc = originalCreatedAtUtc?.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
+            OriginalUpdatedAtUtc = originalUpdatedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
+            QuarantinedAtUtc = DateTime.UtcNow.ToString("O", CultureInfo.InvariantCulture)
+        };
+    }
+
+    private static CorruptPayloadRecord ToRecord(CorruptPayloadEntity entity)
+    {
+        return new CorruptPayloadRecord(
+            entity.Id,
+            Enum.Parse<CorruptPayloadSourceKind>(entity.SourceKind),
+            entity.SourceId,
+            entity.CalculatorId,
+            entity.DisplayName,
+            entity.PayloadVersion,
+            entity.PayloadJson,
+            entity.OriginalCreatedAtUtc is null
+                ? null
+                : DateTime.Parse(entity.OriginalCreatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
+            DateTime.Parse(entity.OriginalUpdatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
+            DateTime.Parse(entity.QuarantinedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
+    }
+}

@@ -62,7 +62,7 @@ public sealed class SqliteRecentActivityRepositoryTests : IAsyncLifetime
             "SELECT Value FROM schema_metadata WHERE Key = 'schema-version'");
         await inspectionConnection.CloseAsync();
 
-        Assert.Equal("2", schemaVersion);
+        Assert.Equal("3", schemaVersion);
         Assert.Collection(activities, activity => Assert.Equal("standard-fire", activity.ItemId));
     }
 }
