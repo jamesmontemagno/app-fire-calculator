@@ -9,10 +9,12 @@ public partial class App : Application
 	public App(
 		AppShell appShell,
 		IThemeService themeService,
-		IAppBehaviorPreferencesService behaviorPreferencesService)
+		IAppBehaviorPreferencesService behaviorPreferencesService,
+		ITemporaryExportCleanupService temporaryExportCleanupService)
 	{
 		InitializeComponent();
 		this.appShell = appShell;
+		temporaryExportCleanupService.RemoveStaleFiles();
 		themeService.Apply(behaviorPreferencesService.Current.HighContrast
 			? ThemePreference.Dark
 			: themeService.Preference);

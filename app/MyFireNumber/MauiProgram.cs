@@ -35,6 +35,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<ICalculatorDefaultsService, CalculatorDefaultsService>();
 		builder.Services.AddSingleton<IAppBehaviorPreferencesService, AppBehaviorPreferencesService>();
 		builder.Services.AddSingleton<ICurrencyPreferencesService, CurrencyPreferencesService>();
+		builder.Services.AddSingleton<ITemporaryExportCleanupService, TemporaryExportCleanupService>();
 		builder.Services.AddSingleton<IErrorPresentationService, ErrorPresentationService>();
 		builder.Services.AddSingleton<IExternalLinkService, ExternalLinkService>();
 		builder.Services.AddSingleton<IPlanNamePromptService, PlanNamePromptService>();

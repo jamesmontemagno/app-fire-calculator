@@ -175,7 +175,7 @@ this document because the project targets the evolving .NET 10 toolchain.
 - [x] `LiveChartsCore.SkiaSharpView.Maui`
 - [x] `DocumentFormat.OpenXml`
 - [x] Current repository-approved xUnit packages for the test project
-- [ ] Optional assertion or mocking package only when it materially improves test clarity
+- [x] Optional assertion or mocking package evaluated; xUnit assertions remain clearer for the current tests
 
 Before broad implementation, prove LiveCharts2 and Open XML work in trimmed Release builds on
 both target platforms.
@@ -311,9 +311,9 @@ Use MAUI `Preferences` only for small, non-sensitive values:
 
 For each calculator:
 
-- [ ] List every input, unit, minimum, maximum, step, and default
-- [ ] List every preset and its complete value set
-- [ ] List every validation and invalid/empty state
+- [x] List every input, unit, minimum, maximum, step, and default in `docs/CALCULATOR_PARITY_MATRIX.md`
+- [x] List every preset and its complete value set in `docs/CALCULATOR_PARITY_MATRIX.md`
+- [x] List every validation and invalid/empty state in `docs/CALCULATOR_PARITY_MATRIX.md`
 - [x] Port formulas to pure C# without UI dependencies
 - [ ] Capture normal, boundary, zero, and invalid web result fixtures
 - [x] Compare C# results with web fixtures using documented numeric tolerances
@@ -331,23 +331,23 @@ silently change formulas to make a test pass.
 
 ### Reusable Controls
 
-- [ ] Currency input with locale parsing and annual/monthly toggle
-- [ ] Percentage input that stores decimals and displays percentages
-- [ ] Age input with accessible validation
-- [ ] Integer and decimal numeric input
-- [ ] Segmented mode selector
-- [ ] Labeled switch/checkbox rows
-- [ ] Result metric view
-- [ ] Progress-to-FIRE view
-- [ ] Preset selector
-- [ ] Save/load/reset/export command bar
-- [ ] Validation summary
-- [ ] Financial disclaimer
-- [ ] LiveCharts2 chart host with loading, empty, and accessible summary states
-- [ ] Editable debt collection
-- [ ] Editable income-source collection
-- [ ] Editable account collection
-- [ ] Editable additional-expense collection
+- [x] Currency input with locale parsing and annual/monthly toggle
+- [x] Percentage input that stores decimals and displays percentages
+- [x] Age input with accessible validation
+- [x] Integer and decimal numeric input
+- [x] Segmented mode selector
+- [x] Labeled switch/checkbox rows
+- [x] Result metric view
+- [x] Progress-to-FIRE view
+- [x] Preset selector
+- [x] Save/load/reset/export command bar
+- [x] Validation summary
+- [x] Financial disclaimer
+- [x] LiveCharts2 chart host with loading, empty, and accessible summary states
+- [x] Editable debt collection
+- [x] Editable income-source collection
+- [x] Editable account collection
+- [x] Editable additional-expense collection
 
 All pages and `DataTemplate` elements require `x:DataType`. Use `Border`, `Grid`,
 `VerticalStackLayout`, and `CollectionView` according to repository guidance. Do not use
@@ -403,7 +403,7 @@ stack layout.
 ### Appearance
 
 - [~] System, light, and dark theme (implemented and persisted; device validation pending)
-- [ ] Chart palette suitable for the active theme
+- [x] Chart palette suitable for the active theme
 - [~] Follow system reduced motion by default (chart motion override implemented and validated on iOS; OS preference detection and Android pending)
 - [~] Optional high-contrast override (dark high-contrast palette implemented and validated on iOS; Android pending)
 
@@ -457,7 +457,7 @@ them with MAUI `Share`. Do not retain exports indefinitely.
 - [x] Apply currency, percentage, integer, and decimal formats
 - [x] Sanitize worksheet names and user-provided text
 - [ ] Open generated workbooks successfully in Apple Numbers and Microsoft Excel
-- [ ] Remove or age out stale temporary exports
+- [x] Remove or age out stale temporary exports
 
 ## Delivery Phases
 
@@ -734,6 +734,7 @@ Exit gate: release candidate passes the Definition of Done below.
 | 2026-08-09 | iPad portrait layout | On an iPad Pro 11-inch simulator, the quiz and Home render at 834x1210 points without clipping. Home keeps all 11 calculators, quiz/retake/browse actions, and the four-tab bar reachable. The 748x44-point native quiz Entry reports TextColor `#17352C` and PlaceholderColor `#587068` over the visually verified light field. | iPad portrait complete; landscape and dynamic-type matrix pending |
 | 2026-08-09 | Toolchain and CI hardening | MAUI Doctor reports all 13 checks healthy with the active .NET 10 SDK, MAUI workload, Microsoft OpenJDK, Android SDK, and Xcode. Both mobile workflows now restore workloads from the project, run the 74-test Release suite, trigger for app/Core/storage/test changes, and use the latest stable Xcode selector. | Local validation complete; hosted workflow dispatch requires a pushed branch |
 | 2026-08-09 | Store metadata and disclosures | `docs/MOBILE_STORE_LISTING.md` records store identity, descriptions, legal/support URLs, review notes, no-collection disclosures, OS-backup behavior, and the required screenshot set. The app repeats the OS-backup disclosure in Settings; the branded icon/splash and educational disclaimers are present. | Content complete; final platform screenshot capture and store-console entry pending |
+| 2026-08-09 | Temporary export retention | App startup removes generated `.xlsx` reports and versioned JSON backups from the OS cache after 24 hours. Cleanup handles unavailable or locked cache files without exposing filenames or financial values. The final iOS app launches normally after cleanup registration, and iOS/Android Debug builds plus all 74 Release tests pass. | Complete |
 
 ## Ralph-Style Agent Loop
 
