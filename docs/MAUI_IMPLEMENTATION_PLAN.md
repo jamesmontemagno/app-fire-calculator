@@ -374,8 +374,8 @@ stack layout.
 
 ### Calculator Customization
 
-- [ ] Show/hide calculators
-- [ ] Reorder calculators with accessible move controls and native reorder interaction
+- [~] Show/hide calculators (implemented; device validation pending)
+- [~] Reorder calculators with accessible move controls and native reorder interaction (accessible move controls implemented; device validation pending)
 - [ ] Reset visibility and order to defaults
 - [ ] Keep hidden calculators discoverable in All Calculators
 
