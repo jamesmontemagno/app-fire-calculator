@@ -15,6 +15,7 @@ public partial class PlansViewModel : ObservableObject
     private readonly IPlanRepository planRepository;
     private readonly ICalculatorCatalog catalog;
     private readonly IConfirmationService confirmationService;
+    private readonly IErrorPresentationService errorPresentationService;
     private readonly INavigationService navigationService;
     private readonly IPlanNamePromptService planNamePromptService;
     private readonly List<PlanListItem> allPlans = [];
@@ -24,12 +25,14 @@ public partial class PlansViewModel : ObservableObject
         ICalculatorCatalog catalog,
         INavigationService navigationService,
         IConfirmationService confirmationService,
+        IErrorPresentationService errorPresentationService,
         IPlanNamePromptService planNamePromptService)
     {
         this.planRepository = planRepository;
         this.catalog = catalog;
         this.navigationService = navigationService;
         this.confirmationService = confirmationService;
+        this.errorPresentationService = errorPresentationService;
         this.planNamePromptService = planNamePromptService;
         CalculatorFilters.Add(new CalculatorFilter(null, "All calculators"));
         foreach (var definition in catalog.All)
@@ -83,6 +86,7 @@ public partial class PlansViewModel : ObservableObject
         catch (Exception)
         {
             ErrorMessage = "Saved plans could not be loaded right now.";
+            await errorPresentationService.ShowAsync("Plans unavailable", ErrorMessage);
         }
         finally
         {
@@ -132,6 +136,7 @@ public partial class PlansViewModel : ObservableObject
         catch (Exception)
         {
             ErrorMessage = "This saved plan could not be renamed right now.";
+            await errorPresentationService.ShowAsync("Rename unavailable", ErrorMessage);
         }
     }
 
@@ -169,6 +174,7 @@ public partial class PlansViewModel : ObservableObject
         catch (Exception)
         {
             ErrorMessage = "This saved plan could not be duplicated right now.";
+            await errorPresentationService.ShowAsync("Duplicate unavailable", ErrorMessage);
         }
     }
 
@@ -193,6 +199,7 @@ public partial class PlansViewModel : ObservableObject
         catch (Exception)
         {
             ErrorMessage = "This saved plan could not be deleted right now.";
+            await errorPresentationService.ShowAsync("Delete unavailable", ErrorMessage);
         }
     }
 

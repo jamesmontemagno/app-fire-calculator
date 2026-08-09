@@ -519,7 +519,7 @@ Exit gate: all calculation tests pass without referencing MAUI.
 - [~] Implement SQLite initialization and migrations
 - [~] Implement preferences and theme services
 - [x] Implement first-run routing
-- [ ] Add global error presentation that does not expose financial values
+- [x] Add global error presentation that does not expose financial values
 
 Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 
@@ -533,6 +533,7 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 | 2026-08-09 | Search accessibility | The iOS SearchBar renders dark entered text (`#17352C`) and a muted placeholder (`#587068`) on the native white field. MAUI reports the outer SearchBar background as transparent, so screenshot evidence confirms the actual native field contrast. | iOS complete |
 | 2026-08-09 | Local storage foundation | The platform-neutral SQLite storage project initializes versioned drafts, plans, and calculator preferences. Three focused repository tests validate draft upsert/round trip, plan ordering, and preference upsert; a fresh iPhone 17 launch includes the repository DI registrations without a startup failure. | iOS complete; future migrations pending |
 | 2026-08-09 | Icon system | Font Awesome Free Solid 6.7.2 is bundled and registered for landmark glyphs and `FontImageSource` action icons. A fresh iPhone 17 launch renders the glyphs without the prior `IconGlyph` StaticResource XAML exception. | iOS complete |
+| 2026-08-09 | Global error presentation | A singleton error presenter marshals generic messages to the UI thread without accepting exception or payload data. Plans load, rename, duplicate, and delete failures use it. The full 57-test suite passes, and a fresh iPhone 17 launch resolves Plans through DI and renders its heading at non-zero bounds. | iOS complete |
 
 ### Phase 3: Standard FIRE Vertical Slice
 
