@@ -32,7 +32,7 @@
                 Stroke="#D7DED8"
                 StrokeThickness="1"
                 StrokeShape="RoundRectangle 8">
-            <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+            <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="12">
                 <Grid ColumnDefinitions="*,Auto">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="Portfolio balance"
@@ -70,6 +70,12 @@
                            FontAttributes="Bold"
                            FontSize="13" />
                 </Grid>
+
+                <Label Grid.Row="3"
+                       Text="{Binding StorageProofStatus}"
+                       TextColor="#425D54"
+                       FontSize="12"
+                       LineBreakMode="WordWrap" />
             </Grid>
         </Border>
     </Grid>

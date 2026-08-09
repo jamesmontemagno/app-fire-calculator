@@ -1,10 +1,13 @@
 ﻿using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
+using MyFireNumber.Data;
 
 namespace MyFireNumber;
 
 public partial class MainPage : ContentPage
 {
+	private string storageProofStatus = "SQLite check in progress.";
+
 	public IReadOnlyList<ISeries> Series { get; } =
 	[
 		new LineSeries<double>
@@ -13,9 +16,39 @@ public partial class MainPage : ContentPage
 		}
 	];
 
+	public string StorageProofStatus
+	{
+		get => storageProofStatus;
+		private set
+		{
+			if (storageProofStatus == value)
+			{
+				return;
+			}
+
+			storageProofStatus = value;
+			OnPropertyChanged();
+		}
+	}
+
 	public MainPage()
 	{
 		InitializeComponent();
 		BindingContext = this;
+		Loaded += OnLoaded;
+	}
+
+	private async void OnLoaded(object? sender, EventArgs eventArgs)
+	{
+		Loaded -= OnLoaded;
+
+		try
+		{
+			StorageProofStatus = await SqliteStorageProof.VerifyAsync();
+		}
+		catch (Exception exception)
+		{
+			StorageProofStatus = $"SQLite check failed: {exception.GetType().Name}.";
+		}
 	}
 }
