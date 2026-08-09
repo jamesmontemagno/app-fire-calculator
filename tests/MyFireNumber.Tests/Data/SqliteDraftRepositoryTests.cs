@@ -39,4 +39,31 @@ public sealed class SqliteDraftRepositoryTests : IAsyncLifetime
         Assert.Equal("{\"currentAge\":31}", restored.PayloadJson);
         Assert.Equal(updatedAt, restored.UpdatedAtUtc);
     }
+
+    [Fact]
+    public async Task ClearAsync_RemovesAllLocalData()
+    {
+        var database = new LocalDatabase(databasePath);
+        var drafts = new SqliteDraftRepository(database);
+        var plans = new SqlitePlanRepository(database);
+        var preferences = new SqliteCalculatorPreferencesRepository(database);
+        var activity = new SqliteRecentActivityRepository(database);
+        var corruptPayloads = new SqliteCorruptPayloadRepository(database);
+        var now = new DateTime(2026, 8, 9, 12, 0, 0, DateTimeKind.Utc);
+        var draft = new DraftRecord("standard-fire", 1, "{}", now);
+
+        await drafts.SaveAsync(draft);
+        await plans.SaveAsync(new PlanRecord("plan", "standard-fire", "Plan", 1, "{}", now, now));
+        await preferences.SaveAsync(new CalculatorPreferenceRecord("standard-fire", false, 0));
+        await activity.TrackAsync(new RecentActivityRecord(RecentActivityKind.Calculator, "standard-fire", now));
+        await corruptPayloads.QuarantineDraftAsync(draft);
+
+        await database.ClearAsync();
+
+        Assert.Null(await drafts.GetAsync("standard-fire"));
+        Assert.Empty(await plans.ListAsync());
+        Assert.Empty(await preferences.ListAsync());
+        Assert.Empty(await activity.ListAsync(RecentActivityKind.Calculator, 1));
+        Assert.Empty(await corruptPayloads.ListAsync());
+    }
 }

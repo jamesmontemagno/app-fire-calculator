@@ -30,6 +30,7 @@ public static class MauiProgram
 
 		builder.Services.AddSingleton<ICalculatorCatalog, CalculatorCatalog>();
 		builder.Services.AddSingleton<IConfirmationService, ConfirmationService>();
+		builder.Services.AddSingleton<IAppResetService, AppResetService>();
 		builder.Services.AddSingleton<IErrorPresentationService, ErrorPresentationService>();
 		builder.Services.AddSingleton<IExternalLinkService, ExternalLinkService>();
 		builder.Services.AddSingleton<IPlanNamePromptService, PlanNamePromptService>();

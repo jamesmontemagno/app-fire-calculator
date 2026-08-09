@@ -69,22 +69,22 @@ presets, input semantics, result metrics, projection data, explanatory copy, and
 ### Included Supporting Features
 
 - [~] Home dashboard with enabled calculators in user-defined order (implemented; device validation pending)
-- [ ] All Calculators catalog with search and visibility controls
+- [~] All Calculators catalog with search and visibility controls (implemented and validated on iOS; Android pending)
 - [x] First-run and repeatable FIRE Quiz
-- [ ] Automatic per-calculator drafts
-- [ ] Multiple named plans with save, rename, duplicate, load, and delete
-- [ ] Quick presets where supplied by the web app
-- [ ] Live result updates and input validation
-- [ ] LiveCharts2 projection and comparison charts
-- [ ] Accessible non-chart summaries for every chart
-- [ ] Reset actions with confirmation where data would be lost
-- [ ] Excel report generation and native sharing
-- [ ] Light, dark, and system themes
+- [~] Automatic per-calculator drafts (implemented and validated on iOS; Android pending)
+- [~] Multiple named plans with save, rename, duplicate, load, and delete (implemented and validated on iOS; Android pending)
+- [~] Quick presets where supplied by the web app (implemented and validated on iOS; Android pending)
+- [~] Live result updates and input validation (implemented and validated on iOS; Android pending)
+- [~] LiveCharts2 projection and comparison charts (implemented and validated on iOS; Android pending)
+- [~] Accessible non-chart summaries for every chart (implemented and validated on iOS; Android pending)
+- [~] Reset actions with confirmation where data would be lost (implemented and validated on iOS; Android pending)
+- [~] Excel report generation and native sharing (implemented and validated on iOS; Android pending)
+- [~] Light, dark, and system themes (implemented and validated on iOS; Android pending)
 - [ ] Reduced-motion and high-contrast behavior
 - [ ] Device-region currency and number formatting with overrides
 - [ ] Import/export of all local app data
-- [ ] Delete all local data
-- [ ] Educational explanations and financial-advice disclaimers
+- [~] Delete all local data (implemented and validated on iOS; Android pending)
+- [~] Educational explanations and financial-advice disclaimers (implemented and validated on iOS; Android pending)
 - [ ] Fully offline calculator, plan, quiz, and settings workflows
 
 ### Active User UX Queue
@@ -170,11 +170,11 @@ tests/MyFireNumber.Tests/
 Resolve mutually compatible stable versions when implementation begins. Do not pin versions in
 this document because the project targets the evolving .NET 10 toolchain.
 
-- [ ] `CommunityToolkit.Mvvm`
-- [ ] `sqlite-net-pcl`
-- [ ] `LiveChartsCore.SkiaSharpView.Maui`
-- [ ] `DocumentFormat.OpenXml`
-- [ ] Current repository-approved xUnit packages for the test project
+- [x] `CommunityToolkit.Mvvm`
+- [x] `sqlite-net-pcl`
+- [x] `LiveChartsCore.SkiaSharpView.Maui`
+- [x] `DocumentFormat.OpenXml`
+- [x] Current repository-approved xUnit packages for the test project
 - [ ] Optional assertion or mocking package only when it materially improves test clarity
 
 Before broad implementation, prove LiveCharts2 and Open XML work in trimmed Release builds on
@@ -286,13 +286,13 @@ Use MAUI `Preferences` only for small, non-sensitive values:
 - [x] Database path uses `FileSystem.AppDataDirectory`
 - [x] Connection initialization is asynchronous and idempotent
 - [ ] WAL and other pragmas are evaluated on both iOS and Android
-- [ ] All writes use repository methods and transactions where multiple records must agree
+- [x] All writes use repository methods and transactions where multiple records must agree
 - [x] Draft saves are debounced and flushed when the app stops or deactivates
 - [x] Corrupt payloads fail safely and remain recoverable/exportable when possible
 - [ ] Payload migrations are explicit and covered by tests
 - [x] Database migrations are monotonic and covered by upgrade tests
 - [ ] Financial values never appear in application logs
-- [ ] Delete-all clears SQLite records and relevant preferences
+- [~] Delete-all clears SQLite records and relevant preferences (implemented and validated on iOS; Android pending)
 - [ ] Export-all produces a versioned local archive without network transmission
 - [ ] Import validates archive version and data before mutating the database
 
@@ -685,7 +685,9 @@ Exit gate: all top-level navigation and discovery workflows are complete.
 - [~] Appearance and theme
 - [ ] Defaults and assumptions
 - [ ] App behavior
-- [ ] Privacy and data management
+- [~] Privacy and data management
+  - [x] Confirmed reset deletes drafts, plans, calculator preferences, recent activity, corrupt-payload quarantine, and app preferences before restarting the first-run quiz.
+  - [ ] Import/export all local app data with corrupt-input handling.
 - [ ] Accessibility preferences
 
 Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
@@ -697,6 +699,7 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 | 2026-08-09 | Settings interaction redesign | Appearance is the first Settings section and uses a compact, accessible monitor/sun/moon segmented selector. Home calculator rows use 44x44 icon actions for move earlier, move later, show, and hide, with calculator-specific semantic descriptions. iPhone 17 screenshots verify readable light and dark states and visible selected segments. | iOS interaction complete; remaining Settings groups and Android pending |
 | 2026-08-09 | Privacy legal links | Privacy is the final Settings card with clear Terms and Privacy policy actions. On iPhone 17, both controls render as 153x44-point targets, and the dark-state screenshot confirms readable presentation. The links use the canonical `https://myfirenumber.com/legal` route, whose local implementation documents educational-use terms and local-only financial-data handling for the website and My Fire Number. The instrumented iOS build, 71 native tests, TypeScript production build, and design detector pass. | iOS visual verification complete; production `/legal` deployment, successful launcher handoff, and Android pending |
 | 2026-08-09 | Branded icon and splash | Replaced the MAUI template's purple/.NET assets with a custom evergreen momentum-flame mark: a bright flame surrounds a rising financial trajectory, framed by subdued growth rings. On iPhone 17, the crisp home-screen icon pairs with the untruncated `My Fire #` label; the launch screen centers the same mark with generous negative space on a deep evergreen field. | iOS complete; Android visual verification pending |
+| 2026-08-09 | Confirmed app reset | The final Privacy-first Settings card offers a deliberate `Delete all app data` action. On iPhone 17, it opens a destructive confirmation explaining that drafts, plans, calculator settings, and quiz progress will be deleted before the first-run FIRE Quiz resumes. The storage-layer reset atomically clears every local data table; a focused test and the full 72-test suite pass. | iOS confirmation visual and storage behavior complete; direct confirmation-button automation and Android pending |
 
 ### Phase 8: Release Hardening
 

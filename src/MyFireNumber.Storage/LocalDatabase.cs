@@ -65,6 +65,19 @@ public sealed class LocalDatabase
         }
     }
 
+    public async Task ClearAsync(CancellationToken cancellationToken = default)
+    {
+        await InitializeAsync(cancellationToken);
+        await connection.RunInTransactionAsync(database =>
+        {
+            database.DeleteAll<DraftEntity>();
+            database.DeleteAll<PlanEntity>();
+            database.DeleteAll<CalculatorPreferenceEntity>();
+            database.DeleteAll<RecentActivityEntity>();
+            database.DeleteAll<CorruptPayloadEntity>();
+        });
+    }
+
     private async Task CreateCurrentSchemaAsync()
     {
         await connection.CreateTableAsync<DraftEntity>();

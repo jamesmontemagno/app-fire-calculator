@@ -208,6 +208,11 @@
                                     TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
                                     SemanticProperties.Description="Open the My Fire Number privacy policy on the website." />
                         </Grid>
+                        <Button Text="Delete all app data"
+                                Command="{Binding ResetAppCommand}"
+                                Background="#9A4335"
+                                TextColor="#FFFFFF"
+                                SemanticProperties.Description="Permanently delete all local app data after confirmation and restart with the FIRE Quiz." />
                     </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>

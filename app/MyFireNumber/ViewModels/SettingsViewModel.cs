@@ -12,6 +12,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IOnboardingService onboardingService;
     private readonly INavigationService navigationService;
     private readonly ICalculatorCatalog catalog;
+    private readonly IAppResetService appResetService;
     private readonly IConfirmationService confirmationService;
     private readonly IExternalLinkService externalLinkService;
     private readonly ICalculatorPreferencesRepository preferencesRepository;
@@ -21,6 +22,7 @@ public partial class SettingsViewModel : ObservableObject
         IOnboardingService onboardingService,
         INavigationService navigationService,
         ICalculatorCatalog catalog,
+        IAppResetService appResetService,
         ICalculatorPreferencesRepository preferencesRepository,
         IConfirmationService confirmationService,
         IExternalLinkService externalLinkService,
@@ -29,6 +31,7 @@ public partial class SettingsViewModel : ObservableObject
         this.onboardingService = onboardingService;
         this.navigationService = navigationService;
         this.catalog = catalog;
+        this.appResetService = appResetService;
         this.preferencesRepository = preferencesRepository;
         this.confirmationService = confirmationService;
         this.externalLinkService = externalLinkService;
@@ -135,6 +138,25 @@ public partial class SettingsViewModel : ObservableObject
 
     [RelayCommand]
     private Task OpenPrivacyAsync() => externalLinkService.OpenPrivacyAsync();
+
+    [RelayCommand]
+    private async Task ResetAppAsync()
+    {
+        var confirmed = await confirmationService.ConfirmAsync(
+            "Delete all app data?",
+            "This permanently deletes your local drafts, plans, calculator settings, and quiz progress. You will start again with the FIRE Quiz.",
+            "Delete and reset",
+            "Cancel");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        await appResetService.ResetAsync();
+        CalculatorPreferences.Clear();
+        await navigationService.GoToAsync("//home");
+        await navigationService.GoToAsync("quiz");
+    }
 
     private async Task MoveCalculatorAsync(int oldIndex, int newIndex)
     {
