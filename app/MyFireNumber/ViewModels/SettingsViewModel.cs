@@ -4,6 +4,7 @@ using MyFireNumber.Core.Calculators;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Text.Json;
 
 namespace MyFireNumber.ViewModels;
@@ -13,6 +14,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IOnboardingService onboardingService;
     private readonly INavigationService navigationService;
     private readonly ICalculatorCatalog catalog;
+    private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly IAppResetService appResetService;
     private readonly IAppDataTransferService appDataTransferService;
     private readonly IConfirmationService confirmationService;
@@ -25,6 +27,7 @@ public partial class SettingsViewModel : ObservableObject
         IOnboardingService onboardingService,
         INavigationService navigationService,
         ICalculatorCatalog catalog,
+        ICalculatorDefaultsService calculatorDefaultsService,
         IAppResetService appResetService,
         IAppDataTransferService appDataTransferService,
         ICalculatorPreferencesRepository preferencesRepository,
@@ -36,6 +39,7 @@ public partial class SettingsViewModel : ObservableObject
         this.onboardingService = onboardingService;
         this.navigationService = navigationService;
         this.catalog = catalog;
+        this.calculatorDefaultsService = calculatorDefaultsService;
         this.appResetService = appResetService;
         this.appDataTransferService = appDataTransferService;
         this.preferencesRepository = preferencesRepository;
@@ -44,6 +48,7 @@ public partial class SettingsViewModel : ObservableObject
         this.errorPresentationService = errorPresentationService;
         this.themeService = themeService;
         selectedTheme = themeService.Preference;
+        LoadCalculatorDefaults();
     }
 
     public IReadOnlyList<ThemePreference> ThemeOptions { get; } = Enum.GetValues<ThemePreference>();
@@ -52,13 +57,57 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private ThemePreference selectedTheme;
 
+    [ObservableProperty]
+    private string expectedReturnPercent = string.Empty;
+
+    [ObservableProperty]
+    private string inflationRatePercent = string.Empty;
+
+    [ObservableProperty]
+    private string withdrawalRatePercent = string.Empty;
+
+    [ObservableProperty]
+    private string defaultCurrentAge = string.Empty;
+
+    [ObservableProperty]
+    private string defaultRetirementAge = string.Empty;
+
+    [ObservableProperty]
+    private string defaultsStatus = string.Empty;
+
     partial void OnSelectedThemeChanged(ThemePreference value) => themeService.Apply(value);
 
     [RelayCommand]
     private void SetTheme(ThemePreference preference) => SelectedTheme = preference;
 
+    [RelayCommand]
+    private void SaveCalculatorDefaults()
+    {
+        if (!TryParsePercent(ExpectedReturnPercent, out var expectedReturn)
+            || !TryParsePercent(InflationRatePercent, out var inflationRate, allowZero: true)
+            || !TryParsePercent(WithdrawalRatePercent, out var withdrawalRate)
+            || !int.TryParse(DefaultCurrentAge, NumberStyles.Integer, CultureInfo.CurrentCulture, out var currentAge)
+            || !int.TryParse(DefaultRetirementAge, NumberStyles.Integer, CultureInfo.CurrentCulture, out var retirementAge)
+            || currentAge is < 18 or > 100
+            || retirementAge <= currentAge
+            || retirementAge > 100)
+        {
+            DefaultsStatus = "Enter percentages from 0 to 100 and ages from 18 to 100. Retirement age must be later.";
+            return;
+        }
+
+        calculatorDefaultsService.Save(new CalculatorDefaults(
+            expectedReturn,
+            inflationRate,
+            withdrawalRate,
+            currentAge,
+            retirementAge));
+        DefaultsStatus = "Saved. These assumptions apply only to new calculators.";
+    }
+
     public async Task LoadAsync()
     {
+        LoadCalculatorDefaults();
         var storedPreferences = await preferencesRepository.ListAsync();
         var preferencesByCalculator = storedPreferences.ToDictionary(preference => preference.CalculatorId);
         CalculatorPreferences.Clear();
@@ -227,5 +276,30 @@ public partial class SettingsViewModel : ObservableObject
             item.CalculatorId,
             item.IsVisible,
             item.SortOrder));
+    }
+
+    private void LoadCalculatorDefaults()
+    {
+        var defaults = calculatorDefaultsService.Current;
+        ExpectedReturnPercent = (defaults.ExpectedReturn * 100).ToString("0.##", CultureInfo.CurrentCulture);
+        InflationRatePercent = (defaults.InflationRate * 100).ToString("0.##", CultureInfo.CurrentCulture);
+        WithdrawalRatePercent = (defaults.WithdrawalRate * 100).ToString("0.##", CultureInfo.CurrentCulture);
+        DefaultCurrentAge = defaults.CurrentAge.ToString(CultureInfo.CurrentCulture);
+        DefaultRetirementAge = defaults.RetirementAge.ToString(CultureInfo.CurrentCulture);
+        DefaultsStatus = string.Empty;
+    }
+
+    private static bool TryParsePercent(string text, out double value, bool allowZero = false)
+    {
+        if (double.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out var percent)
+            && percent < 100
+            && (allowZero ? percent >= 0 : percent > 0))
+        {
+            value = percent / 100;
+            return true;
+        }
+
+        value = 0;
+        return false;
     }
 }

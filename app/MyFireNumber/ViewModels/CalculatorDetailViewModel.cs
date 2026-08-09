@@ -19,6 +19,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 {
     private readonly IBaristaFireExportService baristaExportService;
     private readonly ICalculatorCatalog catalog;
+    private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly ICoastFireExportService coastExportService;
     private readonly ICorruptPayloadRepository corruptPayloadRepository;
     private readonly IDeferredCompensationExportService deferredCompensationExportService;
@@ -49,6 +50,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
     public CalculatorDetailViewModel(
         IBaristaFireExportService baristaExportService,
         ICalculatorCatalog catalog,
+        ICalculatorDefaultsService calculatorDefaultsService,
         ICoastFireExportService coastExportService,
         ICorruptPayloadRepository corruptPayloadRepository,
         IDeferredCompensationExportService deferredCompensationExportService,
@@ -66,6 +68,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
     {
         this.baristaExportService = baristaExportService;
         this.catalog = catalog;
+        this.calculatorDefaultsService = calculatorDefaultsService;
         this.coastExportService = coastExportService;
         this.corruptPayloadRepository = corruptPayloadRepository;
         this.deferredCompensationExportService = deferredCompensationExportService;
@@ -84,7 +87,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         RetirementAccounts.CollectionChanged += OnRetirementAccountsChanged;
         RetirementIncomeSources.CollectionChanged += OnRetirementIncomeSourcesChanged;
         RetirementAdditionalExpenses.CollectionChanged += OnRetirementExpensesChanged;
-        ApplyDraft(StandardFireDraft.Default);
+        ApplyDraft(calculatorDefaultsService.StandardFire);
     }
 
     [ObservableProperty]
@@ -544,7 +547,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
         if (IsRetirementCashFlow)
         {
-            ApplyDeferredCompensationDraft(DeferredCompensationDraft.Default);
+            ApplyDeferredCompensationDraft(calculatorDefaultsService.RetirementCashFlow);
         }
 
         IsLoading = true;
@@ -563,63 +566,63 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 {
                     var draft = JsonSerializer.Deserialize<StandardFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? StandardFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.StandardFire);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsCoastFire && savedPlan.PayloadVersion == CoastFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<CoastFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? CoastFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.CoastFire);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsLeanFire && savedPlan.PayloadVersion == LeanFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<LeanFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? LeanFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.LeanFire);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsFatFire && savedPlan.PayloadVersion == FatFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<FatFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? FatFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.FatFire);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsBaristaFire && savedPlan.PayloadVersion == BaristaFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<BaristaFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? BaristaFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.BaristaFire);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsReverseFire && savedPlan.PayloadVersion == ReverseFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<ReverseFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? ReverseFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.ReverseFire);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsWithdrawalRate && savedPlan.PayloadVersion == WithdrawalRateDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<WithdrawalRateDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? WithdrawalRateDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.WithdrawalRate);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsSavingsInvestmentRate && savedPlan.PayloadVersion == SavingsInvestmentDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<SavingsInvestmentDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? SavingsInvestmentDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.SavingsInvestment);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsHealthcareGap && savedPlan.PayloadVersion == HealthcareGapDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<HealthcareGapDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? HealthcareGapDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.HealthcareGap);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsDebtPayoff && savedPlan.PayloadVersion == DebtPayoffDraft.PayloadVersion)
@@ -633,7 +636,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 {
                     var draft = JsonSerializer.Deserialize<DeferredCompensationDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
-                    ApplyDeferredCompensationDraft(draft ?? DeferredCompensationDraft.Default);
+                    ApplyDeferredCompensationDraft(draft ?? calculatorDefaultsService.RetirementCashFlow);
                     TrackLoadedPlan(savedPlan);
                 }
                 else
@@ -652,47 +655,47 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 else if (IsStandardFire && savedDraft.PayloadVersion == StandardFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<StandardFireDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? StandardFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.StandardFire);
                 }
                 else if (IsCoastFire && savedDraft.PayloadVersion == CoastFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<CoastFireDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? CoastFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.CoastFire);
                 }
                 else if (IsLeanFire && savedDraft.PayloadVersion == LeanFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<LeanFireDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? LeanFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.LeanFire);
                 }
                 else if (IsFatFire && savedDraft.PayloadVersion == FatFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<FatFireDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? FatFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.FatFire);
                 }
                 else if (IsBaristaFire && savedDraft.PayloadVersion == BaristaFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<BaristaFireDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? BaristaFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.BaristaFire);
                 }
                 else if (IsReverseFire && savedDraft.PayloadVersion == ReverseFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<ReverseFireDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? ReverseFireDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.ReverseFire);
                 }
                 else if (IsWithdrawalRate && savedDraft.PayloadVersion == WithdrawalRateDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<WithdrawalRateDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? WithdrawalRateDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.WithdrawalRate);
                 }
                 else if (IsSavingsInvestmentRate && savedDraft.PayloadVersion == SavingsInvestmentDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<SavingsInvestmentDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? SavingsInvestmentDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.SavingsInvestment);
                 }
                 else if (IsHealthcareGap && savedDraft.PayloadVersion == HealthcareGapDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<HealthcareGapDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? HealthcareGapDraft.Default);
+                    ApplyDraft(draft ?? calculatorDefaultsService.HealthcareGap);
                 }
                 else if (IsDebtPayoff && savedDraft.PayloadVersion == DebtPayoffDraft.PayloadVersion)
                 {
@@ -702,7 +705,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 else if (IsRetirementCashFlow && savedDraft.PayloadVersion == DeferredCompensationDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<DeferredCompensationDraft>(savedDraft.PayloadJson);
-                    ApplyDeferredCompensationDraft(draft ?? DeferredCompensationDraft.Default);
+                    ApplyDeferredCompensationDraft(draft ?? calculatorDefaultsService.RetirementCashFlow);
                 }
                 else
                 {
@@ -1314,39 +1317,39 @@ public partial class CalculatorDetailViewModel : ObservableObject
     {
         if (IsStandardFire)
         {
-            ApplyDraft(StandardFireDraft.Default);
+            ApplyDraft(calculatorDefaultsService.StandardFire);
         }
         else if (IsCoastFire)
         {
-            ApplyDraft(CoastFireDraft.Default);
+            ApplyDraft(calculatorDefaultsService.CoastFire);
         }
         else if (IsLeanFire)
         {
-            ApplyDraft(LeanFireDraft.Default);
+            ApplyDraft(calculatorDefaultsService.LeanFire);
         }
         else if (IsFatFire)
         {
-            ApplyDraft(FatFireDraft.Default);
+            ApplyDraft(calculatorDefaultsService.FatFire);
         }
         else if (IsBaristaFire)
         {
-            ApplyDraft(BaristaFireDraft.Default);
+            ApplyDraft(calculatorDefaultsService.BaristaFire);
         }
         else if (IsReverseFire)
         {
-            ApplyDraft(ReverseFireDraft.Default);
+            ApplyDraft(calculatorDefaultsService.ReverseFire);
         }
         else if (IsWithdrawalRate)
         {
-            ApplyDraft(WithdrawalRateDraft.Default);
+            ApplyDraft(calculatorDefaultsService.WithdrawalRate);
         }
         else if (IsSavingsInvestmentRate)
         {
-            ApplyDraft(SavingsInvestmentDraft.Default);
+            ApplyDraft(calculatorDefaultsService.SavingsInvestment);
         }
         else if (IsHealthcareGap)
         {
-            ApplyDraft(HealthcareGapDraft.Default);
+            ApplyDraft(calculatorDefaultsService.HealthcareGap);
         }
         else if (IsDebtPayoff)
         {
@@ -1354,7 +1357,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         }
         else if (IsRetirementCashFlow)
         {
-            ApplyDeferredCompensationDraft(DeferredCompensationDraft.Default);
+            ApplyDeferredCompensationDraft(calculatorDefaultsService.RetirementCashFlow);
         }
     }
 
@@ -1615,7 +1618,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private bool TryCreateDeferredCompensationDraft(out DeferredCompensationDraft draft)
     {
-        draft = DeferredCompensationDraft.Default;
+        draft = calculatorDefaultsService.RetirementCashFlow;
         if (!TryParseWholeNumber(RetirementCurrentAgeText, out var currentAge) || currentAge is < 18 or > 100
             || !TryParseWholeNumber(RetirementSemiAgeText, out var semiAge) || semiAge < currentAge
             || !TryParseWholeNumber(RetirementPlanThroughAgeText, out var planThroughAge) || planThroughAge < semiAge)
@@ -1681,7 +1684,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private bool TryCreateCoastDraft(out CoastFireDraft draft)
     {
-        draft = CoastFireDraft.Default;
+        draft = calculatorDefaultsService.CoastFire;
         if (!TryParseWholeNumber(CurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
         {
             ValidationMessage = "Enter a current age from 18 to 100.";
@@ -1724,7 +1727,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private bool TryCreateLeanDraft(out LeanFireDraft draft)
     {
-        draft = LeanFireDraft.Default;
+        draft = calculatorDefaultsService.LeanFire;
         if (!TryCreateDraft(out var standardDraft))
         {
             return false;
@@ -1745,7 +1748,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private bool TryCreateFatDraft(out FatFireDraft draft)
     {
-        draft = FatFireDraft.Default;
+        draft = calculatorDefaultsService.FatFire;
         if (!TryCreateDraft(out var standardDraft))
         {
             return false;
@@ -1766,7 +1769,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private bool TryCreateBaristaDraft(out BaristaFireDraft draft)
     {
-        draft = BaristaFireDraft.Default;
+        draft = calculatorDefaultsService.BaristaFire;
         if (!TryParseWholeNumber(CurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
         {
             ValidationMessage = "Enter a current age from 18 to 100.";
@@ -1796,7 +1799,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private bool TryCreateReverseDraft(out ReverseFireDraft draft)
     {
-        draft = ReverseFireDraft.Default;
+        draft = calculatorDefaultsService.ReverseFire;
         if (!TryParseWholeNumber(CurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
         {
             ValidationMessage = "Enter a current age from 18 to 100.";
@@ -1832,7 +1835,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private bool TryCreateWithdrawalRateDraft(out WithdrawalRateDraft draft)
     {
-        draft = WithdrawalRateDraft.Default;
+        draft = calculatorDefaultsService.WithdrawalRate;
         if (!TryParseNonNegative(PortfolioValueText, out var portfolioValue) || portfolioValue <= 0)
         {
             ValidationMessage = "Enter a portfolio value greater than zero.";
@@ -1859,7 +1862,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private bool TryCreateSavingsInvestmentDraft(out SavingsInvestmentDraft draft)
     {
-        draft = SavingsInvestmentDraft.Default;
+        draft = calculatorDefaultsService.SavingsInvestment;
         if (!TryParseWholeNumber(CurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
         {
             ValidationMessage = "Enter a current age from 18 to 100.";
@@ -1893,7 +1896,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private bool TryCreateHealthcareGapDraft(out HealthcareGapDraft draft)
     {
-        draft = HealthcareGapDraft.Default;
+        draft = calculatorDefaultsService.HealthcareGap;
         if (!TryParseWholeNumber(HealthcareCurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
         {
             ValidationMessage = "Enter a current age from 18 to 100.";
@@ -2274,7 +2277,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     private bool TryCreateDraft(out StandardFireDraft draft)
     {
-        draft = StandardFireDraft.Default;
+        draft = calculatorDefaultsService.StandardFire;
         if (!TryParseWholeNumber(CurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
         {
             ValidationMessage = "Enter a current age from 18 to 100.";

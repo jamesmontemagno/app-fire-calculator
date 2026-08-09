@@ -412,11 +412,11 @@ stack layout.
 - [ ] Device-region currency by default
 - [ ] Explicit currency override
 - [ ] Locale-aware number formatting
-- [ ] Expected return default
-- [ ] Inflation default
-- [ ] Withdrawal-rate default
-- [ ] Common age defaults
-- [ ] Explain whether changed defaults affect new drafts only
+- [~] Expected return default (implemented and validated on iOS; Android pending)
+- [~] Inflation default (implemented and validated on iOS; Android pending)
+- [~] Withdrawal-rate default (implemented and validated on iOS; Android pending)
+- [~] Common age defaults (implemented and validated on iOS; Android pending)
+- [x] Explain whether changed defaults affect new drafts only
 
 Changing defaults must not silently rewrite existing drafts or named scenarios.
 
@@ -426,7 +426,7 @@ Changing defaults must not silently rewrite existing drafts or named scenarios.
 - [ ] Automatic draft restoration toggle
 - [ ] Destructive-action confirmation toggle where appropriate
 - [ ] Haptics toggle
-- [ ] Retake FIRE Quiz
+- [~] Retake FIRE Quiz (implemented and validated on iOS; Android pending)
 
 ### Privacy and Data
 
@@ -701,6 +701,7 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 | 2026-08-09 | Branded icon and splash | Replaced the MAUI template's purple/.NET assets with a custom evergreen momentum-flame mark: a bright flame surrounds a rising financial trajectory, framed by subdued growth rings. On iPhone 17, the crisp home-screen icon pairs with the untruncated `My Fire #` label; the launch screen centers the same mark with generous negative space on a deep evergreen field. | iOS complete; Android visual verification pending |
 | 2026-08-09 | Confirmed app reset | The final Privacy-first Settings card offers a deliberate `Delete all app data` action. On iPhone 17, it opens a destructive confirmation explaining that drafts, plans, calculator settings, and quiz progress will be deleted before the first-run FIRE Quiz resumes. The storage-layer reset atomically clears every local data table; a focused test and the full 72-test suite pass. | iOS confirmation visual and storage behavior complete; direct confirmation-button automation and Android pending |
 | 2026-08-09 | Local backup and restore | Settings now creates a versioned JSON archive containing every draft, plan, calculator preference, recent activity entry, quarantined payload, theme, and onboarding preference. Export opens the iOS native share sheet without automatic upload. Import requires replacement confirmation, rejects unsupported or invalid archives before mutation, and restores data transactionally. Two focused archive tests and all 74 native tests pass; both 153x44-point controls render with readable dark-state contrast on iPhone 17. | iOS complete; Android file-picker/share validation pending |
+| 2026-08-09 | Calculator defaults | Settings now persists expected return, inflation, withdrawal rate, current age, and retirement age as decimal-backed assumptions for newly created calculators. Existing drafts and named plans remain untouched. On iPhone 17, all five numeric fields render in a compact two-column card, validation explains invalid ranges, save confirmation appears in-page, and the native expected-return Entry reports TextColor `#F2F7F3` and PlaceholderColor `#8EAA9B` over the visually verified `#15211C` field surface. | iOS complete; Android pending |
 
 ### Phase 8: Release Hardening
 
