@@ -107,28 +107,6 @@
                 <Border Padding="18"
                         Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                         Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                        StrokeShape="RoundRectangle 8">
-                    <VerticalStackLayout Spacing="12">
-                           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Label Text="&#xf023;"
-                                FontFamily="FontAwesomeSolid"
-                                VerticalTextAlignment="Center"
-                                TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
-                                   SemanticProperties.Description="Privacy" />
-                            <Label Grid.Column="1"
-                                Text="Privacy first"
-                                TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                FontAttributes="Bold"
-                                FontSize="18" />
-                           </Grid>
-                        <Label Text="Your financial inputs are stored locally on this device. My Fire Number does not use analytics or transmit financial data."
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                               LineHeight="1.3" />
-                    </VerticalStackLayout>
-                </Border>
-                <Border Padding="18"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="10">
                         <VerticalStackLayout Spacing="4">
@@ -197,6 +175,41 @@
                         <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf01e;" Color="#FFFFFF" Size="14" />
                     </Button.ImageSource>
                 </Button>
+                <Border Padding="18"
+                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Label Text="&#xf023;"
+                                   FontFamily="FontAwesomeSolid"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   SemanticProperties.Description="Privacy" />
+                            <Label Grid.Column="1"
+                                   Text="Privacy first"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="18" />
+                        </Grid>
+                        <Label Text="Your financial inputs stay locally on this device. My Fire Number does not use analytics or transmit financial data."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               LineHeight="1.3" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Text="Terms"
+                                    Command="{Binding OpenTermsCommand}"
+                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                    SemanticProperties.Description="Open the My Fire Number terms on the website." />
+                            <Button Grid.Column="1"
+                                    Text="Privacy policy"
+                                    Command="{Binding OpenPrivacyCommand}"
+                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                    SemanticProperties.Description="Open the My Fire Number privacy policy on the website." />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

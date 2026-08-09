@@ -103,7 +103,7 @@ implementation passes cannot lose requested refinements.
 - [x] Home shows onboarding/recommendation guidance only before meaningful calculator or plan activity; afterward, navigation tabs replace the large starter catalog. Include quiz recommendation and retake actions.
 - [ ] Replace the default .NET app icon and splash screen with branded My Fire Number assets.
 - [x] Remove the duplicate large calculator title/summary block when the native navigation bar already identifies the calculator.
-- [ ] Move Privacy to the bottom of Settings, link Terms and Privacy to the website, and update web Terms to cover the mobile app.
+- [~] Move Privacy to the bottom of Settings, link Terms and Privacy to the website, and update web Terms to cover the mobile app.
 - [x] Keep Retirement Cash Flow's main sections visible and use polished row-level accordions for individual accounts, income sources, and additional expenses. New rows expand for editing; existing rows start collapsed.
 - [x] Use context-aware plan actions: fresh drafts say Save to Plans, loaded plans say Update Plan. Keep Duplicate in Plans and remove redundant Save As.
 - [x] Group the Calculators catalog into FIRE, Finance, and Cash Flow sections while preserving search and hidden-calculator discovery.
@@ -695,6 +695,7 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 | Date | Item | Evidence | Status |
 | --- | --- | --- | --- |
 | 2026-08-09 | Settings interaction redesign | Appearance is the first Settings section and uses a compact, accessible monitor/sun/moon segmented selector. Home calculator rows use 44x44 icon actions for move earlier, move later, show, and hide, with calculator-specific semantic descriptions. iPhone 17 screenshots verify readable light and dark states and visible selected segments. | iOS interaction complete; remaining Settings groups and Android pending |
+| 2026-08-09 | Privacy legal links | Privacy is the final Settings card with clear Terms and Privacy policy actions. Both actions use the platform launcher to open anchored website legal content; the new `/legal` route documents the educational-use terms and local-only financial-data handling for both the website and My Fire Number. The instrumented iOS build, 71 native tests, TypeScript production build, and design detector pass. | iOS visual/launcher verification and Android pending |
 
 ### Phase 8: Release Hardening
 
@@ -976,3 +977,4 @@ Add entries here only when a decision changes or a blocker affects future work.
 | 2026-08-08 | Decision | Storage | Use `sqlite-net-pcl` with OS sandbox and backup | Confirmed |
 | 2026-08-08 | Decision | Content | Exclude Books and recommended Apps | Confirmed |
 | 2026-08-08 | Blocker | DevFlow | VS Code MAUI extension 1.17.156 target fails with MSB4099 before project compilation | Temporarily resolved with documented local target patch; remove after upstream fix |
+| 2026-08-09 | Blocker | Privacy legal links | The current session has no MAUI DevFlow launch, hot-reload, visual-tree, or screenshot command available, while the existing iPhone 17 process predates this build. | The native build and tests are complete; retain iOS visual, color, and launcher verification as pending until DevFlow controls are restored. |

@@ -13,6 +13,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly INavigationService navigationService;
     private readonly ICalculatorCatalog catalog;
     private readonly IConfirmationService confirmationService;
+    private readonly IExternalLinkService externalLinkService;
     private readonly ICalculatorPreferencesRepository preferencesRepository;
     private readonly IThemeService themeService;
 
@@ -22,6 +23,7 @@ public partial class SettingsViewModel : ObservableObject
         ICalculatorCatalog catalog,
         ICalculatorPreferencesRepository preferencesRepository,
         IConfirmationService confirmationService,
+        IExternalLinkService externalLinkService,
         IThemeService themeService)
     {
         this.onboardingService = onboardingService;
@@ -29,6 +31,7 @@ public partial class SettingsViewModel : ObservableObject
         this.catalog = catalog;
         this.preferencesRepository = preferencesRepository;
         this.confirmationService = confirmationService;
+        this.externalLinkService = externalLinkService;
         this.themeService = themeService;
         selectedTheme = themeService.Preference;
     }
@@ -126,6 +129,12 @@ public partial class SettingsViewModel : ObservableObject
         onboardingService.Reset();
         await navigationService.GoToAsync("quiz");
     }
+
+    [RelayCommand]
+    private Task OpenTermsAsync() => externalLinkService.OpenTermsAsync();
+
+    [RelayCommand]
+    private Task OpenPrivacyAsync() => externalLinkService.OpenPrivacyAsync();
 
     private async Task MoveCalculatorAsync(int oldIndex, int newIndex)
     {
