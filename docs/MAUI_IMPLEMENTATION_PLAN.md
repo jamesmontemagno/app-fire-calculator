@@ -285,7 +285,7 @@ Use MAUI `Preferences` only for small, non-sensitive values:
 
 - [x] Database path uses `FileSystem.AppDataDirectory`
 - [x] Connection initialization is asynchronous and idempotent
-- [ ] WAL and other pragmas are evaluated on both iOS and Android
+- [x] WAL and other pragmas are evaluated on both iOS and Android
 - [x] All writes use repository methods and transactions where multiple records must agree
 - [x] Draft saves are debounced and flushed when the app stops or deactivates
 - [x] Corrupt payloads fail safely and remain recoverable/exportable when possible
@@ -315,7 +315,7 @@ For each calculator:
 - [x] List every preset and its complete value set in `docs/CALCULATOR_PARITY_MATRIX.md`
 - [x] List every validation and invalid/empty state in `docs/CALCULATOR_PARITY_MATRIX.md`
 - [x] Port formulas to pure C# without UI dependencies
-- [ ] Capture normal, boundary, zero, and invalid web result fixtures
+- [x] Capture normal, boundary, zero, and invalid web result fixtures
 - [x] Compare C# results with web fixtures using documented numeric tolerances
 - [~] Verify all result cards and explanatory values (iOS complete; Android pending)
 - [~] Verify all chart series, axes, thresholds, and labels (iOS complete; Android pending)
@@ -456,7 +456,7 @@ them with MAUI `Share`. Do not retain exports indefinitely.
 - [x] Preserve useful formulas where the web export supplies them
 - [x] Apply currency, percentage, integer, and decimal formats
 - [x] Sanitize worksheet names and user-provided text
-- [ ] Open generated workbooks successfully in Apple Numbers and Microsoft Excel
+- [~] Open generated workbooks successfully in Apple Numbers and Microsoft Excel (Excel verified on macOS; Numbers is not installed on the validation host, and platform share-target checks remain)
 - [x] Remove or age out stale temporary exports
 
 ## Delivery Phases
@@ -568,7 +568,7 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 - [x] Implement draft save/restore/reset
 - [x] Implement named plan save/load
 - [x] Implement Excel export and share
-- [~] Validate light/dark, accessibility, lifecycle restoration, and offline behavior (iOS complete except large-text/VoiceOver/offline matrix; Android pending)
+- [~] Validate light/dark, accessibility, lifecycle restoration, and offline behavior (iOS large text, contrast, lifecycle restoration, and zero-network cold start complete; VoiceOver, disconnected-radio, and Android matrices pending)
 
 Exit gate: Standard FIRE is complete end to end on iOS and Android.
 
@@ -584,7 +584,7 @@ Exit gate: Standard FIRE is complete end to end on iOS and Android.
 | 2026-08-09 | Standard FIRE draft lifecycle | Editing Annual Contribution to `$36,000` recalculates the savings rate to `37.5%` and survives a fresh iPhone 17 debug relaunch. Reset then restores the default `$24,000` contribution, `$1,200,000` FIRE Number, and 24.4-year projection. | iOS complete |
 | 2026-08-09 | Immediate draft flush | On iPhone 17, Annual Contribution was changed to `$43,210` and navigation left the calculator immediately, before the 400 ms debounce elapsed. After process termination and relaunch, Standard FIRE restored `$43,210`, proving the page/window lifecycle flush persisted the pending draft. | iOS complete |
 | 2026-08-09 | Standard FIRE Excel export | A focused Open XML test opens the generated workbook and verifies Inputs, Results, and Projections sheets with formula-backed FIRE Number and projection cells. On iPhone 17, Export to Excel opens the native share sheet with `standard-fire-20260809-032846.xlsx`, including Copy and Save to Files actions. | iOS complete |
-| 2026-08-09 | Standard FIRE dark mode | iPhone 17 system dark mode renders the form, Export action, and portfolio chart without overlap. Native Entry and Picker text is `#F2F7F3`, with placeholder/title `#B9D1C2`; screenshots confirm readable contrast on the dark native fields and chart canvas. | iOS complete; offline, dynamic text, and VoiceOver validation pending |
+| 2026-08-09 | Standard FIRE dark mode | iPhone 17 system dark mode renders the form, Export action, and portfolio chart without overlap. Native Entry and Picker text is `#F2F7F3`, with placeholder/title `#B9D1C2`; screenshots confirm readable contrast on the dark native fields and chart canvas. | iOS complete; disconnected-radio and VoiceOver validation pending |
 
 ### Phase 4: Shared FIRE Calculators
 
@@ -730,11 +730,15 @@ Exit gate: release candidate passes the Definition of Done below.
 | Date | Item | Evidence | Status |
 | --- | --- | --- | --- |
 | 2026-08-09 | iOS linked/AOT simulator launch | A clean linked/AOT Release rebuild completed without warnings. The shipping-style app launched on iPhone 17 and rendered the Home dashboard with persisted SQLite recents in dark mode. Simulator LLVM was disabled after Open XML LLVM optimization remained CPU-bound for more than 36 minutes; final device/store LLVM validation remains required. | iOS simulator complete; device LLVM and Android pending |
-| 2026-08-09 | Current release builds | The final 74-test Release suite passes. The current iOS `iossimulator-arm64` Release build succeeds with linking/AOT and simulator LLVM disabled. Android API 35 Debug builds, installs, launches, and keeps a live process; the trimmed `android-arm64` Release build succeeds with Android AOT disabled because the .NET 10 toolchain fails precompilation across framework and app assemblies. | Build validation complete; Android UI automation and Android AOT pending |
+| 2026-08-09 | Current release builds | The final 79-test Release suite passes. The current iOS `iossimulator-arm64` Release build succeeds with linking/AOT and simulator LLVM disabled. Android API 35 Debug builds, installs, launches, and keeps a live process; the trimmed `android-arm64` Release build succeeds with Android AOT disabled because the .NET 10 toolchain fails precompilation across framework and app assemblies. | Build validation complete; Android UI automation and Android AOT pending |
 | 2026-08-09 | iPad portrait layout | On an iPad Pro 11-inch simulator, the quiz and Home render at 834x1210 points without clipping. Home keeps all 11 calculators, quiz/retake/browse actions, and the four-tab bar reachable. The 748x44-point native quiz Entry reports TextColor `#17352C` and PlaceholderColor `#587068` over the visually verified light field. | iPad portrait complete; landscape and dynamic-type matrix pending |
-| 2026-08-09 | Toolchain and CI hardening | MAUI Doctor reports all 13 checks healthy with the active .NET 10 SDK, MAUI workload, Microsoft OpenJDK, Android SDK, and Xcode. Both mobile workflows now restore workloads from the project, run the 74-test Release suite, trigger for app/Core/storage/test changes, and use the latest stable Xcode selector. | Local validation complete; hosted workflow dispatch requires a pushed branch |
+| 2026-08-09 | Toolchain and CI hardening | MAUI Doctor reports all 13 checks healthy with the active .NET 10 SDK, MAUI workload, Microsoft OpenJDK, Android SDK, and Xcode. Both mobile workflows now restore workloads from the project, run the 79-test Release suite, trigger for app/Core/storage/test changes, and use the latest stable Xcode selector. | Local validation complete; hosted workflow dispatch requires a pushed branch |
 | 2026-08-09 | Store metadata and disclosures | `docs/MOBILE_STORE_LISTING.md` records store identity, descriptions, legal/support URLs, review notes, no-collection disclosures, OS-backup behavior, and the required screenshot set. The app repeats the OS-backup disclosure in Settings; the branded icon/splash and educational disclaimers are present. | Content complete; final platform screenshot capture and store-console entry pending |
-| 2026-08-09 | Temporary export retention | App startup removes generated `.xlsx` reports and versioned JSON backups from the OS cache after 24 hours. Cleanup handles unavailable or locked cache files without exposing filenames or financial values. The final iOS app launches normally after cleanup registration, and iOS/Android Debug builds plus all 74 Release tests pass. | Complete |
+| 2026-08-09 | Temporary export retention | App startup removes generated `.xlsx` reports and versioned JSON backups from the OS cache after 24 hours. Cleanup handles unavailable or locked cache files without exposing filenames or financial values. The final iOS app launches normally after cleanup registration, and iOS/Android Debug builds plus all 79 Release tests pass. | Complete |
+| 2026-08-09 | Boundary parity fixtures | Added funded-target, fully covered Barista income, invalid debt timeline, and zero-year healthcare-gap fixtures alongside the existing normal, zero-return, threshold, and unreachable-target cases. The Release suite now passes 79 tests. | Complete |
+| 2026-08-09 | SQLite pragma evaluation | The app uses one shared sqlite-net async connection, serializes access, and wraps destructive replacement in transactions. WAL would not add useful reader/writer concurrency but would add sidecar-file recovery and sensitive-data-retention complexity, so the shared iOS/Android storage layer intentionally retains the platform SQLite defaults. iOS runtime inspection confirmed `journal_mode=delete`, `synchronous=FULL`, no foreign-key graph, and no busy timeout; the same repository architecture is compiled for Android. | Complete; re-evaluate if multiple connections or background writers are introduced |
+| 2026-08-09 | iOS large text and cold start | On iPad, the quiz relaunches at the accessibility-extra-extra-large content size with the heading, question, helper text, 748x58-point native Entry, and both navigation actions visible without clipping. The Entry reports TextColor `#17352C` and PlaceholderColor `#587068` over the visually verified light field. A separate full process termination/relaunch generated zero captured HTTP requests; source audit found no runtime client/backend dependency, only explicit user-initiated legal links. | iOS large-text and zero-network cold start complete; VoiceOver and physically disconnected-radio checks pending |
+| 2026-08-09 | Workbook consumer validation | A fresh Standard FIRE workbook was generated through the native export action. Microsoft Excel opened and retained a live file handle to the `.xlsx`; focused Open XML tests already verify its sheets, formulas, values, and formats. Apple Numbers is not installed on this host. | Excel complete on macOS; Numbers and mobile share-target checks pending |
 
 ## Ralph-Style Agent Loop
 

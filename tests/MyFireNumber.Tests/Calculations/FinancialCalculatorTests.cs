@@ -33,6 +33,12 @@ public class FinancialCalculatorTests
     }
 
     [Fact]
+    public void YearsToTarget_WhenAlreadyFunded_IsZero()
+    {
+        Assert.Equal(0, FinancialCalculator.YearsToTarget(100_000, 0, 0.07, 100_000));
+    }
+
+    [Fact]
     public void StandardFire_MatchesWebDefaults()
     {
         var result = FinancialCalculator.CalculateStandardFire(DefaultInputs);
@@ -82,6 +88,15 @@ public class FinancialCalculatorTests
     }
 
     [Fact]
+    public void BaristaFire_WhenPartTimeIncomeCoversExpenses_HasZeroTarget()
+    {
+        var result = FinancialCalculator.CalculateBaristaFire(DefaultInputs, DefaultInputs.AnnualExpenses);
+
+        Assert.Equal(0, result.BaristaNumber);
+        Assert.Equal(0, result.YearsToBaristaFire);
+    }
+
+    [Fact]
     public void BaristaFireDraft_DefaultMatchesWebPartTimeIncome()
     {
         var draft = BaristaFireDraft.Default;
@@ -115,6 +130,16 @@ public class FinancialCalculatorTests
         Assert.Equal(0, result.TotalInterest);
         Assert.Equal(["Credit card"], result.PayoffOrder);
         Assert.Equal(0, result.Projections[^1].TotalBalance);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void DebtTimeline_WithInvalidTarget_ReturnsNoResult(int targetMonths)
+    {
+        var debt = new DebtItem("card", "Credit card", 1_000, 0.20, 100);
+
+        Assert.Null(FinancialCalculator.CalculateDebtPayoffByTimeline([debt], targetMonths, useSnowball: true));
     }
 
     [Fact]
@@ -172,5 +197,23 @@ public class FinancialCalculatorTests
         Assert.Equal(3_510, result.EstimatedSubsidy50k);
         Assert.Equal(1_755, result.EstimatedSubsidy75k);
         Assert.Equal(new HealthcareYear(64, 2060, 15_266, 9_394, 3_262, 2_610), result.YearlyBreakdown[^1]);
+    }
+
+    [Fact]
+    public void HealthcareGap_WhenRetirementStartsAtMedicare_HasNoGap()
+    {
+        var result = FinancialCalculator.CalculateHealthcareGap(new HealthcareGapInputs(
+            CurrentAge: 64,
+            EarlyRetirementAge: 65,
+            MedicareAge: 65,
+            MonthlyPremium: 600,
+            AnnualDeductible: 2_500,
+            AnnualOutOfPocket: 2_000,
+            InflationRate: 0.03,
+            ProjectionStartYear: 2026));
+
+        Assert.Equal(0, result.GapYears);
+        Assert.Equal(0, result.TotalCost);
+        Assert.Empty(result.YearlyBreakdown);
     }
 }
