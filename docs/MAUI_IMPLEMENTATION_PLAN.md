@@ -381,7 +381,7 @@ stack layout.
 
 ### Appearance
 
-- [ ] System, light, and dark theme
+- [~] System, light, and dark theme (implemented and persisted; device validation pending)
 - [ ] Chart palette suitable for the active theme
 - [ ] Follow system reduced motion by default
 - [ ] Optional high-contrast override

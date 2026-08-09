@@ -32,6 +32,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IConfirmationService, ConfirmationService>();
 		builder.Services.AddSingleton<IPlanNamePromptService, PlanNamePromptService>();
 		builder.Services.AddSingleton<IOnboardingService, OnboardingService>();
+		builder.Services.AddSingleton<IThemeService, ThemeService>();
 		builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
 		builder.Services.AddSingleton<IBaristaFireExportService, BaristaFireExportService>();
 		builder.Services.AddSingleton<ICoastFireExportService, CoastFireExportService>();
