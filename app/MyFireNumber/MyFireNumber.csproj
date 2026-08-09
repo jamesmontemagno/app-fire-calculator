@@ -80,8 +80,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\src\MyFireNumber.Core\MyFireNumber.Core.csproj" />
-		<ProjectReference Include="..\..\src\MyFireNumber.Storage\MyFireNumber.Storage.csproj" />
+		<ProjectReference Include="..\MyFireNumber.Core\MyFireNumber.Core.csproj" />
+		<ProjectReference Include="..\MyFireNumber.Storage\MyFireNumber.Storage.csproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(MauiDevFlowEnabled)' == 'true'">

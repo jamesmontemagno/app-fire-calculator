@@ -167,7 +167,7 @@ app/MyFireNumber/
 Add a separate test project to the solution:
 
 ```text
-tests/MyFireNumber.Tests/
+app/MyFireNumber.Tests/
   Calculations/
   Data/
   Services/
@@ -819,7 +819,7 @@ Files expected to change:
 Run the narrowest available check immediately:
 
 ```bash
-dotnet test tests/MyFireNumber.Tests/MyFireNumber.Tests.csproj --filter "FullyQualifiedName~RelevantTest"
+dotnet test app/MyFireNumber.Tests/MyFireNumber.Tests.csproj --filter "FullyQualifiedName~RelevantTest"
 ```
 
 If no focused test exists yet, use the narrowest project test or target-framework compilation
@@ -928,7 +928,7 @@ small change when a focused test provides the first answer.
 
 ```bash
 # All non-UI tests
-dotnet test tests/MyFireNumber.Tests/MyFireNumber.Tests.csproj
+dotnet test app/MyFireNumber.Tests/MyFireNumber.Tests.csproj
 
 # Android compilation when needed
 dotnet build app/MyFireNumber/MyFireNumber.csproj -f net10.0-android
