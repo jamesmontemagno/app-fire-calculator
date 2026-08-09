@@ -1,11 +1,13 @@
 ﻿using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using MyFireNumber.Data;
+using MyFireNumber.Exports;
 
 namespace MyFireNumber;
 
 public partial class MainPage : ContentPage
 {
+	private string exportProofStatus = "Spreadsheet share ready.";
 	private string storageProofStatus = "SQLite check in progress.";
 
 	public IReadOnlyList<ISeries> Series { get; } =
@@ -31,6 +33,21 @@ public partial class MainPage : ContentPage
 		}
 	}
 
+	public string ExportProofStatus
+	{
+		get => exportProofStatus;
+		private set
+		{
+			if (exportProofStatus == value)
+			{
+				return;
+			}
+
+			exportProofStatus = value;
+			OnPropertyChanged();
+		}
+	}
+
 	public MainPage()
 	{
 		InitializeComponent();
@@ -49,6 +66,24 @@ public partial class MainPage : ContentPage
 		catch (Exception exception)
 		{
 			StorageProofStatus = $"SQLite check failed: {exception.GetType().Name}.";
+		}
+	}
+
+	private async void OnShareSpreadsheetProofClicked(object? sender, EventArgs eventArgs)
+	{
+		try
+		{
+			var filePath = SpreadsheetExportProof.Create();
+			ExportProofStatus = "Spreadsheet proof created in app cache.";
+			await Share.Default.RequestAsync(new ShareFileRequest
+			{
+				Title = "Share spreadsheet proof",
+				File = new ShareFile(filePath)
+			});
+		}
+		catch (Exception exception)
+		{
+			ExportProofStatus = $"Spreadsheet proof failed: {exception.GetType().Name}.";
 		}
 	}
 }

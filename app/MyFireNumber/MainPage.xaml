@@ -32,7 +32,7 @@
                 Stroke="#D7DED8"
                 StrokeThickness="1"
                 StrokeShape="RoundRectangle 8">
-            <Grid RowDefinitions="Auto,*,Auto,Auto" RowSpacing="12">
+            <Grid RowDefinitions="Auto,*,Auto,Auto,Auto,Auto" RowSpacing="12">
                 <Grid ColumnDefinitions="*,Auto">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="Portfolio balance"
@@ -71,7 +71,23 @@
                            FontSize="13" />
                 </Grid>
 
-                <Label Grid.Row="3"
+              <Button Grid.Row="3"
+                     Text="Share spreadsheet proof"
+                     Clicked="OnShareSpreadsheetProofClicked"
+                     Background="#326B57"
+                     TextColor="#FFFFFF"
+                     CornerRadius="6"
+                     FontAttributes="Bold"
+                     FontSize="13"
+                     SemanticProperties.Description="Create a local spreadsheet proof and open the native share sheet." />
+
+                <Label Grid.Row="4"
+                       Text="{Binding ExportProofStatus}"
+                       TextColor="#425D54"
+                       FontSize="12"
+                       LineBreakMode="WordWrap" />
+
+                <Label Grid.Row="5"
                        Text="{Binding StorageProofStatus}"
                        TextColor="#425D54"
                        FontSize="12"
