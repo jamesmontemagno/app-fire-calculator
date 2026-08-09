@@ -3,6 +3,15 @@ using SQLite;
 
 namespace MyFireNumber.Storage;
 
+public sealed class SqliteLocalDataArchiveRepository(LocalDatabase database) : ILocalDataArchiveRepository
+{
+    public Task<LocalDataArchive> ExportAsync(CancellationToken cancellationToken = default) =>
+        database.ExportAsync(cancellationToken);
+
+    public Task ImportAsync(LocalDataArchive archive, CancellationToken cancellationToken = default) =>
+        database.ImportAsync(archive, cancellationToken);
+}
+
 public sealed class SqliteDraftRepository(LocalDatabase database) : IDraftRepository
 {
     public async Task<DraftRecord?> GetAsync(string calculatorId, CancellationToken cancellationToken = default)

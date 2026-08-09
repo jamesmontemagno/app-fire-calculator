@@ -49,6 +49,22 @@ public sealed record CorruptPayloadRecord(
     DateTime OriginalUpdatedAtUtc,
     DateTime QuarantinedAtUtc);
 
+public sealed record LocalDataArchive(
+    int Version,
+    DateTime ExportedAtUtc,
+    IReadOnlyList<DraftRecord> Drafts,
+    IReadOnlyList<PlanRecord> Plans,
+    IReadOnlyList<CalculatorPreferenceRecord> CalculatorPreferences,
+    IReadOnlyList<RecentActivityRecord> RecentActivity,
+    IReadOnlyList<CorruptPayloadRecord> CorruptPayloads);
+
+public interface ILocalDataArchiveRepository
+{
+    Task<LocalDataArchive> ExportAsync(CancellationToken cancellationToken = default);
+
+    Task ImportAsync(LocalDataArchive archive, CancellationToken cancellationToken = default);
+}
+
 public interface IDraftRepository
 {
     Task<DraftRecord?> GetAsync(string calculatorId, CancellationToken cancellationToken = default);

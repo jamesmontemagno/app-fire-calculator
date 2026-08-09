@@ -31,6 +31,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<ICalculatorCatalog, CalculatorCatalog>();
 		builder.Services.AddSingleton<IConfirmationService, ConfirmationService>();
 		builder.Services.AddSingleton<IAppResetService, AppResetService>();
+		builder.Services.AddSingleton<IAppDataTransferService, AppDataTransferService>();
 		builder.Services.AddSingleton<IErrorPresentationService, ErrorPresentationService>();
 		builder.Services.AddSingleton<IExternalLinkService, ExternalLinkService>();
 		builder.Services.AddSingleton<IPlanNamePromptService, PlanNamePromptService>();
@@ -54,6 +55,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<ICalculatorPreferencesRepository, SqliteCalculatorPreferencesRepository>();
 		builder.Services.AddSingleton<IRecentActivityRepository, SqliteRecentActivityRepository>();
 		builder.Services.AddSingleton<ICorruptPayloadRepository, SqliteCorruptPayloadRepository>();
+		builder.Services.AddSingleton<ILocalDataArchiveRepository, SqliteLocalDataArchiveRepository>();
 		builder.Services.AddSingleton<AppShell>();
 		builder.Services.AddSingleton<App>();
 		builder.Services.AddSingleton<HomePage>();

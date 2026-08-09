@@ -78,6 +78,159 @@ public sealed class LocalDatabase
         });
     }
 
+    public async Task<LocalDataArchive> ExportAsync(CancellationToken cancellationToken = default)
+    {
+        await InitializeAsync(cancellationToken);
+        var drafts = await connection.Table<DraftEntity>().ToListAsync();
+        var plans = await connection.Table<PlanEntity>().ToListAsync();
+        var preferences = await connection.Table<CalculatorPreferenceEntity>().ToListAsync();
+        var activity = await connection.Table<RecentActivityEntity>().ToListAsync();
+        var corruptPayloads = await connection.Table<CorruptPayloadEntity>().ToListAsync();
+
+        return new LocalDataArchive(
+            1,
+            DateTime.UtcNow,
+            drafts.Select(ToRecord).ToArray(),
+            plans.Select(ToRecord).ToArray(),
+            preferences.Select(item => new CalculatorPreferenceRecord(item.CalculatorId, item.IsVisible, item.SortOrder)).ToArray(),
+            activity.Select(ToRecord).ToArray(),
+            corruptPayloads.Select(ToRecord).ToArray());
+    }
+
+    public async Task ImportAsync(LocalDataArchive archive, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(archive);
+        if (archive.Version != 1)
+        {
+            throw new InvalidDataException($"Archive version {archive.Version} is not supported.");
+        }
+
+        ValidateArchive(archive);
+        await InitializeAsync(cancellationToken);
+        await connection.RunInTransactionAsync(database =>
+        {
+            database.DeleteAll<DraftEntity>();
+            database.DeleteAll<PlanEntity>();
+            database.DeleteAll<CalculatorPreferenceEntity>();
+            database.DeleteAll<RecentActivityEntity>();
+            database.DeleteAll<CorruptPayloadEntity>();
+
+            database.InsertAll(archive.Drafts.Select(ToEntity));
+            database.InsertAll(archive.Plans.Select(ToEntity));
+            database.InsertAll(archive.CalculatorPreferences.Select(item => new CalculatorPreferenceEntity
+            {
+                CalculatorId = item.CalculatorId,
+                IsVisible = item.IsVisible,
+                SortOrder = item.SortOrder
+            }));
+            database.InsertAll(archive.RecentActivity.Select(ToEntity));
+            database.InsertAll(archive.CorruptPayloads.Select(ToEntity));
+        });
+    }
+
+    private static void ValidateArchive(LocalDataArchive archive)
+    {
+        if (archive.Drafts is null ||
+            archive.Plans is null ||
+            archive.CalculatorPreferences is null ||
+            archive.RecentActivity is null ||
+            archive.CorruptPayloads is null)
+        {
+            throw new InvalidDataException("The archive is missing required local data.");
+        }
+
+        if (archive.Drafts.Any(item => string.IsNullOrWhiteSpace(item.CalculatorId) || string.IsNullOrWhiteSpace(item.PayloadJson)) ||
+            archive.Plans.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.CalculatorId) || string.IsNullOrWhiteSpace(item.Name) || string.IsNullOrWhiteSpace(item.PayloadJson)) ||
+            archive.CalculatorPreferences.Any(item => string.IsNullOrWhiteSpace(item.CalculatorId) || item.SortOrder < 0) ||
+            archive.RecentActivity.Any(item => string.IsNullOrWhiteSpace(item.ItemId)) ||
+            archive.CorruptPayloads.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.SourceId) || string.IsNullOrWhiteSpace(item.CalculatorId) || string.IsNullOrWhiteSpace(item.PayloadJson)))
+        {
+            throw new InvalidDataException("The archive contains invalid local data.");
+        }
+    }
+
+    private static DraftRecord ToRecord(DraftEntity item) => new(
+        item.CalculatorId,
+        item.PayloadVersion,
+        item.PayloadJson,
+        ParseDate(item.UpdatedAtUtc));
+
+    private static PlanRecord ToRecord(PlanEntity item) => new(
+        item.Id,
+        item.CalculatorId,
+        item.Name,
+        item.PayloadVersion,
+        item.PayloadJson,
+        ParseDate(item.CreatedAtUtc),
+        ParseDate(item.UpdatedAtUtc));
+
+    private static RecentActivityRecord ToRecord(RecentActivityEntity item) => new(
+        Enum.Parse<RecentActivityKind>(item.Kind),
+        item.ItemId,
+        ParseDate(item.LastOpenedAtUtc));
+
+    private static CorruptPayloadRecord ToRecord(CorruptPayloadEntity item) => new(
+        item.Id,
+        Enum.Parse<CorruptPayloadSourceKind>(item.SourceKind),
+        item.SourceId,
+        item.CalculatorId,
+        item.DisplayName,
+        item.PayloadVersion,
+        item.PayloadJson,
+        item.OriginalCreatedAtUtc is null ? null : ParseDate(item.OriginalCreatedAtUtc),
+        ParseDate(item.OriginalUpdatedAtUtc),
+        ParseDate(item.QuarantinedAtUtc));
+
+    private static DraftEntity ToEntity(DraftRecord item) => new()
+    {
+        CalculatorId = item.CalculatorId,
+        PayloadVersion = item.PayloadVersion,
+        PayloadJson = item.PayloadJson,
+        UpdatedAtUtc = FormatDate(item.UpdatedAtUtc)
+    };
+
+    private static PlanEntity ToEntity(PlanRecord item) => new()
+    {
+        Id = item.Id,
+        CalculatorId = item.CalculatorId,
+        Name = item.Name,
+        PayloadVersion = item.PayloadVersion,
+        PayloadJson = item.PayloadJson,
+        CreatedAtUtc = FormatDate(item.CreatedAtUtc),
+        UpdatedAtUtc = FormatDate(item.UpdatedAtUtc)
+    };
+
+    private static RecentActivityEntity ToEntity(RecentActivityRecord item) => new()
+    {
+        Key = $"{item.Kind}:{item.ItemId}",
+        Kind = item.Kind.ToString(),
+        ItemId = item.ItemId,
+        LastOpenedAtUtc = FormatDate(item.LastOpenedAtUtc)
+    };
+
+    private static CorruptPayloadEntity ToEntity(CorruptPayloadRecord item) => new()
+    {
+        Id = item.Id,
+        SourceKind = item.SourceKind.ToString(),
+        SourceId = item.SourceId,
+        CalculatorId = item.CalculatorId,
+        DisplayName = item.DisplayName,
+        PayloadVersion = item.PayloadVersion,
+        PayloadJson = item.PayloadJson,
+        OriginalCreatedAtUtc = item.OriginalCreatedAtUtc is null ? null : FormatDate(item.OriginalCreatedAtUtc.Value),
+        OriginalUpdatedAtUtc = FormatDate(item.OriginalUpdatedAtUtc),
+        QuarantinedAtUtc = FormatDate(item.QuarantinedAtUtc)
+    };
+
+    private static DateTime ParseDate(string value) => DateTime.Parse(
+        value,
+        System.Globalization.CultureInfo.InvariantCulture,
+        System.Globalization.DateTimeStyles.RoundtripKind);
+
+    private static string FormatDate(DateTime value) => value
+        .ToUniversalTime()
+        .ToString("O", System.Globalization.CultureInfo.InvariantCulture);
+
     private async Task CreateCurrentSchemaAsync()
     {
         await connection.CreateTableAsync<DraftEntity>();

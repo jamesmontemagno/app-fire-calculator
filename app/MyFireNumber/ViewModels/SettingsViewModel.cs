@@ -4,6 +4,7 @@ using MyFireNumber.Core.Calculators;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
 using System.Collections.ObjectModel;
+using System.Text.Json;
 
 namespace MyFireNumber.ViewModels;
 
@@ -13,8 +14,10 @@ public partial class SettingsViewModel : ObservableObject
     private readonly INavigationService navigationService;
     private readonly ICalculatorCatalog catalog;
     private readonly IAppResetService appResetService;
+    private readonly IAppDataTransferService appDataTransferService;
     private readonly IConfirmationService confirmationService;
     private readonly IExternalLinkService externalLinkService;
+    private readonly IErrorPresentationService errorPresentationService;
     private readonly ICalculatorPreferencesRepository preferencesRepository;
     private readonly IThemeService themeService;
 
@@ -23,18 +26,22 @@ public partial class SettingsViewModel : ObservableObject
         INavigationService navigationService,
         ICalculatorCatalog catalog,
         IAppResetService appResetService,
+        IAppDataTransferService appDataTransferService,
         ICalculatorPreferencesRepository preferencesRepository,
         IConfirmationService confirmationService,
         IExternalLinkService externalLinkService,
+        IErrorPresentationService errorPresentationService,
         IThemeService themeService)
     {
         this.onboardingService = onboardingService;
         this.navigationService = navigationService;
         this.catalog = catalog;
         this.appResetService = appResetService;
+        this.appDataTransferService = appDataTransferService;
         this.preferencesRepository = preferencesRepository;
         this.confirmationService = confirmationService;
         this.externalLinkService = externalLinkService;
+        this.errorPresentationService = errorPresentationService;
         this.themeService = themeService;
         selectedTheme = themeService.Preference;
     }
@@ -138,6 +145,48 @@ public partial class SettingsViewModel : ObservableObject
 
     [RelayCommand]
     private Task OpenPrivacyAsync() => externalLinkService.OpenPrivacyAsync();
+
+    [RelayCommand]
+    private async Task ExportDataAsync()
+    {
+        try
+        {
+            await appDataTransferService.ExportAsync();
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            await errorPresentationService.ShowAsync("Couldn’t export data", "The backup file could not be created. Please try again.");
+        }
+    }
+
+    [RelayCommand]
+    private async Task ImportDataAsync()
+    {
+        var confirmed = await confirmationService.ConfirmAsync(
+            "Replace local app data?",
+            "Importing a backup replaces the drafts, plans, activity, and settings currently stored on this device.",
+            "Choose backup",
+            "Cancel");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            if (await appDataTransferService.PickAndImportAsync())
+            {
+                await LoadAsync();
+                await navigationService.GoToAsync("//home");
+            }
+        }
+        catch (Exception exception) when (exception is InvalidDataException or JsonException or IOException or UnauthorizedAccessException)
+        {
+            await errorPresentationService.ShowAsync(
+                "Couldn’t import backup",
+                "The selected file is not a valid My Fire # backup. Your existing data was not changed.");
+        }
+    }
 
     [RelayCommand]
     private async Task ResetAppAsync()

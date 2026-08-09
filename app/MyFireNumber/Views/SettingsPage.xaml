@@ -167,6 +167,41 @@
                                 SemanticProperties.Description="Show all calculators and restore the default Home order after confirmation." />
                     </VerticalStackLayout>
                 </Border>
+                <Border Padding="18"
+                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="12">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Label Text="&#xf1c0;"
+                                   FontFamily="FontAwesomeSolid"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   SemanticProperties.Description="Your data" />
+                            <Label Grid.Column="1"
+                                   Text="Your data"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="18" />
+                        </Grid>
+                        <Label Text="Create a private backup or restore one you exported earlier. Nothing is uploaded automatically."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               LineHeight="1.3" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Text="Export backup"
+                                    Command="{Binding ExportDataCommand}"
+                                    Background="#2F6B57"
+                                    TextColor="#FFFFFF"
+                                    SemanticProperties.Description="Create and share a local backup of all app data." />
+                            <Button Grid.Column="1"
+                                    Text="Import backup"
+                                    Command="{Binding ImportDataCommand}"
+                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                    SemanticProperties.Description="Choose a backup file to replace local app data after confirmation." />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
                 <Button Text="Retake FIRE Quiz"
                         Command="{Binding RetakeQuizCommand}"
                         Background="#2F6B57"

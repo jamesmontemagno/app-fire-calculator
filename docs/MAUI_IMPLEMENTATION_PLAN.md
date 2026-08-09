@@ -82,7 +82,7 @@ presets, input semantics, result metrics, projection data, explanatory copy, and
 - [~] Light, dark, and system themes (implemented and validated on iOS; Android pending)
 - [ ] Reduced-motion and high-contrast behavior
 - [ ] Device-region currency and number formatting with overrides
-- [ ] Import/export of all local app data
+- [~] Import/export of all local app data (implemented and validated on iOS; Android pending)
 - [~] Delete all local data (implemented and validated on iOS; Android pending)
 - [~] Educational explanations and financial-advice disclaimers (implemented and validated on iOS; Android pending)
 - [ ] Fully offline calculator, plan, quiz, and settings workflows
@@ -687,7 +687,7 @@ Exit gate: all top-level navigation and discovery workflows are complete.
 - [ ] App behavior
 - [~] Privacy and data management
   - [x] Confirmed reset deletes drafts, plans, calculator preferences, recent activity, corrupt-payload quarantine, and app preferences before restarting the first-run quiz.
-  - [ ] Import/export all local app data with corrupt-input handling.
+  - [~] Import/export all local app data with corrupt-input handling (implemented, storage-tested, and validated on iOS; Android pending).
 - [ ] Accessibility preferences
 
 Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
@@ -700,6 +700,7 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 | 2026-08-09 | Privacy legal links | Privacy is the final Settings card with clear Terms and Privacy policy actions. On iPhone 17, both controls render as 153x44-point targets, and the dark-state screenshot confirms readable presentation. The links use the canonical `https://myfirenumber.com/legal` route, whose local implementation documents educational-use terms and local-only financial-data handling for the website and My Fire Number. The instrumented iOS build, 71 native tests, TypeScript production build, and design detector pass. | iOS visual verification complete; production `/legal` deployment, successful launcher handoff, and Android pending |
 | 2026-08-09 | Branded icon and splash | Replaced the MAUI template's purple/.NET assets with a custom evergreen momentum-flame mark: a bright flame surrounds a rising financial trajectory, framed by subdued growth rings. On iPhone 17, the crisp home-screen icon pairs with the untruncated `My Fire #` label; the launch screen centers the same mark with generous negative space on a deep evergreen field. | iOS complete; Android visual verification pending |
 | 2026-08-09 | Confirmed app reset | The final Privacy-first Settings card offers a deliberate `Delete all app data` action. On iPhone 17, it opens a destructive confirmation explaining that drafts, plans, calculator settings, and quiz progress will be deleted before the first-run FIRE Quiz resumes. The storage-layer reset atomically clears every local data table; a focused test and the full 72-test suite pass. | iOS confirmation visual and storage behavior complete; direct confirmation-button automation and Android pending |
+| 2026-08-09 | Local backup and restore | Settings now creates a versioned JSON archive containing every draft, plan, calculator preference, recent activity entry, quarantined payload, theme, and onboarding preference. Export opens the iOS native share sheet without automatic upload. Import requires replacement confirmation, rejects unsupported or invalid archives before mutation, and restores data transactionally. Two focused archive tests and all 74 native tests pass; both 153x44-point controls render with readable dark-state contrast on iPhone 17. | iOS complete; Android file-picker/share validation pending |
 
 ### Phase 8: Release Hardening
 
