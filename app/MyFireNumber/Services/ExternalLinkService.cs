@@ -8,8 +8,8 @@ public interface IExternalLinkService
 
 public sealed class ExternalLinkService : IExternalLinkService
 {
-    private static readonly Uri TermsUri = new("https://jamesmontemagno.github.io/app-fire-calculator/legal#terms");
-    private static readonly Uri PrivacyUri = new("https://jamesmontemagno.github.io/app-fire-calculator/legal#privacy");
+    private static readonly Uri TermsUri = new("https://myfirenumber.com/legal#terms");
+    private static readonly Uri PrivacyUri = new("https://myfirenumber.com/legal#privacy");
 
     public Task OpenTermsAsync() => Launcher.Default.OpenAsync(TermsUri);
 
