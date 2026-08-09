@@ -7,77 +7,73 @@
              Title="Plans"
              Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
 
-    <Grid Padding="20,16" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="14">
-        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
-            <Label Text="&#xf15c;"
-                   FontFamily="FontAwesomeSolid"
-                   VerticalTextAlignment="Center"
-                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
-                   FontSize="28"
-                   SemanticProperties.Description="Saved plans" />
-            <VerticalStackLayout Grid.Column="1" Spacing="2">
-                <Label Text="Saved plans"
-                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                       FontAttributes="Bold"
-                       FontSize="28"
-                       SemanticProperties.HeadingLevel="Level1" />
-                <Label Text="Your scenarios are stored locally on this device."
-                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                       FontSize="14" />
-            </VerticalStackLayout>
-        </Grid>
+    <Grid Padding="20,16">
+        <CollectionView ItemsSource="{Binding Plans}" SelectionMode="None">
+            <CollectionView.Header>
+                <VerticalStackLayout Spacing="14" Margin="0,0,0,14">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                        <Label Text="&#xf15c;"
+                               FontFamily="FontAwesomeSolid"
+                               VerticalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               FontSize="24"
+                               SemanticProperties.Description="Saved plans" />
+                        <VerticalStackLayout Grid.Column="1" Spacing="2">
+                            <Label Text="Saved plans"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold"
+                                   FontSize="24"
+                                   SemanticProperties.HeadingLevel="Level1" />
+                            <Label Text="Your scenarios stay on this device."
+                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   FontSize="13" />
+                        </VerticalStackLayout>
+                    </Grid>
 
-        <Border Grid.Row="1"
-                Padding="10,8"
-                Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                StrokeShape="RoundRectangle 12">
-            <Grid RowDefinitions="Auto,1,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                <Label Text="&#xf002;"
-                       FontFamily="FontAwesomeSolid"
-                       FontSize="15"
-                       VerticalTextAlignment="Center"
-                       TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
-                       SemanticProperties.Description="Search" />
-                <SearchBar Grid.Column="1"
-                           Placeholder="Search saved plans"
-                           Text="{Binding SearchText, Mode=TwoWay}"
-                           Background="Transparent"
-                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                           PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                           SemanticProperties.Description="Search saved plans by name." />
-                <BoxView Grid.Row="1"
-                         Grid.ColumnSpan="2"
-                         Margin="0,4"
-                         HeightRequest="1"
-                         Background="{AppThemeBinding Light=#E1E7E2, Dark=#365244}" />
-                <Label Grid.Row="2"
-                       Text="&#xf0b0;"
-                       FontFamily="FontAwesomeSolid"
-                       FontSize="14"
-                       VerticalTextAlignment="Center"
-                       TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
-                       SemanticProperties.Description="Filter" />
-                <Picker Grid.Row="2"
-                        Grid.Column="1"
-                        Title="All calculators"
-                        ItemsSource="{Binding CalculatorFilters}"
-                        ItemDisplayBinding="{Binding Name}"
-                        SelectedItem="{Binding SelectedCalculatorFilter, Mode=TwoWay}"
-                        Background="Transparent"
-                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                        TitleColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                        SemanticProperties.Description="Filter saved plans by calculator." />
-            </Grid>
-        </Border>
-
-        <ActivityIndicator Grid.Row="2"
-                           IsRunning="{Binding IsLoading}"
-                           IsVisible="{Binding IsLoading}"
-                           HorizontalOptions="Center"
-                           SemanticProperties.Description="Loading saved plans." />
-
-        <CollectionView Grid.Row="3" ItemsSource="{Binding Plans}" SelectionMode="None">
+                    <Border Padding="10,6"
+                            Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                            Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                            StrokeShape="RoundRectangle 12">
+                        <Grid RowDefinitions="Auto,1,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Label Text="&#xf002;"
+                                   FontFamily="FontAwesomeSolid"
+                                   FontSize="15"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   SemanticProperties.Description="Search" />
+                            <SearchBar Grid.Column="1"
+                                       Placeholder="Search saved plans"
+                                       Text="{Binding SearchText, Mode=TwoWay}"
+                                       Background="Transparent"
+                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                       SemanticProperties.Description="Search saved plans by name." />
+                            <BoxView Grid.Row="1"
+                                     Grid.ColumnSpan="2"
+                                     Margin="0,2"
+                                     HeightRequest="1"
+                                     Background="{AppThemeBinding Light=#E1E7E2, Dark=#365244}" />
+                            <Label Grid.Row="2"
+                                   Text="&#xf0b0;"
+                                   FontFamily="FontAwesomeSolid"
+                                   FontSize="14"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   SemanticProperties.Description="Filter" />
+                            <Picker Grid.Row="2"
+                                    Grid.Column="1"
+                                    Title="All calculators"
+                                    ItemsSource="{Binding CalculatorFilters}"
+                                    ItemDisplayBinding="{Binding Name}"
+                                    SelectedItem="{Binding SelectedCalculatorFilter, Mode=TwoWay}"
+                                    Background="Transparent"
+                                    TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                    TitleColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                    SemanticProperties.Description="Filter saved plans by calculator." />
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+            </CollectionView.Header>
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="viewModels:PlanListItem">
                    <SwipeView Margin="0,0,0,10">
@@ -153,5 +149,10 @@
                 </VerticalStackLayout>
             </CollectionView.EmptyView>
         </CollectionView>
+        <ActivityIndicator IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           SemanticProperties.Description="Loading saved plans." />
     </Grid>
 </ContentPage>

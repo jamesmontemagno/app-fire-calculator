@@ -33,7 +33,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly IStandardFireExportService exportService;
     private readonly IWithdrawalRateExportService withdrawalRateExportService;
     private readonly IPlanRepository planRepository;
-    private readonly IPlanNamePromptService planNamePromptService;
     private readonly SemaphoreSlim draftSaveLock = new(1, 1);
     private readonly object pendingDraftLock = new();
     private CancellationTokenSource? saveCancellationTokenSource;
@@ -60,7 +59,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ILeanFireExportService leanExportService,
         INavigationService navigationService,
         IPlanRepository planRepository,
-        IPlanNamePromptService planNamePromptService,
         IReverseFireExportService reverseExportService,
         ISavingsInvestmentExportService savingsInvestmentExportService,
         IStandardFireExportService exportService,
@@ -78,7 +76,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.leanExportService = leanExportService;
         this.navigationService = navigationService;
         this.planRepository = planRepository;
-        this.planNamePromptService = planNamePromptService;
         this.reverseExportService = reverseExportService;
         this.savingsInvestmentExportService = savingsInvestmentExportService;
         this.exportService = exportService;
@@ -95,6 +92,10 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     [ObservableProperty]
     private string summary = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SavePlanActionText), nameof(SavePlanActionDescription))]
+    private bool isLoadedPlan;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStandardFireOrLeanFire), nameof(IsUnsupportedCalculator))]
@@ -496,10 +497,17 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     public bool HasExportStatusMessage => !string.IsNullOrWhiteSpace(ExportStatusMessage);
 
+    public string SavePlanActionText => IsLoadedPlan ? "Update Plan" : "Save to Plans";
+
+    public string SavePlanActionDescription => IsLoadedPlan
+        ? "Update this saved plan with the current values."
+        : "Save the current values as a named plan.";
+
     public async Task LoadAsync(string calculatorId, string? planId = null)
     {
         loadedPlanId = null;
         loadedPlanCreatedAtUtc = null;
+        IsLoadedPlan = false;
         var definition = catalog.GetRequired(calculatorId);
         Title = definition.Title;
         Summary = definition.Summary;
@@ -767,28 +775,10 @@ public partial class CalculatorDetailViewModel : ObservableObject
     [RelayCommand]
     private async Task SavePlanAsync()
     {
-        await SavePlanCoreAsync(PlanNameText, createNew: false);
+        await SavePlanCoreAsync(PlanNameText);
     }
 
-    [RelayCommand]
-    private async Task SavePlanAsAsync()
-    {
-        var initialName = string.IsNullOrWhiteSpace(PlanNameText)
-            ? $"My {Title} Plan"
-            : $"{PlanNameText.Trim()} copy";
-        var name = await planNamePromptService.PromptAsync(
-            "Save plan as",
-            "Enter a name for this new scenario.",
-            initialName);
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            return;
-        }
-
-        await SavePlanCoreAsync(name, createNew: true);
-    }
-
-    private async Task SavePlanCoreAsync(string planName, bool createNew)
+    private async Task SavePlanCoreAsync(string planName)
     {
         if (string.IsNullOrWhiteSpace(planName))
         {
@@ -873,7 +863,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         try
         {
             var now = DateTime.UtcNow;
-            var isUpdatingLoadedPlan = !createNew && loadedPlanId is not null;
+            var isUpdatingLoadedPlan = loadedPlanId is not null;
             var planIdToSave = isUpdatingLoadedPlan ? loadedPlanId! : Guid.NewGuid().ToString("N");
             await planRepository.SaveAsync(new PlanRecord(
                 planIdToSave,
@@ -885,6 +875,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 now));
             loadedPlanId = planIdToSave;
             loadedPlanCreatedAtUtc = isUpdatingLoadedPlan ? loadedPlanCreatedAtUtc ?? now : now;
+            IsLoadedPlan = true;
             PlanNameText = planName.Trim();
             PlanStatusMessage = isUpdatingLoadedPlan
                 ? $"Updated \"{PlanNameText.Trim()}\" in Plans."
@@ -1988,6 +1979,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
     {
         loadedPlanId = plan.Id;
         loadedPlanCreatedAtUtc = plan.CreatedAtUtc;
+        IsLoadedPlan = true;
     }
 
     private void UpdateProjectionChart(StandardFireResult result)
