@@ -333,6 +333,14 @@ All pages and `DataTemplate` elements require `x:DataType`. Use `Border`, `Grid`
 `ListView`, `TableView`, renderers, obsolete expand options, or a `CollectionView` nested in a
 stack layout.
 
+### Iconography
+
+- Use the bundled Font Awesome Free Solid 6.7.2 font for native UI glyphs.
+- Prefer `FontImageSource` for an icon paired with an action label; icon-only commands must have
+  a semantic description and a tooltip where the platform supports hover.
+- Keep Shell source icons as SVG assets referenced as generated PNGs, as required by MAUI.
+- Use icons to reinforce clear actions and landmarks, not as a substitute for visible text.
+
 ### Responsive Behavior
 
 - Compact phones: single-column inputs followed by results
@@ -519,6 +527,7 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 | 2026-08-09 | Onboarding routing | A first-run launch opens the skippable FIRE Quiz. Skip reaches Home and the completion preference survives a subsequent fresh iPhone 17 launch. Settings can reset onboarding and re-open the Quiz. | iOS complete |
 | 2026-08-09 | Search accessibility | The iOS SearchBar renders dark entered text (`#17352C`) and a muted placeholder (`#587068`) on the native white field. MAUI reports the outer SearchBar background as transparent, so screenshot evidence confirms the actual native field contrast. | iOS complete |
 | 2026-08-09 | Local storage foundation | The platform-neutral SQLite storage project initializes versioned drafts, plans, and calculator preferences. Three focused repository tests validate draft upsert/round trip, plan ordering, and preference upsert; a fresh iPhone 17 launch includes the repository DI registrations without a startup failure. | iOS complete; future migrations pending |
+| 2026-08-08 | Icon system | Font Awesome Free Solid 6.7.2 is bundled and registered for landmark glyphs and `FontImageSource` action icons. The iOS simulator target compiles and 20 unit tests pass. DevFlow registration succeeds, but its iOS automation endpoint does not answer status/tree/screenshot requests after a clean restart, so visual verification remains pending. | iOS visual validation pending |
 
 ### Phase 3: Standard FIRE Vertical Slice
 

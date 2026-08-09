@@ -9,6 +9,11 @@
 
     <Grid Padding="24">
         <VerticalStackLayout VerticalOptions="Center" Spacing="20">
+            <Label Text="&#xf059;"
+                   Style="{StaticResource IconGlyph}"
+                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                   FontSize="34"
+                   SemanticProperties.Description="FIRE Quiz" />
             <Label Text="Find your FIRE starting point"
                    TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                    FontAttributes="Bold"
@@ -23,7 +28,11 @@
                     Command="{Binding SkipCommand}"
                     Background="#2F6B57"
                     TextColor="#FFFFFF"
-                    SemanticProperties.Description="Skip the FIRE Quiz and open the Home tab." />
+                    SemanticProperties.Description="Skip the FIRE Quiz and open the Home tab.">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf061;" Color="#FFFFFF" Size="14" />
+                </Button.ImageSource>
+            </Button>
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

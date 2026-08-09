@@ -7,6 +7,11 @@
 
     <Grid Padding="24">
         <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="12">
+             <Label Text="&#xf15c;"
+                 Style="{StaticResource IconGlyph}"
+                 TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                 FontSize="34"
+                   SemanticProperties.Description="Saved plan document" />
             <Label Text="Saved plans"
                    TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                    FontAttributes="Bold"

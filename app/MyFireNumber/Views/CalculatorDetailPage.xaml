@@ -10,11 +10,19 @@
     <Grid>
         <ScrollView>
             <VerticalStackLayout Padding="24" Spacing="18">
-                <Label Text="{Binding Title}"
-                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                       FontAttributes="Bold"
-                       FontSize="30"
-                       SemanticProperties.HeadingLevel="Level1" />
+                  <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                      <Label Text="&#xf1ec;"
+                          Style="{StaticResource IconGlyph}"
+                          TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                          FontSize="28"
+                           SemanticProperties.Description="Calculator" />
+                      <Label Grid.Column="1"
+                          Text="{Binding Title}"
+                          TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                          FontAttributes="Bold"
+                          FontSize="30"
+                          SemanticProperties.HeadingLevel="Level1" />
+                  </Grid>
                 <Label Text="{Binding Summary}"
                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                        FontSize="16"

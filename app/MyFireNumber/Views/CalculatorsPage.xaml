@@ -41,15 +41,26 @@
                                     Background="#2F6B57"
                                     TextColor="#FFFFFF"
                                     FontSize="12"
-                                    MinimumWidthRequest="62" />
+                                    MinimumWidthRequest="78">
+                                <Button.ImageSource>
+                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf061;" Color="#FFFFFF" Size="12" />
+                                </Button.ImageSource>
+                            </Button>
                         </Grid>
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
             <CollectionView.EmptyView>
-                <Label Text="No calculators match that search."
-                       HorizontalTextAlignment="Center"
-                       VerticalTextAlignment="Center" />
+                  <VerticalStackLayout VerticalOptions="Center" Spacing="8">
+                      <Label Text="&#xf002;"
+                          Style="{StaticResource IconGlyph}"
+                          TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                          FontSize="28"
+                           SemanticProperties.Description="Search" />
+                      <Label Text="No calculators match that search."
+                          HorizontalTextAlignment="Center"
+                          VerticalTextAlignment="Center" />
+                  </VerticalStackLayout>
             </CollectionView.EmptyView>
         </CollectionView>
     </Grid>
