@@ -353,8 +353,8 @@ stack layout.
 
 ### Plan List
 
-- [ ] Group or filter by calculator
-- [ ] Search by plan name
+- [~] Group or filter by calculator (implemented; device validation pending)
+- [~] Search by plan name (implemented; device validation pending)
 - [ ] Sort by last modified by default
 - [x] Show plan name, calculator, and last modified time
 - [x] Open a plan into its calculator

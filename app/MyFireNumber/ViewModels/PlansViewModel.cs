@@ -8,6 +8,7 @@ using MyFireNumber.Storage;
 namespace MyFireNumber.ViewModels;
 
 public sealed record PlanListItem(string Id, string CalculatorId, string Name, string CalculatorTitle, string UpdatedDescription);
+public sealed record CalculatorFilter(string? CalculatorId, string Name);
 
 public partial class PlansViewModel : ObservableObject
 {
@@ -16,6 +17,7 @@ public partial class PlansViewModel : ObservableObject
     private readonly IConfirmationService confirmationService;
     private readonly INavigationService navigationService;
     private readonly IPlanNamePromptService planNamePromptService;
+    private readonly List<PlanListItem> allPlans = [];
 
     public PlansViewModel(
         IPlanRepository planRepository,
@@ -29,15 +31,29 @@ public partial class PlansViewModel : ObservableObject
         this.navigationService = navigationService;
         this.confirmationService = confirmationService;
         this.planNamePromptService = planNamePromptService;
+        CalculatorFilters.Add(new CalculatorFilter(null, "All calculators"));
+        foreach (var definition in catalog.All)
+        {
+            CalculatorFilters.Add(new CalculatorFilter(definition.Id, definition.Title));
+        }
+
+        SelectedCalculatorFilter = CalculatorFilters[0];
     }
 
     public ObservableCollection<PlanListItem> Plans { get; } = [];
+    public ObservableCollection<CalculatorFilter> CalculatorFilters { get; } = [];
 
     [ObservableProperty]
     private bool isLoading;
 
     [ObservableProperty]
     private string errorMessage = string.Empty;
+
+    [ObservableProperty]
+    private string searchText = string.Empty;
+
+    [ObservableProperty]
+    private CalculatorFilter? selectedCalculatorFilter;
 
     public bool HasPlans => Plans.Count > 0;
 
@@ -50,11 +66,11 @@ public partial class PlansViewModel : ObservableObject
         try
         {
             var records = await planRepository.ListAsync();
-            Plans.Clear();
+            allPlans.Clear();
             foreach (var record in records)
             {
                 var title = catalog.GetRequired(record.CalculatorId).Title;
-                Plans.Add(new PlanListItem(
+                allPlans.Add(new PlanListItem(
                     record.Id,
                     record.CalculatorId,
                     record.Name,
@@ -62,7 +78,7 @@ public partial class PlansViewModel : ObservableObject
                     $"Updated {record.UpdatedAtUtc.ToLocalTime():g}"));
             }
 
-            OnPropertyChanged(nameof(HasPlans));
+            ApplyFilters();
         }
         catch (Exception)
         {
@@ -73,6 +89,10 @@ public partial class PlansViewModel : ObservableObject
             IsLoading = false;
         }
     }
+
+    partial void OnSearchTextChanged(string value) => ApplyFilters();
+
+    partial void OnSelectedCalculatorFilterChanged(CalculatorFilter? value) => ApplyFilters();
 
     [RelayCommand]
     private Task OpenPlanAsync(PlanListItem plan)
@@ -168,12 +188,28 @@ public partial class PlansViewModel : ObservableObject
         try
         {
             await planRepository.DeleteAsync(plan.Id);
-            Plans.Remove(plan);
-            OnPropertyChanged(nameof(HasPlans));
+            await LoadAsync();
         }
         catch (Exception)
         {
             ErrorMessage = "This saved plan could not be deleted right now.";
         }
+    }
+
+    private void ApplyFilters()
+    {
+        var selectedCalculatorId = SelectedCalculatorFilter?.CalculatorId;
+        var search = SearchText.Trim();
+        var filteredPlans = allPlans.Where(plan =>
+            (selectedCalculatorId is null || plan.CalculatorId == selectedCalculatorId)
+            && (search.Length == 0 || plan.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase)));
+
+        Plans.Clear();
+        foreach (var plan in filteredPlans)
+        {
+            Plans.Add(plan);
+        }
+
+        OnPropertyChanged(nameof(HasPlans));
     }
 }

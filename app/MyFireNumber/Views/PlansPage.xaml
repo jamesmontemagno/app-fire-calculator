@@ -7,7 +7,7 @@
              Title="Plans"
              Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
 
-    <Grid Padding="20,16" RowDefinitions="Auto,Auto,*" RowSpacing="14">
+    <Grid Padding="20,16" RowDefinitions="Auto,Auto,Auto,*" RowSpacing="14">
         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
             <Label Text="&#xf15c;"
                    FontFamily="FontAwesomeSolid"
@@ -27,13 +27,31 @@
             </VerticalStackLayout>
         </Grid>
 
-        <ActivityIndicator Grid.Row="1"
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="12">
+            <SearchBar Placeholder="Search plan names"
+                       Text="{Binding SearchText, Mode=TwoWay}"
+                       Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                       SemanticProperties.Description="Search saved plans by name." />
+            <Picker Grid.Column="1"
+                    Title="All calculators"
+                    ItemsSource="{Binding CalculatorFilters}"
+                    ItemDisplayBinding="{Binding Name}"
+                    SelectedItem="{Binding SelectedCalculatorFilter, Mode=TwoWay}"
+                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                    TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                    TitleColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                    SemanticProperties.Description="Filter saved plans by calculator." />
+        </Grid>
+
+        <ActivityIndicator Grid.Row="2"
                            IsRunning="{Binding IsLoading}"
                            IsVisible="{Binding IsLoading}"
                            HorizontalOptions="Center"
                            SemanticProperties.Description="Loading saved plans." />
 
-        <CollectionView Grid.Row="2" ItemsSource="{Binding Plans}" SelectionMode="None">
+        <CollectionView Grid.Row="3" ItemsSource="{Binding Plans}" SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="viewModels:PlanListItem">
                     <Border Margin="0,0,0,10"
