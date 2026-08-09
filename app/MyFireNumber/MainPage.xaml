@@ -7,33 +7,35 @@
              x:DataType="local:MainPage"
              Background="#F5F7F2">
 
-    <Grid RowDefinitions="Auto,*" Padding="24,20,24,28" RowSpacing="20">
-        <VerticalStackLayout Spacing="6">
-            <Label Text="PROJECTION CHECK"
-                   TextColor="#326B57"
-                   FontAttributes="Bold"
-                   FontSize="12"
-                   CharacterSpacing="1.4" />
-            <Label Text="Your path to financial independence"
-                   TextColor="#17352C"
-                   FontAttributes="Bold"
-                   FontSize="30"
-                   LineHeight="1.05"
-                   SemanticProperties.HeadingLevel="Level1" />
-            <Label Text="A temporary rendering proof using the same annual balance shape planned for calculator results."
-                   TextColor="#425D54"
-                   FontSize="15"
-                   LineHeight="1.25" />
-        </VerticalStackLayout>
+    <Grid>
+        <ScrollView>
+            <Grid RowDefinitions="Auto,Auto" Padding="24,20,24,28" RowSpacing="20">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="PROJECTION CHECK"
+                           TextColor="#326B57"
+                           FontAttributes="Bold"
+                           FontSize="12"
+                           CharacterSpacing="1.4" />
+                    <Label Text="Your path to financial independence"
+                           TextColor="#17352C"
+                           FontAttributes="Bold"
+                           FontSize="30"
+                           LineHeight="1.05"
+                           SemanticProperties.HeadingLevel="Level1" />
+                    <Label Text="A temporary rendering proof using the same annual balance shape planned for calculator results."
+                           TextColor="#425D54"
+                           FontSize="15"
+                           LineHeight="1.25" />
+                </VerticalStackLayout>
 
-        <Border Grid.Row="1"
-                Padding="18"
-                Background="#FFFFFF"
-                Stroke="#D7DED8"
-                StrokeThickness="1"
-                StrokeShape="RoundRectangle 8">
-            <Grid RowDefinitions="Auto,*,Auto,Auto,Auto,Auto" RowSpacing="12">
-                <Grid ColumnDefinitions="*,Auto">
+                <Border Grid.Row="1"
+                        Padding="18"
+                                          Background="#FFFFFF"
+                                          Stroke="#D7DED8"
+                                          StrokeThickness="1"
+                                          StrokeShape="RoundRectangle 8">
+                                   <Grid RowDefinitions="Auto,300,Auto,Auto,Auto,Auto" RowSpacing="12">
+                                          <Grid ColumnDefinitions="*,Auto">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="Portfolio balance"
                                TextColor="#17352C"
@@ -57,7 +59,7 @@
 
                 <lvc:CartesianChart Grid.Row="1"
                                     Series="{Binding Series, Mode=OneTime}"
-                                    MinimumHeightRequest="300"
+                                    HeightRequest="300"
                                     SemanticProperties.Description="Projected portfolio balance rises from 120 thousand dollars at age 35 to 1.42 million dollars at age 60." />
 
                 <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
@@ -92,8 +94,10 @@
                        TextColor="#425D54"
                        FontSize="12"
                        LineBreakMode="WordWrap" />
-            </Grid>
-        </Border>
+                                   </Grid>
+                            </Border>
+                     </Grid>
+              </ScrollView>
     </Grid>
 
 </ContentPage>
