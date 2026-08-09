@@ -478,16 +478,24 @@ This patch is local development-machine state and must never be copied into the 
 
 ### Phase 1: Domain Parity Harness
 
-- [ ] Define typed calculator input and result models
-- [ ] Create golden web fixtures for all calculators
+- [x] Define typed calculator input and result models
+- [x] Create golden web fixtures for all calculators
 - [x] Port common financial math
-- [ ] Port Standard, Coast, Lean, Fat, Barista, and Withdrawal calculations
-- [ ] Port Reverse, Savings Rate, and Healthcare calculations currently located in pages
-- [ ] Port Debt Payoff calculations
-- [ ] Port Retirement Cash Flow calculations
-- [ ] Pass parity tests for normal and boundary cases
+- [x] Port Standard, Coast, Lean, Fat, Barista, and Withdrawal calculations
+- [x] Port Reverse, Savings Rate, and Healthcare calculations currently located in pages
+- [x] Port Debt Payoff calculations
+- [x] Port Retirement Cash Flow calculations
+- [x] Pass parity tests for normal and boundary cases
 
 Exit gate: all calculation tests pass without referencing MAUI.
+
+#### Phase 1 Evidence
+
+| Date | Item | Evidence | Status |
+| --- | --- | --- | --- |
+| 2026-08-09 | Pure calculation core | `MyFireNumber.Core` targets `net10.0` without MAUI dependencies and is referenced by both the app and test project. | Complete |
+| 2026-08-09 | Web parity fixtures | 15 xUnit tests cover shared FIRE, Coast, Lean, Fat, Barista, Withdrawal, Debt, Reverse, Savings, Healthcare, and Retirement Cash Flow normal and boundary behavior. | Complete |
+| 2026-08-09 | iOS integration | The iOS simulator target compiles successfully against the complete pure calculation core. | Complete |
 
 ### Phase 2: App Foundation
 

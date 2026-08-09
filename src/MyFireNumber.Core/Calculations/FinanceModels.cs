@@ -163,3 +163,76 @@ public sealed record HealthcareGapResult(
     double EstimatedSubsidy30k,
     double EstimatedSubsidy50k,
     double EstimatedSubsidy75k);
+
+public enum RetirementAccountType
+{
+    Deferred,
+    Traditional,
+    Roth,
+    Taxable,
+    Savings,
+    Hsa,
+    Other
+}
+
+public sealed record RetirementAccount(
+    string Id,
+    string Name,
+    RetirementAccountType Type,
+    double Balance,
+    double AnnualContribution,
+    double AnnualReturn,
+    int AvailableAge,
+    double WithdrawalRate,
+    int PayoutYears);
+
+public sealed record RetirementIncomeSource(
+    string Id,
+    string Name,
+    double AnnualAmount,
+    int StartAge,
+    int EndAge,
+    double AnnualGrowth,
+    bool IsAfterTax,
+    double TaxRate);
+
+public sealed record RetirementExpense(string Id, string Name, double AnnualAmount, int StartAge);
+
+public sealed record DeferredCompensationInputs(
+    int CurrentAge,
+    int SemiRetirementAge,
+    int PlanThroughAge,
+    double AnnualExpenses,
+    double InflationRate,
+    IReadOnlyList<RetirementAccount> Accounts,
+    IReadOnlyList<RetirementIncomeSource> IncomeSources,
+    IReadOnlyList<RetirementExpense> AdditionalExpenses,
+    bool WithdrawOnlyAfterRetirement,
+    bool ReinvestSurplus,
+    int CurrentYear = 0);
+
+public sealed record RetirementCashFlowPoint(
+    int Age,
+    int Year,
+    double TotalBalance,
+    double OutsideIncome,
+    double DeferredIncome,
+    double PortfolioWithdrawals,
+    double TotalIncome,
+    double Expenses,
+    double Surplus,
+    IReadOnlyDictionary<string, double> Withdrawals,
+    IReadOnlyDictionary<string, double> Balances,
+    IReadOnlyDictionary<string, double> IncomeBySource,
+    double CoreExpenses,
+    double AdditionalExpenses,
+    IReadOnlyDictionary<string, double> ExpensesByItem);
+
+public sealed record DeferredCompensationResult(
+    IReadOnlyList<RetirementCashFlowPoint> Projections,
+    double CurrentBalance,
+    double BalanceAtSemiRetirement,
+    double FirstYearIncome,
+    double FirstYearSurplus,
+    double EndingBalance,
+    int FundedYears);
