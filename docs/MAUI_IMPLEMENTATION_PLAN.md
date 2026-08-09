@@ -358,7 +358,7 @@ stack layout.
 - [ ] Sort by last modified by default
 - [x] Show plan name, calculator, and last modified time
 - [x] Open a plan into its calculator
-- [ ] Rename, duplicate, and delete through native actions
+- [~] Rename, duplicate, and delete through native actions (implemented; device validation pending)
 - [ ] Show an intentional empty state
 
 ### Save Semantics

@@ -15,17 +15,20 @@ public partial class PlansViewModel : ObservableObject
     private readonly ICalculatorCatalog catalog;
     private readonly IConfirmationService confirmationService;
     private readonly INavigationService navigationService;
+    private readonly IPlanNamePromptService planNamePromptService;
 
     public PlansViewModel(
         IPlanRepository planRepository,
         ICalculatorCatalog catalog,
         INavigationService navigationService,
-        IConfirmationService confirmationService)
+        IConfirmationService confirmationService,
+        IPlanNamePromptService planNamePromptService)
     {
         this.planRepository = planRepository;
         this.catalog = catalog;
         this.navigationService = navigationService;
         this.confirmationService = confirmationService;
+        this.planNamePromptService = planNamePromptService;
     }
 
     public ObservableCollection<PlanListItem> Plans { get; } = [];
@@ -76,6 +79,77 @@ public partial class PlansViewModel : ObservableObject
     {
         var route = $"calculator?calculatorId={Uri.EscapeDataString(plan.CalculatorId)}&planId={Uri.EscapeDataString(plan.Id)}";
         return navigationService.GoToAsync(route);
+    }
+
+    [RelayCommand]
+    private async Task RenamePlanAsync(PlanListItem plan)
+    {
+        var name = await planNamePromptService.PromptAsync(
+            "Rename saved plan",
+            "Enter a new name for this scenario.",
+            plan.Name);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        try
+        {
+            var record = await planRepository.GetAsync(plan.Id);
+            if (record is null)
+            {
+                ErrorMessage = "This saved plan could not be found.";
+                return;
+            }
+
+            await planRepository.SaveAsync(record with
+            {
+                Name = name.Trim(),
+                UpdatedAtUtc = DateTime.UtcNow
+            });
+            await LoadAsync();
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "This saved plan could not be renamed right now.";
+        }
+    }
+
+    [RelayCommand]
+    private async Task DuplicatePlanAsync(PlanListItem plan)
+    {
+        var name = await planNamePromptService.PromptAsync(
+            "Duplicate saved plan",
+            "Enter a name for the copied scenario.",
+            $"{plan.Name} copy");
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        try
+        {
+            var record = await planRepository.GetAsync(plan.Id);
+            if (record is null)
+            {
+                ErrorMessage = "This saved plan could not be found.";
+                return;
+            }
+
+            var now = DateTime.UtcNow;
+            await planRepository.SaveAsync(record with
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                Name = name.Trim(),
+                CreatedAtUtc = now,
+                UpdatedAtUtc = now
+            });
+            await LoadAsync();
+        }
+        catch (Exception)
+        {
+            ErrorMessage = "This saved plan could not be duplicated right now.";
+        }
     }
 
     [RelayCommand]

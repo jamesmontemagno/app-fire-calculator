@@ -327,6 +327,24 @@ public sealed class SqlitePlanRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task SaveAsync_RenamePreservesPayloadAndCreationTime()
+    {
+        var repository = new SqlitePlanRepository(new LocalDatabase(databasePath));
+        var createdAt = new DateTime(2026, 8, 9, 12, 0, 0, DateTimeKind.Utc);
+        var updatedAt = createdAt.AddMinutes(5);
+        await repository.SaveAsync(new PlanRecord("plan", "standard-fire", "Original", 1, "{\"value\":1}", createdAt, createdAt));
+
+        await repository.SaveAsync(new PlanRecord("plan", "standard-fire", "Renamed", 1, "{\"value\":1}", createdAt, updatedAt));
+
+        var plan = await repository.GetAsync("plan");
+        Assert.NotNull(plan);
+        Assert.Equal("Renamed", plan!.Name);
+        Assert.Equal("{\"value\":1}", plan.PayloadJson);
+        Assert.Equal(createdAt, plan.CreatedAtUtc);
+        Assert.Equal(updatedAt, plan.UpdatedAtUtc);
+    }
+
+    [Fact]
     public async Task SaveAsync_UpsertsCalculatorPreference()
     {
         var repository = new SqliteCalculatorPreferencesRepository(new LocalDatabase(databasePath));
