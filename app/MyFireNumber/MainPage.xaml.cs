@@ -1,23 +1,21 @@
-﻿namespace MyFireNumber;
+﻿using LiveChartsCore;
+using LiveChartsCore.SkiaSharpView;
+
+namespace MyFireNumber;
 
 public partial class MainPage : ContentPage
 {
-	int count = 0;
+	public IReadOnlyList<ISeries> Series { get; } =
+	[
+		new LineSeries<double>
+		{
+			Values = [120, 185, 275, 405, 590, 825, 1_100, 1_420]
+		}
+	];
 
 	public MainPage()
 	{
 		InitializeComponent();
-	}
-
-	private void OnCounterClicked(object? sender, EventArgs e)
-	{
-		count++;
-
-		if (count == 1)
-			CounterBtn.Text = $"Clicked {count} time";
-		else
-			CounterBtn.Text = $"Clicked {count} times";
-
-		SemanticScreenReader.Announce(CounterBtn.Text);
+		BindingContext = this;
 	}
 }

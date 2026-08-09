@@ -1,36 +1,77 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="MyFireNumber.MainPage">
+             xmlns:local="clr-namespace:MyFireNumber"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+             x:Class="MyFireNumber.MainPage"
+             x:DataType="local:MainPage"
+             Background="#F5F7F2">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Padding="30,0"
-            Spacing="25">
-            <Image
-                Source="dotnet_bot.png"
-                HeightRequest="185"
-                Aspect="AspectFit"
-                SemanticProperties.Description="dot net bot in a submarine number ten" />
-
-            <Label
-                Text="Hello, World!"
-                Style="{StaticResource Headline}"
-                SemanticProperties.HeadingLevel="Level1" />
-
-            <Label
-                Text="Welcome to &#10;.NET Multi-platform App UI"
-                Style="{StaticResource SubHeadline}"
-                SemanticProperties.HeadingLevel="Level2"
-                SemanticProperties.Description="Welcome to dot net Multi platform App U I" />
-
-            <Button
-                x:Name="CounterBtn"
-                Text="Click me"
-                SemanticProperties.Hint="Counts the number of times you click"
-                Clicked="OnCounterClicked"
-                HorizontalOptions="Fill" />
+    <Grid RowDefinitions="Auto,*" Padding="24,20,24,28" RowSpacing="20">
+        <VerticalStackLayout Spacing="6">
+            <Label Text="PROJECTION CHECK"
+                   TextColor="#326B57"
+                   FontAttributes="Bold"
+                   FontSize="12"
+                   CharacterSpacing="1.4" />
+            <Label Text="Your path to financial independence"
+                   TextColor="#17352C"
+                   FontAttributes="Bold"
+                   FontSize="30"
+                   LineHeight="1.05"
+                   SemanticProperties.HeadingLevel="Level1" />
+            <Label Text="A temporary rendering proof using the same annual balance shape planned for calculator results."
+                   TextColor="#425D54"
+                   FontSize="15"
+                   LineHeight="1.25" />
         </VerticalStackLayout>
-    </ScrollView>
+
+        <Border Grid.Row="1"
+                Padding="18"
+                Background="#FFFFFF"
+                Stroke="#D7DED8"
+                StrokeThickness="1"
+                StrokeShape="RoundRectangle 8">
+            <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Spacing="2">
+                        <Label Text="Portfolio balance"
+                               TextColor="#17352C"
+                               FontAttributes="Bold"
+                               FontSize="18" />
+                        <Label Text="Age 35–60"
+                               TextColor="#587068"
+                               FontSize="13" />
+                    </VerticalStackLayout>
+                    <Border Grid.Column="1"
+                            Padding="10,5"
+                            Background="#E4F0E9"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 6">
+                        <Label Text="7% return"
+                               TextColor="#245744"
+                               FontAttributes="Bold"
+                               FontSize="12" />
+                    </Border>
+                </Grid>
+
+                <lvc:CartesianChart Grid.Row="1"
+                                    Series="{Binding Series, Mode=OneTime}"
+                                    MinimumHeightRequest="300"
+                                    SemanticProperties.Description="Projected portfolio balance rises from 120 thousand dollars at age 35 to 1.42 million dollars at age 60." />
+
+                <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+                    <Label Text="Starting balance"
+                           TextColor="#587068"
+                           FontSize="13" />
+                    <Label Grid.Column="1"
+                           Text="$120,000"
+                           TextColor="#17352C"
+                           FontAttributes="Bold"
+                           FontSize="13" />
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
 
 </ContentPage>

@@ -438,7 +438,7 @@ them with MAUI `Share`. Do not retain exports indefinitely.
 - [x] Wire MauiDevFlow for Debug validation
 - [x] Add test project to `MyFireNumber.slnx`
 - [x] Add selected packages
-- [ ] Prove a LiveCharts2 chart renders on iOS and Android
+- [~] Prove a LiveCharts2 chart renders on iOS and Android
 - [ ] Prove a SQLite write/read/migration cycle on iOS and Android
 - [ ] Prove a generated `.xlsx` opens from the native share flow
 - [ ] Prove trimmed Release builds retain required chart, SQLite, and Open XML behavior
@@ -454,6 +454,7 @@ Exit gate: all technical risks have small running proofs on both target platform
 | 2026-08-08 | iOS baseline | MyFireNumber launches on standard iPhone 17 at 402x874. DevFlow 0.1.0-preview.12.26368.2 connects on port 10223; visible labels and button have non-zero bounds. Tapping the button changes `Click me` to `Clicked 1 time`. | Complete |
 | 2026-08-08 | iOS accessibility baseline | Button runtime colors are TextColor `#FFFFFF` on BackgroundColor `#512BD4`; screenshot confirms readable contrast and no overlap. | Complete |
 | 2026-08-08 | Test harness | .NET 10 xUnit project is registered in `MyFireNumber.slnx`; one convention test is discovered and passes. | Complete |
+| 2026-08-09 | iOS LiveCharts2 proof | Fresh iPhone 17 launch renders a visible `CartesianChart` at 316x340 with the expected line and area fill. The visual tree exposes its portfolio-projection accessibility label; the heading is TextColor `#17352C` on the light canvas. Android remains pending. | iOS complete |
 
 #### Temporary DevFlow Extension Workaround
 
@@ -598,6 +599,7 @@ to survive interruptions and prevent large batches of unverified code.
 8. Never mark a checkbox complete without evidence.
 9. Never fix unrelated failures as part of the slice.
 10. Stop on repeated failure and document the blocker instead of hiding it.
+11. Stop the running app before source edits, then rebuild and relaunch for runtime validation.
 
 ### Loop State
 
@@ -656,17 +658,19 @@ that can falsify the change. A build is an intermediate check, not user-facing c
 
 For MAUI behavior:
 
-1. Launch with the VS Code .NET MAUI debug command on the selected device.
-2. Wait for MauiDevFlow to connect.
-3. Inspect the visual tree and verify non-zero bounds, visibility, text, and hierarchy.
-4. Use runtime property inspection for actual native input colors.
-5. Capture a screenshot for visual layout confirmation.
-6. Exercise the interaction with DevFlow actions: fill, tap, scroll, navigate, and back.
-7. Background and resume when the slice involves persisted or draft state.
-8. Repeat on the other target platform before closing a cross-platform item.
+1. Stop the active debug session before editing source files.
+2. Make and narrowly validate the source change while the app is stopped.
+3. Launch with the VS Code .NET MAUI debug command on the selected device.
+4. Wait for MauiDevFlow to connect.
+5. Inspect the visual tree and verify non-zero bounds, visibility, text, and hierarchy.
+6. Use runtime property inspection for actual native input colors.
+7. Capture a screenshot for visual layout confirmation.
+8. Exercise the interaction with DevFlow actions: fill, tap, scroll, navigate, and back.
+9. Background and resume when the slice involves persisted or draft state.
+10. Repeat on the other target platform before closing a cross-platform item.
 
-Hot Reload is the first choice while a debug session is active. Rebuild and relaunch only when
-Hot Reload fails or cannot apply the change.
+Do not rely on Hot Reload for validation in this repository. Every runtime validation must use a
+fresh build and launch so startup registration, resources, XAML, and C# changes are all exercised.
 
 #### 7. Check Accessibility
 
@@ -811,7 +815,7 @@ Follow the Ralph-style agent loop exactly:
 2. State the cycle state, local hypothesis, and focused validation.
 3. Implement only that acceptance slice.
 4. Run focused tests immediately after the first edit.
-5. For MAUI UI or behavior, launch and inspect it with MauiDevFlow on the target platform.
+5. For MAUI UI or behavior, stop the app before edits, then rebuild, launch, and inspect it with MauiDevFlow.
 6. Verify runtime colors, accessibility, and interaction behavior.
 7. Repeat cross-platform checks where required.
 8. Record evidence and mark only proven checklist items complete.
