@@ -596,10 +596,10 @@ Exit gate: nine shared-form calculators are complete on both platforms.
 
 - [x] Debt Payoff editable debt workflow
 - [x] Snowball and Avalanche comparison
-- [ ] Debt balance and breakdown charts (balance projection is implemented; payment-breakdown chart remains)
+- [~] Debt balance and breakdown charts (implemented and validated on iOS; Android pending)
 - [x] Retirement Cash Flow scenario inputs
 - [x] Income, account, and additional-expense editors
-- [ ] Retirement cash-flow and bucket charts (cash-flow projection is implemented; account bucket chart remains)
+- [~] Retirement cash-flow and bucket charts (implemented and validated on iOS; Android pending)
 - [ ] Expandable annual cash-flow detail
 - [x] Complex calculator exports and persistence
 
@@ -618,6 +618,12 @@ Exit gate: collection editing, calculations, charts, plans, and exports pass on 
 - Typed local drafts and named plans now restore all three Retirement Cash Flow collections. On iPhone 17, a newly added account, income source, and expense survived immediate navigation, process termination, relaunch, and route restoration.
 - The Open XML workbook now includes Accounts, Income Sources, and Additional Expenses sheets. Five focused Retirement Cash Flow tests cover web-parity defaults, custom JSON round trips, workbook collection output, and calculation fixtures.
 - iPhone 17 renders the collection editors with non-zero bounds. The visible dark native Entry reports TextColor `#F2F7F3`, PlaceholderColor `#B9D1C2`, and transparent MAUI outer background; the account Picker reports the same text/title colors, and screenshot evidence confirms readable native fields.
+
+#### 2026-08-09 Complex Chart Checkpoint
+
+- Debt Payoff now includes a cumulative principal-and-interest stacked-area chart matching the web breakdown semantics. On iPhone 17, the chart renders at 328x260 and its visible text alternative reports `$1,000` principal and `$33` interest for the exercised scenario.
+- Retirement Cash Flow now includes one balance series per account across the full age projection, matching the web account-bucket chart. On iPhone 17, the chart renders at 328x260 and its visible text alternative lists every ending account balance.
+- The dark native Debt budget Entry and Retirement plan-name Entry report TextColor `#F2F7F3`, PlaceholderColor `#B9D1C2`, and transparent MAUI outer backgrounds; screenshots confirm readable native fields and chart canvases. All 61 tests pass.
 
 ### Phase 6: Quiz, Home, Catalog, and Plans
 

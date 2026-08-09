@@ -395,6 +395,15 @@ public partial class CalculatorDetailViewModel : ObservableObject
     [ObservableProperty]
     private string debtAvalancheComparisonText = string.Empty;
 
+    [ObservableProperty]
+    private IReadOnlyList<ISeries> debtBreakdownSeries = [];
+
+    [ObservableProperty]
+    private string debtBreakdownDescription = string.Empty;
+
+    [ObservableProperty]
+    private string debtBreakdownSummary = string.Empty;
+
     [ObservableProperty] private string retirementCurrentAgeText = "45";
     [ObservableProperty] private string retirementSemiAgeText = "55";
     [ObservableProperty] private string retirementPlanThroughAgeText = "90";
@@ -404,6 +413,15 @@ public partial class CalculatorDetailViewModel : ObservableObject
     [ObservableProperty] private string retirementBalanceAtSemiText = string.Empty;
     [ObservableProperty] private string retirementEndingBalanceText = string.Empty;
     [ObservableProperty] private string retirementFundedYearsText = string.Empty;
+
+    [ObservableProperty]
+    private IReadOnlyList<ISeries> retirementBucketSeries = [];
+
+    [ObservableProperty]
+    private string retirementBucketDescription = string.Empty;
+
+    [ObservableProperty]
+    private string retirementBucketSummary = string.Empty;
 
     [ObservableProperty]
     private string planNameText = "My Standard FIRE Plan";
@@ -1460,6 +1478,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
             ];
             ProjectionXAxes = [new Axis { Name = "Age", Labels = result.Projections.Where((_, index) => index % Math.Max(1, result.Projections.Count / 6) == 0).Select(point => point.Age.ToString(CultureInfo.CurrentCulture)).ToArray(), TextSize = 10 }];
             ProjectionChartDescription = $"Retirement cash-flow projection through age {deferredDraft.PlanThroughAge}. Ending balance is {FormatCurrency(result.EndingBalance)}.";
+            UpdateRetirementBucketChart(deferredDraft, result);
             ScheduleSave(deferredDraft);
         }
         else if (IsDebtPayoff && TryCreateDebtPayoffDraft(out var debtDraft))
@@ -1508,6 +1527,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
             DebtSnowballComparisonText = $"{snowball.TotalMonths} months, {FormatCurrency(snowball.TotalInterest)} interest";
             DebtAvalancheComparisonText = $"{avalanche.TotalMonths} months, {FormatCurrency(avalanche.TotalInterest)} interest";
             UpdateDebtProjectionChart(result);
+            UpdateDebtBreakdownChart(result);
             ScheduleSave(debtDraft);
         }
     }
@@ -2074,6 +2094,46 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ProjectionChartDescription = $"Debt balance projection over {result.TotalMonths} months. Total interest is {FormatCurrency(result.TotalInterest)}.";
     }
 
+    private void UpdateDebtBreakdownChart(DebtPayoffResult result)
+    {
+        DebtBreakdownSeries =
+        [
+            CreateStackedAreaSeries("Principal paid", result.Projections.Select(month => month.CumulativePrincipal), new SKColor(16, 185, 129)),
+            CreateStackedAreaSeries("Interest paid", result.Projections.Select(month => month.CumulativeInterest), new SKColor(239, 68, 68))
+        ];
+        DebtBreakdownDescription = $"Cumulative principal and interest paid over {result.TotalMonths} months.";
+        DebtBreakdownSummary = $"Across the payoff plan, {FormatCurrency(result.TotalPrincipal)} goes to principal and {FormatCurrency(result.TotalInterest)} goes to interest.";
+    }
+
+    private void UpdateRetirementBucketChart(
+        DeferredCompensationDraft draft,
+        DeferredCompensationResult result)
+    {
+        SKColor[] colors =
+        [
+            new(139, 92, 246),
+            new(14, 165, 233),
+            new(20, 184, 166),
+            new(245, 158, 11),
+            new(236, 72, 153),
+            new(132, 204, 22),
+            new(249, 115, 22),
+            new(99, 102, 241)
+        ];
+        RetirementBucketSeries = draft.Accounts
+            .Select((account, index) => (ISeries)CreateProjectionSeries(
+                string.IsNullOrWhiteSpace(account.Name) ? $"Account {index + 1}" : account.Name,
+                result.Projections.Select(point => point.Balances.GetValueOrDefault(account.Id)),
+                colors[index % colors.Length]))
+            .ToArray();
+
+        var endingPoint = result.Projections[^1];
+        var endingBalances = draft.Accounts.Select((account, index) =>
+            $"{(string.IsNullOrWhiteSpace(account.Name) ? $"Account {index + 1}" : account.Name)} {FormatCurrency(endingPoint.Balances.GetValueOrDefault(account.Id))}");
+        RetirementBucketDescription = $"Account balances from age {result.Projections[0].Age} through age {endingPoint.Age}.";
+        RetirementBucketSummary = $"At age {endingPoint.Age}, projected account balances are {string.Join(", ", endingBalances)}.";
+    }
+
     private static LineSeries<double> CreateProjectionSeries(string name, IEnumerable<double> values, SKColor color)
     {
         return new LineSeries<double>
@@ -2083,6 +2143,19 @@ public partial class CalculatorDetailViewModel : ObservableObject
             GeometrySize = 0,
             Fill = null,
             Stroke = new SolidColorPaint(color) { StrokeThickness = 3 }
+        };
+    }
+
+    private static StackedAreaSeries<double> CreateStackedAreaSeries(string name, IEnumerable<double> values, SKColor color)
+    {
+        return new StackedAreaSeries<double>
+        {
+            Name = name,
+            Values = values.ToArray(),
+            GeometrySize = 0,
+            LineSmoothness = 0,
+            Fill = new SolidColorPaint(color.WithAlpha(110)),
+            Stroke = new SolidColorPaint(color) { StrokeThickness = 2 }
         };
     }
 
