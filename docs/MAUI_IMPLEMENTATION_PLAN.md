@@ -433,16 +433,23 @@ them with MAUI `Share`. Do not retain exports indefinitely.
 
 ### Phase 0: Baseline and Technical Spikes
 
-- [ ] Record clean iOS simulator and Android emulator launches
-- [ ] Wire MauiDevFlow for Debug validation
+- [!] Record clean iOS simulator and Android emulator launches
+- [~] Wire MauiDevFlow for Debug validation
 - [ ] Add test project to `MyFireNumber.slnx`
-- [ ] Add selected packages
+- [x] Add selected packages
 - [ ] Prove a LiveCharts2 chart renders on iOS and Android
 - [ ] Prove a SQLite write/read/migration cycle on iOS and Android
 - [ ] Prove a generated `.xlsx` opens from the native share flow
 - [ ] Prove trimmed Release builds retain required chart, SQLite, and Open XML behavior
 
 Exit gate: all technical risks have small running proofs on both target platforms.
+
+#### Phase 0 Evidence
+
+| Date | Item | Evidence | Status |
+| --- | --- | --- | --- |
+| 2026-08-08 | Dependency foundation | iOS simulator build succeeds with CommunityToolkit.Mvvm, sqlite-net-pcl, LiveCharts2, and DocumentFormat.OpenXml. | Complete |
+| 2026-08-08 | DevFlow launch | VS Code MAUI extension 1.17.156 fails before project compilation with `MSB4099` in its installed `MauiDevFlow.targets` duplicate-package detection condition. Direct iOS simulator compilation with `MauiDevFlowEnabled=true` succeeds. | Blocked by extension |
 
 ### Phase 1: Domain Parity Harness
 
@@ -803,3 +810,4 @@ Add entries here only when a decision changes or a blocker affects future work.
 | 2026-08-08 | Decision | Charts | Use LiveCharts2 | Confirmed |
 | 2026-08-08 | Decision | Storage | Use `sqlite-net-pcl` with OS sandbox and backup | Confirmed |
 | 2026-08-08 | Decision | Content | Exclude Books and recommended Apps | Confirmed |
+| 2026-08-08 | Blocker | DevFlow | VS Code MAUI extension 1.17.156 target fails with MSB4099 before project compilation | Await extension fix or approved rollback |
