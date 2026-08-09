@@ -631,14 +631,20 @@ Exit gate: all top-level navigation and discovery workflows are complete.
 
 ### Phase 7: Full Settings
 
-- [ ] Calculator visibility and ordering
-- [ ] Appearance and theme
+- [~] Calculator visibility and ordering
+- [~] Appearance and theme
 - [ ] Defaults and assumptions
 - [ ] App behavior
 - [ ] Privacy and data management
 - [ ] Accessibility preferences
 
 Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
+
+#### Phase 7 Evidence
+
+| Date | Item | Evidence | Status |
+| --- | --- | --- | --- |
+| 2026-08-09 | Settings interaction redesign | Appearance is the first Settings section and uses a compact, accessible monitor/sun/moon segmented selector. Home calculator rows use 44x44 icon actions for move earlier, move later, show, and hide, with calculator-specific semantic descriptions. iPhone 17 screenshots verify readable light and dark states and visible selected segments. | iOS interaction complete; remaining Settings groups and Android pending |
 
 ### Phase 8: Release Hardening
 

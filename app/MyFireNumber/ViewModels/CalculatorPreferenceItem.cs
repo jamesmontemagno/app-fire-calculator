@@ -9,11 +9,15 @@ public partial class CalculatorPreferenceItem(string calculatorId, string title,
     public string Title { get; } = title;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(VisibilityAction))]
+    [NotifyPropertyChangedFor(nameof(VisibilityIcon), nameof(VisibilityDescription))]
     private bool isVisible = isVisible;
 
     [ObservableProperty]
     private int sortOrder = sortOrder;
 
-    public string VisibilityAction => IsVisible ? "Hide" : "Show";
+    public string VisibilityIcon => IsVisible ? "\uf070" : "\uf06e";
+
+    public string VisibilityDescription => IsVisible
+        ? $"Hide {Title} from Home."
+        : $"Show {Title} on Home.";
 }

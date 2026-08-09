@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:services="clr-namespace:MyFireNumber.Services"
              xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
              x:Class="MyFireNumber.Views.SettingsPage"
              x:DataType="viewModels:SettingsViewModel"
@@ -24,6 +25,85 @@
                           FontSize="30"
                           SemanticProperties.HeadingLevel="Level1" />
                   </Grid>
+                <Border Padding="18"
+                       Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                       Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                       StrokeShape="RoundRectangle 12">
+                   <VerticalStackLayout Spacing="12">
+                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                           <Label Text="&#xf53f;"
+                                  FontFamily="FontAwesomeSolid"
+                                  VerticalTextAlignment="Center"
+                                  TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                  SemanticProperties.Description="Appearance" />
+                           <Label Grid.Column="1"
+                                  Text="Appearance"
+                                  TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                  FontAttributes="Bold"
+                                  FontSize="18" />
+                       </Grid>
+                       <Label Text="Choose whether the app follows your device or stays light or dark."
+                              TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                              LineHeight="1.3" />
+                       <Border Padding="4"
+                               Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                               StrokeThickness="0"
+                               StrokeShape="RoundRectangle 12">
+                           <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
+                               <Button Text="&#xf108;"
+                                       FontFamily="FontAwesomeSolid"
+                                       FontSize="16"
+                                       Command="{Binding SetThemeCommand}"
+                                       CommandParameter="{x:Static services:ThemePreference.System}"
+                                       Background="Transparent"
+                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       CornerRadius="9"
+                                       SemanticProperties.Description="Use the device appearance.">
+                                   <Button.Triggers>
+                                       <DataTrigger TargetType="Button" Binding="{Binding SelectedTheme}" Value="System">
+                                           <Setter Property="Background" Value="#2F6B57" />
+                                           <Setter Property="TextColor" Value="#FFFFFF" />
+                                       </DataTrigger>
+                                   </Button.Triggers>
+                               </Button>
+                               <Button Grid.Column="1"
+                                       Text="&#xf185;"
+                                       FontFamily="FontAwesomeSolid"
+                                       FontSize="16"
+                                       Command="{Binding SetThemeCommand}"
+                                       CommandParameter="{x:Static services:ThemePreference.Light}"
+                                       Background="Transparent"
+                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       CornerRadius="9"
+                                       SemanticProperties.Description="Always use the light appearance.">
+                                   <Button.Triggers>
+                                       <DataTrigger TargetType="Button" Binding="{Binding SelectedTheme}" Value="Light">
+                                           <Setter Property="Background" Value="#2F6B57" />
+                                           <Setter Property="TextColor" Value="#FFFFFF" />
+                                       </DataTrigger>
+                                   </Button.Triggers>
+                               </Button>
+                               <Button Grid.Column="2"
+                                       Text="&#xf186;"
+                                       FontFamily="FontAwesomeSolid"
+                                       FontSize="16"
+                                       Command="{Binding SetThemeCommand}"
+                                       CommandParameter="{x:Static services:ThemePreference.Dark}"
+                                       Background="Transparent"
+                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       CornerRadius="9"
+                                       SemanticProperties.Description="Always use the dark appearance.">
+                                   <Button.Triggers>
+                                       <DataTrigger TargetType="Button" Binding="{Binding SelectedTheme}" Value="Dark">
+                                           <Setter Property="Background" Value="#2F6B57" />
+                                           <Setter Property="TextColor" Value="#FFFFFF" />
+                                       </DataTrigger>
+                                   </Button.Triggers>
+                               </Button>
+                           </Grid>
+                       </Border>
+                   </VerticalStackLayout>
+                </Border>
                 <Border Padding="18"
                         Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                         Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
@@ -49,7 +129,7 @@
                 <Border Padding="18"
                         Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                         Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                        StrokeShape="RoundRectangle 8">
+                        StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="10">
                         <VerticalStackLayout Spacing="4">
                             <Label Text="Home calculators"
@@ -64,37 +144,40 @@
                                              BindableLayout.ItemsSource="{Binding CalculatorPreferences}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="viewModels:CalculatorPreferenceItem">
-                                <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="6">
+                                <Grid ColumnDefinitions="*,44,44,44" ColumnSpacing="6">
                                     <Label Text="{Binding Title}"
                                            VerticalTextAlignment="Center"
                                            TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
                                     <Button Grid.Column="1"
-                                            Text="Up"
+                                            Text="&#xf062;"
+                                            FontFamily="FontAwesomeSolid"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=MoveCalculatorUpCommand}"
                                             CommandParameter="{Binding .}"
-                                            Background="#E4F0E9"
-                                            TextColor="#245744"
-                                            FontSize="12"
-                                            MinimumWidthRequest="52"
-                                            SemanticProperties.Description="Move this calculator earlier on Home." />
+                                            Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                            TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                            FontSize="14"
+                                            Padding="0"
+                                            SemanticProperties.Description="{Binding Title, StringFormat='Move {0} earlier on Home.'}" />
                                     <Button Grid.Column="2"
-                                            Text="Down"
+                                            Text="&#xf063;"
+                                            FontFamily="FontAwesomeSolid"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=MoveCalculatorDownCommand}"
                                             CommandParameter="{Binding .}"
-                                            Background="#E4F0E9"
-                                            TextColor="#245744"
-                                            FontSize="12"
-                                            MinimumWidthRequest="58"
-                                            SemanticProperties.Description="Move this calculator later on Home." />
+                                            Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                            TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                            FontSize="14"
+                                            Padding="0"
+                                            SemanticProperties.Description="{Binding Title, StringFormat='Move {0} later on Home.'}" />
                                     <Button Grid.Column="3"
-                                            Text="{Binding VisibilityAction}"
+                                            Text="{Binding VisibilityIcon}"
+                                            FontFamily="FontAwesomeSolid"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=ToggleCalculatorVisibilityCommand}"
                                             CommandParameter="{Binding .}"
                                             Background="#2F6B57"
                                             TextColor="#FFFFFF"
-                                            FontSize="12"
-                                            MinimumWidthRequest="58"
-                                            SemanticProperties.Description="Show or hide this calculator on Home." />
+                                            FontSize="14"
+                                            Padding="0"
+                                            SemanticProperties.Description="{Binding VisibilityDescription}" />
                                 </Grid>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
@@ -104,35 +187,6 @@
                                 Background="#E4F0E9"
                                 TextColor="#245744"
                                 SemanticProperties.Description="Show all calculators and restore the default Home order after confirmation." />
-                    </VerticalStackLayout>
-                </Border>
-                <Border Padding="18"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                        StrokeShape="RoundRectangle 8">
-                    <VerticalStackLayout Spacing="10">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Label Text="&#xf53f;"
-                                   FontFamily="FontAwesomeSolid"
-                                   VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
-                                   SemanticProperties.Description="Appearance" />
-                            <Label Grid.Column="1"
-                                   Text="Appearance"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                   FontAttributes="Bold"
-                                   FontSize="18" />
-                        </Grid>
-                        <Label Text="Choose whether the app follows your device appearance or always uses a light or dark theme."
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                               LineHeight="1.3" />
-                        <Picker Title="Theme"
-                                ItemsSource="{Binding ThemeOptions}"
-                                SelectedItem="{Binding SelectedTheme, Mode=TwoWay}"
-                                Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                                TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                TitleColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                                SemanticProperties.Description="Choose system, light, or dark app appearance." />
                     </VerticalStackLayout>
                 </Border>
                 <Button Text="Retake FIRE Quiz"

@@ -41,6 +41,9 @@ public partial class SettingsViewModel : ObservableObject
 
     partial void OnSelectedThemeChanged(ThemePreference value) => themeService.Apply(value);
 
+    [RelayCommand]
+    private void SetTheme(ThemePreference preference) => SelectedTheme = preference;
+
     public async Task LoadAsync()
     {
         var storedPreferences = await preferencesRepository.ListAsync();
