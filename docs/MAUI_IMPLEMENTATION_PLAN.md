@@ -25,6 +25,7 @@ evidence. Compilation alone is not completion for user-facing work.
 - [x] App name: MyFireNumber
 - [x] Application ID: `com.refractored.myfirenumber`
 - [x] Initial platforms: iOS and Android
+- [x] Core development target: standard iPhone 17 simulator
 - [x] Framework: .NET 10 MAUI single-project app
 - [x] Navigation: Shell with Home, Calculators, Plans, and Settings tabs
 - [x] First launch opens the FIRE Quiz
@@ -433,8 +434,8 @@ them with MAUI `Share`. Do not retain exports indefinitely.
 
 ### Phase 0: Baseline and Technical Spikes
 
-- [!] Record clean iOS simulator and Android emulator launches
-- [~] Wire MauiDevFlow for Debug validation
+- [~] Record clean iOS simulator and Android emulator launches
+- [x] Wire MauiDevFlow for Debug validation
 - [ ] Add test project to `MyFireNumber.slnx`
 - [x] Add selected packages
 - [ ] Prove a LiveCharts2 chart renders on iOS and Android
@@ -449,7 +450,27 @@ Exit gate: all technical risks have small running proofs on both target platform
 | Date | Item | Evidence | Status |
 | --- | --- | --- | --- |
 | 2026-08-08 | Dependency foundation | iOS simulator build succeeds with CommunityToolkit.Mvvm, sqlite-net-pcl, LiveCharts2, and DocumentFormat.OpenXml. | Complete |
-| 2026-08-08 | DevFlow launch | VS Code MAUI extension 1.17.156 fails before project compilation with `MSB4099` in its installed `MauiDevFlow.targets` duplicate-package detection condition. Direct iOS simulator compilation with `MauiDevFlowEnabled=true` succeeds. | Blocked by extension |
+| 2026-08-08 | DevFlow extension | VS Code MAUI extension 1.17.156 failed with `MSB4099`; a documented temporary local scalar-property workaround allows the exact IDE build path to succeed. | Local workaround active |
+| 2026-08-08 | iOS baseline | MyFireNumber launches on standard iPhone 17 at 402x874. DevFlow 0.1.0-preview.12.26368.2 connects on port 10223; visible labels and button have non-zero bounds. Tapping the button changes `Click me` to `Clicked 1 time`. | Complete |
+| 2026-08-08 | iOS accessibility baseline | Button runtime colors are TextColor `#FFFFFF` on BackgroundColor `#512BD4`; screenshot confirms readable contrast and no overlap. | Complete |
+
+#### Temporary DevFlow Extension Workaround
+
+The installed .NET MAUI extension `1.17.156` evaluates an item transform directly in an MSBuild
+property condition. MSBuild 18.6 rejects that expression with `MSB4099` before the app project can
+compile. Until an extension update includes the correction:
+
+1. Keep `Microsoft.Maui.DevFlow.Agent` explicitly pinned in the app project and set the temporary
+  scalar marker `MauiDevFlowAgentExplicitlyReferenced=true`.
+2. In the installed extension's `MauiDevFlow.targets`, use that scalar marker to skip package
+  injection. MSBuild 18.6 rejects item-list expressions in property conditions, including checks
+  against a previously filtered item.
+3. Reapply the local extension patch after an extension reinstall only if the upstream target still
+  contains the invalid condition.
+4. Remove this workaround as soon as the exact VS Code DevFlow build succeeds with an unmodified
+  extension.
+
+This patch is local development-machine state and must never be copied into the repository or CI.
 
 ### Phase 1: Domain Parity Harness
 
@@ -810,4 +831,4 @@ Add entries here only when a decision changes or a blocker affects future work.
 | 2026-08-08 | Decision | Charts | Use LiveCharts2 | Confirmed |
 | 2026-08-08 | Decision | Storage | Use `sqlite-net-pcl` with OS sandbox and backup | Confirmed |
 | 2026-08-08 | Decision | Content | Exclude Books and recommended Apps | Confirmed |
-| 2026-08-08 | Blocker | DevFlow | VS Code MAUI extension 1.17.156 target fails with MSB4099 before project compilation | Await extension fix or approved rollback |
+| 2026-08-08 | Blocker | DevFlow | VS Code MAUI extension 1.17.156 target fails with MSB4099 before project compilation | Temporarily resolved with documented local target patch; remove after upstream fix |
