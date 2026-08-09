@@ -9,31 +9,144 @@
 
     <Grid>
         <ScrollView>
-            <VerticalStackLayout Padding="24" Spacing="18">
-                  <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                      <Label Text="&#xf1ec;"
-                          Style="{StaticResource IconGlyph}"
-                          TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
-                          FontSize="28"
+            <VerticalStackLayout Padding="20,20,20,32" Spacing="18">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                    <Label Text="&#xf1ec;"
+                              FontFamily="FontAwesomeSolid"
+                              VerticalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                           FontSize="28"
                            SemanticProperties.Description="Calculator" />
-                      <Label Grid.Column="1"
-                          Text="{Binding Title}"
-                          TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                          FontAttributes="Bold"
-                          FontSize="30"
-                          SemanticProperties.HeadingLevel="Level1" />
-                  </Grid>
-                <Label Text="{Binding Summary}"
-                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                       FontSize="16"
-                       LineHeight="1.3" />
-                <Border Padding="18"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                        <Label Text="{Binding Title}"
+                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                               FontAttributes="Bold"
+                               FontSize="30"
+                               SemanticProperties.HeadingLevel="Level1" />
+                        <Label Text="{Binding Summary}"
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               FontSize="15"
+                               LineHeight="1.3" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                   IsVisible="{Binding IsLoading}"
+                                   HorizontalOptions="Center"
+                                   SemanticProperties.Description="Restoring your local calculator draft." />
+
+                <Border IsVisible="{Binding HasValidationMessage}"
+                        Padding="14"
+                        Background="{AppThemeBinding Light=#FFF4E8, Dark=#4A3323}"
+                        Stroke="{AppThemeBinding Light=#C97727, Dark=#F2B56D}"
                         StrokeShape="RoundRectangle 8">
-                    <Label Text="Calculator inputs, live results, plans, and export are being connected in the next vertical slice."
-                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                    <Label Text="{Binding ValidationMessage}"
+                           TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}"
                            LineHeight="1.3" />
+                </Border>
+
+                <VerticalStackLayout IsVisible="{Binding IsStandardFire}" Spacing="18">
+                    <Border Padding="16"
+                            Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                            Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                            StrokeShape="RoundRectangle 8">
+                        <VerticalStackLayout Spacing="14">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
+                                <Label Text="&#xf201;"
+                                        FontFamily="FontAwesomeSolid"
+                                        VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                       SemanticProperties.Description="Financial inputs" />
+                                <Label Grid.Column="1"
+                                       Text="Your assumptions"
+                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                       FontAttributes="Bold"
+                                       FontSize="20" />
+                                <Button Grid.Column="2"
+                                        Text="Reset"
+                                        Command="{Binding ResetDefaultsCommand}"
+                                        Background="#E4F0E9"
+                                        TextColor="#245744"
+                                        FontSize="12"
+                                        MinimumWidthRequest="86"
+                                        SemanticProperties.Description="Reset Standard FIRE values to their defaults.">
+                                    <Button.ImageSource>
+                                        <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf01e;" Color="#245744" Size="12" />
+                                    </Button.ImageSource>
+                                </Button>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="12">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="Current age" FontAttributes="Bold" />
+                                    <Entry Text="{Binding CurrentAgeText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="30" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Current age in years" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="1" Spacing="4">
+                                    <Label Text="Retirement age" FontAttributes="Bold" />
+                                    <Entry Text="{Binding RetirementAgeText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="55" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Target retirement age in years" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="1" Grid.ColumnSpan="2" Spacing="4">
+                                    <Label Text="Current savings" FontAttributes="Bold" />
+                                    <Entry Text="{Binding CurrentSavingsText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="100000" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Current invested savings in dollars" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="2" Spacing="4">
+                                    <Label Text="Annual contribution" FontAttributes="Bold" />
+                                    <Entry Text="{Binding AnnualContributionText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="24000" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Annual contribution in dollars" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="4">
+                                    <Label Text="Annual net income" FontAttributes="Bold" />
+                                    <Entry Text="{Binding AnnualIncomeText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="72000" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Annual after-tax income in dollars" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="3" Grid.ColumnSpan="2" Spacing="4">
+                                    <Label Text="Annual retirement expenses" FontAttributes="Bold" />
+                                    <Entry Text="{Binding AnnualExpensesText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="48000" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Expected annual retirement expenses in dollars" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="4" Spacing="4">
+                                    <Label Text="Expected return (%)" FontAttributes="Bold" />
+                                    <Entry Text="{Binding ExpectedReturnText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="7" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Expected annual investment return as a percentage" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Row="4" Grid.Column="1" Spacing="4">
+                                    <Label Text="Inflation (%)" FontAttributes="Bold" />
+                                    <Entry Text="{Binding InflationRateText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="3" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Annual inflation rate as a percentage" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <VerticalStackLayout Spacing="4">
+                                <Label Text="Safe withdrawal rate (%)" FontAttributes="Bold" />
+                                <Entry Text="{Binding WithdrawalRateText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="4" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Safe annual withdrawal rate as a percentage" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Border Padding="16"
+                            Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                            Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                            StrokeShape="RoundRectangle 8">
+                        <VerticalStackLayout Spacing="14">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                <Label Text="&#xf201;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" SemanticProperties.Description="Live results" />
+                                <Label Grid.Column="1" Text="Your FIRE outlook" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" FontAttributes="Bold" FontSize="20" />
+                            </Grid>
+                            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                                <Border Padding="12" Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="FIRE Number" FontSize="12" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" /><Label Text="{Binding FireNumberText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                                <Border Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Years to FIRE" FontSize="12" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" /><Label Text="{Binding YearsToFireText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                                <Border Grid.Row="1" Padding="12" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="FIRE age" FontSize="12" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" /><Label Text="{Binding FireAgeText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                                <Border Grid.Row="1" Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Savings rate" FontSize="12" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" /><Label Text="{Binding SavingsRateText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                                <Border Grid.Row="2" Grid.ColumnSpan="2" Padding="12" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Monthly contribution" FontSize="12" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" /><Label Text="{Binding MonthlyContributionText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                            </Grid>
+                            <VerticalStackLayout Spacing="6">
+                                <ProgressBar Progress="{Binding ProgressToFire}" />
+                                <Label Text="{Binding ProgressDescription}" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" FontSize="13" SemanticProperties.Description="{Binding ProgressDescription}" />
+                                <Label Text="{Binding ProjectionSummary}" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" FontSize="13" LineHeight="1.3" />
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <Label Text="Estimates are educational and not financial advice. Results stay on this device." TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" FontSize="13" LineHeight="1.3" />
+                </VerticalStackLayout>
+
+                <Border IsVisible="{Binding IsNotStandardFire}" Padding="18" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+                    <Label Text="Calculator inputs, live results, plans, and export are being connected in the next vertical slice." TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" LineHeight="1.3" />
                 </Border>
             </VerticalStackLayout>
         </ScrollView>

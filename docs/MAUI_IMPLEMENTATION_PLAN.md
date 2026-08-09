@@ -532,7 +532,7 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 ### Phase 3: Standard FIRE Vertical Slice
 
 - [ ] Build shared input and result controls needed by Standard FIRE
-- [ ] Implement Standard FIRE page and view model
+- [~] Implement Standard FIRE page and view model
 - [ ] Implement projection chart and accessible summary
 - [ ] Implement presets
 - [ ] Implement draft save/restore/reset
@@ -541,6 +541,13 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 - [ ] Validate light/dark, accessibility, lifecycle restoration, and offline behavior
 
 Exit gate: Standard FIRE is complete end to end on iOS and Android.
+
+#### Phase 3 Evidence
+
+| Date | Item | Evidence | Status |
+| --- | --- | --- | --- |
+| 2026-08-08 | Standard FIRE inputs and draft | A typed, versioned Standard FIRE draft matches web defaults in a focused unit test. The detail route restores and debounces writes to the local SQLite draft, validates user input, and calculates its live metrics through the tested pure Core calculator. The iOS simulator target compiles. | iOS visual validation pending |
+| 2026-08-08 | Runtime verification blocker | Fresh iPhone 17 launch registers DevFlow 0.1.0-preview.12.26368.2 on port 10225, but `maui_status` does not answer. Independent diagnostics show an active broker, one matching registered agent, and no app exception; visual-tree, screenshot, interaction, and native Entry contrast verification remain blocked at the DevFlow transport layer. | Environment blocker |
 
 ### Phase 4: Shared FIRE Calculators
 

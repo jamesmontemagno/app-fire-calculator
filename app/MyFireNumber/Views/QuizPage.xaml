@@ -10,7 +10,8 @@
     <Grid Padding="24">
         <VerticalStackLayout VerticalOptions="Center" Spacing="20">
             <Label Text="&#xf059;"
-                   Style="{StaticResource IconGlyph}"
+                     FontFamily="FontAwesomeSolid"
+                     VerticalTextAlignment="Center"
                    TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                    FontSize="34"
                    SemanticProperties.Description="FIRE Quiz" />

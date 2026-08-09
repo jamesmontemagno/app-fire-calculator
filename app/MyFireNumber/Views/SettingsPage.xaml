@@ -12,7 +12,8 @@
             <VerticalStackLayout Padding="24" Spacing="18">
                   <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                       <Label Text="&#xf013;"
-                          Style="{StaticResource IconGlyph}"
+                              FontFamily="FontAwesomeSolid"
+                              VerticalTextAlignment="Center"
                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                           FontSize="28"
                            SemanticProperties.Description="Settings" />
@@ -30,7 +31,8 @@
                     <VerticalStackLayout Spacing="12">
                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                             <Label Text="&#xf023;"
-                                Style="{StaticResource IconGlyph}"
+                                FontFamily="FontAwesomeSolid"
+                                VerticalTextAlignment="Center"
                                 TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                    SemanticProperties.Description="Privacy" />
                             <Label Grid.Column="1"

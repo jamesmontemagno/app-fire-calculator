@@ -53,7 +53,8 @@
             <CollectionView.EmptyView>
                   <VerticalStackLayout VerticalOptions="Center" Spacing="8">
                       <Label Text="&#xf002;"
-                          Style="{StaticResource IconGlyph}"
+                              FontFamily="FontAwesomeSolid"
+                              VerticalTextAlignment="Center"
                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                           FontSize="28"
                            SemanticProperties.Description="Search" />

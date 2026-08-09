@@ -13,7 +13,8 @@
             <VerticalStackLayout Padding="24,24,24,32" Spacing="24">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
                     <Label Text="&#xf201;"
-                           Style="{StaticResource IconGlyph}"
+                              FontFamily="FontAwesomeSolid"
+                              VerticalTextAlignment="Center"
                            TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                            FontSize="28"
                            SemanticProperties.Description="Financial progress" />
@@ -43,7 +44,8 @@
                     <VerticalStackLayout Spacing="14">
                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
                             <Label Text="&#xf1ec;"
-                                Style="{StaticResource IconGlyph}"
+                                FontFamily="FontAwesomeSolid"
+                                VerticalTextAlignment="Center"
                                 TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                    SemanticProperties.Description="Calculator" />
                             <Label Grid.Column="1"

@@ -13,11 +13,11 @@ public partial class CalculatorDetailPage : ContentPage, IQueryAttributable
         this.viewModel = viewModel;
     }
 
-    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    public async void ApplyQueryAttributes(IDictionary<string, object> query)
     {
         if (query.TryGetValue("calculatorId", out var calculatorId) && calculatorId is string value)
         {
-            viewModel.Load(Uri.UnescapeDataString(value));
+            await viewModel.LoadAsync(Uri.UnescapeDataString(value));
         }
     }
 }
