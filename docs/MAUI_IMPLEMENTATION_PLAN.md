@@ -449,7 +449,7 @@ them with MAUI `Share`. Do not retain exports indefinitely.
 - [~] Prove a LiveCharts2 chart renders on iOS and Android
 - [~] Prove a SQLite write/read/migration cycle on iOS and Android
 - [~] Prove a generated `.xlsx` opens from the native share flow
-- [ ] Prove trimmed Release builds retain required chart, SQLite, and Open XML behavior
+- [~] Prove trimmed Release builds retain required chart, SQLite, and Open XML behavior
 
 Exit gate: all technical risks have small running proofs on both target platforms.
 
@@ -535,6 +535,7 @@ Exit gate: fresh install enters Quiz; skip reaches a functional four-tab shell.
 | 2026-08-09 | Icon system | Font Awesome Free Solid 6.7.2 is bundled and registered for landmark glyphs and `FontImageSource` action icons. A fresh iPhone 17 launch renders the glyphs without the prior `IconGlyph` StaticResource XAML exception. | iOS complete |
 | 2026-08-09 | Global error presentation | A singleton error presenter marshals generic messages to the UI thread without accepting exception or payload data. Plans load, rename, duplicate, and delete failures use it. The full 57-test suite passes, and a fresh iPhone 17 launch resolves Plans through DI and renders its heading at non-zero bounds. | iOS complete |
 | 2026-08-09 | Schema v2 migration | `LocalDatabase` now applies explicit ordered migrations and updates schema metadata. A focused upgrade test creates a version-1 database, initializes the version-2 recent-activity table, persists a record, and verifies metadata advanced to version 2 without replacing existing tables. | Complete |
+| 2026-08-09 | Linked iOS Release proof | A clean `net10.0-ios` `iossimulator-arm64` Release rebuild completed with linking/AOT enabled and simulator LLVM disabled, with no warnings or errors. The uninstrumented app launched on iPhone 17 and rendered persisted SQLite calculator and plan recents; the bundle retains LiveCharts2, Open XML, SQLite, SQLitePCLRaw, and SQLite AOT artifacts. Command-line Release DevFlow instrumentation exits before agent registration, while the shipping-style build runs normally, so runtime inspection remains a Debug-only validation path. | iOS simulator complete; device LLVM and Android pending |
 
 ### Phase 3: Standard FIRE Vertical Slice
 
@@ -667,11 +668,17 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 - [ ] Validate background/foreground and process termination restoration
 - [ ] Validate database upgrade from every released schema
 - [ ] Validate import/export and corrupted input handling
-- [ ] Validate Release trimming and AOT
+- [~] Validate Release trimming and AOT
 - [ ] Run Android and iOS GitHub Actions workflows
 - [ ] Complete privacy disclosures, app metadata, icons, splash screen, and screenshots
 
 Exit gate: release candidate passes the Definition of Done below.
+
+#### Phase 8 Evidence
+
+| Date | Item | Evidence | Status |
+| --- | --- | --- | --- |
+| 2026-08-09 | iOS linked/AOT simulator launch | A clean linked/AOT Release rebuild completed without warnings. The shipping-style app launched on iPhone 17 and rendered the Home dashboard with persisted SQLite recents in dark mode. Simulator LLVM was disabled after Open XML LLVM optimization remained CPU-bound for more than 36 minutes; final device/store LLVM validation remains required. | iOS simulator complete; device LLVM and Android pending |
 
 ## Ralph-Style Agent Loop
 
