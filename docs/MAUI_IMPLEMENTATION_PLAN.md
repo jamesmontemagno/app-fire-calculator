@@ -365,7 +365,7 @@ stack layout.
 
 - Saving a draft as a new plan requests a name.
 - Editing a loaded plan changes working state, not the stored plan, until Save is invoked.
-- [~] Save updates the loaded plan; Save As creates another plan. Normal saves now update loaded supported plans; an explicit Save As action remains pending.
+- [~] Save updates the loaded plan; Save As creates another plan. Both semantics are implemented and validated on iOS; Android remains pending.
 - Duplicate creates a new ID and requests or generates a distinct name.
 - Deletion requires confirmation and does not delete the calculator draft.
 - Navigating away does not lose edits because the draft is automatic.
@@ -650,6 +650,7 @@ Exit gate: all top-level navigation and discovery workflows are complete.
 | 2026-08-09 | Plans interaction and discovery | Saved-plan cards are full-width tap targets with no redundant Open buttons. Tapping `iOS Validation Plan` opens the saved Standard FIRE scenario. Rename, Duplicate, and Delete are exposed as native right-side swipe actions, and search plus calculator filtering now share one clearly grouped surface. | iOS tap and layout complete; swipe gesture automation and Android pending |
 | 2026-08-09 | Contextual navigation chrome | Root Home, Calculators, Plans, and Settings tabs hide the redundant top navigation bar while preserving the bottom tab bar. Pushed calculator routes restore the native bar with a back action, the bound calculator name, and Save/Export toolbar icons. iPhone 17 screenshots verify both states and the Standard FIRE title at non-zero bounds. | iOS complete; plan-specific toolbar actions and Android pending |
 | 2026-08-09 | Home recent activity | A bounded SQLite history stores only calculator IDs, plan IDs, and local timestamps. Home resolves and shows up to three recently used calculators and three recently opened plans without changing plan modification dates. Two focused repository/migration tests pass; iPhone 17 shows both sections at non-zero bounds and retains them after process relaunch. | iOS complete; Android pending |
+| 2026-08-09 | Explicit Save As | Calculator details now expose Save, Save As, and Export as distinct native toolbar actions. Save updates the loaded plan while Save As always generates a new plan ID and makes the new copy the active plan. The native prompt now receives its suggested name as an editable initial value instead of placeholder text, fixing the same issue for Rename and Duplicate. iPhone 17 renders all three toolbar icons without title overlap and shows `My Standard FIRE Plan copy` selected in the Save As prompt. | iOS complete; prompt submission automation and Android pending |
 
 ### Phase 7: Full Settings
 

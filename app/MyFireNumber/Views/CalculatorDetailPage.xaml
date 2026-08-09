@@ -24,12 +24,24 @@
         </ToolbarItem>
         <ToolbarItem Text="Export"
                     Order="Primary"
-                    Priority="1"
+                    Priority="2"
                     Command="{Binding ExportCommand}"
                     SemanticProperties.Description="Export this calculator to Excel.">
             <ToolbarItem.IconImageSource>
                <FontImageSource FontFamily="FontAwesomeSolid"
                                 Glyph="&#xf56e;"
+                                Color="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                Size="18" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+        <ToolbarItem Text="Save As"
+                    Order="Primary"
+                    Priority="1"
+                    Command="{Binding SavePlanAsCommand}"
+                    SemanticProperties.Description="Save these values as a new plan.">
+            <ToolbarItem.IconImageSource>
+               <FontImageSource FontFamily="FontAwesomeSolid"
+                                Glyph="&#xf65e;"
                                 Color="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                                 Size="18" />
             </ToolbarItem.IconImageSource>

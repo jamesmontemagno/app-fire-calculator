@@ -22,6 +22,11 @@ public sealed class PlanNamePromptService : IPlanNamePromptService
 {
     public Task<string?> PromptAsync(string title, string message, string initialValue)
     {
-        return Shell.Current.DisplayPromptAsync(title, message, "Save", "Cancel", initialValue);
+        return Shell.Current.DisplayPromptAsync(
+            title,
+            message,
+            "Save",
+            "Cancel",
+            initialValue: initialValue);
     }
 }

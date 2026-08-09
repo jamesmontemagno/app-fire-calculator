@@ -32,6 +32,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly IStandardFireExportService exportService;
     private readonly IWithdrawalRateExportService withdrawalRateExportService;
     private readonly IPlanRepository planRepository;
+    private readonly IPlanNamePromptService planNamePromptService;
     private readonly SemaphoreSlim draftSaveLock = new(1, 1);
     private readonly object pendingDraftLock = new();
     private CancellationTokenSource? saveCancellationTokenSource;
@@ -57,6 +58,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ILeanFireExportService leanExportService,
         INavigationService navigationService,
         IPlanRepository planRepository,
+        IPlanNamePromptService planNamePromptService,
         IReverseFireExportService reverseExportService,
         ISavingsInvestmentExportService savingsInvestmentExportService,
         IStandardFireExportService exportService,
@@ -73,6 +75,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.leanExportService = leanExportService;
         this.navigationService = navigationService;
         this.planRepository = planRepository;
+        this.planNamePromptService = planNamePromptService;
         this.reverseExportService = reverseExportService;
         this.savingsInvestmentExportService = savingsInvestmentExportService;
         this.exportService = exportService;
@@ -724,7 +727,30 @@ public partial class CalculatorDetailViewModel : ObservableObject
     [RelayCommand]
     private async Task SavePlanAsync()
     {
-        if (string.IsNullOrWhiteSpace(PlanNameText))
+        await SavePlanCoreAsync(PlanNameText, createNew: false);
+    }
+
+    [RelayCommand]
+    private async Task SavePlanAsAsync()
+    {
+        var initialName = string.IsNullOrWhiteSpace(PlanNameText)
+            ? $"My {Title} Plan"
+            : $"{PlanNameText.Trim()} copy";
+        var name = await planNamePromptService.PromptAsync(
+            "Save plan as",
+            "Enter a name for this new scenario.",
+            initialName);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        await SavePlanCoreAsync(name, createNew: true);
+    }
+
+    private async Task SavePlanCoreAsync(string planName, bool createNew)
+    {
+        if (string.IsNullOrWhiteSpace(planName))
         {
             ValidationMessage = "Enter a name before saving this plan.";
             return;
@@ -807,18 +833,19 @@ public partial class CalculatorDetailViewModel : ObservableObject
         try
         {
             var now = DateTime.UtcNow;
-            var isUpdatingLoadedPlan = loadedPlanId is not null;
-            var planIdToSave = loadedPlanId ?? Guid.NewGuid().ToString("N");
+            var isUpdatingLoadedPlan = !createNew && loadedPlanId is not null;
+            var planIdToSave = isUpdatingLoadedPlan ? loadedPlanId! : Guid.NewGuid().ToString("N");
             await planRepository.SaveAsync(new PlanRecord(
                 planIdToSave,
                 calculatorId,
-                PlanNameText.Trim(),
+                planName.Trim(),
                 payloadVersion,
                 payloadJson,
-                loadedPlanCreatedAtUtc ?? now,
+                isUpdatingLoadedPlan ? loadedPlanCreatedAtUtc ?? now : now,
                 now));
             loadedPlanId = planIdToSave;
-            loadedPlanCreatedAtUtc ??= now;
+            loadedPlanCreatedAtUtc = isUpdatingLoadedPlan ? loadedPlanCreatedAtUtc ?? now : now;
+            PlanNameText = planName.Trim();
             PlanStatusMessage = isUpdatingLoadedPlan
                 ? $"Updated \"{PlanNameText.Trim()}\" in Plans."
                 : $"Saved \"{PlanNameText.Trim()}\" to Plans.";
