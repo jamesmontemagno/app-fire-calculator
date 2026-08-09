@@ -100,7 +100,7 @@ implementation passes cannot lose requested refinements.
 - [x] Plans search and filtering share one compact surface in the collection header.
 - [x] Calculator search is theme-aware and calculator cards have distinct icons.
 - [x] Home shows the three most recently used calculators and opened plans.
-- [ ] Home shows onboarding/recommendation guidance only before meaningful calculator or plan activity; afterward, navigation tabs replace the large starter catalog. Include quiz recommendation and retake actions.
+- [x] Home shows onboarding/recommendation guidance only before meaningful calculator or plan activity; afterward, navigation tabs replace the large starter catalog. Include quiz recommendation and retake actions.
 - [ ] Replace the default .NET app icon and splash screen with branded My Fire Number assets.
 - [x] Remove the duplicate large calculator title/summary block when the native navigation bar already identifies the calculator.
 - [ ] Move Privacy to the bottom of Settings, link Terms and Privacy to the website, and update web Terms to cover the mobile app.
@@ -657,7 +657,7 @@ Exit gate: collection editing, calculations, charts, plans, and exports pass on 
 
 - [x] Port quiz questions and recommendation rules
 - [x] Implement Skip, completion, retake, and draft-overwrite confirmation
-- [ ] Build Home with enabled calculators in selected order
+- [x] Build Home with enabled calculators in selected order
 - [~] Build searchable All Calculators catalog
 - [~] Build Plans list and plan management workflows
 - [ ] Verify hidden calculators remain discoverable
@@ -676,6 +676,7 @@ Exit gate: all top-level navigation and discovery workflows are complete.
 | 2026-08-09 | Native FIRE Quiz | The eight-question native quiz matches the web recommendation priority and creates calculator-specific typed drafts from local answers. Seven focused rule tests cover every recommendation path and the full suite passes with 71 tests. On iPhone 17, Lean FIRE renders at non-zero bounds, the existing-draft path shows a native Replace/Cancel confirmation, and a clean Reverse FIRE path opens with quiz-prefilled ages 40/50, `$200,000` savings, and `$60,000` expenses. The dark native Entry reports TextColor `#F2F7F3`, PlaceholderColor `#B9D1C2`, and a transparent MAUI outer background; screenshot evidence confirms readable contrast. | iOS complete; Android pending |
 | 2026-08-09 | Streamlined plans and calculator chrome | Plans search and calculator filtering now scroll in a compact `CollectionView` header; the list renders at 362x697 on iPhone 17. Calculator pages begin directly with calculator content beneath the contextual native title, without a duplicate 30-point heading. Fresh drafts expose Save to Plans and loaded plans expose Update Plan in both toolbar and page actions; Save As is removed because Plans already provides Duplicate. The dark Plans SearchBar reports TextColor `#F2F7F3` and PlaceholderColor `#B9D1C2`; the exercised calculator Entry reports the same readable colors. All 71 tests pass. | iOS complete; Android pending |
 | 2026-08-09 | Grouped calculator catalog | The All Calculators `CollectionView` now presents FIRE, Finance, and Cash Flow groups with distinct accessible headers while retaining full-card navigation and search. On iPhone 17, all three headers render at non-zero bounds; searching `debt` collapses the list to the Finance header and Debt Payoff card. The dark native SearchBar reports TextColor `#F2F7F3`, PlaceholderColor `#B9D1C2`, and a transparent MAUI outer background. All 71 tests pass. | iOS complete; Android pending |
+| 2026-08-09 | Activity-aware Home guidance | Home now persists only the non-sensitive recommended calculator ID from the quiz. Before calculator or plan activity, it shows the quiz recommendation with Open, Retake Quiz, and Browse All actions; Retake opens the native quiz and its numeric Entry at non-zero bounds. Once recent calculator activity or any saved plan exists, the starter card is removed and the bounded recent sections remain. iPhone 17 screenshots verify both states; all 71 tests pass. | iOS complete; Android pending |
 
 ### Phase 7: Full Settings
 

@@ -13,6 +13,7 @@ public partial class HomeViewModel : ObservableObject
 {
     private readonly ICalculatorCatalog catalog;
     private readonly INavigationService navigationService;
+    private readonly IOnboardingService onboardingService;
     private readonly ICalculatorPreferencesRepository preferencesRepository;
     private readonly IPlanRepository planRepository;
     private readonly IRecentActivityRepository recentActivityRepository;
@@ -20,12 +21,14 @@ public partial class HomeViewModel : ObservableObject
     public HomeViewModel(
         ICalculatorCatalog catalog,
         INavigationService navigationService,
+        IOnboardingService onboardingService,
         ICalculatorPreferencesRepository preferencesRepository,
         IPlanRepository planRepository,
         IRecentActivityRepository recentActivityRepository)
     {
         this.catalog = catalog;
         this.navigationService = navigationService;
+        this.onboardingService = onboardingService;
         this.preferencesRepository = preferencesRepository;
         this.planRepository = planRepository;
         this.recentActivityRepository = recentActivityRepository;
@@ -37,6 +40,12 @@ public partial class HomeViewModel : ObservableObject
 
     public bool HasRecentCalculators => RecentCalculators.Count > 0;
     public bool HasRecentPlans => RecentPlans.Count > 0;
+    public bool ShowGettingStarted { get; private set; }
+    public bool HasQuizRecommendation => ShowGettingStarted && RecommendedCalculator is not null;
+    public bool ShowFeaturedCalculators => ShowGettingStarted && RecommendedCalculator is null;
+
+    [ObservableProperty]
+    private CalculatorDefinition? recommendedCalculator;
 
     public async Task LoadAsync()
     {
@@ -90,8 +99,17 @@ public partial class HomeViewModel : ObservableObject
             }
         }
 
+        ShowGettingStarted = RecentCalculators.Count == 0
+            && RecentPlans.Count == 0
+            && plansById.Count == 0;
+        RecommendedCalculator = onboardingService.RecommendationCalculatorId is { } recommendationId
+            ? catalog.All.FirstOrDefault(definition => definition.Id == recommendationId)
+            : null;
         OnPropertyChanged(nameof(HasRecentCalculators));
         OnPropertyChanged(nameof(HasRecentPlans));
+        OnPropertyChanged(nameof(ShowGettingStarted));
+        OnPropertyChanged(nameof(HasQuizRecommendation));
+        OnPropertyChanged(nameof(ShowFeaturedCalculators));
     }
 
     [RelayCommand]
@@ -124,5 +142,11 @@ public partial class HomeViewModel : ObservableObject
     private Task BrowseCalculatorsAsync()
     {
         return navigationService.GoToAsync("//calculators");
+    }
+
+    [RelayCommand]
+    private Task RetakeQuizAsync()
+    {
+        return navigationService.GoToAsync("quiz");
     }
 }

@@ -370,6 +370,7 @@ public partial class QuizViewModel : ObservableObject
         RecommendationDescription = recommendation.Description;
         RecommendationBenefits = string.Join(Environment.NewLine, recommendation.Benefits.Select(benefit => $"- {benefit}"));
         RecommendationIconGlyph = catalog.GetRequired(recommendation.CalculatorId).IconGlyph;
+        onboardingService.SetRecommendation(recommendation.CalculatorId);
         IsRecommendationVisible = true;
     }
 

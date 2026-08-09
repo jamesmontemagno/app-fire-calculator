@@ -147,7 +147,8 @@
                    </VerticalStackLayout>
                 </Border>
 
-                <Border Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                <Border IsVisible="{Binding ShowGettingStarted}"
+                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                         Padding="18"
                         Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                         StrokeShape="RoundRectangle 8">
@@ -159,12 +160,52 @@
                                 TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                    SemanticProperties.Description="Calculator" />
                             <Label Grid.Column="1"
-                                Text="Start with a calculator"
+                                Text="Your FIRE starting point"
                                 TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                                 FontAttributes="Bold"
                                 FontSize="20" />
                            </Grid>
-                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding FeaturedCalculators}" Spacing="10">
+                        <Border IsVisible="{Binding HasQuizRecommendation}"
+                                Padding="14"
+                                Background="{AppThemeBinding Light=#EAF4EC, Dark=#15211C}"
+                                Stroke="{AppThemeBinding Light=#A8D4B2, Dark=#43805B}"
+                                StrokeShape="RoundRectangle 10"
+                                SemanticProperties.Description="{Binding RecommendedCalculator.Title, StringFormat='Open your recommended {0} calculator'}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenCalculatorCommand}"
+                                                      CommandParameter="{Binding RecommendedCalculator}" />
+                            </Border.GestureRecognizers>
+                            <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12">
+                                <Label Text="{Binding RecommendedCalculator.IconGlyph}"
+                                       FontFamily="FontAwesomeSolid"
+                                       FontSize="20"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                       SemanticProperties.Description="Quiz recommendation" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="Recommended from your quiz"
+                                           FontSize="12"
+                                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
+                                    <Label Text="{Binding RecommendedCalculator.Title}"
+                                           FontAttributes="Bold"
+                                           FontSize="18"
+                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                                    <Label Text="{Binding RecommendedCalculator.Summary}"
+                                           FontSize="13"
+                                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                                </VerticalStackLayout>
+                                <Label Grid.Column="2"
+                                       Text="&#xf054;"
+                                       FontFamily="FontAwesomeSolid"
+                                       VerticalTextAlignment="Center"
+                                       TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                       SemanticProperties.Description="Open" />
+                            </Grid>
+                        </Border>
+                        <VerticalStackLayout IsVisible="{Binding ShowFeaturedCalculators}"
+                                             BindableLayout.ItemsSource="{Binding FeaturedCalculators}"
+                                             Spacing="10">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="catalog:CalculatorDefinition">
                                     <Border Padding="10,8"
@@ -195,14 +236,25 @@
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
-                        <Button Text="Browse all calculators"
-                                Command="{Binding BrowseCalculatorsCommand}"
-                                Background="#E4F0E9"
-                                TextColor="#245744">
-                            <Button.ImageSource>
-                                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf00e;" Color="#245744" Size="14" />
-                            </Button.ImageSource>
-                        </Button>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Text="Retake quiz"
+                                    Command="{Binding RetakeQuizCommand}"
+                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}"
+                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}">
+                                <Button.ImageSource>
+                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf2f1;" Color="{AppThemeBinding Light=#245744, Dark=#C8E7D5}" Size="14" />
+                                </Button.ImageSource>
+                            </Button>
+                            <Button Grid.Column="1"
+                                    Text="Browse all"
+                                    Command="{Binding BrowseCalculatorsCommand}"
+                                    Background="#2F6B57"
+                                    TextColor="#FFFFFF">
+                                <Button.ImageSource>
+                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf00e;" Color="#FFFFFF" Size="14" />
+                                </Button.ImageSource>
+                            </Button>
+                        </Grid>
                     </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>
