@@ -467,6 +467,7 @@ Exit gate: all technical risks have small running proofs on both target platform
 | 2026-08-09 | iOS Open XML and share proof | Fresh iPhone 17 launch creates `my-fire-number-proof.xlsx` in app cache. Tapping the visible share action opens the iOS native share sheet, which names the workbook and offers Copy and Save to Files. Runtime button colors are TextColor `#FFFFFF` on BackgroundColor `#512BD4`; Android remains pending. | iOS complete |
 | 2026-08-09 | Debug build configuration | Debug builds define `MAUI_DEVFLOW` only when the IDE sets `MauiDevFlowEnabled=true`, matching extension package injection. Standalone iOS simulator and Android builds both succeed without a missing DevFlow assembly; 56 native tests pass. | Complete; IDE runtime inspection remains required |
 | 2026-08-09 | DevFlow CLI recovery | The MAUI CLI broker, iPhone 17 simulator, and instrumented iOS build connect successfully. Settings renders at 402x874; selecting Dark makes the native Picker TextColor `#F2F7F3` and TitleColor `#B9D1C2`, and those values persist after a full process relaunch. | iOS complete |
+| 2026-08-09 | Calculator preferences | On iPhone 17, Settings renders the Home calculator visibility, ordering, and reset controls. Hiding Standard FIRE changes its action to Show and removes it from Home after a full process relaunch; reset restores the default visible state. | iOS complete; Android pending |
 
 #### Temporary DevFlow Extension Workaround
 
