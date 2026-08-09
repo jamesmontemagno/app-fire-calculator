@@ -100,13 +100,14 @@
                                Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                                Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                                StrokeShape="RoundRectangle 12"
-                               SemanticProperties.Description="{Binding Name, StringFormat='Open saved plan {0}. Swipe left for more actions.'}">
-                           <Border.GestureRecognizers>
-                               <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=OpenPlanCommand}"
-                                                     CommandParameter="{Binding .}" />
-                           </Border.GestureRecognizers>
-                           <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                               <VerticalStackLayout Spacing="3">
+                               SemanticProperties.Description="{Binding Name, StringFormat='Saved plan {0}.'}">
+                           <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
+                               <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                   <Grid.GestureRecognizers>
+                                       <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=OpenPlanCommand}"
+                                                             CommandParameter="{Binding .}" />
+                                   </Grid.GestureRecognizers>
+                                   <VerticalStackLayout Spacing="3">
                                    <Label Text="{Binding Name}"
                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                                           FontAttributes="Bold"
@@ -117,14 +118,40 @@
                                    <Label Text="{Binding UpdatedDescription}"
                                           TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
                                           FontSize="12" />
-                               </VerticalStackLayout>
-                               <Label Grid.Column="1"
-                                      Text="&#xf054;"
-                                      FontFamily="FontAwesomeSolid"
-                                      FontSize="14"
-                                      VerticalTextAlignment="Center"
-                                      TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                                      SemanticProperties.Description="Open" />
+                                   </VerticalStackLayout>
+                                   <Label Grid.Column="1"
+                                          Text="&#xf054;"
+                                          FontFamily="FontAwesomeSolid"
+                                          FontSize="14"
+                                          VerticalTextAlignment="Center"
+                                          TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                          SemanticProperties.Description="Open" />
+                               </Grid>
+                               <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                   <Button AutomationId="{Binding Id, StringFormat='RenamePlan-{0}'}"
+                                           Text="Rename"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=RenamePlanCommand}"
+                                           CommandParameter="{Binding .}"
+                                           Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
+                                           TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                           SemanticProperties.Description="{Binding Name, StringFormat='Rename saved plan {0}.'}" />
+                                   <Button AutomationId="{Binding Id, StringFormat='DuplicatePlan-{0}'}"
+                                           Grid.Column="1"
+                                           Text="Duplicate"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=DuplicatePlanCommand}"
+                                           CommandParameter="{Binding .}"
+                                           Background="{AppThemeBinding Light=#E6ECF5, Dark=#263D57}"
+                                           TextColor="{AppThemeBinding Light=#294F7D, Dark=#C8DCF5}"
+                                           SemanticProperties.Description="{Binding Name, StringFormat='Duplicate saved plan {0}.'}" />
+                                   <Button AutomationId="{Binding Id, StringFormat='DeletePlan-{0}'}"
+                                           Grid.Column="2"
+                                           Text="Delete"
+                                           Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=DeletePlanCommand}"
+                                           CommandParameter="{Binding .}"
+                                           Background="{AppThemeBinding Light=#F5E5E2, Dark=#542C28}"
+                                           TextColor="{AppThemeBinding Light=#8C3028, Dark=#FFD0CA}"
+                                           SemanticProperties.Description="{Binding Name, StringFormat='Delete saved plan {0} after confirmation.'}" />
+                               </Grid>
                            </Grid>
                        </Border>
                    </SwipeView>

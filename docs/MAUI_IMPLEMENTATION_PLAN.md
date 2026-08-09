@@ -94,7 +94,7 @@ implementation passes cannot lose requested refinements.
 
 - [x] Retirement Cash Flow supports custom accounts, income sources, and expenses.
 - [x] Calculator and plan cards open when the card is tapped; redundant Open buttons are removed.
-- [~] Plans expose Rename, Duplicate, and Delete swipe actions; direct iOS swipe automation and Android validation remain.
+- [~] Plans expose Rename, Duplicate, and Delete as visible accessible actions plus swipe shortcuts; iOS prompts are validated and Android remains.
 - [x] Root tabs hide the navigation bar while pushed calculators restore a contextual title and toolbar.
 - [x] Settings uses icon controls for calculator order/visibility and an appearance-first segmented selector.
 - [x] Plans search and filtering share one compact surface in the collection header.
@@ -379,7 +379,7 @@ stack layout.
 - [ ] Sort by last modified by default
 - [x] Show plan name, calculator, and last modified time
 - [x] Open a plan into its calculator
-- [~] Rename, duplicate, and delete through native actions (implemented; device validation pending)
+- [~] Rename, duplicate, and delete through native actions (implemented and prompt-validated on iOS; Android pending)
 - [~] Show an intentional empty state (iOS validated; Android pending)
 
 ### Save Semantics
@@ -398,7 +398,7 @@ stack layout.
 - [~] Show/hide calculators (implemented; device validation pending)
 - [~] Reorder calculators with accessible move controls and native reorder interaction (accessible move controls implemented; device validation pending)
 - [~] Reset visibility and order to defaults (implemented; device validation pending)
-- [ ] Keep hidden calculators discoverable in All Calculators
+- [~] Keep hidden calculators discoverable in All Calculators (validated on iOS; Android pending)
 
 ### Appearance
 
@@ -660,7 +660,7 @@ Exit gate: collection editing, calculations, charts, plans, and exports pass on 
 - [x] Build Home with enabled calculators in selected order
 - [~] Build searchable All Calculators catalog
 - [~] Build Plans list and plan management workflows
-- [ ] Verify hidden calculators remain discoverable
+- [~] Verify hidden calculators remain discoverable (validated on iOS; Android pending)
 
 Exit gate: all top-level navigation and discovery workflows are complete.
 
@@ -704,6 +704,8 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 | 2026-08-09 | Calculator defaults | Settings now persists expected return, inflation, withdrawal rate, current age, and retirement age as decimal-backed assumptions for newly created calculators. Existing drafts and named plans remain untouched. On iPhone 17, all five numeric fields render in a compact two-column card, validation explains invalid ranges, save confirmation appears in-page, and the native expected-return Entry reports TextColor `#F2F7F3` and PlaceholderColor `#8EAA9B` over the visually verified `#15211C` field surface. | iOS complete; Android pending |
 | 2026-08-09 | Behavior and accessibility preferences | Settings now persists a post-onboarding launch destination, latest-draft restoration, plan-delete confirmation, haptics, reduced chart motion, and a high-contrast dark palette. Relaunching iPhone 17 after selecting Calculators opens that tab; enabling reduced motion gives the live Standard FIRE chart `AnimationsSpeed=00:00:00`; disabling it restores motion. The behavior card renders all controls with non-zero bounds, and its selected action reports white text while the page's native numeric Entry remains `#F2F7F3` with `#8EAA9B` placeholder text on the verified dark field surface. | iOS simulator complete; physical haptics and Android pending |
 | 2026-08-09 | Currency preference | Calculator results use the device region by default and can explicitly display USD, CAD, EUR, GBP, AUD, or JPY while retaining the device's number separators. On iPhone 17, selecting EUR changes the live Standard FIRE result to `€1,200,000`; restoring Device region returns the default. The native 316x44-point Picker reports TextColor `#F2F7F3` and TitleColor `#8EAA9B` over the visually verified dark field surface. | iOS complete; Android and expanded locale matrix pending |
+| 2026-08-09 | Hidden calculator discovery | Standard FIRE remained visible in the grouped All Calculators catalog while its Settings action showed that it was hidden from Home. The catalog card retained its full open action, confirming Home personalization never removes calculator access. Standard FIRE was restored to Home after validation. | iOS complete; Android pending |
+| 2026-08-09 | Accessible plan management | Plan cards retain left-swipe shortcuts and now also show explicit 104x44-point Rename, Duplicate, and Delete controls. On iPhone 17, each action opens the correct native prompt with the current or generated copy name; Delete explains that the automatic calculator draft remains. SearchBar and Picker runtime colors are `#F2F7F3` text with `#B9D1C2` placeholder/title text, and Rename reports `#C8E7D5`. | iOS complete; destructive acceptance and Android pending |
 
 ### Phase 8: Release Hardening
 
