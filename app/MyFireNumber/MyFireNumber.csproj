@@ -79,7 +79,7 @@
 		<ProjectReference Include="..\..\src\MyFireNumber.Storage\MyFireNumber.Storage.csproj" />
 	</ItemGroup>
 
-	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug' and '$(MauiDevFlowEnabled)' == 'true'">
 		<DefineConstants>$(DefineConstants);MAUI_DEVFLOW</DefineConstants>
 	</PropertyGroup>
 

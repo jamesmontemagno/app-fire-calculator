@@ -465,6 +465,7 @@ Exit gate: all technical risks have small running proofs on both target platform
 | 2026-08-09 | iOS LiveCharts2 proof | Fresh iPhone 17 launch renders a visible `CartesianChart` at 316x340 with the expected line and area fill. The visual tree exposes its portfolio-projection accessibility label; the heading is TextColor `#17352C` on the light canvas. Android remains pending. | iOS complete |
 | 2026-08-09 | iOS SQLite proof | Fresh iPhone 17 launch creates an app-private database, writes a v1 row, adds a nullable v2 column, updates it to schema version 2, and reads the expected values back. The visible status label has non-zero bounds and TextColor `#425D54`; Android remains pending. | iOS complete |
 | 2026-08-09 | iOS Open XML and share proof | Fresh iPhone 17 launch creates `my-fire-number-proof.xlsx` in app cache. Tapping the visible share action opens the iOS native share sheet, which names the workbook and offers Copy and Save to Files. Runtime button colors are TextColor `#FFFFFF` on BackgroundColor `#512BD4`; Android remains pending. | iOS complete |
+| 2026-08-09 | Debug build configuration | Debug builds define `MAUI_DEVFLOW` only when the IDE sets `MauiDevFlowEnabled=true`, matching extension package injection. Standalone iOS simulator and Android builds both succeed without a missing DevFlow assembly; 56 native tests pass. | Complete; IDE runtime inspection remains required |
 
 #### Temporary DevFlow Extension Workaround
 
