@@ -10,6 +10,11 @@ The native app should provide calculator feature parity with the web app while u
 navigation, local storage, lifecycle handling, accessibility, sharing, and platform conventions.
 Financial data must remain on-device.
 
+**Current status:** Feature implementation and iOS simulator validation are complete. Version 1
+release qualification remains blocked on Android runtime automation, minimum-OS simulators/devices,
+screen-reader and landscape device passes, hosted CI from a pushed branch, Apple Numbers, production
+legal-page deployment, and store-console submission.
+
 ## Status Legend
 
 - `[ ]` Not started
@@ -22,7 +27,7 @@ evidence. Compilation alone is not completion for user-facing work.
 
 ## Confirmed Product Decisions
 
-- [x] App name: MyFireNumber
+- [x] Product name: My Fire Number; home-screen display name: `My Fire #`
 - [x] Application ID: `com.refractored.myfirenumber`
 - [x] Initial platforms: iOS and Android
 - [x] Core development target: standard iPhone 17 simulator
@@ -54,17 +59,17 @@ presets, input semantics, result metrics, projection data, explanatory copy, and
 
 | Calculator | Web reference | Native status |
 | --- | --- | --- |
-| Standard FIRE | `web/src/pages/StandardFIRE.tsx` | [ ] |
-| Coast FIRE | `web/src/pages/CoastFIRE.tsx` | [ ] |
-| Lean FIRE | `web/src/pages/LeanFIRE.tsx` | [ ] |
-| Fat FIRE | `web/src/pages/FatFIRE.tsx` | [ ] |
-| Barista FIRE | `web/src/pages/BaristaFIRE.tsx` | [ ] |
-| Reverse FIRE | `web/src/pages/ReverseFIRE.tsx` | [ ] |
-| Withdrawal Rate | `web/src/pages/WithdrawalRate.tsx` | [ ] |
-| Savings and Investment Rate | `web/src/pages/SavingsRate.tsx` | [ ] |
-| Debt Payoff | `web/src/pages/DebtPayoff.tsx` | [ ] |
-| Healthcare Gap | `web/src/pages/HealthcareGap.tsx` | [ ] |
-| Retirement Cash Flow | `web/src/pages/DeferredCompensation.tsx` | [ ] |
+| Standard FIRE | `web/src/pages/StandardFIRE.tsx` | [~] iOS complete; Android runtime pending |
+| Coast FIRE | `web/src/pages/CoastFIRE.tsx` | [~] iOS complete; Android runtime pending |
+| Lean FIRE | `web/src/pages/LeanFIRE.tsx` | [~] iOS complete; Android runtime pending |
+| Fat FIRE | `web/src/pages/FatFIRE.tsx` | [~] iOS complete; Android runtime pending |
+| Barista FIRE | `web/src/pages/BaristaFIRE.tsx` | [~] iOS complete; Android runtime pending |
+| Reverse FIRE | `web/src/pages/ReverseFIRE.tsx` | [~] iOS complete; Android runtime pending |
+| Withdrawal Rate | `web/src/pages/WithdrawalRate.tsx` | [~] iOS complete; Android runtime pending |
+| Savings and Investment Rate | `web/src/pages/SavingsRate.tsx` | [~] iOS complete; Android runtime pending |
+| Debt Payoff | `web/src/pages/DebtPayoff.tsx` | [~] iOS complete; Android runtime pending |
+| Healthcare Gap | `web/src/pages/HealthcareGap.tsx` | [~] iOS complete; Android runtime pending |
+| Retirement Cash Flow | `web/src/pages/DeferredCompensation.tsx` | [~] iOS complete; Android runtime pending |
 
 ### Included Supporting Features
 
@@ -101,7 +106,7 @@ implementation passes cannot lose requested refinements.
 - [x] Calculator search is theme-aware and calculator cards have distinct icons.
 - [x] Home shows the three most recently used calculators and opened plans.
 - [x] Home shows onboarding/recommendation guidance only before meaningful calculator or plan activity; afterward, navigation tabs replace the large starter catalog. Include quiz recommendation and retake actions.
-- [~] Replace the default .NET app icon and splash screen with branded My Fire Number assets.
+- [x] Replace the default .NET app icon and splash screen with branded My Fire Number assets.
 - [x] Remove the duplicate large calculator title/summary block when the native navigation bar already identifies the calculator.
 - [~] Move Privacy to the bottom of Settings, link Terms and Privacy to the website, and update web Terms to cover the mobile app.
 - [x] Keep Retirement Cash Flow's main sections visible and use polished row-level accordions for individual accounts, income sources, and additional expenses. New rows expand for editing; existing rows start collapsed.
@@ -709,18 +714,18 @@ Exit gate: settings persist across relaunch and do not corrupt drafts or plans.
 
 ### Phase 8: Release Hardening
 
-- [ ] Validate Android minimum supported API behavior
-- [ ] Validate iOS minimum supported version behavior
+- [!] Validate Android minimum supported API behavior (API 21 runtime/device unavailable; Android DevFlow agent does not register)
+- [!] Validate iOS minimum supported version behavior (only iOS 26.5 runtime is installed)
 - [~] Validate phone, tablet, portrait, and landscape layouts (iPhone and iPad portrait complete; landscape and Android pending)
-- [ ] Validate VoiceOver and TalkBack workflows
-- [ ] Validate large text and display scaling
+- [!] Validate VoiceOver and TalkBack workflows (requires interactive assistive-technology passes on both platforms)
+- [~] Validate large text and display scaling (iPad accessibility-extra-extra-large complete; Android pending)
 - [~] Validate light, dark, high contrast, and reduced motion (iOS complete; Android pending)
-- [ ] Validate offline cold start and all local workflows
+- [~] Validate offline cold start and all local workflows (zero-network iOS cold start and source audit complete; physically disconnected-radio matrix pending)
 - [~] Validate background/foreground and process termination restoration (iOS draft flush/relaunch complete; Android pending)
 - [x] Validate database upgrade from every released schema
 - [~] Validate import/export and corrupted input handling (storage tests and iOS prompts/share complete; Android pending)
 - [~] Validate Release trimming and AOT
-- [ ] Run Android and iOS GitHub Actions workflows
+- [!] Run Android and iOS GitHub Actions workflows (the local branch has no upstream and cannot be dispatched until explicitly pushed)
 - [~] Complete privacy disclosures, app metadata, icons, splash screen, and screenshots (metadata/disclosures/assets complete; final store screenshot matrix pending)
 
 Exit gate: release candidate passes the Definition of Done below.
@@ -731,7 +736,7 @@ Exit gate: release candidate passes the Definition of Done below.
 | --- | --- | --- | --- |
 | 2026-08-09 | iOS linked/AOT simulator launch | A clean linked/AOT Release rebuild completed without warnings. The shipping-style app launched on iPhone 17 and rendered the Home dashboard with persisted SQLite recents in dark mode. Simulator LLVM was disabled after Open XML LLVM optimization remained CPU-bound for more than 36 minutes; final device/store LLVM validation remains required. | iOS simulator complete; device LLVM and Android pending |
 | 2026-08-09 | Current release builds | The final 79-test Release suite passes. The current iOS `iossimulator-arm64` Release build succeeds with linking/AOT and simulator LLVM disabled. Android API 35 Debug builds, installs, launches, and keeps a live process; the trimmed `android-arm64` Release build succeeds with Android AOT disabled because the .NET 10 toolchain fails precompilation across framework and app assemblies. | Build validation complete; Android UI automation and Android AOT pending |
-| 2026-08-09 | iPad portrait layout | On an iPad Pro 11-inch simulator, the quiz and Home render at 834x1210 points without clipping. Home keeps all 11 calculators, quiz/retake/browse actions, and the four-tab bar reachable. The 748x44-point native quiz Entry reports TextColor `#17352C` and PlaceholderColor `#587068` over the visually verified light field. | iPad portrait complete; landscape and dynamic-type matrix pending |
+| 2026-08-09 | iPad portrait layout | On an iPad Pro 11-inch simulator, the quiz and Home render at 834x1210 points without clipping. Home keeps all 11 calculators, quiz/retake/browse actions, and the four-tab bar reachable. The 748x44-point native quiz Entry reports TextColor `#17352C` and PlaceholderColor `#587068` over the visually verified light field. | iPad portrait complete; landscape pending |
 | 2026-08-09 | Toolchain and CI hardening | MAUI Doctor reports all 13 checks healthy with the active .NET 10 SDK, MAUI workload, Microsoft OpenJDK, Android SDK, and Xcode. Both mobile workflows now restore workloads from the project, run the 79-test Release suite, trigger for app/Core/storage/test changes, and use the latest stable Xcode selector. | Local validation complete; hosted workflow dispatch requires a pushed branch |
 | 2026-08-09 | Store metadata and disclosures | `docs/MOBILE_STORE_LISTING.md` records store identity, descriptions, legal/support URLs, review notes, no-collection disclosures, OS-backup behavior, and the required screenshot set. The app repeats the OS-backup disclosure in Settings; the branded icon/splash and educational disclaimers are present. | Content complete; final platform screenshot capture and store-console entry pending |
 | 2026-08-09 | Temporary export retention | App startup removes generated `.xlsx` reports and versioned JSON backups from the OS cache after 24 hours. Cleanup handles unavailable or locked cache files without exposing filenames or financial values. The final iOS app launches normally after cleanup registration, and iOS/Android Debug builds plus all 79 Release tests pass. | Complete |
@@ -950,14 +955,14 @@ The native version 1 is complete only when all statements are true:
 - [~] Named plans support save, rename, duplicate, load, and delete (iOS validated; Android pending)
 - [x] Database and payload migrations have upgrade tests
 - [~] Every chart renders with LiveCharts2 and has an accessible text equivalent (iOS validated; Android pending)
-- [ ] Excel reports open successfully from both platforms
+- [!] Excel reports open successfully from both platforms (Excel verified on macOS; Apple Numbers is not installed and Android share-target validation is blocked)
 - [~] Theme, locale, defaults, privacy, behavior, and accessibility settings persist (iOS validated; Android pending)
 - [~] Delete-all and data import/export are validated (storage and iOS validated; Android pending)
 - [x] No financial data is transmitted or written to logs
-- [ ] All critical workflows function offline
-- [ ] VoiceOver, TalkBack, large text, contrast, and reduced motion are validated
-- [ ] Debug and trimmed Release validation pass for iOS and Android
-- [ ] Android and iOS CI workflows pass
+- [~] All critical workflows function offline (no runtime backend and zero-network iOS cold start verified; disconnected-radio/platform matrix pending)
+- [~] VoiceOver, TalkBack, large text, contrast, and reduced motion are validated (large text, contrast, and reduced motion verified on iOS; screen readers and Android pending)
+- [~] Debug and trimmed Release validation pass for iOS and Android (local builds pass; Android AOT and release runtime launch pending)
+- [!] Android and iOS CI workflows pass (requires explicit push of the local branch before dispatch)
 - [x] App identifier is `com.refractored.myfirenumber` in project and release configuration
 - [~] Store assets, privacy disclosures, and educational disclaimers are complete (final screenshot matrix pending)
 
