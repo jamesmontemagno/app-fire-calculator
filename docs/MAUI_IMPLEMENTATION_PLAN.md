@@ -376,7 +376,7 @@ stack layout.
 
 - [~] Show/hide calculators (implemented; device validation pending)
 - [~] Reorder calculators with accessible move controls and native reorder interaction (accessible move controls implemented; device validation pending)
-- [ ] Reset visibility and order to defaults
+- [~] Reset visibility and order to defaults (implemented; device validation pending)
 - [ ] Keep hidden calculators discoverable in All Calculators
 
 ### Appearance

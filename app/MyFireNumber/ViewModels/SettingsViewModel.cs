@@ -12,6 +12,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IOnboardingService onboardingService;
     private readonly INavigationService navigationService;
     private readonly ICalculatorCatalog catalog;
+    private readonly IConfirmationService confirmationService;
     private readonly ICalculatorPreferencesRepository preferencesRepository;
     private readonly IThemeService themeService;
 
@@ -20,12 +21,14 @@ public partial class SettingsViewModel : ObservableObject
         INavigationService navigationService,
         ICalculatorCatalog catalog,
         ICalculatorPreferencesRepository preferencesRepository,
+        IConfirmationService confirmationService,
         IThemeService themeService)
     {
         this.onboardingService = onboardingService;
         this.navigationService = navigationService;
         this.catalog = catalog;
         this.preferencesRepository = preferencesRepository;
+        this.confirmationService = confirmationService;
         this.themeService = themeService;
         selectedTheme = themeService.Preference;
     }
@@ -88,6 +91,30 @@ public partial class SettingsViewModel : ObservableObject
         }
 
         await MoveCalculatorAsync(index, index + 1);
+    }
+
+    [RelayCommand]
+    private async Task ResetCalculatorPreferencesAsync()
+    {
+        var confirmed = await confirmationService.ConfirmAsync(
+            "Reset Home calculators?",
+            "Show every calculator and restore the default Home order?",
+            "Reset",
+            "Cancel");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        foreach (var calculator in catalog.All.Select((definition, index) => new { definition, index }))
+        {
+            await preferencesRepository.SaveAsync(new CalculatorPreferenceRecord(
+                calculator.definition.Id,
+                true,
+                calculator.index));
+        }
+
+        await LoadAsync();
     }
 
     [RelayCommand]

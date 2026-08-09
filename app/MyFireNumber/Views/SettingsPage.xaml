@@ -99,6 +99,11 @@
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
+                        <Button Text="Reset Home calculators"
+                                Command="{Binding ResetCalculatorPreferencesCommand}"
+                                Background="#E4F0E9"
+                                TextColor="#245744"
+                                SemanticProperties.Description="Show all calculators and restore the default Home order after confirmation." />
                     </VerticalStackLayout>
                 </Border>
                 <Border Padding="18"
