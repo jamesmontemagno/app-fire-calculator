@@ -1,493 +1,453 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, CardHeader, CardContent } from '../components/ui'
 import SEO from '../components/SEO'
+import { Card, CardContent } from '../components/ui'
+import { getCalculatorByPath } from '../config/calculators'
 import { calculatorSEO } from '../config/seo'
+import {
+  recommendFirePaths,
+  type FireQuizMatch,
+  type FireQuizRecommendation,
+  type QuizAnswers,
+} from '../utils/quizRecommendations'
 
-interface QuizAnswers {
-  currentAge?: number
-  retirementAge?: number
-  currentSavings?: number
-  annualIncome?: number
-  annualExpenses?: number
-  lifestyle?: 'minimal' | 'moderate' | 'comfortable' | 'luxury'
-  workPreference?: 'quit-completely' | 'part-time' | 'flexible' | 'coast'
-  riskTolerance?: 'conservative' | 'moderate' | 'aggressive'
-  primaryGoal?: 'retire-early' | 'financial-security' | 'maintain-lifestyle' | 'flexibility'
-}
+type ChoiceId = 'lifestyle' | 'workPreference' | 'timeline' | 'primaryGoal' | 'personalize'
+type NumericId = 'currentAge' | 'retirementAge' | 'currentSavings' | 'annualIncome' | 'annualExpenses'
 
-interface Recommendation {
-  path: string
+interface ChoiceQuestion {
+  id: ChoiceId
+  type: 'choice'
   title: string
-  icon: string
-  reason: string
-  description: string
-  benefits: string[]
+  subtitle: string
+  choices: { value: string; label: string; description: string }[]
 }
+
+interface NumericQuestion {
+  id: NumericId
+  type: 'number' | 'currency'
+  title: string
+  subtitle: string
+  placeholder: string
+  min: number
+  max?: number
+}
+
+type Question = ChoiceQuestion | NumericQuestion
+
+const questions: Question[] = [
+  {
+    id: 'lifestyle',
+    type: 'choice',
+    title: 'What kind of retirement lifestyle are you planning for?',
+    subtitle: 'Choose the closest fit. You can refine the numbers later.',
+    choices: [
+      { value: 'minimal', label: 'Minimal / frugal', description: 'Keep spending intentionally low.' },
+      { value: 'moderate', label: 'Moderate', description: 'Cover comfortable basics with a balanced budget.' },
+      { value: 'comfortable', label: 'Comfortable', description: 'Maintain flexibility with few major sacrifices.' },
+      { value: 'luxury', label: 'Higher spending', description: 'Plan for more travel, experiences, or financial margin.' },
+      { value: 'not-sure', label: 'Not sure yet', description: 'Keep the recommendation broad for now.' },
+    ],
+  },
+  {
+    id: 'workPreference',
+    type: 'choice',
+    title: 'How would you like work to fit into your future?',
+    subtitle: 'Financial independence can mean stopping, scaling back, or simply gaining options.',
+    choices: [
+      { value: 'quit-completely', label: 'Leave paid work', description: 'Build toward fully funding your lifestyle from investments.' },
+      { value: 'part-time', label: 'Work part-time', description: 'Use some earned income for expenses, benefits, or purpose.' },
+      { value: 'coast', label: 'Shift into coast mode', description: 'Let investments grow while lower-stress work covers today.' },
+      { value: 'flexible', label: 'Keep my options open', description: 'Create room to change how and when you work.' },
+      { value: 'not-sure', label: 'Not sure yet', description: 'Explore paths with different relationships to work.' },
+    ],
+  },
+  {
+    id: 'timeline',
+    type: 'choice',
+    title: 'How soon would you like to reach financial independence?',
+    subtitle: 'A range is enough. This shapes which strategy is most useful to explore first.',
+    choices: [
+      { value: 'within-5', label: 'Within 5 years', description: 'I have a near-term target.' },
+      { value: '5-10', label: 'In 5–10 years', description: 'I want a focused medium-term plan.' },
+      { value: '10-20', label: 'In 10–20 years', description: 'I have time to balance growth and flexibility.' },
+      { value: '20-plus', label: 'More than 20 years', description: 'I can give compound growth a long runway.' },
+      { value: 'not-sure', label: 'Not sure yet', description: 'I am still exploring what is realistic.' },
+    ],
+  },
+  {
+    id: 'primaryGoal',
+    type: 'choice',
+    title: 'What matters most in your FIRE plan?',
+    subtitle: 'Pick the priority you would protect when tradeoffs appear.',
+    choices: [
+      { value: 'retire-early', label: 'Reach FI as soon as practical', description: 'Prioritize the timeline.' },
+      { value: 'financial-security', label: 'Build financial security', description: 'Prioritize resilience and a balanced foundation.' },
+      { value: 'maintain-lifestyle', label: 'Maintain my lifestyle', description: 'Prioritize spending capacity and margin.' },
+      { value: 'flexibility', label: 'Create more flexibility', description: 'Prioritize options and work-life balance.' },
+      { value: 'not-sure', label: 'Not sure yet', description: 'Compare several reasonable starting points.' },
+    ],
+  },
+  {
+    id: 'personalize',
+    type: 'choice',
+    title: 'Would you like to personalize the calculator you open?',
+    subtitle: 'These optional details stay in your browser and do not change the core path recommendation.',
+    choices: [
+      { value: 'yes', label: 'Add my starting numbers', description: 'Answer five optional questions to prefill the calculator.' },
+      { value: 'no', label: 'Show my matches now', description: 'Use calculator defaults and adjust them later.' },
+    ],
+  },
+  {
+    id: 'currentAge',
+    type: 'number',
+    title: 'What is your current age?',
+    subtitle: 'Optional · Used only to prefill the calculator.',
+    placeholder: '30',
+    min: 18,
+    max: 80,
+  },
+  {
+    id: 'retirementAge',
+    type: 'number',
+    title: 'What age would you like to reach FI?',
+    subtitle: 'Optional · A specific age helps personalize timeline calculations.',
+    placeholder: '50',
+    min: 19,
+    max: 100,
+  },
+  {
+    id: 'currentSavings',
+    type: 'currency',
+    title: 'How much do you currently have invested?',
+    subtitle: 'Optional · Include retirement accounts and other invested assets.',
+    placeholder: '100,000',
+    min: 0,
+  },
+  {
+    id: 'annualIncome',
+    type: 'currency',
+    title: 'What is your annual household income?',
+    subtitle: 'Optional · Use income before taxes.',
+    placeholder: '80,000',
+    min: 0,
+  },
+  {
+    id: 'annualExpenses',
+    type: 'currency',
+    title: 'What are your expected annual retirement expenses?',
+    subtitle: 'Optional · This can fine-tune Lean and Fat FIRE matches.',
+    placeholder: '50,000',
+    min: 0,
+  },
+]
 
 export default function FIREQuiz() {
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [answers, setAnswers] = useState<QuizAnswers>({})
-  const [recommendation, setRecommendation] = useState<Recommendation | null>(null)
+  const [personalize, setPersonalize] = useState<boolean>()
+  const [recommendation, setRecommendation] = useState<FireQuizRecommendation>()
+  const [validationMessage, setValidationMessage] = useState('')
+  const currentQuestion = questions[step]
 
-  const seoComponent = <SEO {...calculatorSEO.quiz} />
+  const currentValue = currentQuestion.id === 'personalize'
+    ? personalize === undefined ? undefined : personalize ? 'yes' : 'no'
+    : answers[currentQuestion.id as keyof QuizAnswers]
 
-  const questions = [
-    {
-      id: 'currentAge',
-      title: 'How old are you?',
-      subtitle: 'This helps us understand your timeline',
-      type: 'number',
-      placeholder: '30',
-      min: 18,
-      max: 80,
-    },
-    {
-      id: 'retirementAge',
-      title: 'When do you want to achieve financial independence?',
-      subtitle: 'Your target age for FIRE',
-      type: 'number',
-      placeholder: '50',
-      min: (answers.currentAge || 18) + 1,
-      max: 80,
-    },
-    {
-      id: 'currentSavings',
-      title: 'How much do you currently have saved/invested?',
-      subtitle: 'Include all retirement accounts and investments',
-      type: 'currency',
-      placeholder: '100,000',
-    },
-    {
-      id: 'annualIncome',
-      title: 'What\'s your current annual household income?',
-      subtitle: 'Before taxes',
-      type: 'currency',
-      placeholder: '80,000',
-    },
-    {
-      id: 'annualExpenses',
-      title: 'What are your current annual expenses?',
-      subtitle: 'Or what you expect to spend in retirement',
-      type: 'currency',
-      placeholder: '50,000',
-    },
-    {
-      id: 'lifestyle',
-      title: 'What lifestyle do you want in retirement?',
-      subtitle: 'This impacts your target savings amount',
-      type: 'choice',
-      choices: [
-        { value: 'minimal', label: 'Minimal/Frugal', desc: 'Living simply, $30K-$40K/year' },
-        { value: 'moderate', label: 'Moderate', desc: 'Comfortable basics, $40K-$70K/year' },
-        { value: 'comfortable', label: 'Comfortable', desc: 'No major sacrifices, $70K-$100K/year' },
-        { value: 'luxury', label: 'Luxury/Fat', desc: 'High-end lifestyle, $100K+/year' },
-      ],
-    },
-    {
-      id: 'workPreference',
-      title: 'What\'s your ideal work situation after reaching FI?',
-      subtitle: 'How you want to spend your time',
-      type: 'choice',
-      choices: [
-        { value: 'quit-completely', label: 'Quit Completely', desc: 'Never work again' },
-        { value: 'part-time', label: 'Part-Time Work', desc: 'Work for benefits or extra income' },
-        { value: 'coast', label: 'Coast Mode', desc: 'Low-stress job covering expenses' },
-        { value: 'flexible', label: 'Stay Flexible', desc: 'Keep options open' },
-      ],
-    },
-    {
-      id: 'primaryGoal',
-      title: 'What\'s most important to you?',
-      subtitle: 'Your primary motivation for FIRE',
-      type: 'choice',
-      choices: [
-        { value: 'retire-early', label: 'Retire ASAP', desc: 'Leave workforce as early as possible' },
-        { value: 'financial-security', label: 'Financial Security', desc: 'Peace of mind and freedom' },
-        { value: 'maintain-lifestyle', label: 'Maintain Lifestyle', desc: 'Retire without sacrifice' },
-        { value: 'flexibility', label: 'Flexibility', desc: 'Options and work-life balance' },
-      ],
-    },
-  ]
+  const showRecommendation = (nextAnswers = answers) => {
+    setRecommendation(recommendFirePaths(nextAnswers))
+    window.scrollTo({ top: 0 })
+  }
 
-  const calculateRecommendation = (): Recommendation => {
-    const { lifestyle, workPreference, primaryGoal, currentAge, retirementAge, annualExpenses } = answers
-    
-    // Calculate years to retirement
-    const yearsToFIRE = (retirementAge || 65) - (currentAge || 30)
-    
-    // Determine expense level
-    const expenseLevel = annualExpenses || 50000
-
-    // Lean FIRE logic
-    if (lifestyle === 'minimal' || (expenseLevel < 40000 && primaryGoal === 'retire-early')) {
-      return {
-        path: '/lean',
-        title: 'Lean FIRE',
-        icon: '🌿',
-        reason: 'Your minimalist lifestyle and lower expenses make Lean FIRE achievable',
-        description: 'Achieve FI faster by living frugally. Requires less savings but demands lifestyle discipline.',
-        benefits: [
-          'Retire years earlier than traditional FIRE',
-          'Need less total savings to reach your goal',
-          'Forces intentional spending habits',
-          'Freedom with minimalist lifestyle',
-        ],
-      }
+  const selectChoice = (questionId: ChoiceId, value: string) => {
+    setValidationMessage('')
+    if (questionId === 'personalize') {
+      setPersonalize(value === 'yes')
+      return
     }
+    setAnswers(previous => ({ ...previous, [questionId]: value }))
+  }
 
-    // Fat FIRE logic
-    if (lifestyle === 'luxury' || (expenseLevel >= 100000 && primaryGoal === 'maintain-lifestyle')) {
-      return {
-        path: '/fat',
-        title: 'Fat FIRE',
-        icon: '💎',
-        reason: 'Your desire for a comfortable lifestyle without compromise aligns with Fat FIRE',
-        description: 'Achieve FI while maintaining a luxurious or upper-middle-class lifestyle. Requires more savings but no sacrifices.',
-        benefits: [
-          'Retire without lifestyle changes',
-          'Extra buffer for market downturns',
-          'Travel, dining, and experiences without worry',
-          'Help family and leave a legacy',
-        ],
-      }
-    }
+  const setNumericAnswer = (questionId: NumericId, value: string) => {
+    setValidationMessage('')
+    setAnswers(previous => ({
+      ...previous,
+      [questionId]: value === '' ? undefined : Number(value),
+    }))
+  }
 
-    // Barista FIRE logic
-    if (workPreference === 'part-time' || (yearsToFIRE < 10 && primaryGoal === 'flexibility')) {
-      return {
-        path: '/barista',
-        title: 'Barista FIRE',
-        icon: '☕',
-        reason: 'Your interest in part-time work makes Barista FIRE an ideal stepping stone',
-        description: 'Blend portfolio income with part-time work. Reach FI faster while maintaining health benefits and social connections.',
-        benefits: [
-          'Quit corporate job years earlier',
-          'Part-time work covers some expenses',
-          'Health insurance from employer',
-          'Stay active and socially engaged',
-        ],
-      }
+  const validateNumericAnswer = (question: NumericQuestion) => {
+    const value = answers[question.id]
+    if (value === undefined) return true
+    if (!Number.isFinite(value) || value < question.min || (question.max !== undefined && value > question.max)) {
+      setValidationMessage(
+        question.max === undefined
+          ? `Enter an amount of ${question.min.toLocaleString()} or more, or choose “Not sure.”`
+          : `Enter a value from ${question.min} to ${question.max}, or choose “Not sure.”`,
+      )
+      return false
     }
-
-    // Coast FIRE logic
-    if (workPreference === 'coast' || (currentAge || 30) < 35 && yearsToFIRE > 20) {
-      return {
-        path: '/coast',
-        title: 'Coast FIRE',
-        icon: '⛵',
-        reason: 'Your timeline and age make Coast FIRE a strategic approach',
-        description: 'Save aggressively now, then let compound growth do the work. Perfect for young savers wanting flexibility.',
-        benefits: [
-          'Save hard early, then ease off',
-          'Compound growth does the heavy lifting',
-          'Take lower-paying but fulfilling work',
-          'Reduces pressure in your 30s-40s',
-        ],
-      }
+    if (question.id === 'retirementAge' && answers.currentAge !== undefined && value <= answers.currentAge) {
+      setValidationMessage('Your target FI age must be after your current age, or choose “Not sure.”')
+      return false
     }
-
-    // Reverse FIRE logic
-    if (primaryGoal === 'retire-early' && yearsToFIRE < 15) {
-      return {
-        path: '/reverse',
-        title: 'Reverse FIRE',
-        icon: '🔄',
-        reason: 'Your specific retirement age goal calls for a targeted savings strategy',
-        description: 'Work backwards from your target age to calculate exactly what you need to save monthly.',
-        benefits: [
-          'Clear monthly savings target',
-          'Goal-oriented approach',
-          'Adjust timeline or savings as needed',
-          'Perfect for deadline-driven planners',
-        ],
-      }
-    }
-
-    // Savings Rate focus
-    if (primaryGoal === 'financial-security') {
-      return {
-        path: '/savings-rate',
-        title: 'Savings Rate Calculator',
-        icon: '🧮',
-        reason: 'Understanding your savings rate is the foundation for all FIRE paths',
-        description: 'Your savings rate is the most important metric in FIRE. This calculator shows exactly how it impacts your timeline.',
-        benefits: [
-          'See direct impact of saving more',
-          'Most important FIRE metric',
-          'Works for any income level',
-          'Clear path to financial freedom',
-        ],
-      }
-    }
-
-    // Default to Standard FIRE
-    return {
-      path: '/standard',
-      title: 'Standard FIRE',
-      icon: '🎯',
-      reason: 'The classic FIRE approach fits your balanced goals and timeline',
-      description: 'The traditional 25x expenses rule. A proven, balanced approach to financial independence.',
-      benefits: [
-        'Time-tested 4% withdrawal rule',
-        'Balanced approach for most people',
-        'Comprehensive planning framework',
-        'Retire at traditional age or earlier',
-      ],
-    }
+    return true
   }
 
   const handleNext = () => {
-    if (step < questions.length - 1) {
-      setStep(step + 1)
-    } else {
-      // Calculate recommendation
-      const rec = calculateRecommendation()
-      setRecommendation(rec)
+    if (currentQuestion.type === 'choice' && currentValue === undefined) return
+    if (currentQuestion.type !== 'choice' && !validateNumericAnswer(currentQuestion)) return
+    if (currentQuestion.id === 'personalize' && personalize === false) {
+      showRecommendation()
+      return
     }
-  }
-
-  const handlePrevious = () => {
-    if (step > 0) {
-      setStep(step - 1)
+    if (step === questions.length - 1) {
+      showRecommendation()
+      return
     }
+    setStep(previous => previous + 1)
+    setValidationMessage('')
   }
 
-  const handleAnswer = (value: any) => {
-    const question = questions[step]
-    setAnswers({ ...answers, [question.id]: value })
+  const skipNumericQuestion = () => {
+    if (currentQuestion.type === 'choice') return
+    const nextAnswers = { ...answers, [currentQuestion.id]: undefined }
+    setAnswers(nextAnswers)
+    setValidationMessage('')
+    if (step === questions.length - 1) showRecommendation(nextAnswers)
+    else setStep(previous => previous + 1)
   }
 
-  const handleGoToCalculator = () => {
-    if (!recommendation) return
-
-    // Build query params from answers
+  const openCalculator = (match: FireQuizMatch) => {
     const params = new URLSearchParams()
-    if (answers.currentAge) params.set('currentAge', answers.currentAge.toString())
-    if (answers.retirementAge) params.set('retirementAge', answers.retirementAge.toString())
-    if (answers.currentSavings) params.set('currentSavings', answers.currentSavings.toString())
-    if (answers.annualExpenses) params.set('annualExpenses', answers.annualExpenses.toString())
-    
-    // Calculate annual contribution from income and expenses
-    if (answers.annualIncome && answers.annualExpenses) {
-      const contribution = Math.max(0, answers.annualIncome - answers.annualExpenses)
-      params.set('annualContribution', contribution.toString())
+    if (answers.currentAge !== undefined) params.set('age', answers.currentAge.toString())
+    if (answers.retirementAge !== undefined) params.set('retire', answers.retirementAge.toString())
+    if (answers.currentSavings !== undefined) params.set('savings', answers.currentSavings.toString())
+    if (answers.annualIncome !== undefined) params.set('income', answers.annualIncome.toString())
+    if (answers.annualExpenses !== undefined) params.set('expenses', answers.annualExpenses.toString())
+    if (answers.annualIncome !== undefined && answers.annualExpenses !== undefined) {
+      params.set('contrib', Math.max(0, answers.annualIncome - answers.annualExpenses).toString())
     }
-
-    navigate(`${recommendation.path}?${params.toString()}`)
+    navigate(`${match.path}${params.size > 0 ? `?${params}` : ''}`)
   }
 
-  const handleStartOver = () => {
+  const startOver = () => {
     setStep(0)
     setAnswers({})
-    setRecommendation(null)
+    setPersonalize(undefined)
+    setRecommendation(undefined)
+    setValidationMessage('')
   }
 
-  const currentQuestion = questions[step]
-  const currentAnswer = answers[currentQuestion?.id as keyof QuizAnswers]
-  const canProceed = currentAnswer !== undefined && currentAnswer !== null
-
-  // Results view
   if (recommendation) {
+    const primaryMetadata = getCalculatorByPath(recommendation.primary.path)
     return (
       <>
-        {seoComponent}
-        <div className="max-w-3xl mx-auto space-y-6">
-          {/* Header */}
-          <div className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              Your Recommended Path
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              Based on your answers, here's the best FIRE strategy for you
+        <SEO {...calculatorSEO.quiz} />
+        <main className="mx-auto max-w-3xl space-y-8">
+          <header className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Your best FIRE starting point</h1>
+            <p className="mx-auto mt-3 max-w-2xl text-gray-600 dark:text-gray-400">
+              This is an educational match based on your priorities—not a prediction or financial advice.
             </p>
-          </div>
+          </header>
 
-          {/* Recommendation Card */}
-          <Card className="border-2 border-fire-200 dark:border-fire-800">
-            <CardContent className="p-8">
-              <div className="text-center mb-6">
-              <span className="text-6xl mb-4 block">{recommendation.icon}</span>
-              <h2 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                {recommendation.title}
-              </h2>
-              <p className="text-lg text-fire-600 dark:text-fire-400 font-medium">
-                {recommendation.reason}
-              </p>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 mb-6">
-              <p className="text-gray-700 dark:text-gray-300">
-                {recommendation.description}
-              </p>
-            </div>
-
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
-                Why this path works for you:
-              </h3>
-              <ul className="space-y-2">
-                {recommendation.benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start gap-2 text-gray-600 dark:text-gray-400">
-                    <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {benefit}
+          <Card className="border-2 border-fire-300 dark:border-fire-700">
+            <CardContent className="p-6 sm:p-8">
+              <div className="text-center">
+                <span className="block text-5xl" aria-hidden="true">{primaryMetadata?.icon ?? '🎯'}</span>
+                <h2 className="mt-4 text-3xl font-bold text-gray-900 dark:text-gray-100">{recommendation.primary.title}</h2>
+                <p className="mt-3 text-lg font-medium text-fire-700 dark:text-fire-300">{recommendation.primary.reason}</p>
+              </div>
+              <p className="mx-auto mt-6 max-w-2xl text-gray-700 dark:text-gray-300">{recommendation.primary.description}</p>
+              <ul className="mx-auto mt-5 max-w-2xl space-y-2">
+                {recommendation.primary.benefits.map(benefit => (
+                  <li key={benefit} className="flex gap-3 text-gray-700 dark:text-gray-300">
+                    <span className="font-bold text-green-600 dark:text-green-400" aria-hidden="true">✓</span>
+                    <span>{benefit}</span>
                   </li>
                 ))}
               </ul>
-            </div>
-
-            <div className="flex gap-4">
               <button
-                onClick={handleGoToCalculator}
-                className="flex-1 bg-fire-600 hover:bg-fire-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                type="button"
+                onClick={() => openCalculator(recommendation.primary)}
+                className="mt-7 w-full rounded-lg bg-fire-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-fire-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fire-600"
               >
-                Go to {recommendation.title} Calculator →
+                Start with {recommendation.primary.title}
               </button>
-              <button
-                onClick={handleStartOver}
-                className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-              >
-                Start Over
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* Other Options */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Want to explore other paths?
-            </h3>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              All FIRE paths can work depending on your circumstances. Feel free to explore multiple calculators to find what resonates with you.
+          <section aria-labelledby="alternative-paths-heading">
+            <h2 id="alternative-paths-heading" className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+              Two paths worth comparing
+            </h2>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">
+              FIRE paths overlap. These alternatives emphasize different tradeoffs in your answers.
             </p>
-            <button
-              onClick={() => navigate('/')}
-              className="text-fire-600 dark:text-fire-400 hover:underline"
-            >
-              View All Calculators
-            </button>
-          </CardContent>
-        </Card>
-      </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {recommendation.alternatives.map(match => {
+                const metadata = getCalculatorByPath(match.path)
+                return (
+                  <article key={match.path} className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl" aria-hidden="true">{metadata?.icon ?? '🎯'}</span>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{match.title}</h3>
+                    </div>
+                    <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">{match.reason}</p>
+                    <button
+                      type="button"
+                      onClick={() => openCalculator(match)}
+                      className="mt-5 font-semibold text-fire-700 underline-offset-4 hover:underline dark:text-fire-300"
+                    >
+                      Explore {match.title}
+                    </button>
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+
+          <button
+            type="button"
+            onClick={startOver}
+            className="mx-auto block rounded-lg border border-gray-300 px-5 py-3 font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            Retake the quiz
+          </button>
+        </main>
       </>
     )
   }
 
-  // Quiz view
+  const isOptionalStage = step >= 5
+  const stageStep = isOptionalStage ? step - 4 : step + 1
+  const stageTitle = isOptionalStage ? 'Optional detail' : 'Core question'
+  const stageProgress = stageStep / 5
+
   return (
     <>
-      {seoComponent}
-      <div className="max-w-2xl mx-auto space-y-6">
-        {/* Progress */}
-        <div>
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Question {step + 1} of {questions.length}
-            </span>
-            <span className="text-sm text-gray-500 dark:text-gray-400">
-              {Math.round(((step + 1) / questions.length) * 100)}% complete
-            </span>
+      <SEO {...calculatorSEO.quiz} />
+      <main className="mx-auto max-w-2xl space-y-6">
+        <header>
+          <div className="flex items-center justify-between gap-4 text-sm">
+            <span className="font-semibold text-gray-700 dark:text-gray-300">{stageTitle} {stageStep} of 5</span>
+            <span className="text-gray-500 dark:text-gray-400">{isOptionalStage ? 'Skip anything you do not know' : 'About 2 minutes'}</span>
           </div>
-          <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-gradient-to-r from-fire-500 to-fire-600 transition-all duration-300"
-              style={{ width: `${((step + 1) / questions.length) * 100}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Question Card */}
-      <Card>
-        <CardContent className="p-8">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-              {currentQuestion.title}
-            </h2>
-            <p className="text-gray-600 dark:text-gray-400">
-              {currentQuestion.subtitle}
-            </p>
+          <div
+            className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"
+            role="progressbar"
+            aria-label={`${stageTitle} progress`}
+            aria-valuemin={0}
+            aria-valuemax={5}
+            aria-valuenow={stageStep}
+          >
+            <div className="h-full bg-fire-600 transition-[width] motion-reduce:transition-none" style={{ width: `${stageProgress * 100}%` }} />
           </div>
+        </header>
 
-          {/* Input based on type */}
-          {currentQuestion.type === 'number' && (
-            <div>
-              <input
-                type="number"
-                value={currentAnswer || ''}
-                onChange={(e) => handleAnswer(e.target.value ? Number(e.target.value) : undefined)}
-                placeholder={currentQuestion.placeholder}
-                min={currentQuestion.min}
-                max={currentQuestion.max}
-                className="w-full px-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-fire-500 focus:border-transparent"
-              />
-            </div>
-          )}
+        <Card>
+          <CardContent className="p-6 sm:p-8">
+            <h1 id="quiz-question" className="text-2xl font-bold text-gray-900 dark:text-gray-100">{currentQuestion.title}</h1>
+            <p id="quiz-question-help" className="mt-2 text-gray-600 dark:text-gray-400">{currentQuestion.subtitle}</p>
 
-          {currentQuestion.type === 'currency' && (
-            <div className="relative">
-              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 text-lg">
-                $
-              </span>
-              <input
-                type="number"
-                value={currentAnswer || ''}
-                onChange={(e) => handleAnswer(e.target.value ? Number(e.target.value) : undefined)}
-                placeholder={currentQuestion.placeholder}
-                className="w-full pl-8 pr-4 py-3 text-lg border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-fire-500 focus:border-transparent"
-              />
-            </div>
-          )}
-
-          {currentQuestion.type === 'choice' && (
-            <div className="space-y-3">
-              {currentQuestion.choices?.map((choice) => (
+            {currentQuestion.type === 'choice' ? (
+              <fieldset className="mt-6 space-y-3">
+                <legend className="sr-only">{currentQuestion.title}</legend>
+                {currentQuestion.choices.map(choice => {
+                  const selected = currentValue === choice.value
+                  return (
+                    <label
+                      key={choice.value}
+                      className={`block cursor-pointer rounded-lg border-2 p-4 transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-fire-600 ${
+                        selected
+                          ? 'border-fire-500 bg-fire-50 dark:bg-fire-950/40'
+                          : 'border-gray-200 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-500'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={currentQuestion.id}
+                        value={choice.value}
+                        checked={selected}
+                        onChange={() => selectChoice(currentQuestion.id, choice.value)}
+                        className="sr-only"
+                      />
+                      <span className="block font-semibold text-gray-900 dark:text-gray-100">{choice.label}</span>
+                      <span className="mt-1 block text-sm text-gray-600 dark:text-gray-400">{choice.description}</span>
+                    </label>
+                  )
+                })}
+              </fieldset>
+            ) : (
+              <div className="mt-6">
+                <div className="relative">
+                  {currentQuestion.type === 'currency' && (
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-gray-500 dark:text-gray-400" aria-hidden="true">$</span>
+                  )}
+                  <input
+                    id={`quiz-${currentQuestion.id}`}
+                    type="number"
+                    inputMode={currentQuestion.type === 'currency' ? 'decimal' : 'numeric'}
+                    value={currentValue ?? ''}
+                    onChange={event => setNumericAnswer(currentQuestion.id, event.target.value)}
+                    placeholder={currentQuestion.placeholder}
+                    min={currentQuestion.min}
+                    max={currentQuestion.max}
+                    aria-labelledby="quiz-question"
+                    aria-describedby={`quiz-question-help${validationMessage ? ' quiz-validation' : ''}`}
+                    aria-invalid={Boolean(validationMessage)}
+                    className={`w-full rounded-lg border bg-white py-3 pr-4 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-fire-500 dark:bg-gray-800 dark:text-gray-100 ${
+                      currentQuestion.type === 'currency' ? 'pl-8' : 'pl-4'
+                    } ${validationMessage ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+                  />
+                </div>
+                {validationMessage && (
+                  <p id="quiz-validation" role="alert" className="mt-2 text-sm font-medium text-red-700 dark:text-red-300">
+                    {validationMessage}
+                  </p>
+                )}
                 <button
-                  key={choice.value}
-                  onClick={() => handleAnswer(choice.value)}
-                  className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                    currentAnswer === choice.value
-                      ? 'border-fire-500 bg-fire-50 dark:bg-fire-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                  }`}
+                  type="button"
+                  onClick={skipNumericQuestion}
+                  className="mt-3 font-medium text-gray-600 underline-offset-4 hover:underline dark:text-gray-300"
                 >
-                  <div className="font-semibold text-gray-900 dark:text-gray-100">
-                    {choice.label}
-                  </div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {choice.desc}
-                  </div>
+                  I’m not sure
                 </button>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-      {/* Navigation */}
-      <div className="flex gap-4">
-        <button
-          onClick={handlePrevious}
-          disabled={step === 0}
-          className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          ← Previous
-        </button>
-        <button
-          onClick={handleNext}
-          disabled={!canProceed}
-          className="flex-1 bg-fire-600 hover:bg-fire-700 text-white font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {step === questions.length - 1 ? 'Get Recommendation' : 'Next →'}
-        </button>
-      </div>
-    </div>
+        <nav className="flex gap-3" aria-label="Quiz questions">
+          <button
+            type="button"
+            onClick={() => {
+              setStep(previous => Math.max(0, previous - 1))
+              setValidationMessage('')
+            }}
+            disabled={step === 0}
+            className="rounded-lg border border-gray-300 px-5 py-3 font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={currentQuestion.type === 'choice' && currentValue === undefined}
+            className="flex-1 rounded-lg bg-fire-600 px-6 py-3 font-semibold text-white hover:bg-fire-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {currentQuestion.id === 'personalize' && personalize === false
+              ? 'Show my matches'
+              : step === questions.length - 1
+                ? 'Show my matches'
+                : 'Continue'}
+          </button>
+        </nav>
+        <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+          Estimates only—not financial advice. Your answers stay in this browser.
+        </p>
+      </main>
     </>
   )
 }
