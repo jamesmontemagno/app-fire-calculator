@@ -21,7 +21,10 @@ public partial class CalculatorDetailPage : ContentPage, IQueryAttributable
             var planId = query.TryGetValue("planId", out var savedPlanId) && savedPlanId is string id
                 ? Uri.UnescapeDataString(id)
                 : null;
-            await viewModel.LoadAsync(Uri.UnescapeDataString(value), planId);
+            var returnHomeAfterSave = query.TryGetValue("returnHomeAfterSave", out var returnHomeValue)
+                && bool.TryParse(returnHomeValue?.ToString(), out var parsedReturnHome)
+                && parsedReturnHome;
+            await viewModel.LoadAsync(Uri.UnescapeDataString(value), planId, returnHomeAfterSave);
         }
     }
 

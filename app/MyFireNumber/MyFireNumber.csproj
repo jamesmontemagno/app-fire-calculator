@@ -15,6 +15,10 @@
 		<OutputType>Exe</OutputType>
 		<RootNamespace>MyFireNumber</RootNamespace>
 		<UseMaui>true</UseMaui>
+		<!-- 10.0.90 adds the null guard in Button.LayoutButton on iOS. Without it, Shell tears down a
+		     page's handlers while UIKit still lays out the button's WrapperView, which throws a
+		     NullReferenceException and aborts the app. -->
+		<MauiVersion>10.0.90</MauiVersion>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>

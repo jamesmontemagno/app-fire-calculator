@@ -12,7 +12,7 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Skip"
                      Command="{Binding SkipCommand}"
-                     SemanticProperties.Description="Skip default setup and continue to the FIRE Quiz." />
+                     SemanticProperties.Description="Skip default setup and choose how to start." />
     </ContentPage.ToolbarItems>
 
     <Grid>
@@ -151,7 +151,7 @@
                         Command="{Binding SaveAndContinueCommand}"
                         Background="#2F6B57"
                         TextColor="#FFFFFF"
-                        SemanticProperties.Description="Save these defaults and continue to the FIRE Quiz." />
+                        SemanticProperties.Description="Save these defaults and choose how to start." />
 
                 <controls:EducationalDisclaimerView />
             </VerticalStackLayout>

@@ -1,4 +1,5 @@
-﻿using LiveChartsCore;
+﻿using System.Globalization;
+using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using MyFireNumber.Data;
 using MyFireNumber.Exports;
@@ -14,7 +15,10 @@ public partial class MainPage : ContentPage
 	[
 		new LineSeries<double>
 		{
-			Values = [120, 185, 275, 405, 590, 825, 1_100, 1_420]
+			Name = "Portfolio balance",
+			Values = [120, 185, 275, 405, 590, 825, 1_100, 1_420],
+			YToolTipLabelFormatter = point =>
+				(point.Coordinate.PrimaryValue * 1_000d).ToString("C0", CultureInfo.CurrentCulture)
 		}
 	];
 
