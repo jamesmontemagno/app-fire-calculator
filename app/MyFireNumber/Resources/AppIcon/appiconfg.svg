@@ -7,15 +7,17 @@
             <stop offset="1" stop-color="#FDE68A" />
         </linearGradient>
         <radialGradient id="emberGlow" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stop-color="#FB923C" stop-opacity="0.38" />
-            <stop offset="0.45" stop-color="#F97316" stop-opacity="0.14" />
+            <stop offset="0" stop-color="#FB923C" stop-opacity="0.4" />
+            <stop offset="0.22" stop-color="#F97316" stop-opacity="0.2" />
+            <stop offset="0.5" stop-color="#F97316" stop-opacity="0.1" />
+            <stop offset="0.78" stop-color="#F97316" stop-opacity="0.04" />
             <stop offset="1" stop-color="#F97316" stop-opacity="0" />
         </radialGradient>
     </defs>
     <!-- The highlighted center cell represents "your number" - the single figure the app solves for.
          A soft ember glow spills into the surrounding cells so the whole grid feels lit by it. -->
     <g transform="skewX(-5.81)">
-        <ellipse cx="259.6" cy="232" rx="118" ry="108" fill="url(#emberGlow)" />
+        <ellipse cx="259.6" cy="232" rx="205" ry="195" fill="url(#emberGlow)" />
         <rect x="233.6" y="206" width="52" height="52" fill="url(#ember)" />
     </g>
     <g fill="none" stroke="#FFF3D6" stroke-width="40" stroke-linecap="round">
