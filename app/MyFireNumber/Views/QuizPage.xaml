@@ -32,7 +32,7 @@
                                FontSize="26"
                                LineHeight="1.1"
                                SemanticProperties.HeadingLevel="Level1" />
-                        <Label Text="Your answers stay on this device."
+                        <Label Text="About two minutes. Your answers stay on this device."
                                TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                                FontSize="13" />
                     </VerticalStackLayout>
@@ -65,58 +65,59 @@
                                        LineHeight="1.3" />
                             </VerticalStackLayout>
 
-                            <Entry AutomationId="QuizNumericAnswer"
-                                   IsVisible="{Binding IsNumericQuestion}"
-                                   Text="{Binding AnswerText}"
-                                   Keyboard="Numeric"
-                                   Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                   Placeholder="Enter your answer"
-                                   PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                                   SemanticProperties.Description="{Binding QuestionTitle}" />
-
-                            <VerticalStackLayout IsVisible="{Binding IsChoiceQuestion}"
-                                                 BindableLayout.ItemsSource="{Binding Choices}"
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Choices}"
                                                  Spacing="8">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="viewModels:QuizChoice">
-                                        <Border Padding="14"
-                                                MinimumHeightRequest="60"
-                                                Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                                                Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                                                StrokeShape="RoundRectangle 10"
-                                                SemanticProperties.Description="{Binding Description}">
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:QuizViewModel}}, Path=SelectChoiceCommand}"
-                                                                      CommandParameter="{Binding .}" />
-                                            </Border.GestureRecognizers>
-                                            <Border.Triggers>
-                                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
-                                                    <Setter Property="Background" Value="#2F6B57" />
-                                                    <Setter Property="Stroke" Value="#9ACCB3" />
-                                                </DataTrigger>
-                                            </Border.Triggers>
-                                            <VerticalStackLayout Spacing="3">
-                                                <Label Text="{Binding Label}"
-                                                       FontAttributes="Bold"
-                                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}">
-                                                    <Label.Triggers>
-                                                        <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                                                            <Setter Property="TextColor" Value="#FFFFFF" />
-                                                        </DataTrigger>
-                                                    </Label.Triggers>
-                                                </Label>
-                                                <Label Text="{Binding Description}"
-                                                       FontSize="12"
-                                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
-                                                    <Label.Triggers>
-                                                        <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
-                                                            <Setter Property="TextColor" Value="#E4F0E9" />
-                                                        </DataTrigger>
-                                                    </Label.Triggers>
-                                                </Label>
-                                            </VerticalStackLayout>
-                                        </Border>
+                                        <Grid MinimumHeightRequest="72">
+                                            <Border Padding="14,10"
+                                                    Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                                                    Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                                                    StrokeShape="RoundRectangle 10"
+                                                    InputTransparent="True">
+                                                <Border.Triggers>
+                                                    <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="Background" Value="#2F6B57" />
+                                                        <Setter Property="Stroke" Value="#9ACCB3" />
+                                                    </DataTrigger>
+                                                </Border.Triggers>
+                                                <VerticalStackLayout Spacing="3"
+                                                                     HorizontalOptions="Fill"
+                                                                     VerticalOptions="Center"
+                                                                     InputTransparent="True">
+                                                    <Label Text="{Binding Label}"
+                                                           HorizontalTextAlignment="Start"
+                                                           FontAttributes="Bold"
+                                                           FontSize="14"
+                                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter Property="TextColor" Value="#FFFFFF" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                    <Label Text="{Binding Description}"
+                                                           HorizontalTextAlignment="Start"
+                                                           FontSize="12"
+                                                           LineBreakMode="WordWrap"
+                                                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
+                                                        <Label.Triggers>
+                                                            <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                                <Setter Property="TextColor" Value="#E4F0E9" />
+                                                            </DataTrigger>
+                                                        </Label.Triggers>
+                                                    </Label>
+                                                </VerticalStackLayout>
+                                            </Border>
+                                            <Button AutomationId="{Binding AutomationId}"
+                                                    Text=""
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:QuizViewModel}}, Path=SelectChoiceCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    Background="Transparent"
+                                                    BorderWidth="0"
+                                                    Padding="0"
+                                                    SemanticProperties.Description="{Binding DisplayText}" />
+                                        </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
@@ -144,52 +145,105 @@
                     </Grid>
                 </VerticalStackLayout>
 
-                <VerticalStackLayout IsVisible="{Binding IsRecommendationVisible}" Spacing="18">
+                <VerticalStackLayout IsVisible="{Binding IsRecommendationVisible}" Spacing="20">
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Your best FIRE starting point"
+                               FontAttributes="Bold"
+                               FontSize="26"
+                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                               SemanticProperties.HeadingLevel="Level2" />
+                        <Label Text="This is an educational match based on your priorities, not a prediction or financial advice."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               LineHeight="1.3" />
+                    </VerticalStackLayout>
+
                     <Border Padding="20"
                             Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                             Stroke="{AppThemeBinding Light=#A8D4B2, Dark=#43805B}"
                             StrokeThickness="2"
                             StrokeShape="RoundRectangle 12">
                         <VerticalStackLayout Spacing="12">
-                            <Label Text="Your recommended path"
-                                   FontAttributes="Bold"
-                                   FontSize="14"
-                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
-                            <Label Text="{Binding RecommendationIconGlyph}"
+                            <Label Text="{Binding PrimaryRecommendation.IconGlyph}"
                                    FontFamily="FontAwesomeSolid"
                                    FontSize="32"
                                    TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                    HorizontalTextAlignment="Center"
                                    SemanticProperties.Description="Recommended calculator" />
                             <Label AutomationId="QuizRecommendationTitle"
-                                   Text="{Binding RecommendationTitle}"
+                                   Text="{Binding PrimaryRecommendation.Title}"
                                    FontAttributes="Bold"
                                    FontSize="28"
                                    HorizontalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                   SemanticProperties.HeadingLevel="Level2" />
-                            <Label Text="{Binding RecommendationReason}"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Label Text="{Binding PrimaryRecommendation.Reason}"
                                    FontAttributes="Bold"
                                    HorizontalTextAlignment="Center"
                                    TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                    LineHeight="1.3" />
-                            <Label Text="{Binding RecommendationDescription}"
+                            <Label Text="{Binding PrimaryRecommendation.Description}"
                                    TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                                    LineHeight="1.3" />
-                            <Label Text="{Binding RecommendationBenefits}"
+                            <Label Text="{Binding PrimaryRecommendation.Benefits}"
                                    TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                                    LineHeight="1.4" />
-                            <Button Text="{Binding RecommendationTitle, StringFormat='Open {0}'}"
+                            <Label Text="{Binding RecommendationConfidenceText}"
+                                   FontSize="13"
+                                   TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" />
+                            <Button AutomationId="QuizOpenPrimaryButton"
+                                    Text="{Binding PrimaryRecommendation.Title, StringFormat='Start with {0}'}"
                                     Command="{Binding UseRecommendationCommand}"
+                                    CommandParameter="{Binding PrimaryRecommendation}"
                                     Background="#2F6B57"
                                     TextColor="#FFFFFF" />
-                            <Button Text="Start over"
-                                    Command="{Binding StartOverCommand}"
-                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}"
-                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}" />
                         </VerticalStackLayout>
                     </Border>
+
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Two paths worth comparing"
+                               FontAttributes="Bold"
+                               FontSize="20"
+                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                        <Label Text="FIRE paths overlap. These alternatives emphasize different tradeoffs in your answers."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               LineHeight="1.3" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding AlternativeRecommendations}"
+                                             Spacing="10">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:QuizRecommendationOption">
+                                    <Border Padding="16"
+                                            Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                                            Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                                            StrokeShape="RoundRectangle 10">
+                                        <VerticalStackLayout Spacing="8">
+                                            <Label Text="{Binding Title}"
+                                                   FontAttributes="Bold"
+                                                   FontSize="18"
+                                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                                            <Label Text="{Binding Reason}"
+                                                   FontSize="13"
+                                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                                   LineHeight="1.3" />
+                                            <Button AutomationId="{Binding AutomationId}"
+                                                    Text="{Binding Title, StringFormat='Explore {0}'}"
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:QuizViewModel}}, Path=UseRecommendationCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}"
+                                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+
+                    <Button Text="Retake the quiz"
+                            Command="{Binding StartOverCommand}"
+                            Background="Transparent"
+                            BorderColor="{AppThemeBinding Light=#A8B8AF, Dark=#587668}"
+                            BorderWidth="1"
+                            TextColor="{AppThemeBinding Light=#425D54, Dark=#D6E5DC}" />
                 </VerticalStackLayout>
+
                 <controls:EducationalDisclaimerView />
             </VerticalStackLayout>
         </ScrollView>
