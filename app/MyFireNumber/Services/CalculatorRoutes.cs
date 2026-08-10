@@ -12,7 +12,10 @@ public static class CalculatorRoutes
     {
         "withdrawal-rate",
         "savings-rate",
-        "healthcare-gap"
+        "healthcare-gap",
+        "coast-fire",
+        "barista-fire",
+        "reverse-fire"
     };
 
     public static string Build(

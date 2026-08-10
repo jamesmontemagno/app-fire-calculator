@@ -17,12 +17,10 @@ namespace MyFireNumber.ViewModels;
 
 public partial class CalculatorDetailViewModel : ObservableObject
 {
-    private readonly IBaristaFireExportService baristaExportService;
     private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
     private readonly ICalculatorCatalog catalog;
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly ICurrencyPreferencesService currencyPreferencesService;
-    private readonly ICoastFireExportService coastExportService;
     private readonly ICorruptPayloadRepository corruptPayloadRepository;
     private readonly IDeferredCompensationExportService deferredCompensationExportService;
     private readonly IDebtPayoffExportService debtPayoffExportService;
@@ -30,7 +28,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly IFatFireExportService fatExportService;
     private readonly ILeanFireExportService leanExportService;
     private readonly INavigationService navigationService;
-    private readonly IReverseFireExportService reverseExportService;
     private readonly IStandardFireExportService exportService;
     private readonly IPlanRepository planRepository;
     private readonly SemaphoreSlim draftSaveLock = new(1, 1);
@@ -52,12 +49,10 @@ public partial class CalculatorDetailViewModel : ObservableObject
         : TimeSpan.FromMilliseconds(800);
 
     public CalculatorDetailViewModel(
-        IBaristaFireExportService baristaExportService,
         IAppBehaviorPreferencesService behaviorPreferencesService,
         ICalculatorCatalog catalog,
         ICalculatorDefaultsService calculatorDefaultsService,
         ICurrencyPreferencesService currencyPreferencesService,
-        ICoastFireExportService coastExportService,
         ICorruptPayloadRepository corruptPayloadRepository,
         IDeferredCompensationExportService deferredCompensationExportService,
         IDebtPayoffExportService debtPayoffExportService,
@@ -66,15 +61,12 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ILeanFireExportService leanExportService,
         INavigationService navigationService,
         IPlanRepository planRepository,
-        IReverseFireExportService reverseExportService,
         IStandardFireExportService exportService)
     {
-        this.baristaExportService = baristaExportService;
         this.behaviorPreferencesService = behaviorPreferencesService;
         this.catalog = catalog;
         this.calculatorDefaultsService = calculatorDefaultsService;
         this.currencyPreferencesService = currencyPreferencesService;
-        this.coastExportService = coastExportService;
         this.corruptPayloadRepository = corruptPayloadRepository;
         this.deferredCompensationExportService = deferredCompensationExportService;
         this.debtPayoffExportService = debtPayoffExportService;
@@ -83,7 +75,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.leanExportService = leanExportService;
         this.navigationService = navigationService;
         this.planRepository = planRepository;
-        this.reverseExportService = reverseExportService;
         this.exportService = exportService;
         DebtItems.CollectionChanged += OnDebtItemsChanged;
         RetirementAccounts.CollectionChanged += OnRetirementAccountsChanged;
@@ -107,24 +98,12 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private bool isStandardFire;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
-    private bool isCoastFire;
-
-    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStandardFireOrLeanFire), nameof(IsUnsupportedCalculator), nameof(FireNumberLabel), nameof(YearsToFireLabel), nameof(OutlookTitle), nameof(ProjectionTitle), nameof(PlanNamePlaceholder), nameof(PlanNameDescription), nameof(ExportDescription))]
     private bool isLeanFire;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStandardFireOrLeanFire), nameof(IsUnsupportedCalculator), nameof(FireNumberLabel), nameof(YearsToFireLabel), nameof(OutlookTitle), nameof(ProjectionTitle), nameof(PlanNamePlaceholder), nameof(PlanNameDescription), nameof(ExportDescription))]
     private bool isFatFire;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
-    private bool isBaristaFire;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
-    private bool isReverseFire;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
@@ -196,22 +175,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private string projectionSummary = string.Empty;
 
     [ObservableProperty]
-    private string coastNumberText = string.Empty;
-
-    [ObservableProperty]
     private string fullFireNumberText = string.Empty;
-
-    [ObservableProperty]
-    private string yearsToCoastText = string.Empty;
-
-    [ObservableProperty]
-    private string coastStatusText = string.Empty;
-
-    [ObservableProperty]
-    private string coastProgressDescription = string.Empty;
-
-    [ObservableProperty]
-    private string coastProjectionSummary = string.Empty;
 
     [ObservableProperty]
     private string leanStatusText = string.Empty;
@@ -224,42 +188,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     [ObservableProperty]
     private string fatGuidanceText = string.Empty;
-
-    [ObservableProperty]
-    private string partTimeAnnualIncomeText = string.Empty;
-
-    [ObservableProperty]
-    private string baristaNumberText = string.Empty;
-
-    [ObservableProperty]
-    private string baristaYearsText = string.Empty;
-
-    [ObservableProperty]
-    private string baristaReductionText = string.Empty;
-
-    [ObservableProperty]
-    private string baristaProgressDescription = string.Empty;
-
-    [ObservableProperty]
-    private string baristaProjectionSummary = string.Empty;
-
-    [ObservableProperty]
-    private string reverseRequiredAnnualSavingsText = string.Empty;
-
-    [ObservableProperty]
-    private string reverseRequiredMonthlySavingsText = string.Empty;
-
-    [ObservableProperty]
-    private string reverseYearsText = string.Empty;
-
-    [ObservableProperty]
-    private string reverseCurrentGrowthText = string.Empty;
-
-    [ObservableProperty]
-    private string reverseStatusText = string.Empty;
-
-    [ObservableProperty]
-    private string reverseProjectionSummary = string.Empty;
 
     [ObservableProperty]
     private string debtMonthlyBudgetText = string.Empty;
@@ -359,7 +287,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     public bool IsStandardFireOrLeanFire => IsStandardFire || IsLeanFire || IsFatFire;
 
-    public bool IsUnsupportedCalculator => !IsStandardFire && !IsCoastFire && !IsLeanFire && !IsFatFire && !IsBaristaFire && !IsReverseFire && !IsDebtPayoff && !IsRetirementCashFlow;
+    public bool IsUnsupportedCalculator => !IsStandardFire && !IsLeanFire && !IsFatFire && !IsDebtPayoff && !IsRetirementCashFlow;
 
     public bool IsFixedDebtPayoff => DebtPayoffMode == DebtPayoffMode.FixedBudget;
 
@@ -405,20 +333,14 @@ public partial class CalculatorDetailViewModel : ObservableObject
         Title = definition.Title;
         Summary = definition.Summary;
         IsStandardFire = calculatorId == "standard-fire";
-        IsCoastFire = calculatorId == "coast-fire";
         IsLeanFire = calculatorId == "lean-fire";
         IsFatFire = calculatorId == "fat-fire";
-        IsBaristaFire = calculatorId == "barista-fire";
-        IsReverseFire = calculatorId == "reverse-fire";
         IsDebtPayoff = calculatorId == "debt-payoff";
         IsRetirementCashFlow = calculatorId == "retirement-cash-flow";
         PlanNameText = calculatorId switch
         {
-            "coast-fire" => "My Coast FIRE Plan",
             "lean-fire" => "My Lean FIRE Plan",
             "fat-fire" => "My Fat FIRE Plan",
-            "barista-fire" => "My Barista FIRE Plan",
-            "reverse-fire" => "My Reverse FIRE Plan",
             "debt-payoff" => "My Debt Payoff Plan",
             "retirement-cash-flow" => "My Retirement Cash Flow Plan",
             _ => "My Standard FIRE Plan"
@@ -453,13 +375,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                     ApplyDraft(draft ?? calculatorDefaultsService.StandardFire);
                     TrackLoadedPlan(savedPlan);
                 }
-                else if (IsCoastFire && savedPlan.PayloadVersion == CoastFireDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<CoastFireDraft>(savedPlan.PayloadJson);
-                    PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? calculatorDefaultsService.CoastFire);
-                    TrackLoadedPlan(savedPlan);
-                }
                 else if (IsLeanFire && savedPlan.PayloadVersion == LeanFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<LeanFireDraft>(savedPlan.PayloadJson);
@@ -472,20 +387,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                     var draft = JsonSerializer.Deserialize<FatFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? calculatorDefaultsService.FatFire);
-                    TrackLoadedPlan(savedPlan);
-                }
-                else if (IsBaristaFire && savedPlan.PayloadVersion == BaristaFireDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<BaristaFireDraft>(savedPlan.PayloadJson);
-                    PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? calculatorDefaultsService.BaristaFire);
-                    TrackLoadedPlan(savedPlan);
-                }
-                else if (IsReverseFire && savedPlan.PayloadVersion == ReverseFireDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<ReverseFireDraft>(savedPlan.PayloadJson);
-                    PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? calculatorDefaultsService.ReverseFire);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsDebtPayoff && savedPlan.PayloadVersion == DebtPayoffDraft.PayloadVersion)
@@ -522,11 +423,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                     var draft = JsonSerializer.Deserialize<StandardFireDraft>(savedDraft.PayloadJson);
                     ApplyDraft(draft ?? calculatorDefaultsService.StandardFire);
                 }
-                else if (IsCoastFire && savedDraft.PayloadVersion == CoastFireDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<CoastFireDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? calculatorDefaultsService.CoastFire);
-                }
                 else if (IsLeanFire && savedDraft.PayloadVersion == LeanFireDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<LeanFireDraft>(savedDraft.PayloadJson);
@@ -536,16 +432,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 {
                     var draft = JsonSerializer.Deserialize<FatFireDraft>(savedDraft.PayloadJson);
                     ApplyDraft(draft ?? calculatorDefaultsService.FatFire);
-                }
-                else if (IsBaristaFire && savedDraft.PayloadVersion == BaristaFireDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<BaristaFireDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? calculatorDefaultsService.BaristaFire);
-                }
-                else if (IsReverseFire && savedDraft.PayloadVersion == ReverseFireDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<ReverseFireDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? calculatorDefaultsService.ReverseFire);
                 }
                 else if (IsDebtPayoff && savedDraft.PayloadVersion == DebtPayoffDraft.PayloadVersion)
                 {
@@ -657,12 +543,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             payloadVersion = StandardFireDraft.PayloadVersion;
             payloadJson = JsonSerializer.Serialize(standardDraft);
         }
-        else if (IsCoastFire && TryCreateCoastDraft(out var coastDraft))
-        {
-            calculatorId = "coast-fire";
-            payloadVersion = CoastFireDraft.PayloadVersion;
-            payloadJson = JsonSerializer.Serialize(coastDraft);
-        }
         else if (IsLeanFire && TryCreateLeanDraft(out var leanDraft))
         {
             calculatorId = "lean-fire";
@@ -674,18 +554,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             calculatorId = "fat-fire";
             payloadVersion = FatFireDraft.PayloadVersion;
             payloadJson = JsonSerializer.Serialize(fatDraft);
-        }
-        else if (IsBaristaFire && TryCreateBaristaDraft(out var baristaDraft))
-        {
-            calculatorId = "barista-fire";
-            payloadVersion = BaristaFireDraft.PayloadVersion;
-            payloadJson = JsonSerializer.Serialize(baristaDraft);
-        }
-        else if (IsReverseFire && TryCreateReverseDraft(out var reverseDraft))
-        {
-            calculatorId = "reverse-fire";
-            payloadVersion = ReverseFireDraft.PayloadVersion;
-            payloadJson = JsonSerializer.Serialize(reverseDraft);
         }
         else if (IsDebtPayoff && TryCreateDebtPayoffDraft(out var debtDraft))
         {
@@ -745,12 +613,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 await exportService.ShareAsync(standardDraft, result);
                 ExportStatusMessage = "Your Standard FIRE workbook is ready to share.";
             }
-            else if (IsCoastFire && TryCreateCoastDraft(out var coastDraft))
-            {
-                var result = FinancialCalculator.CalculateCoastFire(coastDraft.ToFireInputs());
-                await coastExportService.ShareAsync(coastDraft, result);
-                ExportStatusMessage = "Your Coast FIRE workbook is ready to share.";
-            }
             else if (IsLeanFire && TryCreateLeanDraft(out var leanDraft))
             {
                 var result = FinancialCalculator.CalculateLeanFire(leanDraft.ToFireInputs()).Standard;
@@ -762,18 +624,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 var result = FinancialCalculator.CalculateFatFire(fatDraft.ToFireInputs()).Standard;
                 await fatExportService.ShareAsync(fatDraft, result);
                 ExportStatusMessage = "Your Fat FIRE workbook is ready to share.";
-            }
-            else if (IsBaristaFire && TryCreateBaristaDraft(out var baristaDraft))
-            {
-                var result = FinancialCalculator.CalculateBaristaFire(baristaDraft.ToFireInputs(), baristaDraft.PartTimeAnnualIncome);
-                await baristaExportService.ShareAsync(baristaDraft, result);
-                ExportStatusMessage = "Your Barista FIRE workbook is ready to share.";
-            }
-            else if (IsReverseFire && TryCreateReverseDraft(out var reverseDraft))
-            {
-                var result = FinancialCalculator.CalculateReverseFire(reverseDraft.ToFireInputs());
-                await reverseExportService.ShareAsync(reverseDraft, result);
-                ExportStatusMessage = "Your Reverse FIRE workbook is ready to share.";
             }
             else if (IsDebtPayoff && TryCreateDebtPayoffDraft(out var debtDraft))
             {
@@ -812,21 +662,15 @@ public partial class CalculatorDetailViewModel : ObservableObject
         }
         catch (Exception)
         {
-            ExportStatusMessage = IsCoastFire
-                ? "The Coast FIRE workbook could not be created locally."
-                : IsLeanFire
-                    ? "The Lean FIRE workbook could not be created locally."
-                    : IsFatFire
-                        ? "The Fat FIRE workbook could not be created locally."
-                        : IsBaristaFire
-                            ? "The Barista FIRE workbook could not be created locally."
-                            : IsReverseFire
-                                ? "The Reverse FIRE workbook could not be created locally."
-                                : IsDebtPayoff
-                                                ? "The Debt Payoff workbook could not be created locally."
-                                                : IsRetirementCashFlow
-                                                    ? "The Retirement Cash Flow workbook could not be created locally."
-                                            : "The Standard FIRE workbook could not be created locally.";
+            ExportStatusMessage = IsLeanFire
+                ? "The Lean FIRE workbook could not be created locally."
+                : IsFatFire
+                    ? "The Fat FIRE workbook could not be created locally."
+                    : IsDebtPayoff
+                        ? "The Debt Payoff workbook could not be created locally."
+                        : IsRetirementCashFlow
+                            ? "The Retirement Cash Flow workbook could not be created locally."
+                            : "The Standard FIRE workbook could not be created locally.";
         }
     }
 
@@ -836,7 +680,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     partial void OnAnnualContributionTextChanged(string value) => OnDraftInputChanged();
     partial void OnAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
     partial void OnAnnualExpensesTextChanged(string value) => OnDraftInputChanged();
-    partial void OnPartTimeAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementCurrentAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementSemiAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementPlanThroughAgeTextChanged(string value) => OnDraftInputChanged();
@@ -976,21 +819,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         RecalculateAndSave();
     }
 
-    private void ApplyDraft(CoastFireDraft draft)
-    {
-        isApplyingDraft = true;
-        CurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
-        RetirementAgeText = draft.RetirementAge.ToString(CultureInfo.CurrentCulture);
-        CurrentSavingsText = FormatNumber(draft.CurrentSavings);
-        AnnualContributionText = FormatNumber(draft.AnnualContribution);
-        AnnualExpensesText = FormatNumber(draft.AnnualExpenses);
-        ExpectedReturnText = FormatNumber(draft.ExpectedReturn * 100);
-        InflationRateText = FormatNumber(draft.InflationRate * 100);
-        WithdrawalRateText = FormatNumber(draft.WithdrawalRate * 100);
-        isApplyingDraft = false;
-        RecalculateAndSave();
-    }
-
     private void ApplyDraft(LeanFireDraft draft)
     {
         isApplyingDraft = true;
@@ -1023,35 +851,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         RecalculateAndSave();
     }
 
-    private void ApplyDraft(BaristaFireDraft draft)
-    {
-        isApplyingDraft = true;
-        CurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
-        CurrentSavingsText = FormatNumber(draft.CurrentSavings);
-        AnnualContributionText = FormatNumber(draft.AnnualContribution);
-        AnnualExpensesText = FormatNumber(draft.AnnualExpenses);
-        PartTimeAnnualIncomeText = FormatNumber(draft.PartTimeAnnualIncome);
-        ExpectedReturnText = FormatNumber(draft.ExpectedReturn * 100);
-        InflationRateText = FormatNumber(draft.InflationRate * 100);
-        WithdrawalRateText = FormatNumber(draft.WithdrawalRate * 100);
-        isApplyingDraft = false;
-        RecalculateAndSave();
-    }
-
-    private void ApplyDraft(ReverseFireDraft draft)
-    {
-        isApplyingDraft = true;
-        CurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
-        RetirementAgeText = draft.TargetRetirementAge.ToString(CultureInfo.CurrentCulture);
-        CurrentSavingsText = FormatNumber(draft.CurrentSavings);
-        AnnualExpensesText = FormatNumber(draft.AnnualExpenses);
-        ExpectedReturnText = FormatNumber(draft.ExpectedReturn * 100);
-        InflationRateText = FormatNumber(draft.InflationRate * 100);
-        WithdrawalRateText = FormatNumber(draft.WithdrawalRate * 100);
-        isApplyingDraft = false;
-        RecalculateAndSave();
-    }
-
     private void ApplyDraft(DebtPayoffDraft draft)
     {
         isApplyingDraft = true;
@@ -1071,10 +870,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         {
             ApplyDraft(calculatorDefaultsService.StandardFire);
         }
-        else if (IsCoastFire)
-        {
-            ApplyDraft(calculatorDefaultsService.CoastFire);
-        }
         else if (IsLeanFire)
         {
             ApplyDraft(calculatorDefaultsService.LeanFire);
@@ -1082,14 +877,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         else if (IsFatFire)
         {
             ApplyDraft(calculatorDefaultsService.FatFire);
-        }
-        else if (IsBaristaFire)
-        {
-            ApplyDraft(calculatorDefaultsService.BaristaFire);
-        }
-        else if (IsReverseFire)
-        {
-            ApplyDraft(calculatorDefaultsService.ReverseFire);
         }
         else if (IsDebtPayoff)
         {
@@ -1126,22 +913,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 : $"At the current assumptions, your portfolio is projected to reach {FormatCurrency(result.FireNumber)} in approximately {result.YearsToFire:N1} years.";
             UpdateProjectionChart(result);
             ScheduleSave(standardDraft);
-        }
-        else if (IsCoastFire && TryCreateCoastDraft(out var coastDraft))
-        {
-            var result = FinancialCalculator.CalculateCoastFire(coastDraft.ToFireInputs());
-            ValidationMessage = string.Empty;
-            CoastNumberText = FormatCurrency(result.CoastNumber);
-            FullFireNumberText = FormatCurrency(result.FireNumber);
-            YearsToCoastText = result.AlreadyCoasting ? "Already coasting" : $"{result.YearsToCoast:N1} years";
-            CoastStatusText = result.AlreadyCoasting
-                ? "You're already Coast FIRE!"
-                : $"{result.YearsToCoast:N1} years to Coast FIRE";
-            var progress = result.CoastNumber <= 0 ? 0 : Math.Clamp(coastDraft.CurrentSavings / result.CoastNumber, 0, 1);
-            CoastProgressDescription = $"{progress:P0} of your Coast FIRE Number is currently funded.";
-            CoastProjectionSummary = $"By age {result.Projections[^1].Age:0}, coasting projects {FormatCurrency(result.Projections[^1].Portfolio)} and continuing contributions projects {FormatCurrency(result.ProjectionsWithContributions[^1].Portfolio)}.";
-            UpdateCoastProjectionChart(result);
-            ScheduleSave(coastDraft);
         }
         else if (IsLeanFire && TryCreateLeanDraft(out var leanDraft))
         {
@@ -1184,39 +955,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 : $"Fat FIRE typically starts at {FormatCurrency(FinancialCalculator.FatFireThreshold)} in annual expenses; your current plan uses {FormatCurrency(fatDraft.AnnualExpenses)}.";
             UpdateProjectionChart(result);
             ScheduleSave(fatDraft);
-        }
-        else if (IsBaristaFire && TryCreateBaristaDraft(out var baristaDraft))
-        {
-            var result = FinancialCalculator.CalculateBaristaFire(baristaDraft.ToFireInputs(), baristaDraft.PartTimeAnnualIncome);
-            ValidationMessage = string.Empty;
-            BaristaNumberText = FormatCurrency(result.BaristaNumber);
-            FullFireNumberText = FormatCurrency(result.FullFireNumber);
-            BaristaYearsText = double.IsPositiveInfinity(result.YearsToBaristaFire)
-                ? "Not reachable with these inputs"
-                : $"{result.YearsToBaristaFire:N1} years";
-            BaristaReductionText = $"{FormatCurrency(result.SavingsFromPartTime)} less needed with part-time income.";
-            var progress = result.BaristaNumber <= 0 ? 0 : Math.Clamp(baristaDraft.CurrentSavings / result.BaristaNumber, 0, 1);
-            BaristaProgressDescription = $"{progress:P0} of your Barista FIRE Number is currently funded.";
-            BaristaProjectionSummary = double.IsPositiveInfinity(result.YearsToBaristaFire)
-                ? "The current contribution and return assumptions do not reach the Barista FIRE Number."
-                : $"At the current assumptions, your portfolio is projected to reach {FormatCurrency(result.BaristaNumber)} in approximately {result.YearsToBaristaFire:N1} years.";
-            UpdateBaristaProjectionChart(result);
-            ScheduleSave(baristaDraft);
-        }
-        else if (IsReverseFire && TryCreateReverseDraft(out var reverseDraft))
-        {
-            var result = FinancialCalculator.CalculateReverseFire(reverseDraft.ToFireInputs());
-            ValidationMessage = string.Empty;
-            ReverseRequiredAnnualSavingsText = FormatCurrency(result.RequiredAnnualSavings);
-            ReverseRequiredMonthlySavingsText = FormatCurrency(result.RequiredMonthlySavings);
-            ReverseYearsText = $"{result.YearsToFire:0} years";
-            ReverseCurrentGrowthText = FormatCurrency(result.CurrentWillGrowTo);
-            ReverseStatusText = result.AlreadyAchievable
-                ? "You're already on track!"
-                : $"To FIRE by age {reverseDraft.TargetRetirementAge}, you need to save {FormatCurrency(result.RequiredMonthlySavings)} per month.";
-            ReverseProjectionSummary = $"Your current savings are projected to grow to {FormatCurrency(result.CurrentWillGrowTo)} by age {reverseDraft.TargetRetirementAge}; the target portfolio is {FormatCurrency(result.FireNumber)}.";
-            UpdateReverseProjectionChart(result);
-            ScheduleSave(reverseDraft);
         }
         else if (IsRetirementCashFlow && TryCreateDeferredCompensationDraft(out var deferredDraft))
         {
@@ -1370,49 +1108,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         return true;
     }
 
-    private bool TryCreateCoastDraft(out CoastFireDraft draft)
-    {
-        draft = calculatorDefaultsService.CoastFire;
-        if (!TryParseWholeNumber(CurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
-        {
-            ValidationMessage = "Enter a current age from 18 to 100.";
-            return false;
-        }
-
-        if (!TryParseWholeNumber(RetirementAgeText, out var retirementAge) || retirementAge < currentAge || retirementAge > 100)
-        {
-            ValidationMessage = "Enter a retirement age from your current age through 100.";
-            return false;
-        }
-
-        if (!TryParseNonNegative(CurrentSavingsText, out var currentSavings)
-            || !TryParseNonNegative(AnnualContributionText, out var annualContribution)
-            || !TryParseNonNegative(AnnualExpensesText, out var annualExpenses))
-        {
-            ValidationMessage = "Enter zero or a positive amount for each dollar value.";
-            return false;
-        }
-
-        if (!TryParsePercentage(ExpectedReturnText, 0, 15, out var expectedReturn)
-            || !TryParsePercentage(InflationRateText, 0, 10, out var inflationRate)
-            || !TryParsePercentage(WithdrawalRateText, 2, 6, out var withdrawalRate))
-        {
-            ValidationMessage = "Expected return must be 0% to 15%, inflation 0% to 10%, and withdrawal rate 2% to 6%.";
-            return false;
-        }
-
-        draft = new CoastFireDraft(
-            currentAge,
-            retirementAge,
-            currentSavings,
-            annualContribution,
-            expectedReturn,
-            inflationRate,
-            withdrawalRate,
-            annualExpenses);
-        return true;
-    }
-
     private bool TryCreateLeanDraft(out LeanFireDraft draft)
     {
         draft = calculatorDefaultsService.LeanFire;
@@ -1452,72 +1147,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             standardDraft.InflationRate,
             standardDraft.WithdrawalRate,
             standardDraft.AnnualExpenses);
-        return true;
-    }
-
-    private bool TryCreateBaristaDraft(out BaristaFireDraft draft)
-    {
-        draft = calculatorDefaultsService.BaristaFire;
-        if (!TryParseWholeNumber(CurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
-        {
-            ValidationMessage = "Enter a current age from 18 to 100.";
-            return false;
-        }
-
-        if (!TryParseNonNegative(CurrentSavingsText, out var currentSavings)
-            || !TryParseNonNegative(AnnualContributionText, out var annualContribution)
-            || !TryParseNonNegative(AnnualExpensesText, out var annualExpenses)
-            || !TryParseNonNegative(PartTimeAnnualIncomeText, out var partTimeIncome))
-        {
-            ValidationMessage = "Enter zero or a positive amount for each dollar value.";
-            return false;
-        }
-
-        if (!TryParsePercentage(ExpectedReturnText, 0, 15, out var expectedReturn)
-            || !TryParsePercentage(InflationRateText, 0, 10, out var inflationRate)
-            || !TryParsePercentage(WithdrawalRateText, 2, 6, out var withdrawalRate))
-        {
-            ValidationMessage = "Expected return must be 0% to 15%, inflation 0% to 10%, and withdrawal rate 2% to 6%.";
-            return false;
-        }
-
-        draft = new BaristaFireDraft(currentAge, currentSavings, annualContribution, expectedReturn, inflationRate, withdrawalRate, annualExpenses, partTimeIncome);
-        return true;
-    }
-
-    private bool TryCreateReverseDraft(out ReverseFireDraft draft)
-    {
-        draft = calculatorDefaultsService.ReverseFire;
-        if (!TryParseWholeNumber(CurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
-        {
-            ValidationMessage = "Enter a current age from 18 to 100.";
-            return false;
-        }
-
-        if (!TryParseWholeNumber(RetirementAgeText, out var targetRetirementAge)
-            || targetRetirementAge <= currentAge
-            || targetRetirementAge > 100)
-        {
-            ValidationMessage = "Enter a target FIRE age after your current age through 100.";
-            return false;
-        }
-
-        if (!TryParseNonNegative(CurrentSavingsText, out var currentSavings)
-            || !TryParseNonNegative(AnnualExpensesText, out var annualExpenses))
-        {
-            ValidationMessage = "Enter zero or a positive amount for each dollar value.";
-            return false;
-        }
-
-        if (!TryParsePercentage(ExpectedReturnText, 0, 15, out var expectedReturn)
-            || !TryParsePercentage(InflationRateText, 0, 10, out var inflationRate)
-            || !TryParsePercentage(WithdrawalRateText, 2, 6, out var withdrawalRate))
-        {
-            ValidationMessage = "Expected return must be 0% to 15%, inflation 0% to 10%, and withdrawal rate 2% to 6%.";
-            return false;
-        }
-
-        draft = new ReverseFireDraft(currentAge, targetRetirementAge, currentSavings, expectedReturn, inflationRate, withdrawalRate, annualExpenses);
         return true;
     }
 
@@ -1592,73 +1221,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ];
         ProjectionChartDescription = $"Portfolio projection from age {result.Projections[0].Age:0} through age {result.Projections[^1].Age:0}. "
             + $"The portfolio starts at {FormatCurrency(result.Projections[0].Portfolio)} and the FIRE target is {FormatCurrency(result.FireNumber)}.";
-    }
-
-    private void UpdateCoastProjectionChart(CoastFireResult result)
-    {
-        ProjectionSeries =
-        [
-            CreateProjectionSeries("Coast", result.Projections.Select(point => point.Portfolio), new SKColor(51, 117, 171)),
-            CreateProjectionSeries("Continue contributing", result.ProjectionsWithContributions.Select(point => point.Portfolio), new SKColor(95, 86, 189)),
-            CreateProjectionSeries("Full FIRE target", Enumerable.Repeat(result.FireNumber, result.Projections.Count), new SKColor(201, 119, 39))
-        ];
-        ProjectionXAxes =
-        [
-            new Axis
-            {
-                Name = "Age",
-                Labels = result.Projections.Select(point => point.Age.ToString("0", CultureInfo.CurrentCulture)).ToArray(),
-                LabelsRotation = 0,
-                TextSize = 10
-            }
-        ];
-        ProjectionChartDescription = $"Coast FIRE comparison from age {result.Projections[0].Age:0} through age {result.Projections[^1].Age:0}. "
-            + $"The Coast path has no further contributions, while the comparison path continues contributions. The full FIRE target is {FormatCurrency(result.FireNumber)}.";
-    }
-
-    private void UpdateBaristaProjectionChart(BaristaFireResult result)
-    {
-        ProjectionSeries =
-        [
-            CreateProjectionSeries("Portfolio", result.Projections.Select(point => point.Portfolio), new SKColor(154, 92, 23)),
-            CreateProjectionSeries("Today's dollars", result.Projections.Select(point => point.InflationAdjusted), new SKColor(84, 112, 104)),
-            CreateProjectionSeries("Barista FIRE target", Enumerable.Repeat(result.BaristaNumber, result.Projections.Count), new SKColor(201, 119, 39)),
-            CreateProjectionSeries("Full FIRE target", Enumerable.Repeat(result.FullFireNumber, result.Projections.Count), new SKColor(75, 90, 84))
-        ];
-        ProjectionXAxes =
-        [
-            new Axis
-            {
-                Name = "Age",
-                Labels = result.Projections.Select(point => point.Age.ToString("0", CultureInfo.CurrentCulture)).ToArray(),
-                LabelsRotation = 0,
-                TextSize = 10
-            }
-        ];
-        ProjectionChartDescription = $"Barista FIRE portfolio projection from age {result.Projections[0].Age:0} through age {result.Projections[^1].Age:0}. "
-            + $"The Barista FIRE target is {FormatCurrency(result.BaristaNumber)} and the full FIRE target is {FormatCurrency(result.FullFireNumber)}.";
-    }
-
-    private void UpdateReverseProjectionChart(ReverseFireResult result)
-    {
-        ProjectionSeries =
-        [
-            CreateProjectionSeries("Portfolio", result.Projections.Select(point => point.Portfolio), new SKColor(29, 119, 130)),
-            CreateProjectionSeries("Today's dollars", result.Projections.Select(point => point.InflationAdjusted), new SKColor(84, 112, 104)),
-            CreateProjectionSeries("FIRE target", Enumerable.Repeat(result.FireNumber, result.Projections.Count), new SKColor(201, 119, 39))
-        ];
-        ProjectionXAxes =
-        [
-            new Axis
-            {
-                Name = "Age",
-                Labels = result.Projections.Select(point => point.Age.ToString("0", CultureInfo.CurrentCulture)).ToArray(),
-                LabelsRotation = 0,
-                TextSize = 10
-            }
-        ];
-        ProjectionChartDescription = $"Reverse FIRE projection from age {result.Projections[0].Age:0} through age {result.Projections[^1].Age:0}. "
-            + $"The required-saving path targets {FormatCurrency(result.FireNumber)}.";
     }
 
     private void UpdateDebtProjectionChart(DebtPayoffResult result)
@@ -1845,11 +1407,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ScheduleSave("standard-fire", StandardFireDraft.PayloadVersion, JsonSerializer.Serialize(draft));
     }
 
-    private void ScheduleSave(CoastFireDraft draft)
-    {
-        ScheduleSave("coast-fire", CoastFireDraft.PayloadVersion, JsonSerializer.Serialize(draft));
-    }
-
     private void ScheduleSave(LeanFireDraft draft)
     {
         ScheduleSave("lean-fire", LeanFireDraft.PayloadVersion, JsonSerializer.Serialize(draft));
@@ -1858,16 +1415,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private void ScheduleSave(FatFireDraft draft)
     {
         ScheduleSave("fat-fire", FatFireDraft.PayloadVersion, JsonSerializer.Serialize(draft));
-    }
-
-    private void ScheduleSave(BaristaFireDraft draft)
-    {
-        ScheduleSave("barista-fire", BaristaFireDraft.PayloadVersion, JsonSerializer.Serialize(draft));
-    }
-
-    private void ScheduleSave(ReverseFireDraft draft)
-    {
-        ScheduleSave("reverse-fire", ReverseFireDraft.PayloadVersion, JsonSerializer.Serialize(draft));
     }
 
     private void ScheduleSave(DeferredCompensationDraft draft)

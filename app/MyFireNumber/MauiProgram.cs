@@ -87,6 +87,9 @@ public static class MauiProgram
 		builder.Services.AddTransient<WithdrawalRatePage>();
 		builder.Services.AddTransient<SavingsInvestmentPage>();
 		builder.Services.AddTransient<HealthcareGapPage>();
+		builder.Services.AddTransient<CoastFirePage>();
+		builder.Services.AddTransient<BaristaFirePage>();
+		builder.Services.AddTransient<ReverseFirePage>();
 		builder.Services.AddTransient<QuizPage>();
 		builder.Services.AddTransient<WelcomePage>();
 		builder.Services.AddTransient<DefaultsOnboardingPage>();
@@ -101,6 +104,9 @@ public static class MauiProgram
 		builder.Services.AddTransient<WithdrawalRateViewModel>();
 		builder.Services.AddTransient<SavingsInvestmentViewModel>();
 		builder.Services.AddTransient<HealthcareGapViewModel>();
+		builder.Services.AddTransient<CoastFireViewModel>();
+		builder.Services.AddTransient<BaristaFireViewModel>();
+		builder.Services.AddTransient<ReverseFireViewModel>();
 		builder.Services.AddTransient<QuizViewModel>();
 		builder.Services.AddTransient<WelcomeViewModel>();
 		builder.Services.AddTransient<DefaultsOnboardingViewModel>();
