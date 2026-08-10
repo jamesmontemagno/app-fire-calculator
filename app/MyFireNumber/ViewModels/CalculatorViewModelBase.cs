@@ -91,6 +91,8 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
 
     protected ICalculatorDefaultsService CalculatorDefaults { get; }
 
+    protected INavigationService Navigation => navigation;
+
     public TimeSpan ChartAnimationsSpeed => behaviorPreferences.Current.ReduceMotion
         ? TimeSpan.Zero
         : TimeSpan.FromMilliseconds(800);

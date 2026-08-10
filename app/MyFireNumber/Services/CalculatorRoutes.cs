@@ -16,7 +16,8 @@ public static class CalculatorRoutes
         "coast-fire",
         "barista-fire",
         "reverse-fire",
-        "debt-payoff"
+        "debt-payoff",
+        "retirement-cash-flow"
     };
 
     public static string Build(

@@ -22,7 +22,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly ICurrencyPreferencesService currencyPreferencesService;
     private readonly ICorruptPayloadRepository corruptPayloadRepository;
-    private readonly IDeferredCompensationExportService deferredCompensationExportService;
     private readonly IDraftRepository draftRepository;
     private readonly IFatFireExportService fatExportService;
     private readonly ILeanFireExportService leanExportService;
@@ -38,9 +37,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private string? loadedPlanId;
     private bool returnHomeAfterSave;
 
-    public ObservableCollection<RetirementAccountEditorItem> RetirementAccounts { get; } = [];
-    public ObservableCollection<RetirementIncomeEditorItem> RetirementIncomeSources { get; } = [];
-    public ObservableCollection<RetirementExpenseEditorItem> RetirementAdditionalExpenses { get; } = [];
 
     public TimeSpan ChartAnimationsSpeed => behaviorPreferencesService.Current.ReduceMotion
         ? TimeSpan.Zero
@@ -52,7 +48,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ICalculatorDefaultsService calculatorDefaultsService,
         ICurrencyPreferencesService currencyPreferencesService,
         ICorruptPayloadRepository corruptPayloadRepository,
-        IDeferredCompensationExportService deferredCompensationExportService,
         IDraftRepository draftRepository,
         IFatFireExportService fatExportService,
         ILeanFireExportService leanExportService,
@@ -65,16 +60,12 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.calculatorDefaultsService = calculatorDefaultsService;
         this.currencyPreferencesService = currencyPreferencesService;
         this.corruptPayloadRepository = corruptPayloadRepository;
-        this.deferredCompensationExportService = deferredCompensationExportService;
         this.draftRepository = draftRepository;
         this.fatExportService = fatExportService;
         this.leanExportService = leanExportService;
         this.navigationService = navigationService;
         this.planRepository = planRepository;
         this.exportService = exportService;
-        RetirementAccounts.CollectionChanged += OnRetirementAccountsChanged;
-        RetirementIncomeSources.CollectionChanged += OnRetirementIncomeSourcesChanged;
-        RetirementAdditionalExpenses.CollectionChanged += OnRetirementExpensesChanged;
         ApplyDraft(calculatorDefaultsService.StandardFire);
     }
 
@@ -99,16 +90,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStandardFireOrLeanFire), nameof(IsUnsupportedCalculator), nameof(FireNumberLabel), nameof(YearsToFireLabel), nameof(OutlookTitle), nameof(ProjectionTitle), nameof(PlanNamePlaceholder), nameof(PlanNameDescription), nameof(ExportDescription))]
     private bool isFatFire;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
-    private bool isRetirementCashFlow;
-
-    [ObservableProperty]
-    private bool withdrawOnlyAfterRetirement = true;
-
-    [ObservableProperty]
-    private bool reinvestRetirementSurplus = true;
 
     [ObservableProperty]
     private bool isLoading;
@@ -180,24 +161,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     [ObservableProperty]
     private string fatGuidanceText = string.Empty;
 
-    [ObservableProperty] private string retirementCurrentAgeText = "45";
-    [ObservableProperty] private string retirementSemiAgeText = "55";
-    [ObservableProperty] private string retirementPlanThroughAgeText = "90";
-    [ObservableProperty] private string retirementExpensesText = "80000";
-    [ObservableProperty] private string retirementInflationText = "3";
-    [ObservableProperty] private string retirementCurrentBalanceText = string.Empty;
-    [ObservableProperty] private string retirementBalanceAtSemiText = string.Empty;
-    [ObservableProperty] private string retirementEndingBalanceText = string.Empty;
-    [ObservableProperty] private string retirementFundedYearsText = string.Empty;
-
-    [ObservableProperty]
-    private IReadOnlyList<ISeries> retirementBucketSeries = [];
-
-    [ObservableProperty]
-    private string retirementBucketDescription = string.Empty;
-
-    [ObservableProperty]
-    private string retirementBucketSummary = string.Empty;
 
     [ObservableProperty]
     private string planNameText = "My Standard FIRE Plan";
@@ -229,7 +192,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     public bool IsStandardFireOrLeanFire => IsStandardFire || IsLeanFire || IsFatFire;
 
-    public bool IsUnsupportedCalculator => !IsStandardFire && !IsLeanFire && !IsFatFire && !IsRetirementCashFlow;
+    public bool IsUnsupportedCalculator => !IsStandardFire && !IsLeanFire && !IsFatFire;
 
     public string FireNumberLabel => IsLeanFire ? "Lean FIRE Number" : IsFatFire ? "Fat FIRE Number" : "FIRE Number";
 
@@ -273,23 +236,16 @@ public partial class CalculatorDetailViewModel : ObservableObject
         IsStandardFire = calculatorId == "standard-fire";
         IsLeanFire = calculatorId == "lean-fire";
         IsFatFire = calculatorId == "fat-fire";
-        IsRetirementCashFlow = calculatorId == "retirement-cash-flow";
         PlanNameText = calculatorId switch
         {
             "lean-fire" => "My Lean FIRE Plan",
             "fat-fire" => "My Fat FIRE Plan",
-            "retirement-cash-flow" => "My Retirement Cash Flow Plan",
             _ => "My Standard FIRE Plan"
         };
 
         if (IsUnsupportedCalculator)
         {
             return;
-        }
-
-        if (IsRetirementCashFlow)
-        {
-            ApplyDeferredCompensationDraft(calculatorDefaultsService.RetirementCashFlow);
         }
 
         IsLoading = true;
@@ -325,13 +281,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                     ApplyDraft(draft ?? calculatorDefaultsService.FatFire);
                     TrackLoadedPlan(savedPlan);
                 }
-                else if (IsRetirementCashFlow && savedPlan.PayloadVersion == DeferredCompensationDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<DeferredCompensationDraft>(savedPlan.PayloadJson);
-                    PlanNameText = savedPlan.Name;
-                    ApplyDeferredCompensationDraft(draft ?? calculatorDefaultsService.RetirementCashFlow);
-                    TrackLoadedPlan(savedPlan);
-                }
                 else
                 {
                     ValidationMessage = "This saved plan uses an unsupported format. Default values are shown.";
@@ -361,11 +310,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 {
                     var draft = JsonSerializer.Deserialize<FatFireDraft>(savedDraft.PayloadJson);
                     ApplyDraft(draft ?? calculatorDefaultsService.FatFire);
-                }
-                else if (IsRetirementCashFlow && savedDraft.PayloadVersion == DeferredCompensationDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<DeferredCompensationDraft>(savedDraft.PayloadJson);
-                    ApplyDeferredCompensationDraft(draft ?? calculatorDefaultsService.RetirementCashFlow);
                 }
                 else
                 {
@@ -479,12 +423,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             payloadVersion = FatFireDraft.PayloadVersion;
             payloadJson = JsonSerializer.Serialize(fatDraft);
         }
-        else if (IsRetirementCashFlow && TryCreateDeferredCompensationDraft(out var deferredDraft))
-        {
-            calculatorId = "retirement-cash-flow";
-            payloadVersion = DeferredCompensationDraft.PayloadVersion;
-            payloadJson = JsonSerializer.Serialize(deferredDraft);
-        }
         else
         {
             return false;
@@ -543,12 +481,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 await fatExportService.ShareAsync(fatDraft, result);
                 ExportStatusMessage = "Your Fat FIRE workbook is ready to share.";
             }
-            else if (IsRetirementCashFlow && TryCreateDeferredCompensationDraft(out var deferredDraft))
-            {
-                var result = DeferredCompensationCalculator.Calculate(deferredDraft.ToInputs());
-                await deferredCompensationExportService.ShareAsync(deferredDraft, result);
-                ExportStatusMessage = "Your Retirement Cash Flow workbook is ready to share.";
-            }
         }
         catch (Exception)
         {
@@ -556,8 +488,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 ? "The Lean FIRE workbook could not be created locally."
                 : IsFatFire
                     ? "The Fat FIRE workbook could not be created locally."
-                        : IsRetirementCashFlow
-                            ? "The Retirement Cash Flow workbook could not be created locally."
                             : "The Standard FIRE workbook could not be created locally.";
         }
     }
@@ -568,13 +498,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     partial void OnAnnualContributionTextChanged(string value) => OnDraftInputChanged();
     partial void OnAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
     partial void OnAnnualExpensesTextChanged(string value) => OnDraftInputChanged();
-    partial void OnRetirementCurrentAgeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnRetirementSemiAgeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnRetirementPlanThroughAgeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnRetirementExpensesTextChanged(string value) => OnDraftInputChanged();
-    partial void OnRetirementInflationTextChanged(string value) => OnDraftInputChanged();
-    partial void OnWithdrawOnlyAfterRetirementChanged(bool value) => OnDraftInputChanged();
-    partial void OnReinvestRetirementSurplusChanged(bool value) => OnDraftInputChanged();
     partial void OnExpectedReturnTextChanged(string value) => OnDraftInputChanged();
     partial void OnInflationRateTextChanged(string value) => OnDraftInputChanged();
     partial void OnWithdrawalRateTextChanged(string value) => OnDraftInputChanged();
@@ -585,67 +508,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         {
             ValidationMessage = string.Empty;
             ApplyDraft(value.Draft);
-        }
-    }
-
-    [RelayCommand]
-    private void AddRetirementAccount()
-    {
-        RetirementAccounts.Add(new RetirementAccountEditorItem
-        {
-            Name = "New retirement account",
-            AvailableAgeText = RetirementSemiAgeText,
-            IsExpanded = true
-        });
-    }
-
-    [RelayCommand]
-    private void RemoveRetirementAccount(RetirementAccountEditorItem? account)
-    {
-        if (account is not null)
-        {
-            RetirementAccounts.Remove(account);
-        }
-    }
-
-    [RelayCommand]
-    private void AddRetirementIncome()
-    {
-        RetirementIncomeSources.Add(new RetirementIncomeEditorItem
-        {
-            Name = "New retirement income",
-            StartAgeText = RetirementSemiAgeText,
-            EndAgeText = RetirementPlanThroughAgeText,
-            IsExpanded = true
-        });
-    }
-
-    [RelayCommand]
-    private void RemoveRetirementIncome(RetirementIncomeEditorItem? income)
-    {
-        if (income is not null)
-        {
-            RetirementIncomeSources.Remove(income);
-        }
-    }
-
-    [RelayCommand]
-    private void AddRetirementExpense()
-    {
-        RetirementAdditionalExpenses.Add(new RetirementExpenseEditorItem
-        {
-            Name = "New retirement expense",
-            StartAgeText = RetirementSemiAgeText,
-            IsExpanded = true
-        });
-    }
-
-    [RelayCommand]
-    private void RemoveRetirementExpense(RetirementExpenseEditorItem? expense)
-    {
-        if (expense is not null)
-        {
-            RetirementAdditionalExpenses.Remove(expense);
         }
     }
 
@@ -710,10 +572,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         else if (IsFatFire)
         {
             ApplyDraft(calculatorDefaultsService.FatFire);
-        }
-        else if (IsRetirementCashFlow)
-        {
-            ApplyDeferredCompensationDraft(calculatorDefaultsService.RetirementCashFlow);
         }
     }
 
@@ -785,107 +643,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             UpdateProjectionChart(result);
             ScheduleSave(fatDraft);
         }
-        else if (IsRetirementCashFlow && TryCreateDeferredCompensationDraft(out var deferredDraft))
-        {
-            var result = DeferredCompensationCalculator.Calculate(deferredDraft.ToInputs());
-            ValidationMessage = string.Empty;
-            RetirementCurrentBalanceText = FormatCurrency(result.CurrentBalance);
-            RetirementBalanceAtSemiText = FormatCurrency(result.BalanceAtSemiRetirement);
-            RetirementEndingBalanceText = FormatCurrency(result.EndingBalance);
-            RetirementFundedYearsText = $"{result.FundedYears} of {result.Projections.Count} years funded";
-            ProjectionSeries =
-            [
-                CreateProjectionSeries("Portfolio balance", result.Projections.Select(point => point.TotalBalance), new SKColor(43, 111, 83)),
-                CreateProjectionSeries("Expenses", result.Projections.Select(point => point.Expenses), new SKColor(190, 81, 66))
-            ];
-            ProjectionXAxes = [new Axis { Name = "Age", Labels = result.Projections.Where((_, index) => index % Math.Max(1, result.Projections.Count / 6) == 0).Select(point => point.Age.ToString(CultureInfo.CurrentCulture)).ToArray(), TextSize = 10 }];
-            ProjectionChartDescription = $"Retirement cash-flow projection through age {deferredDraft.PlanThroughAge}. Ending balance is {FormatCurrency(result.EndingBalance)}.";
-            UpdateRetirementBucketChart(deferredDraft, result);
-            ScheduleSave(deferredDraft);
-        }
-    }
-
-    private void ApplyDeferredCompensationDraft(DeferredCompensationDraft draft)
-    {
-        isApplyingDraft = true;
-        RetirementCurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
-        RetirementSemiAgeText = draft.SemiRetirementAge.ToString(CultureInfo.CurrentCulture);
-        RetirementPlanThroughAgeText = draft.PlanThroughAge.ToString(CultureInfo.CurrentCulture);
-        RetirementExpensesText = draft.AnnualExpenses.ToString("0.##", CultureInfo.CurrentCulture);
-        RetirementInflationText = (draft.InflationRate * 100).ToString("0.##", CultureInfo.CurrentCulture);
-        WithdrawOnlyAfterRetirement = draft.WithdrawOnlyAfterRetirement;
-        ReinvestRetirementSurplus = draft.ReinvestSurplus;
-        ReplaceRetirementAccounts(draft.Accounts);
-        ReplaceRetirementIncomeSources(draft.IncomeSources);
-        ReplaceRetirementExpenses(draft.AdditionalExpenses);
-        isApplyingDraft = false;
-        RecalculateAndSave();
-    }
-
-    private bool TryCreateDeferredCompensationDraft(out DeferredCompensationDraft draft)
-    {
-        draft = calculatorDefaultsService.RetirementCashFlow;
-        if (!TryParseWholeNumber(RetirementCurrentAgeText, out var currentAge) || currentAge is < 18 or > 100
-            || !TryParseWholeNumber(RetirementSemiAgeText, out var semiAge) || semiAge < currentAge
-            || !TryParseWholeNumber(RetirementPlanThroughAgeText, out var planThroughAge) || planThroughAge < semiAge)
-        {
-            ValidationMessage = "Enter ages from 18 to 100 in chronological order.";
-            return false;
-        }
-        if (!TryParseNonNegative(RetirementExpensesText, out var annualExpenses) || !TryParsePercentage(RetirementInflationText, 0, 10, out var inflationRate))
-        {
-            ValidationMessage = "Enter a non-negative annual expense and inflation from 0% to 10%.";
-            return false;
-        }
-
-        var accounts = new List<RetirementAccount>();
-        foreach (var editor in RetirementAccounts)
-        {
-            if (!editor.TryCreateAccount(out var account))
-            {
-                ValidationMessage = "Complete every retirement account with valid amounts, percentages, and an available age from 18 to 100.";
-                return false;
-            }
-
-            accounts.Add(account);
-        }
-
-        var incomeSources = new List<RetirementIncomeSource>();
-        foreach (var editor in RetirementIncomeSources)
-        {
-            if (!editor.TryCreateIncome(out var income))
-            {
-                ValidationMessage = "Complete every income source with valid amounts, percentages, and chronological ages.";
-                return false;
-            }
-
-            incomeSources.Add(income);
-        }
-
-        var additionalExpenses = new List<RetirementExpense>();
-        foreach (var editor in RetirementAdditionalExpenses)
-        {
-            if (!editor.TryCreateExpense(out var expense))
-            {
-                ValidationMessage = "Complete every additional expense with a valid annual amount and start age.";
-                return false;
-            }
-
-            additionalExpenses.Add(expense);
-        }
-
-        draft = new DeferredCompensationDraft(
-            currentAge,
-            semiAge,
-            planThroughAge,
-            annualExpenses,
-            inflationRate,
-            accounts,
-            incomeSources,
-            additionalExpenses,
-            WithdrawOnlyAfterRetirement,
-            ReinvestRetirementSurplus);
-        return true;
     }
 
     private bool TryCreateLeanDraft(out LeanFireDraft draft)
@@ -967,83 +724,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ];
         ProjectionChartDescription = $"Portfolio projection from age {result.Projections[0].Age:0} through age {result.Projections[^1].Age:0}. "
             + $"The portfolio starts at {FormatCurrency(result.Projections[0].Portfolio)} and the FIRE target is {FormatCurrency(result.FireNumber)}.";
-    }
-
-    private void UpdateRetirementBucketChart(
-        DeferredCompensationDraft draft,
-        DeferredCompensationResult result)
-    {
-        SKColor[] colors =
-        [
-            new(139, 92, 246),
-            new(14, 165, 233),
-            new(20, 184, 166),
-            new(245, 158, 11),
-            new(236, 72, 153),
-            new(132, 204, 22),
-            new(249, 115, 22),
-            new(99, 102, 241)
-        ];
-        RetirementBucketSeries = draft.Accounts
-            .Select((account, index) => (ISeries)CreateProjectionSeries(
-                string.IsNullOrWhiteSpace(account.Name) ? $"Account {index + 1}" : account.Name,
-                result.Projections.Select(point => point.Balances.GetValueOrDefault(account.Id)),
-                colors[index % colors.Length]))
-            .ToArray();
-
-        var endingPoint = result.Projections[^1];
-        var endingBalances = draft.Accounts.Select((account, index) =>
-            $"{(string.IsNullOrWhiteSpace(account.Name) ? $"Account {index + 1}" : account.Name)} {FormatCurrency(endingPoint.Balances.GetValueOrDefault(account.Id))}");
-        RetirementBucketDescription = $"Account balances from age {result.Projections[0].Age} through age {endingPoint.Age}.";
-        RetirementBucketSummary = $"At age {endingPoint.Age}, projected account balances are {string.Join(", ", endingBalances)}.";
-    }
-
-    [RelayCommand]
-    private async Task ViewRetirementAnnualDetailsAsync()
-    {
-        if (!TryCreateDeferredCompensationDraft(out var draft))
-        {
-            return;
-        }
-
-        var result = DeferredCompensationCalculator.Calculate(draft.ToInputs());
-        var details = result.Projections
-            .Select(point => CreateRetirementAnnualDetail(draft, point))
-            .ToArray();
-        await navigationService.GoToAsync(
-            "retirement-annual-details",
-            new Dictionary<string, object> { ["details"] = details });
-    }
-
-    private RetirementAnnualDetailItem CreateRetirementAnnualDetail(
-        DeferredCompensationDraft draft,
-        RetirementCashFlowPoint point)
-    {
-        var incomeParts = draft.IncomeSources
-            .Select(source => (source.Name, Amount: point.IncomeBySource.GetValueOrDefault(source.Id)))
-            .Where(item => item.Amount > 0)
-            .Select(item => $"{item.Name}: {FormatCurrency(item.Amount)}")
-            .Concat(draft.Accounts
-                .Select(account => (account.Name, Amount: point.Withdrawals.GetValueOrDefault(account.Id)))
-                .Where(item => item.Amount > 0)
-                .Select(item => $"{item.Name} withdrawal: {FormatCurrency(item.Amount)}"));
-        var expenseParts = new[] { $"Core expenses: {FormatCurrency(point.CoreExpenses)}" }
-            .Concat(draft.AdditionalExpenses
-                .Select(expense => (expense.Name, Amount: point.ExpensesByItem.GetValueOrDefault(expense.Id)))
-                .Where(item => item.Amount > 0)
-                .Select(item => $"{item.Name}: {FormatCurrency(item.Amount)}"));
-        var balanceParts = draft.Accounts.Select((account, index) =>
-            $"{(string.IsNullOrWhiteSpace(account.Name) ? $"Account {index + 1}" : account.Name)}: {FormatCurrency(point.Balances.GetValueOrDefault(account.Id))}");
-
-        return new RetirementAnnualDetailItem(
-            $"Age {point.Age} - {point.Year}",
-            FormatCurrency(point.TotalBalance),
-            FormatCurrency(point.TotalIncome),
-            FormatCurrency(point.Expenses),
-            FormatCurrency(point.Surplus),
-            incomeParts.Any() ? string.Join(Environment.NewLine, incomeParts) : "No income or account withdrawals this year.",
-            string.Join(Environment.NewLine, expenseParts),
-            string.Join(Environment.NewLine, balanceParts));
     }
 
     private LineSeries<double> CreateProjectionSeries(string name, IEnumerable<double> values, SKColor color)
@@ -1131,103 +811,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private void ScheduleSave(FatFireDraft draft)
     {
         ScheduleSave("fat-fire", FatFireDraft.PayloadVersion, JsonSerializer.Serialize(draft));
-    }
-
-    private void ScheduleSave(DeferredCompensationDraft draft)
-    {
-        ScheduleSave("retirement-cash-flow", DeferredCompensationDraft.PayloadVersion, JsonSerializer.Serialize(draft));
-    }
-
-    private void OnRetirementAccountsChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
-    {
-        if (eventArgs.OldItems is not null)
-        {
-            foreach (RetirementAccountEditorItem account in eventArgs.OldItems)
-            {
-                account.Changed -= OnRetirementEditorChanged;
-            }
-        }
-
-        if (eventArgs.NewItems is not null)
-        {
-            foreach (RetirementAccountEditorItem account in eventArgs.NewItems)
-            {
-                account.Changed += OnRetirementEditorChanged;
-            }
-        }
-
-        OnDraftInputChanged();
-    }
-
-    private void OnRetirementIncomeSourcesChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
-    {
-        if (eventArgs.OldItems is not null)
-        {
-            foreach (RetirementIncomeEditorItem income in eventArgs.OldItems)
-            {
-                income.Changed -= OnRetirementEditorChanged;
-            }
-        }
-
-        if (eventArgs.NewItems is not null)
-        {
-            foreach (RetirementIncomeEditorItem income in eventArgs.NewItems)
-            {
-                income.Changed += OnRetirementEditorChanged;
-            }
-        }
-
-        OnDraftInputChanged();
-    }
-
-    private void OnRetirementExpensesChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
-    {
-        if (eventArgs.OldItems is not null)
-        {
-            foreach (RetirementExpenseEditorItem expense in eventArgs.OldItems)
-            {
-                expense.Changed -= OnRetirementEditorChanged;
-            }
-        }
-
-        if (eventArgs.NewItems is not null)
-        {
-            foreach (RetirementExpenseEditorItem expense in eventArgs.NewItems)
-            {
-                expense.Changed += OnRetirementEditorChanged;
-            }
-        }
-
-        OnDraftInputChanged();
-    }
-
-    private void OnRetirementEditorChanged(object? sender, EventArgs eventArgs) => OnDraftInputChanged();
-
-    private void ReplaceRetirementAccounts(IReadOnlyList<RetirementAccount> accounts)
-    {
-        RetirementAccounts.Clear();
-        foreach (var account in accounts)
-        {
-            RetirementAccounts.Add(RetirementAccountEditorItem.FromAccount(account));
-        }
-    }
-
-    private void ReplaceRetirementIncomeSources(IReadOnlyList<RetirementIncomeSource> incomeSources)
-    {
-        RetirementIncomeSources.Clear();
-        foreach (var income in incomeSources)
-        {
-            RetirementIncomeSources.Add(RetirementIncomeEditorItem.FromIncome(income));
-        }
-    }
-
-    private void ReplaceRetirementExpenses(IReadOnlyList<RetirementExpense> expenses)
-    {
-        RetirementAdditionalExpenses.Clear();
-        foreach (var expense in expenses)
-        {
-            RetirementAdditionalExpenses.Add(RetirementExpenseEditorItem.FromExpense(expense));
-        }
     }
 
     private void ScheduleSave(string calculatorId, int payloadVersion, string payloadJson)

@@ -38,6 +38,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("barista-fire", typeof(BaristaFirePage));
 		Routing.RegisterRoute("reverse-fire", typeof(ReverseFirePage));
 		Routing.RegisterRoute("debt-payoff", typeof(DebtPayoffPage));
+		Routing.RegisterRoute("retirement-cash-flow", typeof(RetirementCashFlowPage));
 		Routing.RegisterRoute("retirement-annual-details", typeof(RetirementAnnualDetailsPage));
 		Loaded += OnLoaded;
 	}
