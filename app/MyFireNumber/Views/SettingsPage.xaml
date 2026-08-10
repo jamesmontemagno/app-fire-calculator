@@ -134,6 +134,7 @@
                             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="4">
                                 <Button AutomationId="LaunchHomeButton"
                                         Text="Home"
+                                        Padding="6,10"
                                         Command="{Binding SetLaunchDestinationCommand}"
                                         CommandParameter="{x:Static services:LaunchDestination.Home}"
                                         Background="Transparent"
@@ -148,6 +149,7 @@
                                 <Button AutomationId="LaunchCalculatorsButton"
                                         Grid.Column="1"
                                         Text="Calculators"
+                                        Padding="6,10"
                                         Command="{Binding SetLaunchDestinationCommand}"
                                         CommandParameter="{x:Static services:LaunchDestination.Calculators}"
                                         Background="Transparent"
@@ -162,6 +164,7 @@
                                 <Button AutomationId="LaunchPlansButton"
                                         Grid.Column="2"
                                         Text="Plans"
+                                        Padding="6,10"
                                         Command="{Binding SetLaunchDestinationCommand}"
                                         CommandParameter="{x:Static services:LaunchDestination.Plans}"
                                         Background="Transparent"
