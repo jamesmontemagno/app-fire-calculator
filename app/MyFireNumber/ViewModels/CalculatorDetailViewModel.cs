@@ -2549,7 +2549,14 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
         if (draft is not null)
         {
-            await SaveDraftRecordAsync(draft, CancellationToken.None);
+            try
+            {
+                await SaveDraftRecordAsync(draft, CancellationToken.None);
+            }
+            catch (Exception)
+            {
+                ValidationMessage = "Your changes are shown here, but could not be saved locally yet.";
+            }
         }
     }
 
