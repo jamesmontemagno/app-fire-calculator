@@ -160,7 +160,7 @@
                                 TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                    SemanticProperties.Description="Calculator" />
                             <Label Grid.Column="1"
-                                Text="Your FIRE starting point"
+                                Text="Suggested calculators"
                                 TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                                 FontAttributes="Bold"
                                 FontSize="20" />
@@ -203,6 +203,10 @@
                                        SemanticProperties.Description="Open" />
                             </Grid>
                         </Border>
+                        <Label IsVisible="{Binding ShowFeaturedCalculators}"
+                               Text="Start with one of these to build your first estimate."
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               LineHeight="1.3" />
                         <VerticalStackLayout IsVisible="{Binding ShowFeaturedCalculators}"
                                              BindableLayout.ItemsSource="{Binding FeaturedCalculators}"
                                              Spacing="10">

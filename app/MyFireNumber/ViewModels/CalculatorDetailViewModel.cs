@@ -793,12 +793,21 @@ public partial class CalculatorDetailViewModel : ObservableObject
         await SavePlanCoreAsync(PlanNameText);
     }
 
-    private async Task SavePlanCoreAsync(string planName)
+    [RelayCommand]
+    private async Task SavePlanAndCloseAsync()
+    {
+        if (await SavePlanCoreAsync(PlanNameText))
+        {
+            await navigationService.GoToAsync("..");
+        }
+    }
+
+    private async Task<bool> SavePlanCoreAsync(string planName)
     {
         if (string.IsNullOrWhiteSpace(planName))
         {
             ValidationMessage = "Enter a name before saving this plan.";
-            return;
+            return false;
         }
 
         string calculatorId;
@@ -872,7 +881,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         }
         else
         {
-            return;
+            return false;
         }
 
         try
@@ -896,10 +905,12 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 ? $"Updated \"{PlanNameText.Trim()}\" in Plans."
                 : $"Saved \"{PlanNameText.Trim()}\" to Plans.";
             behaviorPreferencesService.PerformHaptic();
+            return true;
         }
         catch (Exception)
         {
             PlanStatusMessage = "This plan could not be saved locally yet.";
+            return false;
         }
     }
 

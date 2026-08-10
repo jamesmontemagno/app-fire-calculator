@@ -34,15 +34,8 @@
                             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
                             Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                             StrokeShape="RoundRectangle 12">
-                        <Grid RowDefinitions="Auto,1,Auto" ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Label Text="&#xf002;"
-                                   FontFamily="FontAwesomeSolid"
-                                   FontSize="15"
-                                   VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
-                                   SemanticProperties.Description="Search" />
+                        <Grid RowDefinitions="Auto,1,Auto">
                             <SearchBar AutomationId="PlanSearch"
-                                       Grid.Column="1"
                                        Placeholder="Search saved plans"
                                        Text="{Binding SearchText, Mode=TwoWay}"
                                        Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
@@ -50,28 +43,19 @@
                                        PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
                                        SemanticProperties.Description="Search saved plans by name." />
                             <BoxView Grid.Row="1"
-                                     Grid.ColumnSpan="2"
-                                     Margin="0,2"
-                                     HeightRequest="1"
-                                     Background="{AppThemeBinding Light=#E1E7E2, Dark=#365244}" />
-                            <Label Grid.Row="2"
-                                   Text="&#xf0b0;"
-                                   FontFamily="FontAwesomeSolid"
-                                   FontSize="14"
-                                   VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
-                                   SemanticProperties.Description="Filter" />
-                            <Picker AutomationId="PlanCalculatorFilter"
+                                    Margin="0,2"
+                                    HeightRequest="1"
+                                    Background="{AppThemeBinding Light=#E1E7E2, Dark=#365244}" />
+                            <Picker AutomationId="PlanSort"
                                     Grid.Row="2"
-                                    Grid.Column="1"
-                                    Title="All calculators"
-                                    ItemsSource="{Binding CalculatorFilters}"
+                                    Title="Sort by"
+                                    ItemsSource="{Binding SortOptions}"
                                     ItemDisplayBinding="{Binding Name}"
-                                    SelectedItem="{Binding SelectedCalculatorFilter, Mode=TwoWay}"
+                                    SelectedItem="{Binding SelectedSortOption, Mode=TwoWay}"
                                     Background="Transparent"
                                     TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                                     TitleColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                                    SemanticProperties.Description="Filter saved plans by calculator." />
+                                    SemanticProperties.Description="Sort saved plans." />
                         </Grid>
                     </Border>
                 </VerticalStackLayout>
@@ -81,7 +65,7 @@
                    <SwipeView Margin="0,0,0,10">
                        <SwipeView.RightItems>
                            <SwipeItems Mode="Reveal">
-                               <SwipeItem Text="Rename"
+                               <SwipeItem Text=""
                                           BackgroundColor="#326B57"
                                           Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=RenamePlanCommand}"
                                           CommandParameter="{Binding .}"
@@ -89,10 +73,11 @@
                                    <SwipeItem.IconImageSource>
                                        <FontImageSource Glyph="&#xf044;"
                                                         FontFamily="FontAwesomeSolid"
-                                                        Color="White" />
+                                                        Color="#FFFFFF"
+                                                        Size="13" />
                                    </SwipeItem.IconImageSource>
                                </SwipeItem>
-                               <SwipeItem Text="Duplicate"
+                               <SwipeItem Text=""
                                           BackgroundColor="#426B9D"
                                           Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=DuplicatePlanCommand}"
                                           CommandParameter="{Binding .}"
@@ -100,10 +85,11 @@
                                    <SwipeItem.IconImageSource>
                                        <FontImageSource Glyph="&#xf0c5;"
                                                         FontFamily="FontAwesomeSolid"
-                                                        Color="White" />
+                                                        Color="#FFFFFF"
+                                                        Size="13" />
                                    </SwipeItem.IconImageSource>
                                </SwipeItem>
-                               <SwipeItem Text="Delete"
+                               <SwipeItem Text=""
                                           BackgroundColor="#A33A31"
                                           Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=DeletePlanCommand}"
                                           CommandParameter="{Binding .}"
@@ -111,7 +97,8 @@
                                    <SwipeItem.IconImageSource>
                                        <FontImageSource Glyph="&#xf2ed;"
                                                         FontFamily="FontAwesomeSolid"
-                                                        Color="White" />
+                                                        Color="#FFFFFF"
+                                                        Size="13" />
                                    </SwipeItem.IconImageSource>
                                </SwipeItem>
                            </SwipeItems>

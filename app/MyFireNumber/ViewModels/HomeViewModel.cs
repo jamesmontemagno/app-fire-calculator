@@ -11,6 +11,13 @@ public sealed record RecentPlanItem(string Id, string CalculatorId, string Name,
 
 public partial class HomeViewModel : ObservableObject
 {
+    private static readonly string[] SuggestedCalculatorIds =
+    [
+        "standard-fire",
+        "coast-fire",
+        "savings-rate"
+    ];
+
     private readonly ICalculatorCatalog catalog;
     private readonly INavigationService navigationService;
     private readonly IOnboardingService onboardingService;
@@ -67,10 +74,16 @@ public partial class HomeViewModel : ObservableObject
             })
             .Where(item => item.Preference.IsVisible)
             .OrderBy(item => item.Preference.SortOrder)
-            .Select(item => item.Definition);
+            .Select(item => item.Definition)
+            .ToArray();
 
         FeaturedCalculators.Clear();
-        foreach (var calculator in visibleCalculators)
+        foreach (var calculator in SuggestedCalculatorIds
+                     .Select(id => visibleCalculators.FirstOrDefault(definition => definition.Id == id))
+                     .OfType<CalculatorDefinition>()
+                     .Concat(visibleCalculators)
+                     .DistinctBy(definition => definition.Id)
+                     .Take(3))
         {
             FeaturedCalculators.Add(calculator);
         }
