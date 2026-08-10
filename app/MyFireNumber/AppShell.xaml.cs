@@ -30,7 +30,9 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("welcome", typeof(WelcomePage));
 		Routing.RegisterRoute("onboarding-defaults", typeof(DefaultsOnboardingPage));
 		Routing.RegisterRoute("onboarding-choice", typeof(OnboardingChoicePage));
-		Routing.RegisterRoute("calculator", typeof(CalculatorDetailPage));
+		Routing.RegisterRoute("standard-fire", typeof(FireNumberPage));
+		Routing.RegisterRoute("lean-fire", typeof(FireNumberPage));
+		Routing.RegisterRoute("fat-fire", typeof(FireNumberPage));
 		Routing.RegisterRoute("withdrawal-rate", typeof(WithdrawalRatePage));
 		Routing.RegisterRoute("savings-rate", typeof(SavingsInvestmentPage));
 		Routing.RegisterRoute("healthcare-gap", typeof(HealthcareGapPage));

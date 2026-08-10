@@ -17,11 +17,23 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
         BindingContext = viewModel;
     }
 
+    /// <summary>
+    /// Lets a page that serves several calculator variants pick its view model from
+    /// the navigation query before the draft is restored.
+    /// </summary>
+    protected virtual ICalculatorViewModel? SelectViewModel(IDictionary<string, object> query) => calculatorViewModel;
+
     public async void ApplyQueryAttributes(IDictionary<string, object> query)
     {
-        if (calculatorViewModel is null)
+        var viewModel = SelectViewModel(query);
+        if (viewModel is null)
         {
             return;
+        }
+
+        if (!ReferenceEquals(viewModel, calculatorViewModel))
+        {
+            InitializeCalculator(viewModel);
         }
 
         var planId = query.TryGetValue("planId", out var savedPlanId) && savedPlanId is string id
@@ -31,7 +43,7 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
             && bool.TryParse(returnHomeValue?.ToString(), out var parsedReturnHome)
             && parsedReturnHome;
 
-        await calculatorViewModel.LoadAsync(planId, returnHomeAfterSave);
+        await viewModel.LoadAsync(planId, returnHomeAfterSave);
     }
 
     protected override void OnAppearing()

@@ -1,23 +1,18 @@
 namespace MyFireNumber.Services;
 
 /// <summary>
-/// Builds Shell routes for calculators. Calculators that have been split into
-/// their own page get a dedicated route; the rest fall back to the shared
-/// <c>calculator</c> detail route until they are migrated.
+/// Builds Shell routes for calculators. Every calculator owns a route named after
+/// its ID. The Standard, Lean, and Fat FIRE variants share one page, so their
+/// routes also carry the calculator ID so the page can pick the right view model.
 /// </summary>
 public static class CalculatorRoutes
 {
-    /// <summary>Calculator IDs that own a dedicated page and view model.</summary>
-    public static IReadOnlySet<string> DedicatedRouteCalculatorIds { get; } = new HashSet<string>(StringComparer.Ordinal)
+    /// <summary>Calculator IDs served by the shared FIRE Number page.</summary>
+    public static IReadOnlySet<string> SharedFireNumberCalculatorIds { get; } = new HashSet<string>(StringComparer.Ordinal)
     {
-        "withdrawal-rate",
-        "savings-rate",
-        "healthcare-gap",
-        "coast-fire",
-        "barista-fire",
-        "reverse-fire",
-        "debt-payoff",
-        "retirement-cash-flow"
+        "standard-fire",
+        "lean-fire",
+        "fat-fire"
     };
 
     public static string Build(
@@ -26,12 +21,12 @@ public static class CalculatorRoutes
         bool returnHomeAfterSave = false,
         string routePrefix = "")
     {
-        var hasDedicatedRoute = DedicatedRouteCalculatorIds.Contains(calculatorId);
-        var route = hasDedicatedRoute
-            ? $"{routePrefix}{calculatorId}"
-            : $"{routePrefix}calculator?calculatorId={Uri.EscapeDataString(calculatorId)}";
-
         var query = new List<string>();
+        if (SharedFireNumberCalculatorIds.Contains(calculatorId))
+        {
+            query.Add($"calculatorId={Uri.EscapeDataString(calculatorId)}");
+        }
+
         if (!string.IsNullOrWhiteSpace(planId))
         {
             query.Add($"planId={Uri.EscapeDataString(planId)}");
@@ -42,12 +37,9 @@ public static class CalculatorRoutes
             query.Add("returnHomeAfterSave=true");
         }
 
-        if (query.Count == 0)
-        {
-            return route;
-        }
-
-        var separator = hasDedicatedRoute ? '?' : '&';
-        return $"{route}{separator}{string.Join('&', query)}";
+        var route = $"{routePrefix}{calculatorId}";
+        return query.Count == 0
+            ? route
+            : $"{route}?{string.Join('&', query)}";
     }
 }

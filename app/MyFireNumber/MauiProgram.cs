@@ -83,7 +83,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<CalculatorsPage>();
 		builder.Services.AddSingleton<PlansPage>();
 		builder.Services.AddSingleton<SettingsPage>();
-		builder.Services.AddTransient<CalculatorDetailPage>();
+		builder.Services.AddTransient<FireNumberPage>();
 		builder.Services.AddTransient<WithdrawalRatePage>();
 		builder.Services.AddTransient<SavingsInvestmentPage>();
 		builder.Services.AddTransient<HealthcareGapPage>();
@@ -101,7 +101,9 @@ public static class MauiProgram
 		builder.Services.AddSingleton<CalculatorCatalogViewModel>();
 		builder.Services.AddSingleton<PlansViewModel>();
 		builder.Services.AddSingleton<SettingsViewModel>();
-		builder.Services.AddTransient<CalculatorDetailViewModel>();
+		builder.Services.AddTransient<StandardFireViewModel>();
+		builder.Services.AddTransient<LeanFireViewModel>();
+		builder.Services.AddTransient<FatFireViewModel>();
 		builder.Services.AddTransient<CalculatorViewModelServices>();
 		builder.Services.AddTransient<WithdrawalRateViewModel>();
 		builder.Services.AddTransient<SavingsInvestmentViewModel>();
