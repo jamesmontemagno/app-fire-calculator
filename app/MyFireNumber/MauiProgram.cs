@@ -84,6 +84,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<PlansPage>();
 		builder.Services.AddSingleton<SettingsPage>();
 		builder.Services.AddTransient<CalculatorDetailPage>();
+		builder.Services.AddTransient<WithdrawalRatePage>();
 		builder.Services.AddTransient<QuizPage>();
 		builder.Services.AddTransient<WelcomePage>();
 		builder.Services.AddTransient<DefaultsOnboardingPage>();
@@ -94,6 +95,8 @@ public static class MauiProgram
 		builder.Services.AddSingleton<PlansViewModel>();
 		builder.Services.AddSingleton<SettingsViewModel>();
 		builder.Services.AddTransient<CalculatorDetailViewModel>();
+		builder.Services.AddTransient<CalculatorViewModelServices>();
+		builder.Services.AddTransient<WithdrawalRateViewModel>();
 		builder.Services.AddTransient<QuizViewModel>();
 		builder.Services.AddTransient<WelcomeViewModel>();
 		builder.Services.AddTransient<DefaultsOnboardingViewModel>();

@@ -34,7 +34,7 @@ public partial class OnboardingChoiceViewModel : ObservableObject
             "standard-fire",
             DateTime.UtcNow));
         await navigationService.GoToAsync("//home");
-        await navigationService.GoToAsync("calculator?calculatorId=standard-fire");
+        await navigationService.GoToAsync(CalculatorRoutes.Build("standard-fire"));
     }
 
     [RelayCommand]

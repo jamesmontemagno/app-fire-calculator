@@ -34,7 +34,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly IReverseFireExportService reverseExportService;
     private readonly ISavingsInvestmentExportService savingsInvestmentExportService;
     private readonly IStandardFireExportService exportService;
-    private readonly IWithdrawalRateExportService withdrawalRateExportService;
     private readonly IPlanRepository planRepository;
     private readonly SemaphoreSlim draftSaveLock = new(1, 1);
     private readonly object pendingDraftLock = new();
@@ -72,8 +71,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
         IPlanRepository planRepository,
         IReverseFireExportService reverseExportService,
         ISavingsInvestmentExportService savingsInvestmentExportService,
-        IStandardFireExportService exportService,
-        IWithdrawalRateExportService withdrawalRateExportService)
+        IStandardFireExportService exportService)
     {
         this.baristaExportService = baristaExportService;
         this.behaviorPreferencesService = behaviorPreferencesService;
@@ -93,7 +91,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.reverseExportService = reverseExportService;
         this.savingsInvestmentExportService = savingsInvestmentExportService;
         this.exportService = exportService;
-        this.withdrawalRateExportService = withdrawalRateExportService;
         DebtItems.CollectionChanged += OnDebtItemsChanged;
         RetirementAccounts.CollectionChanged += OnRetirementAccountsChanged;
         RetirementIncomeSources.CollectionChanged += OnRetirementIncomeSourcesChanged;
@@ -134,10 +131,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
     private bool isReverseFire;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
-    private bool isWithdrawalRate;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
@@ -281,30 +274,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     [ObservableProperty]
     private string reverseProjectionSummary = string.Empty;
-
-    [ObservableProperty]
-    private string portfolioValueText = string.Empty;
-
-    [ObservableProperty]
-    private string retirementYearsText = string.Empty;
-
-    [ObservableProperty]
-    private string withdrawalAnnualText = string.Empty;
-
-    [ObservableProperty]
-    private string withdrawalMonthlyText = string.Empty;
-
-    [ObservableProperty]
-    private string withdrawalLongevityText = string.Empty;
-
-    [ObservableProperty]
-    private string withdrawalSuccessText = string.Empty;
-
-    [ObservableProperty]
-    private string withdrawalStatusText = string.Empty;
-
-    [ObservableProperty]
-    private string withdrawalRateAnalysisText = string.Empty;
 
     [ObservableProperty]
     private string startingAmountText = string.Empty;
@@ -477,7 +446,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     public bool IsStandardFireOrLeanFire => IsStandardFire || IsLeanFire || IsFatFire;
 
-    public bool IsUnsupportedCalculator => !IsStandardFire && !IsCoastFire && !IsLeanFire && !IsFatFire && !IsBaristaFire && !IsReverseFire && !IsWithdrawalRate && !IsSavingsInvestmentRate && !IsHealthcareGap && !IsDebtPayoff && !IsRetirementCashFlow;
+    public bool IsUnsupportedCalculator => !IsStandardFire && !IsCoastFire && !IsLeanFire && !IsFatFire && !IsBaristaFire && !IsReverseFire && !IsSavingsInvestmentRate && !IsHealthcareGap && !IsDebtPayoff && !IsRetirementCashFlow;
 
     public bool IsMonthlyContribution => ContributionFrequency == ContributionFrequency.Monthly;
 
@@ -532,7 +501,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         IsFatFire = calculatorId == "fat-fire";
         IsBaristaFire = calculatorId == "barista-fire";
         IsReverseFire = calculatorId == "reverse-fire";
-        IsWithdrawalRate = calculatorId == "withdrawal-rate";
         IsSavingsInvestmentRate = calculatorId == "savings-rate";
         IsHealthcareGap = calculatorId == "healthcare-gap";
         IsDebtPayoff = calculatorId == "debt-payoff";
@@ -544,7 +512,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             "fat-fire" => "My Fat FIRE Plan",
             "barista-fire" => "My Barista FIRE Plan",
             "reverse-fire" => "My Reverse FIRE Plan",
-            "withdrawal-rate" => "My Withdrawal Plan",
             "savings-rate" => "My Investment Plan",
             "healthcare-gap" => "My Healthcare Gap Plan",
             "debt-payoff" => "My Debt Payoff Plan",
@@ -614,13 +581,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                     var draft = JsonSerializer.Deserialize<ReverseFireDraft>(savedPlan.PayloadJson);
                     PlanNameText = savedPlan.Name;
                     ApplyDraft(draft ?? calculatorDefaultsService.ReverseFire);
-                    TrackLoadedPlan(savedPlan);
-                }
-                else if (IsWithdrawalRate && savedPlan.PayloadVersion == WithdrawalRateDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<WithdrawalRateDraft>(savedPlan.PayloadJson);
-                    PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? calculatorDefaultsService.WithdrawalRate);
                     TrackLoadedPlan(savedPlan);
                 }
                 else if (IsSavingsInvestmentRate && savedPlan.PayloadVersion == SavingsInvestmentDraft.PayloadVersion)
@@ -695,11 +655,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 {
                     var draft = JsonSerializer.Deserialize<ReverseFireDraft>(savedDraft.PayloadJson);
                     ApplyDraft(draft ?? calculatorDefaultsService.ReverseFire);
-                }
-                else if (IsWithdrawalRate && savedDraft.PayloadVersion == WithdrawalRateDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<WithdrawalRateDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? calculatorDefaultsService.WithdrawalRate);
                 }
                 else if (IsSavingsInvestmentRate && savedDraft.PayloadVersion == SavingsInvestmentDraft.PayloadVersion)
                 {
@@ -851,12 +806,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             payloadVersion = ReverseFireDraft.PayloadVersion;
             payloadJson = JsonSerializer.Serialize(reverseDraft);
         }
-        else if (IsWithdrawalRate && TryCreateWithdrawalRateDraft(out var withdrawalDraft))
-        {
-            calculatorId = "withdrawal-rate";
-            payloadVersion = WithdrawalRateDraft.PayloadVersion;
-            payloadJson = JsonSerializer.Serialize(withdrawalDraft);
-        }
         else if (IsSavingsInvestmentRate && TryCreateSavingsInvestmentDraft(out var investmentDraft))
         {
             calculatorId = "savings-rate";
@@ -957,17 +906,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 await reverseExportService.ShareAsync(reverseDraft, result);
                 ExportStatusMessage = "Your Reverse FIRE workbook is ready to share.";
             }
-            else if (IsWithdrawalRate && TryCreateWithdrawalRateDraft(out var withdrawalDraft))
-            {
-                var result = FinancialCalculator.CalculateWithdrawal(
-                    withdrawalDraft.PortfolioValue,
-                    withdrawalDraft.WithdrawalRate,
-                    withdrawalDraft.ExpectedReturn,
-                    withdrawalDraft.InflationRate,
-                    withdrawalDraft.RetirementYears);
-                await withdrawalRateExportService.ShareAsync(withdrawalDraft, result);
-                ExportStatusMessage = "Your Withdrawal Rate workbook is ready to share.";
-            }
             else if (IsSavingsInvestmentRate && TryCreateSavingsInvestmentDraft(out var investmentDraft))
             {
                 var result = FinancialCalculator.CalculateInvestmentGrowth(investmentDraft.ToInputs());
@@ -1027,9 +965,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
                             ? "The Barista FIRE workbook could not be created locally."
                             : IsReverseFire
                                 ? "The Reverse FIRE workbook could not be created locally."
-                                : IsWithdrawalRate
-                                    ? "The Withdrawal Rate workbook could not be created locally."
-                                    : IsSavingsInvestmentRate
+                                : IsSavingsInvestmentRate
                                         ? "The Savings & Investment Rate workbook could not be created locally."
                                         : IsHealthcareGap
                                             ? "The Healthcare Gap workbook could not be created locally."
@@ -1048,8 +984,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     partial void OnAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
     partial void OnAnnualExpensesTextChanged(string value) => OnDraftInputChanged();
     partial void OnPartTimeAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnPortfolioValueTextChanged(string value) => OnDraftInputChanged();
-    partial void OnRetirementYearsTextChanged(string value) => OnDraftInputChanged();
     partial void OnStartingAmountTextChanged(string value) => OnDraftInputChanged();
     partial void OnInvestmentContributionTextChanged(string value) => OnDraftInputChanged();
     partial void OnYearsInvestingTextChanged(string value) => OnDraftInputChanged();
@@ -1285,18 +1219,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         RecalculateAndSave();
     }
 
-    private void ApplyDraft(WithdrawalRateDraft draft)
-    {
-        isApplyingDraft = true;
-        PortfolioValueText = FormatNumber(draft.PortfolioValue);
-        WithdrawalRateText = FormatNumber(draft.WithdrawalRate * 100);
-        ExpectedReturnText = FormatNumber(draft.ExpectedReturn * 100);
-        InflationRateText = FormatNumber(draft.InflationRate * 100);
-        RetirementYearsText = draft.RetirementYears.ToString(CultureInfo.CurrentCulture);
-        isApplyingDraft = false;
-        RecalculateAndSave();
-    }
-
     private void ApplyDraft(SavingsInvestmentDraft draft)
     {
         isApplyingDraft = true;
@@ -1364,10 +1286,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         else if (IsReverseFire)
         {
             ApplyDraft(calculatorDefaultsService.ReverseFire);
-        }
-        else if (IsWithdrawalRate)
-        {
-            ApplyDraft(calculatorDefaultsService.WithdrawalRate);
         }
         else if (IsSavingsInvestmentRate)
         {
@@ -1503,29 +1421,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             ReverseProjectionSummary = $"Your current savings are projected to grow to {FormatCurrency(result.CurrentWillGrowTo)} by age {reverseDraft.TargetRetirementAge}; the target portfolio is {FormatCurrency(result.FireNumber)}.";
             UpdateReverseProjectionChart(result);
             ScheduleSave(reverseDraft);
-        }
-        else if (IsWithdrawalRate && TryCreateWithdrawalRateDraft(out var withdrawalDraft))
-        {
-            var result = FinancialCalculator.CalculateWithdrawal(
-                withdrawalDraft.PortfolioValue,
-                withdrawalDraft.WithdrawalRate,
-                withdrawalDraft.ExpectedReturn,
-                withdrawalDraft.InflationRate,
-                withdrawalDraft.RetirementYears);
-            ValidationMessage = string.Empty;
-            WithdrawalAnnualText = FormatCurrency(result.AnnualWithdrawal);
-            WithdrawalMonthlyText = FormatCurrency(result.MonthlyWithdrawal);
-            WithdrawalLongevityText = result.PortfolioLongevity >= withdrawalDraft.RetirementYears
-                ? $"{withdrawalDraft.RetirementYears}+ years"
-                : $"{result.PortfolioLongevity:0} years";
-            WithdrawalSuccessText = result.SuccessRate.ToString("P0", CultureInfo.CurrentCulture);
-            WithdrawalStatusText = result.PortfolioLongevity >= withdrawalDraft.RetirementYears
-                ? "Your withdrawal rate is sustainable for this goal."
-                : "Your portfolio may run out before this goal.";
-            WithdrawalRateAnalysisText = string.Join("  ", result.RateAnalysis.Select(analysis =>
-                $"{analysis.Rate:P1}: {(analysis.Years >= withdrawalDraft.RetirementYears ? "Sustainable" : $"{analysis.Years:0} years")}"));
-            UpdateWithdrawalProjectionChart(result);
-            ScheduleSave(withdrawalDraft);
         }
         else if (IsSavingsInvestmentRate && TryCreateSavingsInvestmentDraft(out var investmentDraft))
         {
@@ -1859,33 +1754,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         return true;
     }
 
-    private bool TryCreateWithdrawalRateDraft(out WithdrawalRateDraft draft)
-    {
-        draft = calculatorDefaultsService.WithdrawalRate;
-        if (!TryParseNonNegative(PortfolioValueText, out var portfolioValue) || portfolioValue <= 0)
-        {
-            ValidationMessage = "Enter a portfolio value greater than zero.";
-            return false;
-        }
-
-        if (!TryParseWholeNumber(RetirementYearsText, out var retirementYears) || retirementYears is < 10 or > 60)
-        {
-            ValidationMessage = "Enter a retirement duration from 10 to 60 years.";
-            return false;
-        }
-
-        if (!TryParsePercentage(WithdrawalRateText, 2, 8, out var withdrawalRate)
-            || !TryParsePercentage(ExpectedReturnText, 0, 15, out var expectedReturn)
-            || !TryParsePercentage(InflationRateText, 0, 10, out var inflationRate))
-        {
-            ValidationMessage = "Withdrawal rate must be 2% to 8%, return 0% to 15%, and inflation 0% to 10%.";
-            return false;
-        }
-
-        draft = new WithdrawalRateDraft(portfolioValue, withdrawalRate, expectedReturn, inflationRate, retirementYears);
-        return true;
-    }
-
     private bool TryCreateSavingsInvestmentDraft(out SavingsInvestmentDraft draft)
     {
         draft = calculatorDefaultsService.SavingsInvestment;
@@ -2101,27 +1969,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ];
         ProjectionChartDescription = $"Reverse FIRE projection from age {result.Projections[0].Age:0} through age {result.Projections[^1].Age:0}. "
             + $"The required-saving path targets {FormatCurrency(result.FireNumber)}.";
-    }
-
-    private void UpdateWithdrawalProjectionChart(WithdrawalResult result)
-    {
-        ProjectionSeries =
-        [
-            CreateProjectionSeries("Portfolio balance", result.WithdrawalProjections.Select(point => point.Balance), new SKColor(42, 121, 160)),
-            CreateProjectionSeries("Annual withdrawal", result.WithdrawalProjections.Select(point => point.Withdrawal), new SKColor(201, 119, 39))
-        ];
-        ProjectionXAxes =
-        [
-            new Axis
-            {
-                Name = "Retirement year",
-                Labels = result.WithdrawalProjections.Select(point => point.Year.ToString("0", CultureInfo.CurrentCulture)).ToArray(),
-                LabelsRotation = 0,
-                TextSize = 10
-            }
-        ];
-        ProjectionChartDescription = $"Withdrawal projection through retirement year {result.WithdrawalProjections[^1].Year:0}. "
-            + $"The ending portfolio balance is {FormatCurrency(result.EndingBalance)}.";
     }
 
     private void UpdateInvestmentProjectionChart(InvestmentGrowthResult result)
@@ -2376,11 +2223,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private void ScheduleSave(ReverseFireDraft draft)
     {
         ScheduleSave("reverse-fire", ReverseFireDraft.PayloadVersion, JsonSerializer.Serialize(draft));
-    }
-
-    private void ScheduleSave(WithdrawalRateDraft draft)
-    {
-        ScheduleSave("withdrawal-rate", WithdrawalRateDraft.PayloadVersion, JsonSerializer.Serialize(draft));
     }
 
     private void ScheduleSave(SavingsInvestmentDraft draft)

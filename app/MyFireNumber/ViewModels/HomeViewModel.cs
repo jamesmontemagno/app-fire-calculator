@@ -132,7 +132,7 @@ public partial class HomeViewModel : ObservableObject
             RecentActivityKind.Calculator,
             definition.Id,
             DateTime.UtcNow));
-        await navigationService.GoToAsync($"calculator?calculatorId={Uri.EscapeDataString(definition.Id)}");
+        await navigationService.GoToAsync(CalculatorRoutes.Build(definition.Id));
     }
 
     [RelayCommand]
@@ -147,8 +147,7 @@ public partial class HomeViewModel : ObservableObject
             RecentActivityKind.Plan,
             plan.Id,
             now));
-        await navigationService.GoToAsync(
-            $"calculator?calculatorId={Uri.EscapeDataString(plan.CalculatorId)}&planId={Uri.EscapeDataString(plan.Id)}");
+        await navigationService.GoToAsync(CalculatorRoutes.Build(plan.CalculatorId, plan.Id));
     }
 
     [RelayCommand]
