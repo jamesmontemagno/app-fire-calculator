@@ -2,9 +2,11 @@ namespace MyFireNumber.Services;
 
 public interface IOnboardingService
 {
+    bool HasSeenWelcome { get; }
     bool IsComplete { get; }
     string? RecommendationCalculatorId { get; }
 
+    void MarkWelcomeSeen();
     void Complete();
     void SetRecommendation(string calculatorId);
 
@@ -13,11 +15,18 @@ public interface IOnboardingService
 
 public sealed class OnboardingService : IOnboardingService
 {
+    private const string WelcomeSeenKey = "onboarding-welcome-seen";
     private const string CompletionKey = "onboarding-completed";
     private const string RecommendationKey = "onboarding-recommendation-calculator";
 
+    public bool HasSeenWelcome => Preferences.Default.Get(WelcomeSeenKey, false);
     public bool IsComplete => Preferences.Default.Get(CompletionKey, false);
     public string? RecommendationCalculatorId => Preferences.Default.Get<string?>(RecommendationKey, null);
+
+    public void MarkWelcomeSeen()
+    {
+        Preferences.Default.Set(WelcomeSeenKey, true);
+    }
 
     public void Complete()
     {
@@ -31,6 +40,7 @@ public sealed class OnboardingService : IOnboardingService
 
     public void Reset()
     {
+        Preferences.Default.Remove(WelcomeSeenKey);
         Preferences.Default.Remove(CompletionKey);
         Preferences.Default.Remove(RecommendationKey);
     }

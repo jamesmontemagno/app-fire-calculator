@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.WelcomePage"
+             x:DataType="viewModels:WelcomeViewModel"
+             Title="Welcome"
+             Shell.NavBarIsVisible="False"
+             Shell.TabBarIsVisible="False"
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+    <Grid Padding="24,32,24,24"
+          RowDefinitions="*,Auto">
+        <VerticalStackLayout Grid.Row="0"
+                             VerticalOptions="Center"
+                             Spacing="24">
+            <Border HorizontalOptions="Center"
+                    Padding="20"
+                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 48">
+                <Label Text="&#xf0d6;"
+                       FontFamily="FontAwesomeSolid"
+                       FontSize="48"
+                       TextColor="{AppThemeBinding Light=#2F6B57, Dark=#9ACCB3}"
+                       SemanticProperties.Description="A sprouting plant representing growth" />
+            </Border>
+
+            <VerticalStackLayout Spacing="12">
+                <Label Text="Welcome to My Fire Number"
+                       FontAttributes="Bold"
+                       FontSize="34"
+                       HorizontalTextAlignment="Center"
+                       LineHeight="1.08"
+                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                       SemanticProperties.HeadingLevel="Level1" />
+                <Label Text="Explore the choices that shape your path to financial independence."
+                       FontSize="18"
+                       HorizontalTextAlignment="Center"
+                       LineHeight="1.35"
+                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+            </VerticalStackLayout>
+
+            <Border Padding="20"
+                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                    Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                    StrokeShape="RoundRectangle 16">
+                <VerticalStackLayout Spacing="14">
+                    <Label Text="Make your plan your own"
+                           FontAttributes="Bold"
+                           FontSize="18"
+                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                    <Label Text="Set a few starting assumptions, discover the calculator that fits your goal, then revisit and adjust your plan whenever life changes."
+                           LineHeight="1.4"
+                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                    <Grid ColumnDefinitions="Auto,*"
+                          ColumnSpacing="10">
+                        <Label Text="&#xf023;"
+                               FontFamily="FontAwesomeSolid"
+                               FontSize="16"
+                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               SemanticProperties.Description="Private" />
+                        <Label Grid.Column="1"
+                               Text="Your financial information stays on this device."
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Grid.Row="1"
+                             Spacing="16">
+            <Button AutomationId="WelcomeGetStartedButton"
+                    Text="Get started"
+                    Command="{Binding GetStartedCommand}"
+                    Background="{AppThemeBinding Light=#2F6B57, Dark=#9ACCB3}"
+                    TextColor="{AppThemeBinding Light=#FFFFFF, Dark=#17352C}"
+                    SemanticProperties.Description="Get started with your starting assumptions." />
+            <controls:EducationalDisclaimerView />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
