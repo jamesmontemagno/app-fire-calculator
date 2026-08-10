@@ -15,7 +15,8 @@ public static class CalculatorRoutes
         "healthcare-gap",
         "coast-fire",
         "barista-fire",
-        "reverse-fire"
+        "reverse-fire",
+        "debt-payoff"
     };
 
     public static string Build(

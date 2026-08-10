@@ -90,6 +90,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<CoastFirePage>();
 		builder.Services.AddTransient<BaristaFirePage>();
 		builder.Services.AddTransient<ReverseFirePage>();
+		builder.Services.AddTransient<DebtPayoffPage>();
 		builder.Services.AddTransient<QuizPage>();
 		builder.Services.AddTransient<WelcomePage>();
 		builder.Services.AddTransient<DefaultsOnboardingPage>();
@@ -107,6 +108,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<CoastFireViewModel>();
 		builder.Services.AddTransient<BaristaFireViewModel>();
 		builder.Services.AddTransient<ReverseFireViewModel>();
+		builder.Services.AddTransient<DebtPayoffViewModel>();
 		builder.Services.AddTransient<QuizViewModel>();
 		builder.Services.AddTransient<WelcomeViewModel>();
 		builder.Services.AddTransient<DefaultsOnboardingViewModel>();

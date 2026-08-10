@@ -23,7 +23,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly ICurrencyPreferencesService currencyPreferencesService;
     private readonly ICorruptPayloadRepository corruptPayloadRepository;
     private readonly IDeferredCompensationExportService deferredCompensationExportService;
-    private readonly IDebtPayoffExportService debtPayoffExportService;
     private readonly IDraftRepository draftRepository;
     private readonly IFatFireExportService fatExportService;
     private readonly ILeanFireExportService leanExportService;
@@ -39,7 +38,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private string? loadedPlanId;
     private bool returnHomeAfterSave;
 
-    public ObservableCollection<DebtEditorItem> DebtItems { get; } = [];
     public ObservableCollection<RetirementAccountEditorItem> RetirementAccounts { get; } = [];
     public ObservableCollection<RetirementIncomeEditorItem> RetirementIncomeSources { get; } = [];
     public ObservableCollection<RetirementExpenseEditorItem> RetirementAdditionalExpenses { get; } = [];
@@ -55,7 +53,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ICurrencyPreferencesService currencyPreferencesService,
         ICorruptPayloadRepository corruptPayloadRepository,
         IDeferredCompensationExportService deferredCompensationExportService,
-        IDebtPayoffExportService debtPayoffExportService,
         IDraftRepository draftRepository,
         IFatFireExportService fatExportService,
         ILeanFireExportService leanExportService,
@@ -69,14 +66,12 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.currencyPreferencesService = currencyPreferencesService;
         this.corruptPayloadRepository = corruptPayloadRepository;
         this.deferredCompensationExportService = deferredCompensationExportService;
-        this.debtPayoffExportService = debtPayoffExportService;
         this.draftRepository = draftRepository;
         this.fatExportService = fatExportService;
         this.leanExportService = leanExportService;
         this.navigationService = navigationService;
         this.planRepository = planRepository;
         this.exportService = exportService;
-        DebtItems.CollectionChanged += OnDebtItemsChanged;
         RetirementAccounts.CollectionChanged += OnRetirementAccountsChanged;
         RetirementIncomeSources.CollectionChanged += OnRetirementIncomeSourcesChanged;
         RetirementAdditionalExpenses.CollectionChanged += OnRetirementExpensesChanged;
@@ -104,10 +99,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsStandardFireOrLeanFire), nameof(IsUnsupportedCalculator), nameof(FireNumberLabel), nameof(YearsToFireLabel), nameof(OutlookTitle), nameof(ProjectionTitle), nameof(PlanNamePlaceholder), nameof(PlanNameDescription), nameof(ExportDescription))]
     private bool isFatFire;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
-    private bool isDebtPayoff;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
@@ -189,55 +180,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     [ObservableProperty]
     private string fatGuidanceText = string.Empty;
 
-    [ObservableProperty]
-    private string debtMonthlyBudgetText = string.Empty;
-
-    [ObservableProperty]
-    private string debtExtraPaymentText = string.Empty;
-
-    [ObservableProperty]
-    private string debtTargetMonthsText = string.Empty;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsFixedDebtPayoff), nameof(IsTargetDebtPayoff))]
-    private DebtPayoffMode debtPayoffMode = DebtPayoffMode.FixedBudget;
-
-    [ObservableProperty]
-    private DebtPayoffStrategy debtPayoffStrategy = DebtPayoffStrategy.Snowball;
-
-    [ObservableProperty]
-    private string debtTotalText = string.Empty;
-
-    [ObservableProperty]
-    private string debtMinimumPaymentsText = string.Empty;
-
-    [ObservableProperty]
-    private string debtPayoffTimeText = string.Empty;
-
-    [ObservableProperty]
-    private string debtInterestText = string.Empty;
-
-    [ObservableProperty]
-    private string debtPaymentText = string.Empty;
-
-    [ObservableProperty]
-    private string debtStrategySummary = string.Empty;
-
-    [ObservableProperty]
-    private string debtSnowballComparisonText = string.Empty;
-
-    [ObservableProperty]
-    private string debtAvalancheComparisonText = string.Empty;
-
-    [ObservableProperty]
-    private IReadOnlyList<ISeries> debtBreakdownSeries = [];
-
-    [ObservableProperty]
-    private string debtBreakdownDescription = string.Empty;
-
-    [ObservableProperty]
-    private string debtBreakdownSummary = string.Empty;
-
     [ObservableProperty] private string retirementCurrentAgeText = "45";
     [ObservableProperty] private string retirementSemiAgeText = "55";
     [ObservableProperty] private string retirementPlanThroughAgeText = "90";
@@ -287,11 +229,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     public bool IsStandardFireOrLeanFire => IsStandardFire || IsLeanFire || IsFatFire;
 
-    public bool IsUnsupportedCalculator => !IsStandardFire && !IsLeanFire && !IsFatFire && !IsDebtPayoff && !IsRetirementCashFlow;
-
-    public bool IsFixedDebtPayoff => DebtPayoffMode == DebtPayoffMode.FixedBudget;
-
-    public bool IsTargetDebtPayoff => DebtPayoffMode == DebtPayoffMode.TargetTimeline;
+    public bool IsUnsupportedCalculator => !IsStandardFire && !IsLeanFire && !IsFatFire && !IsRetirementCashFlow;
 
     public string FireNumberLabel => IsLeanFire ? "Lean FIRE Number" : IsFatFire ? "Fat FIRE Number" : "FIRE Number";
 
@@ -335,13 +273,11 @@ public partial class CalculatorDetailViewModel : ObservableObject
         IsStandardFire = calculatorId == "standard-fire";
         IsLeanFire = calculatorId == "lean-fire";
         IsFatFire = calculatorId == "fat-fire";
-        IsDebtPayoff = calculatorId == "debt-payoff";
         IsRetirementCashFlow = calculatorId == "retirement-cash-flow";
         PlanNameText = calculatorId switch
         {
             "lean-fire" => "My Lean FIRE Plan",
             "fat-fire" => "My Fat FIRE Plan",
-            "debt-payoff" => "My Debt Payoff Plan",
             "retirement-cash-flow" => "My Retirement Cash Flow Plan",
             _ => "My Standard FIRE Plan"
         };
@@ -389,13 +325,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                     ApplyDraft(draft ?? calculatorDefaultsService.FatFire);
                     TrackLoadedPlan(savedPlan);
                 }
-                else if (IsDebtPayoff && savedPlan.PayloadVersion == DebtPayoffDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<DebtPayoffDraft>(savedPlan.PayloadJson);
-                    PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? DebtPayoffDraft.Default);
-                    TrackLoadedPlan(savedPlan);
-                }
                 else if (IsRetirementCashFlow && savedPlan.PayloadVersion == DeferredCompensationDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<DeferredCompensationDraft>(savedPlan.PayloadJson);
@@ -432,11 +361,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 {
                     var draft = JsonSerializer.Deserialize<FatFireDraft>(savedDraft.PayloadJson);
                     ApplyDraft(draft ?? calculatorDefaultsService.FatFire);
-                }
-                else if (IsDebtPayoff && savedDraft.PayloadVersion == DebtPayoffDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<DebtPayoffDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? DebtPayoffDraft.Default);
                 }
                 else if (IsRetirementCashFlow && savedDraft.PayloadVersion == DeferredCompensationDraft.PayloadVersion)
                 {
@@ -555,12 +479,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             payloadVersion = FatFireDraft.PayloadVersion;
             payloadJson = JsonSerializer.Serialize(fatDraft);
         }
-        else if (IsDebtPayoff && TryCreateDebtPayoffDraft(out var debtDraft))
-        {
-            calculatorId = "debt-payoff";
-            payloadVersion = DebtPayoffDraft.PayloadVersion;
-            payloadJson = JsonSerializer.Serialize(debtDraft);
-        }
         else if (IsRetirementCashFlow && TryCreateDeferredCompensationDraft(out var deferredDraft))
         {
             calculatorId = "retirement-cash-flow";
@@ -625,34 +543,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 await fatExportService.ShareAsync(fatDraft, result);
                 ExportStatusMessage = "Your Fat FIRE workbook is ready to share.";
             }
-            else if (IsDebtPayoff && TryCreateDebtPayoffDraft(out var debtDraft))
-            {
-                var totalMinimumPayments = debtDraft.Debts.Sum(debt => debt.MinimumPayment);
-                DebtPayoffResult result;
-                if (debtDraft.Mode == DebtPayoffMode.TargetTimeline)
-                {
-                    result = FinancialCalculator.CalculateDebtPayoffByTimeline(
-                        debtDraft.Debts,
-                        debtDraft.TargetMonths,
-                        debtDraft.Strategy == DebtPayoffStrategy.Snowball,
-                        debtDraft.ExtraPayment)?.Result
-                        ?? throw new InvalidOperationException("A payoff timeline could not be calculated for these debts.");
-                }
-                else
-                {
-                    if (debtDraft.MonthlyBudget < totalMinimumPayments)
-                    {
-                        throw new InvalidOperationException("Monthly budget must cover minimum payments.");
-                    }
-
-                    result = debtDraft.Strategy == DebtPayoffStrategy.Snowball
-                        ? FinancialCalculator.CalculateSnowballPayoff(debtDraft.Debts, debtDraft.MonthlyBudget, debtDraft.ExtraPayment)
-                        : FinancialCalculator.CalculateAvalanchePayoff(debtDraft.Debts, debtDraft.MonthlyBudget, debtDraft.ExtraPayment);
-                }
-
-                await debtPayoffExportService.ShareAsync(debtDraft, result);
-                ExportStatusMessage = "Your Debt Payoff workbook is ready to share.";
-            }
             else if (IsRetirementCashFlow && TryCreateDeferredCompensationDraft(out var deferredDraft))
             {
                 var result = DeferredCompensationCalculator.Calculate(deferredDraft.ToInputs());
@@ -666,8 +556,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 ? "The Lean FIRE workbook could not be created locally."
                 : IsFatFire
                     ? "The Fat FIRE workbook could not be created locally."
-                    : IsDebtPayoff
-                        ? "The Debt Payoff workbook could not be created locally."
                         : IsRetirementCashFlow
                             ? "The Retirement Cash Flow workbook could not be created locally."
                             : "The Standard FIRE workbook could not be created locally.";
@@ -685,11 +573,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     partial void OnRetirementPlanThroughAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementExpensesTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementInflationTextChanged(string value) => OnDraftInputChanged();
-    partial void OnDebtMonthlyBudgetTextChanged(string value) => OnDraftInputChanged();
-    partial void OnDebtExtraPaymentTextChanged(string value) => OnDraftInputChanged();
-    partial void OnDebtTargetMonthsTextChanged(string value) => OnDraftInputChanged();
-    partial void OnDebtPayoffModeChanged(DebtPayoffMode value) => OnDraftInputChanged();
-    partial void OnDebtPayoffStrategyChanged(DebtPayoffStrategy value) => OnDraftInputChanged();
     partial void OnWithdrawOnlyAfterRetirementChanged(bool value) => OnDraftInputChanged();
     partial void OnReinvestRetirementSurplusChanged(bool value) => OnDraftInputChanged();
     partial void OnExpectedReturnTextChanged(string value) => OnDraftInputChanged();
@@ -702,27 +585,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         {
             ValidationMessage = string.Empty;
             ApplyDraft(value.Draft);
-        }
-    }
-
-    [RelayCommand]
-    private void AddDebt()
-    {
-        DebtItems.Add(new DebtEditorItem
-        {
-            Name = "New debt",
-            BalanceText = "1000",
-            RateText = "19.99",
-            MinimumPaymentText = "50"
-        });
-    }
-
-    [RelayCommand]
-    private void RemoveDebt(DebtEditorItem? debt)
-    {
-        if (debt is not null)
-        {
-            DebtItems.Remove(debt);
         }
     }
 
@@ -787,22 +649,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         }
     }
 
-    [RelayCommand]
-    private void SetDebtStrategy(string strategy)
-    {
-        DebtPayoffStrategy = string.Equals(strategy, "avalanche", StringComparison.OrdinalIgnoreCase)
-            ? DebtPayoffStrategy.Avalanche
-            : DebtPayoffStrategy.Snowball;
-    }
-
-    [RelayCommand]
-    private void SetDebtPayoffMode(string mode)
-    {
-        DebtPayoffMode = string.Equals(mode, "target", StringComparison.OrdinalIgnoreCase)
-            ? DebtPayoffMode.TargetTimeline
-            : DebtPayoffMode.FixedBudget;
-    }
-
     private void ApplyDraft(StandardFireDraft draft)
     {
         isApplyingDraft = true;
@@ -851,19 +697,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         RecalculateAndSave();
     }
 
-    private void ApplyDraft(DebtPayoffDraft draft)
-    {
-        isApplyingDraft = true;
-        ReplaceDebtItems(draft.Debts);
-        DebtMonthlyBudgetText = FormatNumber(draft.MonthlyBudget);
-        DebtExtraPaymentText = FormatNumber(draft.ExtraPayment);
-        DebtTargetMonthsText = draft.TargetMonths.ToString(CultureInfo.CurrentCulture);
-        DebtPayoffMode = draft.Mode;
-        DebtPayoffStrategy = draft.Strategy;
-        isApplyingDraft = false;
-        RecalculateAndSave();
-    }
-
     private void ApplyDefaultDraft()
     {
         if (IsStandardFire)
@@ -877,10 +710,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         else if (IsFatFire)
         {
             ApplyDraft(calculatorDefaultsService.FatFire);
-        }
-        else if (IsDebtPayoff)
-        {
-            ApplyDraft(DebtPayoffDraft.Default);
         }
         else if (IsRetirementCashFlow)
         {
@@ -973,55 +802,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             ProjectionChartDescription = $"Retirement cash-flow projection through age {deferredDraft.PlanThroughAge}. Ending balance is {FormatCurrency(result.EndingBalance)}.";
             UpdateRetirementBucketChart(deferredDraft, result);
             ScheduleSave(deferredDraft);
-        }
-        else if (IsDebtPayoff && TryCreateDebtPayoffDraft(out var debtDraft))
-        {
-            var totalMinimumPayments = debtDraft.Debts.Sum(debt => debt.MinimumPayment);
-            DebtPayoffResult result;
-            if (debtDraft.Mode == DebtPayoffMode.TargetTimeline)
-            {
-                var timeline = FinancialCalculator.CalculateDebtPayoffByTimeline(
-                    debtDraft.Debts,
-                    debtDraft.TargetMonths,
-                    debtDraft.Strategy == DebtPayoffStrategy.Snowball,
-                    debtDraft.ExtraPayment);
-                if (timeline is null)
-                {
-                    ValidationMessage = "A payoff timeline could not be calculated for these debts.";
-                    return;
-                }
-
-                result = timeline.Result;
-            }
-            else
-            {
-                if (debtDraft.MonthlyBudget < totalMinimumPayments)
-                {
-                    ValidationMessage = $"Monthly budget must be at least {FormatCurrency(totalMinimumPayments)} to cover minimum payments.";
-                    return;
-                }
-
-                result = debtDraft.Strategy == DebtPayoffStrategy.Snowball
-                    ? FinancialCalculator.CalculateSnowballPayoff(debtDraft.Debts, debtDraft.MonthlyBudget, debtDraft.ExtraPayment)
-                    : FinancialCalculator.CalculateAvalanchePayoff(debtDraft.Debts, debtDraft.MonthlyBudget, debtDraft.ExtraPayment);
-            }
-            ValidationMessage = string.Empty;
-            DebtTotalText = FormatCurrency(debtDraft.Debts.Sum(debt => debt.Balance));
-            DebtMinimumPaymentsText = FormatCurrency(totalMinimumPayments);
-            DebtPayoffTimeText = $"{result.TotalMonths} months";
-            DebtInterestText = FormatCurrency(result.TotalInterest);
-            DebtPaymentText = FormatCurrency(result.MonthlyPayment);
-            DebtStrategySummary = debtDraft.Strategy == DebtPayoffStrategy.Snowball
-                ? $"Snowball pays the smallest balance first. Your payoff order is {string.Join(", ", result.PayoffOrder)}."
-                : $"Avalanche pays the highest interest rate first. Your payoff order is {string.Join(", ", result.PayoffOrder)}.";
-            var comparisonPayment = result.MonthlyPayment;
-            var snowball = FinancialCalculator.CalculateSnowballPayoff(debtDraft.Debts, comparisonPayment);
-            var avalanche = FinancialCalculator.CalculateAvalanchePayoff(debtDraft.Debts, comparisonPayment);
-            DebtSnowballComparisonText = $"{snowball.TotalMonths} months, {FormatCurrency(snowball.TotalInterest)} interest";
-            DebtAvalancheComparisonText = $"{avalanche.TotalMonths} months, {FormatCurrency(avalanche.TotalInterest)} interest";
-            UpdateDebtProjectionChart(result);
-            UpdateDebtBreakdownChart(result);
-            ScheduleSave(debtDraft);
         }
     }
 
@@ -1150,40 +930,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         return true;
     }
 
-    private bool TryCreateDebtPayoffDraft(out DebtPayoffDraft draft)
-    {
-        draft = DebtPayoffDraft.Default;
-        var debts = new List<DebtItem>();
-        foreach (var debtItem in DebtItems)
-        {
-            if (!debtItem.TryCreateDebt(out var debt))
-            {
-                ValidationMessage = "Every debt needs a name, positive balance, interest rate, and minimum payment.";
-                return false;
-            }
-
-            debts.Add(debt);
-        }
-
-        if (debts.Count == 0)
-        {
-            ValidationMessage = "Add at least one debt to calculate a payoff strategy.";
-            return false;
-        }
-
-        if (!TryParseNonNegative(DebtMonthlyBudgetText, out var monthlyBudget)
-            || !TryParseNonNegative(DebtExtraPaymentText, out var extraPayment)
-            || !TryParseWholeNumber(DebtTargetMonthsText, out var targetMonths)
-            || targetMonths is < 1 or > 360)
-        {
-            ValidationMessage = "Enter positive debt payments and a payoff timeline from 1 to 360 months.";
-            return false;
-        }
-
-        draft = new DebtPayoffDraft(debts, monthlyBudget, extraPayment, targetMonths, DebtPayoffMode, DebtPayoffStrategy);
-        return true;
-    }
-
     private void OnDraftInputChanged()
     {
         if (!isApplyingDraft)
@@ -1221,36 +967,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ];
         ProjectionChartDescription = $"Portfolio projection from age {result.Projections[0].Age:0} through age {result.Projections[^1].Age:0}. "
             + $"The portfolio starts at {FormatCurrency(result.Projections[0].Portfolio)} and the FIRE target is {FormatCurrency(result.FireNumber)}.";
-    }
-
-    private void UpdateDebtProjectionChart(DebtPayoffResult result)
-    {
-        ProjectionSeries =
-        [
-            CreateProjectionSeries("Debt balance", result.Projections.Select(month => month.TotalBalance), new SKColor(190, 81, 66))
-        ];
-        ProjectionXAxes =
-        [
-            new Axis
-            {
-                Name = "Month",
-                Labels = result.Projections.Where((_, index) => index % Math.Max(1, result.Projections.Count / 6) == 0).Select(month => month.Month.ToString(CultureInfo.CurrentCulture)).ToArray(),
-                LabelsRotation = 0,
-                TextSize = 10
-            }
-        ];
-        ProjectionChartDescription = $"Debt balance projection over {result.TotalMonths} months. Total interest is {FormatCurrency(result.TotalInterest)}.";
-    }
-
-    private void UpdateDebtBreakdownChart(DebtPayoffResult result)
-    {
-        DebtBreakdownSeries =
-        [
-            CreateStackedAreaSeries("Principal paid", result.Projections.Select(month => month.CumulativePrincipal), new SKColor(16, 185, 129)),
-            CreateStackedAreaSeries("Interest paid", result.Projections.Select(month => month.CumulativeInterest), new SKColor(239, 68, 68))
-        ];
-        DebtBreakdownDescription = $"Cumulative principal and interest paid over {result.TotalMonths} months.";
-        DebtBreakdownSummary = $"Across the payoff plan, {FormatCurrency(result.TotalPrincipal)} goes to principal and {FormatCurrency(result.TotalInterest)} goes to interest.";
     }
 
     private void UpdateRetirementBucketChart(
@@ -1420,43 +1136,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private void ScheduleSave(DeferredCompensationDraft draft)
     {
         ScheduleSave("retirement-cash-flow", DeferredCompensationDraft.PayloadVersion, JsonSerializer.Serialize(draft));
-    }
-
-    private void ScheduleSave(DebtPayoffDraft draft)
-    {
-        ScheduleSave("debt-payoff", DebtPayoffDraft.PayloadVersion, JsonSerializer.Serialize(draft));
-    }
-
-    private void OnDebtItemsChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
-    {
-        if (eventArgs.OldItems is not null)
-        {
-            foreach (DebtEditorItem debt in eventArgs.OldItems)
-            {
-                debt.Changed -= OnDebtItemChanged;
-            }
-        }
-
-        if (eventArgs.NewItems is not null)
-        {
-            foreach (DebtEditorItem debt in eventArgs.NewItems)
-            {
-                debt.Changed += OnDebtItemChanged;
-            }
-        }
-
-        OnDraftInputChanged();
-    }
-
-    private void OnDebtItemChanged(object? sender, EventArgs eventArgs) => OnDraftInputChanged();
-
-    private void ReplaceDebtItems(IReadOnlyList<DebtItem> debts)
-    {
-        DebtItems.Clear();
-        foreach (var debt in debts)
-        {
-            DebtItems.Add(DebtEditorItem.FromDebt(debt));
-        }
     }
 
     private void OnRetirementAccountsChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
