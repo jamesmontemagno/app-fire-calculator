@@ -10,7 +10,7 @@ using SkiaSharp.Views.Maui.Controls.Hosting;
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
 #endif
-#if MAUI_DEVFLOW
+#if MAUI_DEVFLOW && !IOS
 using Microsoft.Maui.DevFlow.Agent;
 #endif
 
@@ -85,6 +85,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<SettingsPage>();
 		builder.Services.AddTransient<CalculatorDetailPage>();
 		builder.Services.AddTransient<QuizPage>();
+		builder.Services.AddTransient<WelcomePage>();
 		builder.Services.AddTransient<DefaultsOnboardingPage>();
 		builder.Services.AddTransient<RetirementAnnualDetailsPage>();
 		builder.Services.AddSingleton<HomeViewModel>();
@@ -93,10 +94,12 @@ public static class MauiProgram
 		builder.Services.AddSingleton<SettingsViewModel>();
 		builder.Services.AddTransient<CalculatorDetailViewModel>();
 		builder.Services.AddTransient<QuizViewModel>();
+		builder.Services.AddTransient<WelcomeViewModel>();
 		builder.Services.AddTransient<DefaultsOnboardingViewModel>();
 		builder.Services.AddTransient<RetirementAnnualDetailsViewModel>();
 
-#if MAUI_DEVFLOW
+#if MAUI_DEVFLOW && !IOS
+		// The current DevFlow preview fails MAUI native class registration on iOS at startup.
 		builder.AddMauiDevFlowAgent();
 #endif
 
