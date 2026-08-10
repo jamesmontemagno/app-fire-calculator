@@ -32,6 +32,8 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("onboarding-choice", typeof(OnboardingChoicePage));
 		Routing.RegisterRoute("calculator", typeof(CalculatorDetailPage));
 		Routing.RegisterRoute("withdrawal-rate", typeof(WithdrawalRatePage));
+		Routing.RegisterRoute("savings-rate", typeof(SavingsInvestmentPage));
+		Routing.RegisterRoute("healthcare-gap", typeof(HealthcareGapPage));
 		Routing.RegisterRoute("retirement-annual-details", typeof(RetirementAnnualDetailsPage));
 		Loaded += OnLoaded;
 	}

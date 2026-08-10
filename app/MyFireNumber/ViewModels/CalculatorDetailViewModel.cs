@@ -28,11 +28,9 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private readonly IDebtPayoffExportService debtPayoffExportService;
     private readonly IDraftRepository draftRepository;
     private readonly IFatFireExportService fatExportService;
-    private readonly IHealthcareGapExportService healthcareGapExportService;
     private readonly ILeanFireExportService leanExportService;
     private readonly INavigationService navigationService;
     private readonly IReverseFireExportService reverseExportService;
-    private readonly ISavingsInvestmentExportService savingsInvestmentExportService;
     private readonly IStandardFireExportService exportService;
     private readonly IPlanRepository planRepository;
     private readonly SemaphoreSlim draftSaveLock = new(1, 1);
@@ -65,12 +63,10 @@ public partial class CalculatorDetailViewModel : ObservableObject
         IDebtPayoffExportService debtPayoffExportService,
         IDraftRepository draftRepository,
         IFatFireExportService fatExportService,
-        IHealthcareGapExportService healthcareGapExportService,
         ILeanFireExportService leanExportService,
         INavigationService navigationService,
         IPlanRepository planRepository,
         IReverseFireExportService reverseExportService,
-        ISavingsInvestmentExportService savingsInvestmentExportService,
         IStandardFireExportService exportService)
     {
         this.baristaExportService = baristaExportService;
@@ -84,12 +80,10 @@ public partial class CalculatorDetailViewModel : ObservableObject
         this.debtPayoffExportService = debtPayoffExportService;
         this.draftRepository = draftRepository;
         this.fatExportService = fatExportService;
-        this.healthcareGapExportService = healthcareGapExportService;
         this.leanExportService = leanExportService;
         this.navigationService = navigationService;
         this.planRepository = planRepository;
         this.reverseExportService = reverseExportService;
-        this.savingsInvestmentExportService = savingsInvestmentExportService;
         this.exportService = exportService;
         DebtItems.CollectionChanged += OnDebtItemsChanged;
         RetirementAccounts.CollectionChanged += OnRetirementAccountsChanged;
@@ -131,14 +125,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
     private bool isReverseFire;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
-    private bool isSavingsInvestmentRate;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
-    private bool isHealthcareGap;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsUnsupportedCalculator))]
@@ -276,79 +262,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private string reverseProjectionSummary = string.Empty;
 
     [ObservableProperty]
-    private string startingAmountText = string.Empty;
-
-    [ObservableProperty]
-    private string investmentContributionText = string.Empty;
-
-    [ObservableProperty]
-    private string yearsInvestingText = string.Empty;
-
-    [ObservableProperty]
-    private string investmentAnnualIncomeText = string.Empty;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsMonthlyContribution), nameof(IsYearlyContribution))]
-    private ContributionFrequency contributionFrequency = ContributionFrequency.Monthly;
-
-    [ObservableProperty]
-    private string investmentSavingsRateText = string.Empty;
-
-    [ObservableProperty]
-    private string investmentAnnualContributionText = string.Empty;
-
-    [ObservableProperty]
-    private string investmentFinalBalanceText = string.Empty;
-
-    [ObservableProperty]
-    private string investmentInflationAdjustedText = string.Empty;
-
-    [ObservableProperty]
-    private string investmentGrowthText = string.Empty;
-
-    [ObservableProperty]
-    private string investmentCategoryText = string.Empty;
-
-    [ObservableProperty]
-    private string investmentProjectionSummary = string.Empty;
-
-    [ObservableProperty]
-    private string healthcareCurrentAgeText = string.Empty;
-
-    [ObservableProperty]
-    private string earlyRetirementAgeText = string.Empty;
-
-    [ObservableProperty]
-    private string medicareAgeText = string.Empty;
-
-    [ObservableProperty]
-    private string monthlyPremiumText = string.Empty;
-
-    [ObservableProperty]
-    private string annualDeductibleText = string.Empty;
-
-    [ObservableProperty]
-    private string annualOutOfPocketText = string.Empty;
-
-    [ObservableProperty]
-    private string healthcareGapYearsText = string.Empty;
-
-    [ObservableProperty]
-    private string healthcareAnnualCostText = string.Empty;
-
-    [ObservableProperty]
-    private string healthcareTotalCostText = string.Empty;
-
-    [ObservableProperty]
-    private string healthcareAverageAnnualCostText = string.Empty;
-
-    [ObservableProperty]
-    private string healthcareSubsidyEstimateText = string.Empty;
-
-    [ObservableProperty]
-    private string healthcareProjectionSummary = string.Empty;
-
-    [ObservableProperty]
     private string debtMonthlyBudgetText = string.Empty;
 
     [ObservableProperty]
@@ -446,11 +359,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
 
     public bool IsStandardFireOrLeanFire => IsStandardFire || IsLeanFire || IsFatFire;
 
-    public bool IsUnsupportedCalculator => !IsStandardFire && !IsCoastFire && !IsLeanFire && !IsFatFire && !IsBaristaFire && !IsReverseFire && !IsSavingsInvestmentRate && !IsHealthcareGap && !IsDebtPayoff && !IsRetirementCashFlow;
-
-    public bool IsMonthlyContribution => ContributionFrequency == ContributionFrequency.Monthly;
-
-    public bool IsYearlyContribution => ContributionFrequency == ContributionFrequency.Yearly;
+    public bool IsUnsupportedCalculator => !IsStandardFire && !IsCoastFire && !IsLeanFire && !IsFatFire && !IsBaristaFire && !IsReverseFire && !IsDebtPayoff && !IsRetirementCashFlow;
 
     public bool IsFixedDebtPayoff => DebtPayoffMode == DebtPayoffMode.FixedBudget;
 
@@ -501,8 +410,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         IsFatFire = calculatorId == "fat-fire";
         IsBaristaFire = calculatorId == "barista-fire";
         IsReverseFire = calculatorId == "reverse-fire";
-        IsSavingsInvestmentRate = calculatorId == "savings-rate";
-        IsHealthcareGap = calculatorId == "healthcare-gap";
         IsDebtPayoff = calculatorId == "debt-payoff";
         IsRetirementCashFlow = calculatorId == "retirement-cash-flow";
         PlanNameText = calculatorId switch
@@ -512,8 +419,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             "fat-fire" => "My Fat FIRE Plan",
             "barista-fire" => "My Barista FIRE Plan",
             "reverse-fire" => "My Reverse FIRE Plan",
-            "savings-rate" => "My Investment Plan",
-            "healthcare-gap" => "My Healthcare Gap Plan",
             "debt-payoff" => "My Debt Payoff Plan",
             "retirement-cash-flow" => "My Retirement Cash Flow Plan",
             _ => "My Standard FIRE Plan"
@@ -583,20 +488,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                     ApplyDraft(draft ?? calculatorDefaultsService.ReverseFire);
                     TrackLoadedPlan(savedPlan);
                 }
-                else if (IsSavingsInvestmentRate && savedPlan.PayloadVersion == SavingsInvestmentDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<SavingsInvestmentDraft>(savedPlan.PayloadJson);
-                    PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? calculatorDefaultsService.SavingsInvestment);
-                    TrackLoadedPlan(savedPlan);
-                }
-                else if (IsHealthcareGap && savedPlan.PayloadVersion == HealthcareGapDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<HealthcareGapDraft>(savedPlan.PayloadJson);
-                    PlanNameText = savedPlan.Name;
-                    ApplyDraft(draft ?? calculatorDefaultsService.HealthcareGap);
-                    TrackLoadedPlan(savedPlan);
-                }
                 else if (IsDebtPayoff && savedPlan.PayloadVersion == DebtPayoffDraft.PayloadVersion)
                 {
                     var draft = JsonSerializer.Deserialize<DebtPayoffDraft>(savedPlan.PayloadJson);
@@ -655,16 +546,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 {
                     var draft = JsonSerializer.Deserialize<ReverseFireDraft>(savedDraft.PayloadJson);
                     ApplyDraft(draft ?? calculatorDefaultsService.ReverseFire);
-                }
-                else if (IsSavingsInvestmentRate && savedDraft.PayloadVersion == SavingsInvestmentDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<SavingsInvestmentDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? calculatorDefaultsService.SavingsInvestment);
-                }
-                else if (IsHealthcareGap && savedDraft.PayloadVersion == HealthcareGapDraft.PayloadVersion)
-                {
-                    var draft = JsonSerializer.Deserialize<HealthcareGapDraft>(savedDraft.PayloadJson);
-                    ApplyDraft(draft ?? calculatorDefaultsService.HealthcareGap);
                 }
                 else if (IsDebtPayoff && savedDraft.PayloadVersion == DebtPayoffDraft.PayloadVersion)
                 {
@@ -806,18 +687,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             payloadVersion = ReverseFireDraft.PayloadVersion;
             payloadJson = JsonSerializer.Serialize(reverseDraft);
         }
-        else if (IsSavingsInvestmentRate && TryCreateSavingsInvestmentDraft(out var investmentDraft))
-        {
-            calculatorId = "savings-rate";
-            payloadVersion = SavingsInvestmentDraft.PayloadVersion;
-            payloadJson = JsonSerializer.Serialize(investmentDraft);
-        }
-        else if (IsHealthcareGap && TryCreateHealthcareGapDraft(out var healthcareDraft))
-        {
-            calculatorId = "healthcare-gap";
-            payloadVersion = HealthcareGapDraft.PayloadVersion;
-            payloadJson = JsonSerializer.Serialize(healthcareDraft);
-        }
         else if (IsDebtPayoff && TryCreateDebtPayoffDraft(out var debtDraft))
         {
             calculatorId = "debt-payoff";
@@ -906,18 +775,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
                 await reverseExportService.ShareAsync(reverseDraft, result);
                 ExportStatusMessage = "Your Reverse FIRE workbook is ready to share.";
             }
-            else if (IsSavingsInvestmentRate && TryCreateSavingsInvestmentDraft(out var investmentDraft))
-            {
-                var result = FinancialCalculator.CalculateInvestmentGrowth(investmentDraft.ToInputs());
-                await savingsInvestmentExportService.ShareAsync(investmentDraft, result);
-                ExportStatusMessage = "Your Savings & Investment Rate workbook is ready to share.";
-            }
-            else if (IsHealthcareGap && TryCreateHealthcareGapDraft(out var healthcareDraft))
-            {
-                var result = FinancialCalculator.CalculateHealthcareGap(healthcareDraft.ToInputs());
-                await healthcareGapExportService.ShareAsync(healthcareDraft, result);
-                ExportStatusMessage = "Your Healthcare Gap workbook is ready to share.";
-            }
             else if (IsDebtPayoff && TryCreateDebtPayoffDraft(out var debtDraft))
             {
                 var totalMinimumPayments = debtDraft.Debts.Sum(debt => debt.MinimumPayment);
@@ -965,11 +822,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
                             ? "The Barista FIRE workbook could not be created locally."
                             : IsReverseFire
                                 ? "The Reverse FIRE workbook could not be created locally."
-                                : IsSavingsInvestmentRate
-                                        ? "The Savings & Investment Rate workbook could not be created locally."
-                                        : IsHealthcareGap
-                                            ? "The Healthcare Gap workbook could not be created locally."
-                                            : IsDebtPayoff
+                                : IsDebtPayoff
                                                 ? "The Debt Payoff workbook could not be created locally."
                                                 : IsRetirementCashFlow
                                                     ? "The Retirement Cash Flow workbook could not be created locally."
@@ -984,21 +837,11 @@ public partial class CalculatorDetailViewModel : ObservableObject
     partial void OnAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
     partial void OnAnnualExpensesTextChanged(string value) => OnDraftInputChanged();
     partial void OnPartTimeAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnStartingAmountTextChanged(string value) => OnDraftInputChanged();
-    partial void OnInvestmentContributionTextChanged(string value) => OnDraftInputChanged();
-    partial void OnYearsInvestingTextChanged(string value) => OnDraftInputChanged();
-    partial void OnInvestmentAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnHealthcareCurrentAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementCurrentAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementSemiAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementPlanThroughAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementExpensesTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementInflationTextChanged(string value) => OnDraftInputChanged();
-    partial void OnEarlyRetirementAgeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnMedicareAgeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnMonthlyPremiumTextChanged(string value) => OnDraftInputChanged();
-    partial void OnAnnualDeductibleTextChanged(string value) => OnDraftInputChanged();
-    partial void OnAnnualOutOfPocketTextChanged(string value) => OnDraftInputChanged();
     partial void OnDebtMonthlyBudgetTextChanged(string value) => OnDraftInputChanged();
     partial void OnDebtExtraPaymentTextChanged(string value) => OnDraftInputChanged();
     partial void OnDebtTargetMonthsTextChanged(string value) => OnDraftInputChanged();
@@ -1017,16 +860,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             ValidationMessage = string.Empty;
             ApplyDraft(value.Draft);
         }
-    }
-
-    partial void OnContributionFrequencyChanged(ContributionFrequency value) => OnDraftInputChanged();
-
-    [RelayCommand]
-    private void SetContributionFrequency(string frequency)
-    {
-        ContributionFrequency = string.Equals(frequency, "yearly", StringComparison.OrdinalIgnoreCase)
-            ? ContributionFrequency.Yearly
-            : ContributionFrequency.Monthly;
     }
 
     [RelayCommand]
@@ -1219,35 +1052,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         RecalculateAndSave();
     }
 
-    private void ApplyDraft(SavingsInvestmentDraft draft)
-    {
-        isApplyingDraft = true;
-        StartingAmountText = FormatNumber(draft.StartingAmount);
-        InvestmentContributionText = FormatNumber(draft.ContributionAmount);
-        ContributionFrequency = draft.ContributionFrequency;
-        YearsInvestingText = draft.YearsInvesting.ToString(CultureInfo.CurrentCulture);
-        ExpectedReturnText = FormatNumber(draft.ExpectedReturn * 100);
-        InflationRateText = FormatNumber(draft.InflationRate * 100);
-        InvestmentAnnualIncomeText = FormatNumber(draft.AnnualIncome);
-        CurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
-        isApplyingDraft = false;
-        RecalculateAndSave();
-    }
-
-    private void ApplyDraft(HealthcareGapDraft draft)
-    {
-        isApplyingDraft = true;
-        HealthcareCurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
-        EarlyRetirementAgeText = draft.EarlyRetirementAge.ToString(CultureInfo.CurrentCulture);
-        MedicareAgeText = draft.MedicareAge.ToString(CultureInfo.CurrentCulture);
-        MonthlyPremiumText = FormatNumber(draft.MonthlyPremium);
-        AnnualDeductibleText = FormatNumber(draft.AnnualDeductible);
-        AnnualOutOfPocketText = FormatNumber(draft.AnnualOutOfPocket);
-        InflationRateText = FormatNumber(draft.InflationRate * 100);
-        isApplyingDraft = false;
-        RecalculateAndSave();
-    }
-
     private void ApplyDraft(DebtPayoffDraft draft)
     {
         isApplyingDraft = true;
@@ -1286,14 +1090,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         else if (IsReverseFire)
         {
             ApplyDraft(calculatorDefaultsService.ReverseFire);
-        }
-        else if (IsSavingsInvestmentRate)
-        {
-            ApplyDraft(calculatorDefaultsService.SavingsInvestment);
-        }
-        else if (IsHealthcareGap)
-        {
-            ApplyDraft(calculatorDefaultsService.HealthcareGap);
         }
         else if (IsDebtPayoff)
         {
@@ -1421,35 +1217,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
             ReverseProjectionSummary = $"Your current savings are projected to grow to {FormatCurrency(result.CurrentWillGrowTo)} by age {reverseDraft.TargetRetirementAge}; the target portfolio is {FormatCurrency(result.FireNumber)}.";
             UpdateReverseProjectionChart(result);
             ScheduleSave(reverseDraft);
-        }
-        else if (IsSavingsInvestmentRate && TryCreateSavingsInvestmentDraft(out var investmentDraft))
-        {
-            var result = FinancialCalculator.CalculateInvestmentGrowth(investmentDraft.ToInputs());
-            ValidationMessage = string.Empty;
-            InvestmentSavingsRateText = result.SavingsRate.ToString("P1", CultureInfo.CurrentCulture);
-            InvestmentAnnualContributionText = FormatCurrency(result.AnnualContribution);
-            InvestmentFinalBalanceText = FormatCurrency(result.FinalNominalBalance);
-            InvestmentInflationAdjustedText = FormatCurrency(result.FinalInflationAdjustedBalance);
-            InvestmentGrowthText = FormatCurrency(result.TotalGrowth);
-            InvestmentCategoryText = result.SavingsCategory;
-            InvestmentProjectionSummary = $"After {investmentDraft.YearsInvesting} years, your portfolio is projected to reach {FormatCurrency(result.FinalNominalBalance)}; that is {FormatCurrency(result.FinalInflationAdjustedBalance)} in today's dollars.";
-            UpdateInvestmentProjectionChart(result);
-            ScheduleSave(investmentDraft);
-        }
-        else if (IsHealthcareGap && TryCreateHealthcareGapDraft(out var healthcareDraft))
-        {
-            var result = FinancialCalculator.CalculateHealthcareGap(healthcareDraft.ToInputs());
-            ValidationMessage = string.Empty;
-            HealthcareGapYearsText = $"{result.GapYears} years";
-            HealthcareAnnualCostText = FormatCurrency(result.AnnualCost);
-            HealthcareTotalCostText = FormatCurrency(result.TotalCost);
-            HealthcareAverageAnnualCostText = FormatCurrency(result.AverageAnnualCost);
-            HealthcareSubsidyEstimateText = $"$30k income: {FormatCurrency(result.EstimatedSubsidy30k)}  |  $50k: {FormatCurrency(result.EstimatedSubsidy50k)}  |  $75k: {FormatCurrency(result.EstimatedSubsidy75k)}";
-            HealthcareProjectionSummary = result.GapYears == 0
-                ? "Your retirement age is at or beyond Medicare eligibility, so no pre-Medicare coverage gap is projected."
-                : $"From age {healthcareDraft.EarlyRetirementAge} to {healthcareDraft.MedicareAge}, estimated healthcare costs total {FormatCurrency(result.TotalCost)} before Medicare eligibility.";
-            UpdateHealthcareProjectionChart(result);
-            ScheduleSave(healthcareDraft);
         }
         else if (IsRetirementCashFlow && TryCreateDeferredCompensationDraft(out var deferredDraft))
         {
@@ -1754,83 +1521,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         return true;
     }
 
-    private bool TryCreateSavingsInvestmentDraft(out SavingsInvestmentDraft draft)
-    {
-        draft = calculatorDefaultsService.SavingsInvestment;
-        if (!TryParseWholeNumber(CurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
-        {
-            ValidationMessage = "Enter a current age from 18 to 100.";
-            return false;
-        }
-
-        if (!TryParseWholeNumber(YearsInvestingText, out var yearsInvesting) || yearsInvesting is < 1 or > 60)
-        {
-            ValidationMessage = "Enter an investment timeline from 1 to 60 years.";
-            return false;
-        }
-
-        if (!TryParseNonNegative(StartingAmountText, out var startingAmount)
-            || !TryParseNonNegative(InvestmentContributionText, out var contributionAmount)
-            || !TryParseNonNegative(InvestmentAnnualIncomeText, out var annualIncome))
-        {
-            ValidationMessage = "Enter zero or a positive amount for each dollar value.";
-            return false;
-        }
-
-        if (!TryParsePercentage(ExpectedReturnText, 0, 15, out var expectedReturn)
-            || !TryParsePercentage(InflationRateText, 0, 10, out var inflationRate))
-        {
-            ValidationMessage = "Expected return must be 0% to 15% and inflation 0% to 10%.";
-            return false;
-        }
-
-        draft = new SavingsInvestmentDraft(startingAmount, contributionAmount, ContributionFrequency, yearsInvesting, expectedReturn, inflationRate, annualIncome, currentAge);
-        return true;
-    }
-
-    private bool TryCreateHealthcareGapDraft(out HealthcareGapDraft draft)
-    {
-        draft = calculatorDefaultsService.HealthcareGap;
-        if (!TryParseWholeNumber(HealthcareCurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
-        {
-            ValidationMessage = "Enter a current age from 18 to 100.";
-            return false;
-        }
-
-        if (!TryParseWholeNumber(EarlyRetirementAgeText, out var earlyRetirementAge)
-            || earlyRetirementAge < currentAge
-            || earlyRetirementAge > 100)
-        {
-            ValidationMessage = "Enter a retirement age from your current age through 100.";
-            return false;
-        }
-
-        if (!TryParseWholeNumber(MedicareAgeText, out var medicareAge)
-            || medicareAge < earlyRetirementAge
-            || medicareAge > 100)
-        {
-            ValidationMessage = "Enter a Medicare age from retirement age through 100.";
-            return false;
-        }
-
-        if (!TryParseNonNegative(MonthlyPremiumText, out var monthlyPremium)
-            || !TryParseNonNegative(AnnualDeductibleText, out var annualDeductible)
-            || !TryParseNonNegative(AnnualOutOfPocketText, out var annualOutOfPocket))
-        {
-            ValidationMessage = "Enter zero or a positive amount for each healthcare cost.";
-            return false;
-        }
-
-        if (!TryParsePercentage(InflationRateText, 0, 10, out var inflationRate))
-        {
-            ValidationMessage = "Enter an inflation rate from 0% to 10%.";
-            return false;
-        }
-
-        draft = new HealthcareGapDraft(currentAge, earlyRetirementAge, medicareAge, monthlyPremium, annualDeductible, annualOutOfPocket, inflationRate);
-        return true;
-    }
-
     private bool TryCreateDebtPayoffDraft(out DebtPayoffDraft draft)
     {
         draft = DebtPayoffDraft.Default;
@@ -1969,51 +1659,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ];
         ProjectionChartDescription = $"Reverse FIRE projection from age {result.Projections[0].Age:0} through age {result.Projections[^1].Age:0}. "
             + $"The required-saving path targets {FormatCurrency(result.FireNumber)}.";
-    }
-
-    private void UpdateInvestmentProjectionChart(InvestmentGrowthResult result)
-    {
-        ProjectionSeries =
-        [
-            CreateProjectionSeries("Portfolio", result.Projections.Select(point => point.Portfolio), new SKColor(72, 93, 165)),
-            CreateProjectionSeries("Today's dollars", result.Projections.Select(point => point.InflationAdjusted), new SKColor(84, 112, 104)),
-            CreateProjectionSeries("Total invested", result.Projections.Select(point => point.TotalContributions), new SKColor(201, 119, 39))
-        ];
-        ProjectionXAxes =
-        [
-            new Axis
-            {
-                Name = "Age",
-                Labels = result.Projections.Select(point => point.Age.ToString("0", CultureInfo.CurrentCulture)).ToArray(),
-                LabelsRotation = 0,
-                TextSize = 10
-            }
-        ];
-        ProjectionChartDescription = $"Investment growth projection from age {result.Projections[0].Age:0} through age {result.Projections[^1].Age:0}. "
-            + $"The projected final portfolio is {FormatCurrency(result.FinalNominalBalance)}.";
-    }
-
-    private void UpdateHealthcareProjectionChart(HealthcareGapResult result)
-    {
-        ProjectionSeries =
-        [
-            CreateProjectionSeries("Total cost", result.YearlyBreakdown.Select(year => year.Cost), new SKColor(190, 81, 66)),
-            CreateProjectionSeries("Premium", result.YearlyBreakdown.Select(year => year.Premium), new SKColor(72, 93, 165)),
-            CreateProjectionSeries("Deductible and out-of-pocket", result.YearlyBreakdown.Select(year => year.Deductible + year.OutOfPocket), new SKColor(201, 119, 39))
-        ];
-        ProjectionXAxes =
-        [
-            new Axis
-            {
-                Name = "Age",
-                Labels = result.YearlyBreakdown.Select(year => year.Age.ToString("0", CultureInfo.CurrentCulture)).ToArray(),
-                LabelsRotation = 0,
-                TextSize = 10
-            }
-        ];
-        ProjectionChartDescription = result.GapYears == 0
-            ? "No pre-Medicare healthcare coverage gap is projected."
-            : $"Pre-Medicare healthcare costs from age {result.YearlyBreakdown[0].Age:0} through age {result.YearlyBreakdown[^1].Age:0}. Total estimated cost is {FormatCurrency(result.TotalCost)}.";
     }
 
     private void UpdateDebtProjectionChart(DebtPayoffResult result)
@@ -2223,16 +1868,6 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private void ScheduleSave(ReverseFireDraft draft)
     {
         ScheduleSave("reverse-fire", ReverseFireDraft.PayloadVersion, JsonSerializer.Serialize(draft));
-    }
-
-    private void ScheduleSave(SavingsInvestmentDraft draft)
-    {
-        ScheduleSave("savings-rate", SavingsInvestmentDraft.PayloadVersion, JsonSerializer.Serialize(draft));
-    }
-
-    private void ScheduleSave(HealthcareGapDraft draft)
-    {
-        ScheduleSave("healthcare-gap", HealthcareGapDraft.PayloadVersion, JsonSerializer.Serialize(draft));
     }
 
     private void ScheduleSave(DeferredCompensationDraft draft)

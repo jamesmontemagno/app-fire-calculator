@@ -10,7 +10,9 @@ public static class CalculatorRoutes
     /// <summary>Calculator IDs that own a dedicated page and view model.</summary>
     public static IReadOnlySet<string> DedicatedRouteCalculatorIds { get; } = new HashSet<string>(StringComparer.Ordinal)
     {
-        "withdrawal-rate"
+        "withdrawal-rate",
+        "savings-rate",
+        "healthcare-gap"
     };
 
     public static string Build(
