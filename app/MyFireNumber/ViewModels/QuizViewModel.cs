@@ -25,9 +25,11 @@ public partial class QuizViewModel : ObservableObject
     private const int QuestionCount = 8;
     private readonly ICalculatorCatalog catalog;
     private readonly IConfirmationService confirmationService;
+    private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly IDraftRepository draftRepository;
     private readonly INavigationService navigationService;
     private readonly IOnboardingService onboardingService;
+    private readonly IRecentActivityRepository recentActivityRepository;
     private FireQuizRecommendation? recommendation;
     private int? currentAge;
     private int? retirementAge;
@@ -41,15 +43,23 @@ public partial class QuizViewModel : ObservableObject
     public QuizViewModel(
         ICalculatorCatalog catalog,
         IConfirmationService confirmationService,
+        ICalculatorDefaultsService calculatorDefaultsService,
         IDraftRepository draftRepository,
         INavigationService navigationService,
-        IOnboardingService onboardingService)
+        IOnboardingService onboardingService,
+        IRecentActivityRepository recentActivityRepository)
     {
         this.catalog = catalog;
         this.confirmationService = confirmationService;
+        this.calculatorDefaultsService = calculatorDefaultsService;
         this.draftRepository = draftRepository;
         this.navigationService = navigationService;
         this.onboardingService = onboardingService;
+        this.recentActivityRepository = recentActivityRepository;
+
+        var defaults = calculatorDefaultsService.Current;
+        currentAge = defaults.CurrentAge;
+        retirementAge = defaults.RetirementAge;
         ShowQuestion();
     }
 
@@ -203,6 +213,10 @@ public partial class QuizViewModel : ObservableObject
         var draft = CreateRecommendedDraft(recommendation.CalculatorId);
         await draftRepository.SaveAsync(draft);
         onboardingService.Complete();
+        await recentActivityRepository.TrackAsync(new RecentActivityRecord(
+            RecentActivityKind.Calculator,
+            recommendation.CalculatorId,
+            DateTime.UtcNow));
         await navigationService.GoToAsync(
             $"../calculator?calculatorId={Uri.EscapeDataString(recommendation.CalculatorId)}");
     }

@@ -7,8 +7,22 @@ using MyFireNumber.Storage;
 
 namespace MyFireNumber.ViewModels;
 
-public sealed record PlanListItem(string Id, string CalculatorId, string Name, string CalculatorTitle, string UpdatedDescription);
-public sealed record CalculatorFilter(string? CalculatorId, string Name);
+public sealed record PlanListItem(
+    string Id,
+    string CalculatorId,
+    string Name,
+    string CalculatorTitle,
+    DateTime UpdatedAtUtc,
+    string UpdatedDescription);
+
+public enum PlanSortOrder
+{
+    RecentlyUpdated,
+    Name,
+    Calculator
+}
+
+public sealed record PlanSortOption(PlanSortOrder Order, string Name);
 
 public partial class PlansViewModel : ObservableObject
 {
@@ -40,17 +54,14 @@ public partial class PlansViewModel : ObservableObject
         this.errorPresentationService = errorPresentationService;
         this.planNamePromptService = planNamePromptService;
         this.recentActivityRepository = recentActivityRepository;
-        CalculatorFilters.Add(new CalculatorFilter(null, "All calculators"));
-        foreach (var definition in catalog.All)
-        {
-            CalculatorFilters.Add(new CalculatorFilter(definition.Id, definition.Title));
-        }
-
-        SelectedCalculatorFilter = CalculatorFilters[0];
+        SortOptions.Add(new PlanSortOption(PlanSortOrder.RecentlyUpdated, "Recently updated"));
+        SortOptions.Add(new PlanSortOption(PlanSortOrder.Name, "Plan name"));
+        SortOptions.Add(new PlanSortOption(PlanSortOrder.Calculator, "Calculator"));
+        SelectedSortOption = SortOptions[0];
     }
 
     public ObservableCollection<PlanListItem> Plans { get; } = [];
-    public ObservableCollection<CalculatorFilter> CalculatorFilters { get; } = [];
+    public ObservableCollection<PlanSortOption> SortOptions { get; } = [];
 
     [ObservableProperty]
     private bool isLoading;
@@ -62,7 +73,7 @@ public partial class PlansViewModel : ObservableObject
     private string searchText = string.Empty;
 
     [ObservableProperty]
-    private CalculatorFilter? selectedCalculatorFilter;
+    private PlanSortOption? selectedSortOption;
 
     public bool HasPlans => Plans.Count > 0;
 
@@ -84,6 +95,7 @@ public partial class PlansViewModel : ObservableObject
                     record.CalculatorId,
                     record.Name,
                     title,
+                    record.UpdatedAtUtc,
                     $"Updated {record.UpdatedAtUtc.ToLocalTime():g}"));
             }
 
@@ -102,7 +114,7 @@ public partial class PlansViewModel : ObservableObject
 
     partial void OnSearchTextChanged(string value) => ApplyFilters();
 
-    partial void OnSelectedCalculatorFilterChanged(CalculatorFilter? value) => ApplyFilters();
+    partial void OnSelectedSortOptionChanged(PlanSortOption? value) => ApplyFilters();
 
     [RelayCommand]
     private async Task OpenPlanAsync(PlanListItem plan)
@@ -222,11 +234,19 @@ public partial class PlansViewModel : ObservableObject
 
     private void ApplyFilters()
     {
-        var selectedCalculatorId = SelectedCalculatorFilter?.CalculatorId;
         var search = SearchText.Trim();
         var filteredPlans = allPlans.Where(plan =>
-            (selectedCalculatorId is null || plan.CalculatorId == selectedCalculatorId)
-            && (search.Length == 0 || plan.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase)));
+            search.Length == 0 || plan.Name.Contains(search, StringComparison.CurrentCultureIgnoreCase));
+        filteredPlans = SelectedSortOption?.Order switch
+        {
+            PlanSortOrder.Name => filteredPlans
+                .OrderBy(plan => plan.Name, StringComparer.CurrentCultureIgnoreCase)
+                .ThenByDescending(plan => plan.UpdatedAtUtc),
+            PlanSortOrder.Calculator => filteredPlans
+                .OrderBy(plan => plan.CalculatorTitle, StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(plan => plan.Name, StringComparer.CurrentCultureIgnoreCase),
+            _ => filteredPlans.OrderByDescending(plan => plan.UpdatedAtUtc)
+        };
 
         Plans.Clear();
         foreach (var plan in filteredPlans)
