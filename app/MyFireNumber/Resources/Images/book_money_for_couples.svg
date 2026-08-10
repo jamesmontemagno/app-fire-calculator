@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+  <rect width="600" height="900" fill="#7A3D4A"/>
+  <rect x="42" y="42" width="516" height="816" rx="20" fill="#F7E9EC" opacity=".16"/>
+  <path d="M112 155h376v12H112zm0 25h250v12H112z" fill="#F4C6D0"/>
+  <text x="72" y="390" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="70" font-weight="700">MONEY</text>
+  <text x="72" y="470" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="70" font-weight="700">FOR</text>
+  <text x="72" y="550" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="70" font-weight="700">COUPLES</text>
+  <text x="72" y="635" fill="#F4C6D0" font-family="Arial, sans-serif" font-size="28">RAMIT SETHI</text>
+  <path d="M445 708c-38-35-91-7-68 41l48 45 48-45c23-48-30-76-68-41z" fill="#E6B74F"/>
+</svg>

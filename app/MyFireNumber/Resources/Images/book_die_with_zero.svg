@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+  <rect width="600" height="900" fill="#235A59"/>
+  <rect x="42" y="42" width="516" height="816" rx="20" fill="#E3F4F3" opacity=".15"/>
+  <path d="M112 155h376v12H112zm0 25h250v12H112z" fill="#B9E0DE"/>
+  <text x="72" y="390" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="70" font-weight="700">DIE</text>
+  <text x="72" y="470" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="70" font-weight="700">WITH</text>
+  <text x="72" y="550" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="70" font-weight="700">ZERO</text>
+  <text x="72" y="635" fill="#B9E0DE" font-family="Arial, sans-serif" font-size="28">BILL PERKINS</text>
+  <circle cx="470" cy="730" r="58" fill="none" stroke="#E6B74F" stroke-width="18"/>
+</svg>

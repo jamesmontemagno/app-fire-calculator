@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+  <rect width="600" height="900" fill="#274E7B"/>
+  <rect x="42" y="42" width="516" height="816" rx="20" fill="#E9F2FB" opacity=".14"/>
+  <path d="M112 155h376v12H112zm0 25h250v12H112z" fill="#B6D4F3"/>
+  <text x="72" y="375" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="58" font-weight="700">THE</text>
+  <text x="72" y="445" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="58" font-weight="700">PSYCHOLOGY</text>
+  <text x="72" y="515" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="58" font-weight="700">OF MONEY</text>
+  <text x="72" y="635" fill="#B6D4F3" font-family="Arial, sans-serif" font-size="28">MORGAN HOUSEL</text>
+  <circle cx="461" cy="726" r="68" fill="#D6AE4E"/>
+  <path d="M435 726h52m-26-26v52" stroke="#274E7B" stroke-width="10" stroke-linecap="round"/>
+</svg>

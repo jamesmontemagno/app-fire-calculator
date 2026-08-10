@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+  <rect width="600" height="900" fill="#58477E"/>
+  <rect x="42" y="42" width="516" height="816" rx="20" fill="#F0EBFA" opacity=".15"/>
+  <path d="M112 155h376v12H112zm0 25h250v12H112z" fill="#D6C7F0"/>
+  <text x="72" y="355" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="50" font-weight="700">THE BOGLEHEADS'</text>
+  <text x="72" y="415" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="50" font-weight="700">GUIDE TO</text>
+  <text x="72" y="475" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="50" font-weight="700">INVESTING</text>
+  <text x="72" y="635" fill="#D6C7F0" font-family="Arial, sans-serif" font-size="25">TAYLOR LARIMORE</text>
+  <path d="M415 764h116v-98H415z" fill="#E6B74F"/>
+  <path d="M438 738h70m-70-24h70m-70-24h70" stroke="#58477E" stroke-width="8"/>
+</svg>

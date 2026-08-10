@@ -61,6 +61,7 @@ public partial class SettingsViewModel : ObservableObject
         hapticsEnabled = behavior.Haptics;
         reduceMotion = behavior.ReduceMotion;
         highContrast = behavior.HighContrast;
+        showRecommendedBooks = behavior.ShowRecommendedBooks;
         selectedCurrencyOption = currencyPreferencesService.SelectedOption;
         LoadCalculatorDefaults();
     }
@@ -127,6 +128,9 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private bool highContrast;
 
+    [ObservableProperty]
+    private bool showRecommendedBooks;
+
     public string LaunchDestinationDescription => $"{SelectedLaunchDestination} will open after onboarding.";
 
     private bool isSynchronizingDefaultPercentages;
@@ -154,6 +158,7 @@ public partial class SettingsViewModel : ObservableObject
     partial void OnConfirmPlanDeletionChanged(bool value) => SaveBehaviorPreferences();
     partial void OnHapticsEnabledChanged(bool value) => SaveBehaviorPreferences();
     partial void OnReduceMotionChanged(bool value) => SaveBehaviorPreferences();
+    partial void OnShowRecommendedBooksChanged(bool value) => SaveBehaviorPreferences();
 
     partial void OnHighContrastChanged(bool value)
     {
@@ -434,6 +439,7 @@ public partial class SettingsViewModel : ObservableObject
             ConfirmPlanDeletion,
             HapticsEnabled,
             ReduceMotion,
-            HighContrast));
+            HighContrast,
+            ShowRecommendedBooks));
     }
 }

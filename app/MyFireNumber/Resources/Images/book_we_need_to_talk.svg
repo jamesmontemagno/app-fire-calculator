@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+  <rect width="600" height="900" fill="#8A5831"/>
+  <rect x="42" y="42" width="516" height="816" rx="20" fill="#FFF0E0" opacity=".15"/>
+  <path d="M112 155h376v12H112zm0 25h250v12H112z" fill="#F2CFA8"/>
+  <text x="72" y="355" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="58" font-weight="700">WE NEED</text>
+  <text x="72" y="425" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="58" font-weight="700">TO TALK</text>
+  <text x="72" y="495" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="42">ABOUT WEALTH</text>
+  <text x="72" y="635" fill="#F2CFA8" font-family="Arial, sans-serif" font-size="28">JENNIFER RISHER</text>
+  <path d="M411 686h120v75H461l-26 26v-26h-24z" fill="#E6B74F"/>
+</svg>

@@ -13,7 +13,8 @@ public sealed record AppBehaviorPreferences(
     bool ConfirmPlanDeletion,
     bool Haptics,
     bool ReduceMotion,
-    bool HighContrast);
+    bool HighContrast,
+    bool ShowRecommendedBooks = true);
 
 public interface IAppBehaviorPreferencesService
 {
@@ -32,6 +33,7 @@ public sealed class AppBehaviorPreferencesService : IAppBehaviorPreferencesServi
     private const string HapticsKey = "behavior-haptics";
     private const string ReduceMotionKey = "accessibility-reduce-motion";
     private const string HighContrastKey = "accessibility-high-contrast";
+    private const string ShowRecommendedBooksKey = "home-show-recommended-books";
 
     public AppBehaviorPreferences Current
     {
@@ -47,7 +49,8 @@ public sealed class AppBehaviorPreferencesService : IAppBehaviorPreferencesServi
                 Preferences.Default.Get(ConfirmPlanDeletionKey, true),
                 Preferences.Default.Get(HapticsKey, true),
                 Preferences.Default.Get(ReduceMotionKey, false),
-                Preferences.Default.Get(HighContrastKey, false));
+                Preferences.Default.Get(HighContrastKey, false),
+                Preferences.Default.Get(ShowRecommendedBooksKey, true));
         }
     }
 
@@ -59,6 +62,7 @@ public sealed class AppBehaviorPreferencesService : IAppBehaviorPreferencesServi
         Preferences.Default.Set(HapticsKey, preferences.Haptics);
         Preferences.Default.Set(ReduceMotionKey, preferences.ReduceMotion);
         Preferences.Default.Set(HighContrastKey, preferences.HighContrast);
+        Preferences.Default.Set(ShowRecommendedBooksKey, preferences.ShowRecommendedBooks);
     }
 
     public void PerformHaptic()
