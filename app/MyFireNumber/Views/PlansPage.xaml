@@ -7,13 +7,14 @@
              Title="Plans"
              Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
 
-    <Grid Padding="20,16">
-        <CollectionView ItemsSource="{Binding Plans}" SelectionMode="None">
-            <CollectionView.Header>
-                <VerticalStackLayout Spacing="14" Margin="0,0,0,14">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+    <Grid Padding="20,16" RowDefinitions="Auto,*" RowSpacing="14">
+        <VerticalStackLayout Spacing="14">
+            <Grid ColumnDefinitions="32,*" ColumnSpacing="10">
                         <Label Text="&#xf15c;"
                                FontFamily="FontAwesomeSolid"
+                               WidthRequest="32"
+                               HeightRequest="32"
+                               HorizontalTextAlignment="Center"
                                VerticalTextAlignment="Center"
                                TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                FontSize="24"
@@ -29,78 +30,110 @@
                                    FontSize="13" />
                         </VerticalStackLayout>
                     </Grid>
-
-                    <Border Padding="10,6"
-                            Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                            Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                            StrokeShape="RoundRectangle 12">
-                        <Grid RowDefinitions="Auto,1,Auto">
-                            <SearchBar AutomationId="PlanSearch"
-                                       Placeholder="Search saved plans"
-                                       Text="{Binding SearchText, Mode=TwoWay}"
-                                       Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                                       SemanticProperties.Description="Search saved plans by name." />
-                            <BoxView Grid.Row="1"
-                                    Margin="0,2"
-                                    HeightRequest="1"
-                                    Background="{AppThemeBinding Light=#E1E7E2, Dark=#365244}" />
-                            <Picker AutomationId="PlanSort"
-                                    Grid.Row="2"
-                                    Title="Sort by"
-                                    ItemsSource="{Binding SortOptions}"
-                                    ItemDisplayBinding="{Binding Name}"
-                                    SelectedItem="{Binding SelectedSortOption, Mode=TwoWay}"
-                                    Background="Transparent"
-                                    TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                    TitleColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                                    SemanticProperties.Description="Sort saved plans." />
-                        </Grid>
-                    </Border>
-                </VerticalStackLayout>
-            </CollectionView.Header>
+            <SearchBar AutomationId="PlanSearch"
+                       Placeholder="Search saved plans"
+                       Text="{Binding SearchText, Mode=TwoWay}"
+                       Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                       SemanticProperties.Description="Search saved plans by name." />
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <Label Text="Sort"
+                       VerticalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                       FontAttributes="Bold"
+                       FontSize="13" />
+                <Picker AutomationId="PlanSort"
+                        Grid.Column="1"
+                        ItemsSource="{Binding SortOptions}"
+                        ItemDisplayBinding="{Binding Name}"
+                        SelectedItem="{Binding SelectedSortOption, Mode=TwoWay}"
+                        Background="Transparent"
+                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                        TitleColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                        SemanticProperties.Description="Sort saved plans." />
+            </Grid>
+        </VerticalStackLayout>
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Plans}"
+                        SelectionMode="None">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="viewModels:PlanListItem">
                    <SwipeView Margin="0,0,0,10">
                        <SwipeView.RightItems>
                            <SwipeItems Mode="Reveal">
-                               <SwipeItem Text=""
-                                          BackgroundColor="#326B57"
-                                          Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=RenamePlanCommand}"
-                                          CommandParameter="{Binding .}"
-                                          SemanticProperties.Description="Rename this saved plan.">
-                                   <SwipeItem.IconImageSource>
-                                       <FontImageSource Glyph="&#xf044;"
-                                                        FontFamily="FontAwesomeSolid"
-                                                        Color="#FFFFFF"
-                                                        Size="13" />
-                                   </SwipeItem.IconImageSource>
-                               </SwipeItem>
-                               <SwipeItem Text=""
-                                          BackgroundColor="#426B9D"
-                                          Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=DuplicatePlanCommand}"
-                                          CommandParameter="{Binding .}"
-                                          SemanticProperties.Description="Duplicate this saved plan.">
-                                   <SwipeItem.IconImageSource>
-                                       <FontImageSource Glyph="&#xf0c5;"
-                                                        FontFamily="FontAwesomeSolid"
-                                                        Color="#FFFFFF"
-                                                        Size="13" />
-                                   </SwipeItem.IconImageSource>
-                               </SwipeItem>
-                               <SwipeItem Text=""
-                                          BackgroundColor="#A33A31"
-                                          Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=DeletePlanCommand}"
-                                          CommandParameter="{Binding .}"
-                                          SemanticProperties.Description="Delete this saved plan after confirmation.">
-                                   <SwipeItem.IconImageSource>
-                                       <FontImageSource Glyph="&#xf2ed;"
-                                                        FontFamily="FontAwesomeSolid"
-                                                        Color="#FFFFFF"
-                                                        Size="13" />
-                                   </SwipeItem.IconImageSource>
-                               </SwipeItem>
+                               <SwipeItemView Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=RenamePlanCommand}"
+                                              CommandParameter="{Binding .}"
+                                              SemanticProperties.Description="Rename this saved plan.">
+                                   <Border WidthRequest="84"
+                                           Padding="8,6"
+                                           Background="#326B57"
+                                           StrokeThickness="0"
+                                           StrokeShape="RoundRectangle 12">
+                                       <VerticalStackLayout Spacing="3"
+                                                            HorizontalOptions="Center"
+                                                            VerticalOptions="Center">
+                                           <Label Text="&#xf044;"
+                                                  FontFamily="FontAwesomeSolid"
+                                                  FontSize="17"
+                                                  HorizontalTextAlignment="Center"
+                                                  TextColor="#FFFFFF" />
+                                           <Label Text="Rename"
+                                                  FontAttributes="Bold"
+                                                  FontSize="12"
+                                                  HorizontalTextAlignment="Center"
+                                                  TextColor="#FFFFFF" />
+                                       </VerticalStackLayout>
+                                   </Border>
+                               </SwipeItemView>
+                               <SwipeItemView Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=DuplicatePlanCommand}"
+                                              CommandParameter="{Binding .}"
+                                              SemanticProperties.Description="Duplicate this saved plan.">
+                                   <Border WidthRequest="84"
+                                           Padding="8,6"
+                                           Background="#426B9D"
+                                           StrokeThickness="0"
+                                           StrokeShape="RoundRectangle 12">
+                                       <VerticalStackLayout Spacing="3"
+                                                            HorizontalOptions="Center"
+                                                            VerticalOptions="Center">
+                                           <Label Text="&#xf0c5;"
+                                                  FontFamily="FontAwesomeSolid"
+                                                  FontSize="17"
+                                                  HorizontalTextAlignment="Center"
+                                                  TextColor="#FFFFFF" />
+                                           <Label Text="Copy"
+                                                  FontAttributes="Bold"
+                                                  FontSize="12"
+                                                  HorizontalTextAlignment="Center"
+                                                  TextColor="#FFFFFF" />
+                                       </VerticalStackLayout>
+                                   </Border>
+                               </SwipeItemView>
+                               <SwipeItemView Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=DeletePlanCommand}"
+                                              CommandParameter="{Binding .}"
+                                              SemanticProperties.Description="Delete this saved plan after confirmation.">
+                                   <Border WidthRequest="84"
+                                           Padding="8,6"
+                                           Background="#A33A31"
+                                           StrokeThickness="0"
+                                           StrokeShape="RoundRectangle 12">
+                                       <VerticalStackLayout Spacing="3"
+                                                            HorizontalOptions="Center"
+                                                            VerticalOptions="Center">
+                                           <Label Text="&#xf2ed;"
+                                                  FontFamily="FontAwesomeSolid"
+                                                  FontSize="17"
+                                                  HorizontalTextAlignment="Center"
+                                                  TextColor="#FFFFFF" />
+                                           <Label Text="Delete"
+                                                  FontAttributes="Bold"
+                                                  FontSize="12"
+                                                  HorizontalTextAlignment="Center"
+                                                  TextColor="#FFFFFF" />
+                                       </VerticalStackLayout>
+                                   </Border>
+                               </SwipeItemView>
                            </SwipeItems>
                        </SwipeView.RightItems>
                        <Border Padding="16"

@@ -29,6 +29,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("quiz", typeof(QuizPage));
 		Routing.RegisterRoute("welcome", typeof(WelcomePage));
 		Routing.RegisterRoute("onboarding-defaults", typeof(DefaultsOnboardingPage));
+		Routing.RegisterRoute("onboarding-choice", typeof(OnboardingChoicePage));
 		Routing.RegisterRoute("calculator", typeof(CalculatorDetailPage));
 		Routing.RegisterRoute("retirement-annual-details", typeof(RetirementAnnualDetailsPage));
 		Loaded += OnLoaded;

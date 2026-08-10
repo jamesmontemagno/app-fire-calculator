@@ -98,11 +98,11 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
             (int)CurrentAge,
             (int)RetirementAge));
 
-        await navigationService.GoToAsync("../quiz");
+        await navigationService.GoToAsync("../onboarding-choice");
     }
 
     [RelayCommand]
-    private Task SkipAsync() => navigationService.GoToAsync("../quiz");
+    private Task SkipAsync() => navigationService.GoToAsync("../onboarding-choice");
 
     private static void RoundSliderValue(double value, Action<double> update, int digits)
     {

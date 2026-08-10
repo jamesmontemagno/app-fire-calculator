@@ -218,7 +218,7 @@ public partial class QuizViewModel : ObservableObject
             recommendation.CalculatorId,
             DateTime.UtcNow));
         await navigationService.GoToAsync(
-            $"../calculator?calculatorId={Uri.EscapeDataString(recommendation.CalculatorId)}");
+            $"../calculator?calculatorId={Uri.EscapeDataString(recommendation.CalculatorId)}&returnHomeAfterSave=true");
     }
 
     private bool SaveCurrentAnswer()

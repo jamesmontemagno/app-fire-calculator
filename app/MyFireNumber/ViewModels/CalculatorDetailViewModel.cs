@@ -43,6 +43,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
     private bool isApplyingDraft;
     private DateTime? loadedPlanCreatedAtUtc;
     private string? loadedPlanId;
+    private bool returnHomeAfterSave;
 
     public ObservableCollection<DebtEditorItem> DebtItems { get; } = [];
     public ObservableCollection<RetirementAccountEditorItem> RetirementAccounts { get; } = [];
@@ -516,8 +517,9 @@ public partial class CalculatorDetailViewModel : ObservableObject
         ? "Update this saved plan with the current values."
         : "Save the current values as a named plan.";
 
-    public async Task LoadAsync(string calculatorId, string? planId = null)
+    public async Task LoadAsync(string calculatorId, string? planId = null, bool returnHomeAfterSave = false)
     {
+        this.returnHomeAfterSave = returnHomeAfterSave;
         loadedPlanId = null;
         loadedPlanCreatedAtUtc = null;
         IsLoadedPlan = false;
@@ -798,7 +800,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
     {
         if (await SavePlanCoreAsync(PlanNameText))
         {
-            await navigationService.GoToAsync("..");
+            await navigationService.GoToAsync(returnHomeAfterSave ? "//home" : "..");
         }
     }
 
@@ -2274,7 +2276,7 @@ public partial class CalculatorDetailViewModel : ObservableObject
             string.Join(Environment.NewLine, balanceParts));
     }
 
-    private static LineSeries<double> CreateProjectionSeries(string name, IEnumerable<double> values, SKColor color)
+    private LineSeries<double> CreateProjectionSeries(string name, IEnumerable<double> values, SKColor color)
     {
         return new LineSeries<double>
         {
@@ -2282,11 +2284,12 @@ public partial class CalculatorDetailViewModel : ObservableObject
             Values = values.ToArray(),
             GeometrySize = 0,
             Fill = null,
-            Stroke = new SolidColorPaint(color) { StrokeThickness = 3 }
+            Stroke = new SolidColorPaint(color) { StrokeThickness = 3 },
+            YToolTipLabelFormatter = point => FormatCurrency(point.Coordinate.PrimaryValue)
         };
     }
 
-    private static StackedAreaSeries<double> CreateStackedAreaSeries(string name, IEnumerable<double> values, SKColor color)
+    private StackedAreaSeries<double> CreateStackedAreaSeries(string name, IEnumerable<double> values, SKColor color)
     {
         return new StackedAreaSeries<double>
         {
@@ -2295,7 +2298,8 @@ public partial class CalculatorDetailViewModel : ObservableObject
             GeometrySize = 0,
             LineSmoothness = 0,
             Fill = new SolidColorPaint(color.WithAlpha(110)),
-            Stroke = new SolidColorPaint(color) { StrokeThickness = 2 }
+            Stroke = new SolidColorPaint(color) { StrokeThickness = 2 },
+            YToolTipLabelFormatter = point => FormatCurrency(point.Coordinate.PrimaryValue)
         };
     }
 
