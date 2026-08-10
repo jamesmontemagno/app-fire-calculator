@@ -7,11 +7,11 @@
             <stop offset="1" stop-color="#FDE68A" />
         </linearGradient>
         <radialGradient id="emberGlow" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stop-color="#FDBA74" stop-opacity="0.5" />
-            <stop offset="0.18" stop-color="#FB923C" stop-opacity="0.34" />
-            <stop offset="0.38" stop-color="#F97316" stop-opacity="0.19" />
-            <stop offset="0.62" stop-color="#F97316" stop-opacity="0.09" />
-            <stop offset="0.82" stop-color="#EA580C" stop-opacity="0.03" />
+            <stop offset="0" stop-color="#FDBA74" stop-opacity="0.72" />
+            <stop offset="0.18" stop-color="#FB923C" stop-opacity="0.52" />
+            <stop offset="0.38" stop-color="#F97316" stop-opacity="0.3" />
+            <stop offset="0.62" stop-color="#F97316" stop-opacity="0.15" />
+            <stop offset="0.82" stop-color="#EA580C" stop-opacity="0.05" />
             <stop offset="1" stop-color="#EA580C" stop-opacity="0" />
         </radialGradient>
     </defs>
