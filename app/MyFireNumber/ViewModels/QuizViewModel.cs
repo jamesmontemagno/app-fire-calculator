@@ -199,7 +199,7 @@ public partial class QuizViewModel : ObservableObject
             option.CalculatorId,
             DateTime.UtcNow));
         await navigationService.GoToAsync(
-            $"../calculator?calculatorId={Uri.EscapeDataString(option.CalculatorId)}&returnHomeAfterSave=true");
+            CalculatorRoutes.Build(option.CalculatorId, returnHomeAfterSave: true, routePrefix: "../"));
     }
 
     private bool SaveCurrentAnswer()

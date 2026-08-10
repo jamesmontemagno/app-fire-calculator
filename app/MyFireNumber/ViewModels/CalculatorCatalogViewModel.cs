@@ -81,6 +81,6 @@ public partial class CalculatorCatalogViewModel : ObservableObject
             RecentActivityKind.Calculator,
             definition.Id,
             DateTime.UtcNow));
-        await navigationService.GoToAsync($"calculator?calculatorId={Uri.EscapeDataString(definition.Id)}");
+        await navigationService.GoToAsync(CalculatorRoutes.Build(definition.Id));
     }
 }

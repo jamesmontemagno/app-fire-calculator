@@ -128,7 +128,7 @@ public partial class PlansViewModel : ObservableObject
             RecentActivityKind.Plan,
             plan.Id,
             now));
-        var route = $"calculator?calculatorId={Uri.EscapeDataString(plan.CalculatorId)}&planId={Uri.EscapeDataString(plan.Id)}";
+        var route = CalculatorRoutes.Build(plan.CalculatorId, plan.Id);
         await navigationService.GoToAsync(route);
     }
 
