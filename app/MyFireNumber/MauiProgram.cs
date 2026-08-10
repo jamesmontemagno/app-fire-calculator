@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using LiveChartsCore.SkiaSharpView.Maui;
+using MyFireNumber.Core.Books;
 using MyFireNumber.Core.Calculators;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
@@ -46,6 +47,7 @@ public static class MauiProgram
 			});
 
 		builder.Services.AddSingleton<ICalculatorCatalog, CalculatorCatalog>();
+		builder.Services.AddSingleton<IRecommendedBookCatalog, RecommendedBookCatalog>();
 		builder.Services.AddSingleton<IConfirmationService, ConfirmationService>();
 		builder.Services.AddSingleton<IAppResetService, AppResetService>();
 		builder.Services.AddSingleton<IAppDataTransferService, AppDataTransferService>();

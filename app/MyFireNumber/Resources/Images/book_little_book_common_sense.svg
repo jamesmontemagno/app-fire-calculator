@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+  <rect width="600" height="900" fill="#B44D42"/>
+  <rect x="42" y="42" width="516" height="816" rx="20" fill="#FFF0ED" opacity=".15"/>
+  <path d="M112 155h376v12H112zm0 25h250v12H112z" fill="#F5C1B8"/>
+  <text x="72" y="335" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="45" font-weight="700">THE LITTLE BOOK</text>
+  <text x="72" y="395" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="45" font-weight="700">OF COMMON</text>
+  <text x="72" y="455" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="45" font-weight="700">SENSE</text>
+  <text x="72" y="515" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="45" font-weight="700">INVESTING</text>
+  <text x="72" y="635" fill="#F5C1B8" font-family="Arial, sans-serif" font-size="28">JOHN C. BOGLE</text>
+  <path d="M414 765l57-92 57 92z" fill="#E6B74F"/>
+</svg>

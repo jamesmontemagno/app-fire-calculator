@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MyFireNumber.Core.Books;
 using MyFireNumber.Core.Calculators;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
@@ -19,31 +20,44 @@ public partial class HomeViewModel : ObservableObject
     ];
 
     private readonly ICalculatorCatalog catalog;
+    private readonly IRecommendedBookCatalog recommendedBookCatalog;
     private readonly INavigationService navigationService;
     private readonly IOnboardingService onboardingService;
     private readonly ICalculatorPreferencesRepository preferencesRepository;
     private readonly IPlanRepository planRepository;
     private readonly IRecentActivityRepository recentActivityRepository;
+    private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
+    private readonly IExternalLinkService externalLinkService;
+    private readonly IErrorPresentationService errorPresentationService;
 
     public HomeViewModel(
         ICalculatorCatalog catalog,
+        IRecommendedBookCatalog recommendedBookCatalog,
         INavigationService navigationService,
         IOnboardingService onboardingService,
         ICalculatorPreferencesRepository preferencesRepository,
         IPlanRepository planRepository,
-        IRecentActivityRepository recentActivityRepository)
+        IRecentActivityRepository recentActivityRepository,
+        IAppBehaviorPreferencesService behaviorPreferencesService,
+        IExternalLinkService externalLinkService,
+        IErrorPresentationService errorPresentationService)
     {
         this.catalog = catalog;
+        this.recommendedBookCatalog = recommendedBookCatalog;
         this.navigationService = navigationService;
         this.onboardingService = onboardingService;
         this.preferencesRepository = preferencesRepository;
         this.planRepository = planRepository;
         this.recentActivityRepository = recentActivityRepository;
+        this.behaviorPreferencesService = behaviorPreferencesService;
+        this.externalLinkService = externalLinkService;
+        this.errorPresentationService = errorPresentationService;
     }
 
     public ObservableCollection<CalculatorDefinition> FeaturedCalculators { get; } = [];
     public ObservableCollection<CalculatorDefinition> RecentCalculators { get; } = [];
     public ObservableCollection<RecentPlanItem> RecentPlans { get; } = [];
+    public IReadOnlyList<RecommendedBook> RecommendedBooks => recommendedBookCatalog.All;
 
     public bool HasRecentCalculators => RecentCalculators.Count > 0;
     public bool HasRecentPlans => RecentPlans.Count > 0;
@@ -53,6 +67,9 @@ public partial class HomeViewModel : ObservableObject
 
     [ObservableProperty]
     private CalculatorDefinition? recommendedCalculator;
+
+    [ObservableProperty]
+    private bool showRecommendedBooks;
 
     public async Task LoadAsync()
     {
@@ -118,6 +135,7 @@ public partial class HomeViewModel : ObservableObject
         RecommendedCalculator = onboardingService.RecommendationCalculatorId is { } recommendationId
             ? catalog.All.FirstOrDefault(definition => definition.Id == recommendationId)
             : null;
+        ShowRecommendedBooks = behaviorPreferencesService.Current.ShowRecommendedBooks;
         OnPropertyChanged(nameof(HasRecentCalculators));
         OnPropertyChanged(nameof(HasRecentPlans));
         OnPropertyChanged(nameof(ShowGettingStarted));
@@ -148,6 +166,17 @@ public partial class HomeViewModel : ObservableObject
             plan.Id,
             now));
         await navigationService.GoToAsync(CalculatorRoutes.Build(plan.CalculatorId, plan.Id));
+    }
+
+    [RelayCommand]
+    private async Task OpenBookAsync(RecommendedBook book)
+    {
+        if (!await externalLinkService.OpenBookAsync(book.AmazonUri))
+        {
+            await errorPresentationService.ShowAsync(
+                "Couldn’t open book",
+                "Amazon could not be opened. Please try again.");
+        }
     }
 
     [RelayCommand]

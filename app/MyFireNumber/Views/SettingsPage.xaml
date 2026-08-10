@@ -183,7 +183,7 @@
                                FontSize="12"
                                TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
                                SemanticProperties.Description="{Binding LaunchDestinationDescription}" />
-                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="10">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="10">
                             <Label Text="Restore latest calculator drafts" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
                             <Switch AutomationId="RestoreDraftsSwitch" Grid.Column="1" IsToggled="{Binding RestoreDrafts}" OnColor="#2F6B57" />
                             <Label Grid.Row="1" Text="Confirm before deleting plans" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
@@ -194,6 +194,8 @@
                             <Switch AutomationId="ReduceMotionSwitch" Grid.Row="3" Grid.Column="1" IsToggled="{Binding ReduceMotion}" OnColor="#2F6B57" />
                             <Label Grid.Row="4" Text="High contrast dark palette" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
                             <Switch AutomationId="HighContrastSwitch" Grid.Row="4" Grid.Column="1" IsToggled="{Binding HighContrast}" OnColor="#2F6B57" />
+                            <Label Grid.Row="5" Text="Show recommended books on Home" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Switch AutomationId="RecommendedBooksSwitch" Grid.Row="5" Grid.Column="1" IsToggled="{Binding ShowRecommendedBooks}" OnColor="#2F6B57" />
                         </Grid>
                     </VerticalStackLayout>
                 </Border>
