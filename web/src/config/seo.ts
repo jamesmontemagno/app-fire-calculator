@@ -90,8 +90,8 @@ export const calculatorSEO: Record<string, PageSEO> = {
     canonicalPath: '/apps',
   },
   quiz: {
-    title: 'FIRE Calculator Quiz - Find Your Perfect FIRE Path',
-    description: 'Take our free FIRE quiz to discover which calculator and strategy fits your situation. Answer a few questions and get personalized calculator recommendations with pre-filled values.',
+    title: 'FIRE Calculator Quiz - Find Your FIRE Starting Point',
+    description: 'Compare FIRE paths based on your timeline, lifestyle, and work preferences. Get a starting recommendation, two alternatives, and optional calculator prefilling.',
     keywords: 'FIRE quiz, which FIRE calculator, FIRE personality quiz, financial independence quiz, early retirement quiz',
     canonicalPath: '/quiz',
   },

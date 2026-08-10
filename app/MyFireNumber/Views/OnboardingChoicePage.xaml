@@ -32,7 +32,7 @@
                                FontSize="20"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
-                        <Label Text="Answer a few questions for a personalized calculator recommendation."
+                        <Label Text="Answer a few questions to find a starting path and compare alternatives."
                                LineHeight="1.3"
                                TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
                         <Button AutomationId="OnboardingTakeQuizButton"
@@ -40,7 +40,7 @@
                                 Command="{Binding TakeQuizCommand}"
                                 Background="#2F6B57"
                                 TextColor="#FFFFFF"
-                                SemanticProperties.Description="Take the FIRE Quiz for a personalized calculator recommendation." />
+                                SemanticProperties.Description="Take the FIRE Quiz to find a starting path and compare alternatives." />
                     </VerticalStackLayout>
                 </Border>
 

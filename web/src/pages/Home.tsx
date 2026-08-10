@@ -63,7 +63,7 @@ export default function Home() {
             Not sure which calculator to use?
           </h2>
           <p className="text-base text-gray-600 dark:text-gray-400 mb-4">
-            Take our quick quiz to find the perfect FIRE path for your situation. 
+            Take our quick quiz to find a FIRE starting point and compare nearby alternatives.
             Answer a few questions and we'll recommend the best calculator with your information pre-filled.
           </p>
           <Link
