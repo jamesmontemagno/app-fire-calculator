@@ -6,18 +6,33 @@
             <stop offset="0.55" stop-color="#FBBF24" />
             <stop offset="1" stop-color="#FDE68A" />
         </linearGradient>
+        <linearGradient id="emberSoft" x1="0" y1="1" x2="0" y2="0">
+            <stop offset="0" stop-color="#EA580C" />
+            <stop offset="1" stop-color="#F97316" />
+        </linearGradient>
         <radialGradient id="emberGlow" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stop-color="#FB923C" stop-opacity="0.4" />
-            <stop offset="0.22" stop-color="#F97316" stop-opacity="0.2" />
+            <stop offset="0" stop-color="#FB923C" stop-opacity="0.3" />
+            <stop offset="0.22" stop-color="#F97316" stop-opacity="0.15" />
             <stop offset="0.5" stop-color="#F97316" stop-opacity="0.1" />
             <stop offset="0.78" stop-color="#F97316" stop-opacity="0.04" />
             <stop offset="1" stop-color="#F97316" stop-opacity="0" />
         </radialGradient>
     </defs>
     <!-- The highlighted center cell represents "your number" - the single figure the app solves for.
-         A soft ember glow spills into the surrounding cells so the whole grid feels lit by it. -->
+         The surrounding eight cells carry the same ember at low opacity so the fire reads across
+         the whole grid without competing with the numeral. -->
     <g transform="skewX(-5.81)">
         <ellipse cx="259.6" cy="232" rx="205" ry="195" fill="url(#emberGlow)" />
+        <g fill="url(#emberSoft)">
+            <rect x="141.6" y="114" width="52" height="52" rx="9" ry="9" opacity="0.08" />
+            <rect x="233.6" y="114" width="52" height="52" rx="9" ry="9" opacity="0.17" />
+            <rect x="325.6" y="114" width="52" height="52" rx="9" ry="9" opacity="0.08" />
+            <rect x="141.6" y="206" width="52" height="52" rx="9" ry="9" opacity="0.17" />
+            <rect x="325.6" y="206" width="52" height="52" rx="9" ry="9" opacity="0.17" />
+            <rect x="141.6" y="298" width="52" height="52" rx="9" ry="9" opacity="0.08" />
+            <rect x="233.6" y="298" width="52" height="52" rx="9" ry="9" opacity="0.17" />
+            <rect x="325.6" y="298" width="52" height="52" rx="9" ry="9" opacity="0.08" />
+        </g>
         <rect x="233.6" y="206" width="52" height="52" fill="url(#ember)" />
     </g>
     <g fill="none" stroke="#FFF3D6" stroke-width="40" stroke-linecap="round">
