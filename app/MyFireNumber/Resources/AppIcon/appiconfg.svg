@@ -6,35 +6,19 @@
             <stop offset="0.55" stop-color="#FBBF24" />
             <stop offset="1" stop-color="#FDE68A" />
         </linearGradient>
-        <linearGradient id="emberSoft" x1="0" y1="1" x2="0" y2="0">
-            <stop offset="0" stop-color="#EA580C" />
-            <stop offset="1" stop-color="#F97316" />
-        </linearGradient>
         <radialGradient id="emberGlow" cx="0.5" cy="0.5" r="0.5">
-            <stop offset="0" stop-color="#FB923C" stop-opacity="0.3" />
-            <stop offset="0.22" stop-color="#F97316" stop-opacity="0.15" />
-            <stop offset="0.5" stop-color="#F97316" stop-opacity="0.1" />
-            <stop offset="0.78" stop-color="#F97316" stop-opacity="0.04" />
-            <stop offset="1" stop-color="#F97316" stop-opacity="0" />
+            <stop offset="0" stop-color="#FDBA74" stop-opacity="0.5" />
+            <stop offset="0.18" stop-color="#FB923C" stop-opacity="0.34" />
+            <stop offset="0.38" stop-color="#F97316" stop-opacity="0.19" />
+            <stop offset="0.62" stop-color="#F97316" stop-opacity="0.09" />
+            <stop offset="0.82" stop-color="#EA580C" stop-opacity="0.03" />
+            <stop offset="1" stop-color="#EA580C" stop-opacity="0" />
         </radialGradient>
     </defs>
     <!-- The highlighted center cell represents "your number" - the single figure the app solves for.
-         The surrounding eight cells carry the same ember at low opacity so the fire reads across
-         the whole grid without competing with the numeral. -->
-    <g transform="skewX(-5.81)">
-        <ellipse cx="259.6" cy="232" rx="205" ry="195" fill="url(#emberGlow)" />
-        <g fill="url(#emberSoft)">
-            <rect x="141.6" y="114" width="52" height="52" rx="9" ry="9" opacity="0.08" />
-            <rect x="233.6" y="114" width="52" height="52" rx="9" ry="9" opacity="0.17" />
-            <rect x="325.6" y="114" width="52" height="52" rx="9" ry="9" opacity="0.08" />
-            <rect x="141.6" y="206" width="52" height="52" rx="9" ry="9" opacity="0.17" />
-            <rect x="325.6" y="206" width="52" height="52" rx="9" ry="9" opacity="0.17" />
-            <rect x="141.6" y="298" width="52" height="52" rx="9" ry="9" opacity="0.08" />
-            <rect x="233.6" y="298" width="52" height="52" rx="9" ry="9" opacity="0.17" />
-            <rect x="325.6" y="298" width="52" height="52" rx="9" ry="9" opacity="0.08" />
-        </g>
-        <rect x="233.6" y="206" width="52" height="52" fill="url(#ember)" />
-    </g>
+         A circular ember radiates outward from it so the heat reaches every cell of the grid. -->
+    <circle cx="236" cy="232" r="220" fill="url(#emberGlow)" />
+    <rect x="233.6" y="206" width="52" height="52" transform="skewX(-5.81)" fill="url(#ember)" />
     <g fill="none" stroke="#FFF3D6" stroke-width="40" stroke-linecap="round">
         <path d="M118 186H338" />
         <path d="M118 278H338" />
