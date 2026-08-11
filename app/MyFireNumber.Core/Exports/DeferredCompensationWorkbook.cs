@@ -35,9 +35,11 @@ public static class DeferredCompensationWorkbook
             Number($"D{index + 2}", account.AnnualContribution, CurrencyStyleIndex),
             Number($"E{index + 2}", account.AnnualReturn, PercentageStyleIndex),
             Number($"F{index + 2}", account.AvailableAge, DecimalStyleIndex),
-            Number($"G{index + 2}", account.WithdrawalRate, PercentageStyleIndex),
-            Number($"H{index + 2}", account.PayoutYears, DecimalStyleIndex)))
-            .Prepend(new Row(Text("A1", "Name"), Text("B1", "Type"), Text("C1", "Balance"), Text("D1", "Annual contribution"), Text("E1", "Annual return"), Text("F1", "Available age"), Text("G1", "Withdrawal rate"), Text("H1", "Payout years"))), 28, 18, 18, 22, 18, 16, 18, 16);
+            Text($"G{index + 2}", account.Type == RetirementAccountType.Deferred ? "Equal annual payouts" : "Withdrawal rate"),
+            account.Type == RetirementAccountType.Deferred
+                ? Number($"H{index + 2}", account.PayoutYears, DecimalStyleIndex)
+                : Number($"H{index + 2}", account.WithdrawalRate, PercentageStyleIndex)))
+            .Prepend(new Row(Text("A1", "Name"), Text("B1", "Type"), Text("C1", "Balance"), Text("D1", "Annual contribution"), Text("E1", "Annual return"), Text("F1", "Available age"), Text("G1", "Distribution method"), Text("H1", "Value"))), 28, 18, 18, 22, 18, 16, 22, 16);
         AddWorksheet(workbookPart, sheets, "Income Sources", 5, draft.IncomeSources.Select((income, index) => new Row(
             Text($"A{index + 2}", income.Name),
             Number($"B{index + 2}", income.AnnualAmount, CurrencyStyleIndex),

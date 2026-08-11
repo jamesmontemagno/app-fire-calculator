@@ -132,6 +132,7 @@ export function calculateDeferredCompensation({
   const retirementAge = Math.max(startAge, Math.floor(semiRetirementAge))
   const endAge = Math.max(retirementAge, Math.floor(planThroughAge))
   const balances = new Map(accounts.map(account => [account.id, Math.max(0, account.balance)]))
+  const deferredAnnualPayouts = new Map<string, number>()
   const projections: RetirementCashFlowPoint[] = []
 
   for (let age = startAge; age <= endAge; age++) {
@@ -145,7 +146,8 @@ export function calculateDeferredCompensation({
     for (const account of accounts) {
       let balance = balances.get(account.id) ?? 0
       if (age > startAge) {
-        balance *= 1 + Math.max(-1, account.annualReturn)
+        const payoutHasStarted = account.type === 'deferred' && age >= account.availableAge
+        if (!payoutHasStarted) balance *= 1 + Math.max(-1, account.annualReturn)
         if (age < retirementAge) balance += Math.max(0, account.annualContribution)
       }
       balances.set(account.id, balance)
@@ -183,7 +185,12 @@ export function calculateDeferredCompensation({
       if (age < payoutStartAge || age > payoutEndAge) continue
 
       const balance = balances.get(account.id) ?? 0
-      const withdrawal = balance / (payoutEndAge - age + 1)
+      let annualPayout = deferredAnnualPayouts.get(account.id)
+      if (annualPayout === undefined) {
+        annualPayout = balance / (payoutEndAge - age + 1)
+        deferredAnnualPayouts.set(account.id, annualPayout)
+      }
+      const withdrawal = Math.min(balance, annualPayout)
       balances.set(account.id, balance - withdrawal)
       accountWithdrawals[account.id] = withdrawal
       deferredIncome += withdrawal

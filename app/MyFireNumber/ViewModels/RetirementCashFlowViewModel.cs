@@ -183,26 +183,44 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     protected override bool TryBuildDraft(out DeferredCompensationDraft draft)
     {
         draft = DefaultDraft;
-        if (!TryParseWholeNumber(RetirementCurrentAgeText, out var currentAge) || currentAge is < 18 or > 100
-            || !TryParseWholeNumber(RetirementSemiAgeText, out var semiAge) || semiAge < currentAge
-            || !TryParseWholeNumber(RetirementPlanThroughAgeText, out var planThroughAge) || planThroughAge < semiAge)
+        if (!TryParseWholeNumber(RetirementCurrentAgeText, out var currentAge) || currentAge is < 18 or > 100)
         {
-            ValidationMessage = "Enter ages from 18 to 100 in chronological order.";
+            ValidationMessage = "Scenario: Current age must be a whole number from 18 to 100.";
             return false;
         }
 
-        if (!TryParseNonNegative(RetirementExpensesText, out var annualExpenses) || !TryParsePercentage(RetirementInflationText, 0, 10, out var inflationRate))
+        if (!TryParseWholeNumber(RetirementSemiAgeText, out var semiAge) || semiAge < currentAge || semiAge > 100)
         {
-            ValidationMessage = "Enter a non-negative annual expense and inflation from 0% to 10%.";
+            ValidationMessage = $"Scenario: Semi-retirement age must be a whole number from {currentAge} to 100.";
+            return false;
+        }
+
+        if (!TryParseWholeNumber(RetirementPlanThroughAgeText, out var planThroughAge) || planThroughAge < semiAge || planThroughAge > 100)
+        {
+            ValidationMessage = $"Scenario: Plan-through age must be a whole number from {semiAge} to 100.";
+            return false;
+        }
+
+        if (!TryParseNonNegative(RetirementExpensesText, out var annualExpenses))
+        {
+            ValidationMessage = "Scenario: Annual expenses must be a number of zero or more.";
+            return false;
+        }
+
+        if (!TryParsePercentage(RetirementInflationText, 0, 10, out var inflationRate))
+        {
+            ValidationMessage = "Scenario: Inflation rate must be between 0% and 10%.";
             return false;
         }
 
         var accounts = new List<RetirementAccount>();
-        foreach (var editor in RetirementAccounts)
+        for (var index = 0; index < RetirementAccounts.Count; index++)
         {
-            if (!editor.TryCreateAccount(out var account))
+            var editor = RetirementAccounts[index];
+            if (!editor.TryCreateAccount(out var account, out var validationError))
             {
-                ValidationMessage = "Complete every retirement account with valid amounts, percentages, and an available age from 18 to 100.";
+                editor.IsExpanded = true;
+                ValidationMessage = $"{DescribeItem("Account", index, editor.Name)}: {validationError}";
                 return false;
             }
 
@@ -210,11 +228,13 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
         }
 
         var incomeSources = new List<RetirementIncomeSource>();
-        foreach (var editor in RetirementIncomeSources)
+        for (var index = 0; index < RetirementIncomeSources.Count; index++)
         {
-            if (!editor.TryCreateIncome(out var income))
+            var editor = RetirementIncomeSources[index];
+            if (!editor.TryCreateIncome(out var income, out var validationError))
             {
-                ValidationMessage = "Complete every income source with valid amounts, percentages, and chronological ages.";
+                editor.IsExpanded = true;
+                ValidationMessage = $"{DescribeItem("Income source", index, editor.Name)}: {validationError}";
                 return false;
             }
 
@@ -222,11 +242,13 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
         }
 
         var additionalExpenses = new List<RetirementExpense>();
-        foreach (var editor in RetirementAdditionalExpenses)
+        for (var index = 0; index < RetirementAdditionalExpenses.Count; index++)
         {
-            if (!editor.TryCreateExpense(out var expense))
+            var editor = RetirementAdditionalExpenses[index];
+            if (!editor.TryCreateExpense(out var expense, out var validationError))
             {
-                ValidationMessage = "Complete every additional expense with a valid annual amount and start age.";
+                editor.IsExpanded = true;
+                ValidationMessage = $"{DescribeItem("Additional expense", index, editor.Name)}: {validationError}";
                 return false;
             }
 
@@ -245,6 +267,14 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
             WithdrawOnlyAfterRetirement,
             ReinvestRetirementSurplus);
         return true;
+    }
+
+    private static string DescribeItem(string itemType, int index, string name)
+    {
+        var trimmedName = name.Trim();
+        return string.IsNullOrWhiteSpace(trimmedName)
+            ? $"{itemType} {index + 1}"
+            : $"{itemType} \"{trimmedName}\"";
     }
 
     protected override void Recalculate(DeferredCompensationDraft draft)

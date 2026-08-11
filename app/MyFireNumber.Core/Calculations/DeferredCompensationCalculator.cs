@@ -9,6 +9,7 @@ public static class DeferredCompensationCalculator
         var endAge = Math.Max(retirementAge, inputs.PlanThroughAge);
         var currentYear = inputs.CurrentYear == 0 ? DateTime.Now.Year : inputs.CurrentYear;
         var balances = inputs.Accounts.ToDictionary(account => account.Id, account => Math.Max(0, account.Balance));
+        var deferredAnnualPayouts = new Dictionary<string, double>();
         var projections = new List<RetirementCashFlowPoint>();
 
         for (var age = startAge; age <= endAge; age++)
@@ -25,7 +26,13 @@ public static class DeferredCompensationCalculator
                 var balance = balances.GetValueOrDefault(account.Id);
                 if (age > startAge)
                 {
-                    balance *= 1 + Math.Max(-1, account.AnnualReturn);
+                    var payoutHasStarted = account.Type == RetirementAccountType.Deferred
+                        && age >= account.AvailableAge;
+                    if (!payoutHasStarted)
+                    {
+                        balance *= 1 + Math.Max(-1, account.AnnualReturn);
+                    }
+
                     if (age < retirementAge)
                     {
                         balance += Math.Max(0, account.AnnualContribution);
@@ -71,7 +78,13 @@ public static class DeferredCompensationCalculator
                 }
 
                 var balance = balances.GetValueOrDefault(account.Id);
-                var withdrawal = balance / (payoutEndAge - age + 1);
+                if (!deferredAnnualPayouts.TryGetValue(account.Id, out var annualPayout))
+                {
+                    annualPayout = balance / (payoutEndAge - age + 1);
+                    deferredAnnualPayouts[account.Id] = annualPayout;
+                }
+
+                var withdrawal = Math.Min(balance, annualPayout);
                 balances[account.Id] = balance - withdrawal;
                 withdrawals[account.Id] = withdrawal;
                 deferredIncome += withdrawal;

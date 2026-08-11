@@ -16,6 +16,7 @@ public sealed class DeferredCompensationWorkbookTests : IDisposable
         {
             Accounts =
             [
+                new RetirementAccount("deferred", "Custom Deferred", RetirementAccountType.Deferred, 300_000, 0, 0.05, 55, 0, 5),
                 new RetirementAccount("roth", "Custom Roth", RetirementAccountType.Roth, 125_000, 7_000, 0.06, 59, 0.04, 1)
             ],
             IncomeSources =
@@ -44,7 +45,12 @@ public sealed class DeferredCompensationWorkbookTests : IDisposable
         Assert.Equal(
             ["Inputs", "Results", "Annual Cash Flow", "Accounts", "Income Sources", "Additional Expenses"],
             sheets.Select(sheet => sheet.Name!.Value));
-        Assert.Equal("Custom Roth", GetCell(workbookPart, sheets[3], "A2").InlineString!.Text!.Text);
+        Assert.Equal("Custom Deferred", GetCell(workbookPart, sheets[3], "A2").InlineString!.Text!.Text);
+        Assert.Equal("Equal annual payouts", GetCell(workbookPart, sheets[3], "G2").InlineString!.Text!.Text);
+        Assert.Equal("5", GetCell(workbookPart, sheets[3], "H2").CellValue!.Text);
+        Assert.Equal("Custom Roth", GetCell(workbookPart, sheets[3], "A3").InlineString!.Text!.Text);
+        Assert.Equal("Withdrawal rate", GetCell(workbookPart, sheets[3], "G3").InlineString!.Text!.Text);
+        Assert.Equal("0.04", GetCell(workbookPart, sheets[3], "H3").CellValue!.Text);
         Assert.Equal("Custom Pension", GetCell(workbookPart, sheets[4], "A2").InlineString!.Text!.Text);
         Assert.Equal("Custom Travel", GetCell(workbookPart, sheets[5], "A2").InlineString!.Text!.Text);
     }

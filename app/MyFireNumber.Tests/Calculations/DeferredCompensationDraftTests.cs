@@ -6,7 +6,7 @@ namespace MyFireNumber.Tests.Calculations;
 public sealed class DeferredCompensationDraftTests
 {
     [Fact]
-    public void Default_MapsWebScenarioToCoreInputs()
+    public void Default_StartsWithSavingsAndTraditionalAccounts()
     {
         var draft = DeferredCompensationDraft.Default;
         var inputs = draft.ToInputs(2026);
@@ -17,8 +17,10 @@ public sealed class DeferredCompensationDraftTests
         Assert.Equal(80_000, inputs.AnnualExpenses);
         Assert.Equal(0.03, inputs.InflationRate);
         Assert.Equal(2, inputs.Accounts.Count);
-        Assert.Equal("Deferred Compensation", inputs.Accounts[0].Name);
-        Assert.Equal(RetirementAccountType.Deferred, inputs.Accounts[0].Type);
+        Assert.Equal("Savings", inputs.Accounts[0].Name);
+        Assert.Equal(RetirementAccountType.Savings, inputs.Accounts[0].Type);
+        Assert.Equal("401(k)", inputs.Accounts[1].Name);
+        Assert.Equal(RetirementAccountType.Traditional, inputs.Accounts[1].Type);
         Assert.Single(inputs.IncomeSources);
         Assert.True(inputs.WithdrawOnlyAfterRetirement);
         Assert.True(inputs.ReinvestSurplus);

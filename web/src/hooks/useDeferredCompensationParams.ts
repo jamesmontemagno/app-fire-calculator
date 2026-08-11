@@ -59,15 +59,15 @@ const DEFAULTS: DeferredCompensationParams = {
   inflationRate: 0.03,
   accounts: [
     {
-      id: 'deferred-comp',
-      name: 'Deferred Compensation',
-      type: 'deferred',
+      id: 'savings',
+      name: 'Savings',
+      type: 'savings',
       balance: 300000,
       annualContribution: 0,
       annualReturn: 0.05,
-      availableAge: 55,
-      withdrawalRate: 0,
-      payoutYears: 5,
+      availableAge: 18,
+      withdrawalRate: 0.04,
+      payoutYears: 1,
     },
     {
       id: '401k',
