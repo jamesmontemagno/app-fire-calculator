@@ -13,7 +13,7 @@ public class DeferredCompensationCalculatorTests
             RetirementAccountType.Deferred,
             10_000,
             0,
-            0,
+            0.05,
             50,
             0,
             2);

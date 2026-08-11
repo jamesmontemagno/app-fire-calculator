@@ -16,6 +16,8 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
     private string name = "New account";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UsesPayoutSchedule))]
+    [NotifyPropertyChangedFor(nameof(UsesWithdrawalRate))]
     private RetirementAccountType type = RetirementAccountType.Traditional;
 
     [ObservableProperty]
@@ -41,6 +43,8 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
     private bool isExpanded;
 
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
+    public bool UsesPayoutSchedule => Type == RetirementAccountType.Deferred;
+    public bool UsesWithdrawalRate => !UsesPayoutSchedule;
 
     public event EventHandler? Changed;
 
@@ -57,18 +61,54 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
         PayoutYearsText = account.PayoutYears.ToString(CultureInfo.CurrentCulture)
     };
 
-    public bool TryCreateAccount(out RetirementAccount account)
+    public bool TryCreateAccount(out RetirementAccount account, out string validationError)
     {
         account = new RetirementAccount(Id, Name.Trim(), Type, 0, 0, 0, 0, 0, 0);
-        if (string.IsNullOrWhiteSpace(account.Name)
-            || !TryNonNegative(BalanceText, out var balance)
-            || !TryNonNegative(AnnualContributionText, out var contribution)
-            || !TryPercentage(AnnualReturnText, -100, 100, out var annualReturn)
-            || !TryAge(AvailableAgeText, out var availableAge)
-            || !TryPercentage(WithdrawalRateText, 0, 100, out var withdrawalRate)
-            || !int.TryParse(PayoutYearsText, NumberStyles.Integer, CultureInfo.CurrentCulture, out var payoutYears)
-            || payoutYears is < 1 or > 50)
+        validationError = string.Empty;
+        var withdrawalRate = 0d;
+        var payoutYears = 1;
+        if (string.IsNullOrWhiteSpace(account.Name))
         {
+            validationError = "Name is required.";
+            return false;
+        }
+
+        if (!TryNonNegative(BalanceText, out var balance))
+        {
+            validationError = "Balance must be a number of zero or more.";
+            return false;
+        }
+
+        if (!TryNonNegative(AnnualContributionText, out var contribution))
+        {
+            validationError = "Annual contribution must be a number of zero or more.";
+            return false;
+        }
+
+        if (!TryPercentage(AnnualReturnText, -100, 100, out var annualReturn))
+        {
+            validationError = "Expected annual return must be between -100% and 100%.";
+            return false;
+        }
+
+        if (!TryAge(AvailableAgeText, out var availableAge))
+        {
+            validationError = "Available age must be a whole number from 18 to 100.";
+            return false;
+        }
+
+        if (UsesPayoutSchedule)
+        {
+            if (!int.TryParse(PayoutYearsText, NumberStyles.Integer, CultureInfo.CurrentCulture, out payoutYears)
+                || payoutYears is < 1 or > 50)
+            {
+                validationError = "Payout years must be a whole number from 1 to 50.";
+                return false;
+            }
+        }
+        else if (!TryPercentage(WithdrawalRateText, 0, 100, out withdrawalRate))
+        {
+            validationError = "Withdrawal rate must be between 0% and 100%.";
             return false;
         }
 
@@ -134,6 +174,7 @@ public sealed partial class RetirementIncomeEditorItem : ObservableObject
     private string annualGrowthText = "0";
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RequiresTaxRate))]
     private bool isAfterTax = true;
 
     [ObservableProperty]
@@ -144,6 +185,7 @@ public sealed partial class RetirementIncomeEditorItem : ObservableObject
     private bool isExpanded;
 
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
+    public bool RequiresTaxRate => !IsAfterTax;
 
     public event EventHandler? Changed;
 
@@ -159,17 +201,50 @@ public sealed partial class RetirementIncomeEditorItem : ObservableObject
         TaxRateText = Format(income.TaxRate * 100)
     };
 
-    public bool TryCreateIncome(out RetirementIncomeSource income)
+    public bool TryCreateIncome(out RetirementIncomeSource income, out string validationError)
     {
         income = new RetirementIncomeSource(Id, Name.Trim(), 0, 0, 0, 0, IsAfterTax, 0);
-        if (string.IsNullOrWhiteSpace(income.Name)
-            || !TryNonNegative(AnnualAmountText, out var amount)
-            || !TryAge(StartAgeText, out var startAge)
-            || !TryAge(EndAgeText, out var endAge)
-            || endAge < startAge
-            || !TryPercentage(AnnualGrowthText, -100, 100, out var annualGrowth)
-            || !TryPercentage(TaxRateText, 0, 100, out var taxRate))
+        validationError = string.Empty;
+        if (string.IsNullOrWhiteSpace(income.Name))
         {
+            validationError = "Name is required.";
+            return false;
+        }
+
+        if (!TryNonNegative(AnnualAmountText, out var amount))
+        {
+            validationError = "Annual amount must be a number of zero or more.";
+            return false;
+        }
+
+        if (!TryAge(StartAgeText, out var startAge))
+        {
+            validationError = "Start age must be a whole number from 18 to 100.";
+            return false;
+        }
+
+        if (!TryAge(EndAgeText, out var endAge))
+        {
+            validationError = "End age must be a whole number from 18 to 100.";
+            return false;
+        }
+
+        if (endAge < startAge)
+        {
+            validationError = "End age must be the same as or later than start age.";
+            return false;
+        }
+
+        if (!TryPercentage(AnnualGrowthText, -100, 100, out var annualGrowth))
+        {
+            validationError = "Annual growth must be between -100% and 100%.";
+            return false;
+        }
+
+        var taxRate = 0d;
+        if (RequiresTaxRate && !TryPercentage(TaxRateText, 0, 100, out taxRate))
+        {
+            validationError = "Tax rate must be between 0% and 100%.";
             return false;
         }
 
@@ -234,15 +309,27 @@ public sealed partial class RetirementExpenseEditorItem : ObservableObject
         StartAgeText = expense.StartAge.ToString(CultureInfo.CurrentCulture)
     };
 
-    public bool TryCreateExpense(out RetirementExpense expense)
+    public bool TryCreateExpense(out RetirementExpense expense, out string validationError)
     {
         expense = new RetirementExpense(Id, Name.Trim(), 0, 0);
-        if (string.IsNullOrWhiteSpace(expense.Name)
-            || !double.TryParse(AnnualAmountText, NumberStyles.Number, CultureInfo.CurrentCulture, out var amount)
-            || amount < 0
-            || !int.TryParse(StartAgeText, NumberStyles.Integer, CultureInfo.CurrentCulture, out var startAge)
+        validationError = string.Empty;
+        if (string.IsNullOrWhiteSpace(expense.Name))
+        {
+            validationError = "Name is required.";
+            return false;
+        }
+
+        if (!double.TryParse(AnnualAmountText, NumberStyles.Number, CultureInfo.CurrentCulture, out var amount)
+            || amount < 0)
+        {
+            validationError = "Annual amount must be a number of zero or more.";
+            return false;
+        }
+
+        if (!int.TryParse(StartAgeText, NumberStyles.Integer, CultureInfo.CurrentCulture, out var startAge)
             || startAge is < 18 or > 100)
         {
+            validationError = "Start age must be a whole number from 18 to 100.";
             return false;
         }
 
