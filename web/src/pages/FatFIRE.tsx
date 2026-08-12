@@ -16,7 +16,6 @@ export default function FatFIRE() {
   const results = useMemo(() => {
     return calculateFatFIRE({
       currentAge: params.currentAge,
-      retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
       annualIncome: params.annualIncome,
@@ -32,7 +31,6 @@ export default function FatFIRE() {
   const handleExport = () => {
     const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       currentAge: params.currentAge,
-      retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
       expectedReturn: params.expectedReturn,
@@ -118,25 +116,23 @@ export default function FatFIRE() {
               label="Current Age"
               value={params.currentAge}
               onChange={(v) => setParam('currentAge', v)}
-            />
-            <AgeInput
-              label="Target Retirement Age"
-              value={params.retirementAge}
-              onChange={(v) => setParam('retirementAge', v)}
+              tooltip="Your current age"
             />
             <CurrencyInput
-              label="Current Savings"
+              label="Current Invested Assets"
               value={params.currentSavings}
               onChange={(v) => setParam('currentSavings', v)}
+              tooltip="Total invested assets (401k, IRA, brokerage)"
             />
             <CurrencyInput
-              label="Annual Contribution"
+              label="Annual Contributions"
               value={params.annualContribution}
               onChange={(v) => setParam('annualContribution', v)}
+              tooltip="How much you save and invest per year"
             />
             <div>
               <CurrencyInput
-                label="Annual Expenses (Fat)"
+                label="Annual Retirement Expenses"
                 value={params.annualExpenses}
                 onChange={(v) => setParam('annualExpenses', v)}
                 tooltip="For Fat FIRE, typically $100,000+ per year"
@@ -160,9 +156,10 @@ export default function FatFIRE() {
               </div>
             </div>
             <PercentageInput
-              label="Expected Return"
+              label="Expected Annual Return"
               value={params.expectedReturn}
               onChange={(v) => setParam('expectedReturn', v)}
+              tooltip="Average annual investment return before inflation"
               min={0}
               max={0.15}
             />
@@ -170,6 +167,7 @@ export default function FatFIRE() {
               label="Inflation Rate"
               value={params.inflationRate}
               onChange={(v) => setParam('inflationRate', v)}
+              tooltip="Expected annual increase in prices"
               min={0}
               max={0.10}
             />

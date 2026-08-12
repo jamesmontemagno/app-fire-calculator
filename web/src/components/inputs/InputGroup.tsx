@@ -12,6 +12,7 @@ interface InputGroupProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'o
   min?: number
   max?: number
   step?: number
+  showSlider?: boolean
 }
 
 export default function InputGroup({
@@ -25,6 +26,7 @@ export default function InputGroup({
   min,
   max,
   step = 1,
+  showSlider = false,
   className = '',
   ...props
 }: InputGroupProps) {
@@ -86,6 +88,23 @@ export default function InputGroup({
           </span>
         )}
       </div>
+      {showSlider && min !== undefined && max !== undefined && (
+        <input
+          type="range"
+          value={value}
+          onChange={handleChange}
+          min={min}
+          max={max}
+          step={step}
+          aria-label={`${label} slider`}
+          className="
+            mt-3 w-full h-2
+            bg-gray-200 dark:bg-gray-700
+            rounded-lg appearance-none cursor-pointer
+            accent-fire-500 dark:accent-fire-400
+          "
+        />
+      )}
       {helperText && (
         <p id={helperTextId} className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
           {helperText}

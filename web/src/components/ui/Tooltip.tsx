@@ -1,4 +1,4 @@
-import { useState, useId } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 
 interface TooltipProps {
   content: string
@@ -7,17 +7,43 @@ interface TooltipProps {
 export default function Tooltip({ content }: TooltipProps) {
   const [isVisible, setIsVisible] = useState(false)
   const tooltipId = useId()
+  const containerRef = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    if (!isVisible) return
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!containerRef.current?.contains(event.target as Node)) {
+        setIsVisible(false)
+      }
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsVisible(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', handlePointerDown)
+    document.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown)
+      document.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [isVisible])
 
   return (
-    <span className="group relative">
+    <span ref={containerRef} className="group relative">
       <button
         type="button"
         aria-label="More information"
-        aria-describedby={tooltipId}
+        aria-expanded={isVisible}
+        aria-controls={tooltipId}
+        onClick={() => setIsVisible(true)}
         onMouseEnter={() => setIsVisible(true)}
         onMouseLeave={() => setIsVisible(false)}
         onFocus={() => setIsVisible(true)}
-        onBlur={() => setIsVisible(false)}
         className="inline-flex items-center justify-center w-4 h-4 focus:outline-none focus:ring-2 focus:ring-fire-500 rounded-full"
       >
         <svg 
@@ -36,7 +62,7 @@ export default function Tooltip({ content }: TooltipProps) {
         className={`
           absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 
           bg-gray-900 dark:bg-gray-700 text-white text-xs rounded-lg 
-          whitespace-nowrap z-50 max-w-xs text-center
+          w-max max-w-64 whitespace-normal z-50 text-center
           transition-all
           ${isVisible ? 'opacity-100 visible' : 'opacity-0 invisible'}
         `}

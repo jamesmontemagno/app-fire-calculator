@@ -119,19 +119,22 @@ export default function BaristaFIRE() {
               label="Current Age"
               value={params.currentAge}
               onChange={(v) => setParam('currentAge', v)}
+              tooltip="Your current age"
             />
             <CurrencyInput
-              label="Current Savings"
+              label="Current Invested Assets"
               value={params.currentSavings}
               onChange={(v) => setParam('currentSavings', v)}
+              tooltip="Total invested assets (401k, IRA, brokerage)"
             />
             <CurrencyInput
-              label="Annual Contribution"
+              label="Annual Contributions"
               value={params.annualContribution}
               onChange={(v) => setParam('annualContribution', v)}
+              tooltip="How much you save and invest per year"
             />
             <CurrencyInput
-              label="Annual Expenses"
+              label="Annual Retirement Expenses"
               value={params.annualExpenses}
               onChange={(v) => setParam('annualExpenses', v)}
               tooltip="Total yearly spending needs"
@@ -153,9 +156,10 @@ export default function BaristaFIRE() {
             </div>
 
             <PercentageInput
-              label="Expected Return"
+              label="Expected Annual Return"
               value={params.expectedReturn}
               onChange={(v) => setParam('expectedReturn', v)}
+              tooltip="Average annual investment return before inflation"
               min={0}
               max={0.15}
             />
@@ -163,6 +167,7 @@ export default function BaristaFIRE() {
               label="Inflation Rate"
               value={params.inflationRate}
               onChange={(v) => setParam('inflationRate', v)}
+              tooltip="Expected annual increase in prices"
               min={0}
               max={0.10}
             />
@@ -170,6 +175,7 @@ export default function BaristaFIRE() {
               label="Safe Withdrawal Rate"
               value={params.withdrawalRate}
               onChange={(v) => setParam('withdrawalRate', v)}
+              tooltip="Percentage of your portfolio withdrawn each year in retirement"
               min={0.02}
               max={0.06}
             />

@@ -170,6 +170,7 @@ export default function HealthcareGap() {
               label="Current Age"
               value={params.currentAge}
               onChange={(v) => setParam('currentAge', v)}
+              tooltip="Your current age"
             />
             <AgeInput
               label="Early Retirement Age"

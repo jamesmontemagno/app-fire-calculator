@@ -4,7 +4,7 @@
 
 export interface FIREInputs {
   currentAge: number
-  retirementAge: number
+  retirementAge?: number
   currentSavings: number
   annualContribution: number
   annualIncome: number // net annual income for savings rate calculation
@@ -261,7 +261,7 @@ export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
   const fireAge = currentAge + yearsToFIRE
 
   // Coast FIRE Number (amount needed now to coast to FIRE at target retirement age)
-  const yearsToRetirement = Math.max(0, inputs.retirementAge - currentAge)
+  const yearsToRetirement = Math.max(0, (inputs.retirementAge ?? currentAge) - currentAge)
   const coastFireNumber = presentValue(fireNumber, realReturn, yearsToRetirement)
 
   // Calculate savings rate based on annual income

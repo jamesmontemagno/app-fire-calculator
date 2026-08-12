@@ -204,22 +204,24 @@ export default function RetirementAccountListInput({
                       </select>
                     </div>
                     <CurrencyInput
-                      label="Current balance"
+                      label="Current Balance"
                       value={account.balance}
                       onChange={value => updateAccount(account.id, 'balance', value)}
+                      tooltip="The amount currently held in this account"
                     />
                     <CurrencyInput
-                      label="Annual contribution"
+                      label="Annual Contributions"
                       value={account.annualContribution}
                       onChange={value => updateAccount(account.id, 'annualContribution', value)}
                       tooltip="Contributions stop at your semi-retirement age."
                     />
                     <PercentageInput
-                      label="Expected annual return"
+                      label="Expected Annual Return"
                       value={account.annualReturn}
                       onChange={value => updateAccount(account.id, 'annualReturn', value)}
                       min={0}
                       max={0.2}
+                      tooltip="Average annual investment return before inflation"
                     />
                     <div>
                       <AgeInput

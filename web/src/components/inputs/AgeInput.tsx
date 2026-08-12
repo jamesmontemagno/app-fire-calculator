@@ -8,6 +8,7 @@ interface AgeInputProps {
   onChange: (value: number) => void
   min?: number
   max?: number
+  showSlider?: boolean
   className?: string
 }
 
@@ -18,6 +19,7 @@ export default function AgeInput({
   onChange,
   min = 18,
   max = 100,
+  showSlider = true,
   className = '',
 }: AgeInputProps) {
   const id = useId()
@@ -83,6 +85,23 @@ export default function AgeInput({
           years old
         </span>
       </div>
+      {showSlider && (
+        <input
+          type="range"
+          value={value}
+          onChange={(event) => onChange(parseInt(event.target.value))}
+          min={min}
+          max={max}
+          step={1}
+          aria-label={`${label} slider`}
+          className="
+            mt-3 w-full h-2
+            bg-gray-200 dark:bg-gray-700
+            rounded-lg appearance-none cursor-pointer
+            accent-fire-500 dark:accent-fire-400
+          "
+        />
+      )}
     </div>
   )
 }
