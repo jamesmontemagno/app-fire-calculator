@@ -202,18 +202,21 @@ export default function RetirementIncomeListInput({
                       label={source.isAfterTax ? 'Annual after-tax amount' : 'Annual gross amount'}
                       value={source.annualAmount}
                       onChange={value => updateSource(source.id, 'annualAmount', value)}
+                      tooltip="The yearly income expected from this source"
                     />
                     <AgeInput
                       label="Starts at age"
                       value={source.startAge}
                       min={currentAge}
                       onChange={value => updateSource(source.id, 'startAge', value)}
+                      tooltip="The first age when this income is received"
                     />
                     <AgeInput
                       label="Ends at age"
                       value={source.endAge}
                       min={source.startAge}
                       onChange={value => updateSource(source.id, 'endAge', value)}
+                      tooltip="The final age when this income is received"
                     />
                     <PercentageInput
                       label="Annual growth"

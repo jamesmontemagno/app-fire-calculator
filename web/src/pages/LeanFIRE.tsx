@@ -19,7 +19,6 @@ export default function LeanFIRE() {
   const results = useMemo(() => {
     return calculateLeanFIRE({
       currentAge: params.currentAge,
-      retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
       annualIncome: params.annualIncome,
@@ -35,7 +34,6 @@ export default function LeanFIRE() {
   const handleExport = () => {
     const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       currentAge: params.currentAge,
-      retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
       expectedReturn: params.expectedReturn,
@@ -138,25 +136,24 @@ export default function LeanFIRE() {
               label="Current Age"
               value={params.currentAge}
               onChange={(v) => setParam('currentAge', v)}
-            />
-            <AgeInput
-              label="Target Retirement Age"
-              value={params.retirementAge}
-              onChange={(v) => setParam('retirementAge', v)}
+              tooltip="Your current age"
+              showSlider
             />
             <CurrencyInput
-              label="Current Savings"
+              label="Current Invested Assets"
               value={params.currentSavings}
               onChange={(v) => setParam('currentSavings', v)}
+              tooltip="Total invested assets (401k, IRA, brokerage)"
             />
             <CurrencyInput
-              label="Annual Contribution"
+              label="Annual Contributions"
               value={params.annualContribution}
               onChange={(v) => setParam('annualContribution', v)}
+              tooltip="How much you save and invest per year"
             />
             <div>
               <CurrencyInput
-                label="Annual Expenses (Lean)"
+                label="Annual Retirement Expenses"
                 value={params.annualExpenses}
                 onChange={(v) => setParam('annualExpenses', v)}
                 tooltip="For Lean FIRE, keep this ≤$40,000"
@@ -178,9 +175,10 @@ export default function LeanFIRE() {
               </div>
             </div>
             <PercentageInput
-              label="Expected Return"
+              label="Expected Annual Return"
               value={params.expectedReturn}
               onChange={(v) => setParam('expectedReturn', v)}
+              tooltip="Average annual investment return before inflation"
               min={0}
               max={0.15}
             />
@@ -188,6 +186,7 @@ export default function LeanFIRE() {
               label="Inflation Rate"
               value={params.inflationRate}
               onChange={(v) => setParam('inflationRate', v)}
+              tooltip="Expected annual increase in prices"
               min={0}
               max={0.10}
             />
@@ -195,6 +194,7 @@ export default function LeanFIRE() {
               label="Safe Withdrawal Rate"
               value={params.withdrawalRate}
               onChange={(v) => setParam('withdrawalRate', v)}
+              tooltip="Percentage of your portfolio withdrawn each year in retirement"
               min={0.02}
               max={0.06}
             />

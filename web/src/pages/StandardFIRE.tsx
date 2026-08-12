@@ -14,7 +14,6 @@ export default function StandardFIRE() {
   const results = useMemo(() => {
     return calculateStandardFIRE({
       currentAge: params.currentAge,
-      retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
       annualIncome: params.annualIncome,
@@ -28,7 +27,6 @@ export default function StandardFIRE() {
   const handleExport = () => {
     const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
       currentAge: params.currentAge,
-      retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
       annualIncome: params.annualIncome,
@@ -108,21 +106,16 @@ export default function StandardFIRE() {
               value={params.currentAge}
               onChange={(v) => setParam('currentAge', v)}
               tooltip="Your current age"
-            />
-            <AgeInput
-              label="Target Retirement Age"
-              value={params.retirementAge}
-              onChange={(v) => setParam('retirementAge', v)}
-              tooltip="The age you want to retire"
+              showSlider
             />
             <CurrencyInput
-              label="Current Savings"
+              label="Current Invested Assets"
               value={params.currentSavings}
               onChange={(v) => setParam('currentSavings', v)}
               tooltip="Total invested assets (401k, IRA, brokerage)"
             />
             <CurrencyInput
-              label="Annual Contribution"
+              label="Annual Contributions"
               value={params.annualContribution}
               onChange={(v) => setParam('annualContribution', v)}
               tooltip="How much you save and invest per year"
@@ -136,14 +129,14 @@ export default function StandardFIRE() {
               allowMonthlyToggle
             />
             <CurrencyInput
-              label="Annual Expenses"
+              label="Annual Retirement Expenses"
               value={params.annualExpenses}
               onChange={(v) => setParam('annualExpenses', v)}
               tooltip="Your expected yearly spending in retirement"
               allowMonthlyToggle
             />
             <PercentageInput
-              label="Expected Return"
+              label="Expected Annual Return"
               value={params.expectedReturn}
               onChange={(v) => setParam('expectedReturn', v)}
               tooltip="Average annual investment return (7% is typical for stocks)"

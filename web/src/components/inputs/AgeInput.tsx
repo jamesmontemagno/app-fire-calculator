@@ -8,6 +8,7 @@ interface AgeInputProps {
   onChange: (value: number) => void
   min?: number
   max?: number
+  showSlider?: boolean
   className?: string
 }
 
@@ -18,6 +19,7 @@ export default function AgeInput({
   onChange,
   min = 18,
   max = 100,
+  showSlider = false,
   className = '',
 }: AgeInputProps) {
   const id = useId()
@@ -25,7 +27,7 @@ export default function AgeInput({
 
   // Sync with external value changes (e.g., from URL params or presets)
   useEffect(() => {
-    const parsed = parseInt(inputValue)
+    const parsed = parseInt(inputValue, 10)
     if (parsed !== value) {
       setInputValue(value.toString())
     }
@@ -36,7 +38,7 @@ export default function AgeInput({
     setInputValue(raw)
     
     // Only update parent if valid number in range
-    const parsed = parseInt(raw)
+    const parsed = parseInt(raw, 10)
     if (!isNaN(parsed) && parsed >= min && parsed <= max) {
       onChange(parsed)
     }
@@ -44,7 +46,7 @@ export default function AgeInput({
 
   const handleBlur = () => {
     // On blur, validate and reset to last valid value if needed
-    const parsed = parseInt(inputValue)
+    const parsed = parseInt(inputValue, 10)
     if (isNaN(parsed) || parsed < min || parsed > max) {
       setInputValue(value.toString())
     }
@@ -83,6 +85,23 @@ export default function AgeInput({
           years old
         </span>
       </div>
+      {showSlider && (
+        <input
+          type="range"
+          value={value}
+          onChange={(event) => onChange(parseInt(event.target.value, 10))}
+          min={min}
+          max={max}
+          step={1}
+          aria-label={`${label} slider`}
+          className="
+            mt-3 w-full h-2
+            bg-gray-200 dark:bg-gray-700
+            rounded-lg appearance-none cursor-pointer
+            accent-fire-500 dark:accent-fire-400
+          "
+        />
+      )}
     </div>
   )
 }

@@ -129,11 +129,13 @@ export default function WithdrawalRate() {
               suffix="years"
               min={10}
               max={60}
+              showSlider
             />
             <PercentageInput
-              label="Expected Return"
+              label="Expected Annual Return"
               value={params.expectedReturn}
               onChange={(v) => setParam('expectedReturn', v)}
+              tooltip="Average annual investment return before inflation"
               min={0}
               max={0.15}
             />
@@ -141,6 +143,7 @@ export default function WithdrawalRate() {
               label="Inflation Rate"
               value={params.inflationRate}
               onChange={(v) => setParam('inflationRate', v)}
+              tooltip="Expected annual increase in prices and withdrawals"
               min={0}
               max={0.10}
             />

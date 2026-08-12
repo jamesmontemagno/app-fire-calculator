@@ -155,6 +155,7 @@ export default function DebtListInput({ debts, onChange }: DebtListInputProps) {
                       value={debt.balance}
                       onChange={(value) => updateDebt(debt.id, 'balance', value)}
                       min={0}
+                      tooltip="The amount currently owed on this debt"
                     />
 
                     <PercentageInput
@@ -164,6 +165,7 @@ export default function DebtListInput({ debts, onChange }: DebtListInputProps) {
                       min={0}
                       max={0.5}
                       step={0.0025}
+                      tooltip="The debt's annual percentage rate (APR)"
                     />
 
                     <CurrencyInput
@@ -171,6 +173,7 @@ export default function DebtListInput({ debts, onChange }: DebtListInputProps) {
                       value={debt.minPayment}
                       onChange={(value) => updateDebt(debt.id, 'minPayment', value)}
                       min={0}
+                      tooltip="The lender's required payment each month"
                     />
                   </div>
                 )}

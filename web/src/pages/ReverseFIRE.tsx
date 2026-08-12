@@ -4,7 +4,6 @@ import { formatCurrency, generateProjections } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
-import ProgressToFIRE from '../components/ui/ProgressToFIRE'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -135,28 +134,6 @@ export default function ReverseFIRE() {
           </div>
       </div>
 
-      {/* Progress Bar */}
-      <ProgressToFIRE 
-        currentSavings={params.currentSavings} 
-        fireNumber={results.fireNumber}
-        yearsToFIRE={results.yearsToFIRE}
-      />
-
-      {/* Explanation Banner */}
-      <div className="bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-800 rounded-xl p-4">
-        <div className="flex gap-3">
-          <span className="text-2xl">🔄</span>
-          <div>
-            <h3 className="font-semibold text-teal-900 dark:text-teal-100">How Reverse FIRE Works</h3>
-            <p className="text-sm text-teal-700 dark:text-teal-300 mt-1">
-              Instead of calculating when you'll FIRE based on your savings, this calculator works backwards: 
-              you set your target retirement age, and it tells you exactly how much you need to save each month 
-              to get there.
-            </p>
-          </div>
-        </div>
-      </div>
-
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Inputs */}
         <Card className="lg:col-span-1">
@@ -168,28 +145,34 @@ export default function ReverseFIRE() {
               label="Current Age"
               value={params.currentAge}
               onChange={(v) => setParam('currentAge', v)}
+              tooltip="Your current age"
+              showSlider
             />
             <AgeInput
-              label="Target FIRE Age"
+              label="Target Retirement Age"
               value={params.retirementAge}
               onChange={(v) => setParam('retirementAge', v)}
               tooltip="When do you want to achieve FIRE?"
               min={params.currentAge + 1}
+              showSlider
             />
             <CurrencyInput
-              label="Current Savings"
+              label="Current Invested Assets"
               value={params.currentSavings}
               onChange={(v) => setParam('currentSavings', v)}
+              tooltip="Total invested assets (401k, IRA, brokerage)"
             />
             <CurrencyInput
-              label="Annual Expenses in Retirement"
+              label="Annual Retirement Expenses"
               value={params.annualExpenses}
               onChange={(v) => setParam('annualExpenses', v)}
+              tooltip="Your expected yearly spending in retirement"
             />
             <PercentageInput
-              label="Expected Return"
+              label="Expected Annual Return"
               value={params.expectedReturn}
               onChange={(v) => setParam('expectedReturn', v)}
+              tooltip="Average annual investment return before inflation"
               min={0}
               max={0.15}
             />
@@ -197,6 +180,7 @@ export default function ReverseFIRE() {
               label="Inflation Rate"
               value={params.inflationRate}
               onChange={(v) => setParam('inflationRate', v)}
+              tooltip="Expected annual increase in prices"
               min={0}
               max={0.10}
             />
@@ -204,6 +188,7 @@ export default function ReverseFIRE() {
               label="Safe Withdrawal Rate"
               value={params.withdrawalRate}
               onChange={(v) => setParam('withdrawalRate', v)}
+              tooltip="Percentage of your portfolio withdrawn each year in retirement"
               min={0.02}
               max={0.06}
             />
@@ -266,68 +251,6 @@ export default function ReverseFIRE() {
               subtext={`By age ${params.retirementAge}`}
             />
           </div>
-
-          {/* Scenario Comparison */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Different Target Ages</h2>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-200 dark:border-gray-700">
-                      <th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-gray-100">Target Age</th>
-                      <th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-gray-100">Years Away</th>
-                      <th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-gray-100">Monthly Savings</th>
-                      <th className="text-left py-2 px-3 font-semibold text-gray-900 dark:text-gray-100">Annual Savings</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {[40, 45, 50, 55, 60, 65].filter(age => age > params.currentAge).map((targetAge) => {
-                      const calc = calculateReverseFIRE(
-                        params.currentAge,
-                        targetAge,
-                        params.currentSavings,
-                        params.annualExpenses,
-                        params.expectedReturn,
-                        params.inflationRate,
-                        params.withdrawalRate
-                      )
-                      return (
-                        <tr 
-                          key={targetAge}
-                          className={`border-b border-gray-100 dark:border-gray-800 ${
-                            targetAge === params.retirementAge ? 'bg-teal-50 dark:bg-teal-900/20' : ''
-                          }`}
-                        >
-                          <td className="py-2 px-3 font-medium text-gray-900 dark:text-gray-100">
-                            Age {targetAge}
-                            {targetAge === params.retirementAge && (
-                              <span className="ml-2 text-xs bg-teal-100 dark:bg-teal-800 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded">
-                                Selected
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-2 px-3 text-gray-600 dark:text-gray-400">{targetAge - params.currentAge} years</td>
-                          <td className="py-2 px-3 text-gray-900 dark:text-gray-100 font-medium">
-                            {calc.alreadyAchievable ? (
-                              <span className="text-green-600 dark:text-green-400">$0 (on track!)</span>
-                            ) : (
-                              formatCurrency(calc.requiredMonthlySavings)
-                            )}
-                          </td>
-                          <td className="py-2 px-3 text-gray-600 dark:text-gray-400">
-                            {calc.alreadyAchievable ? '-' : formatCurrency(calc.requiredAnnualSavings)}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
 
           {/* Chart */}
           <Card>

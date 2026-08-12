@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { CurrencyInput, PercentageInput } from '../components/inputs'
+import { CurrencyInput, InputGroup, PercentageInput } from '../components/inputs'
 import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
@@ -246,24 +246,22 @@ export default function SavingsRate() {
               tooltip={`Amount you'll invest ${contributionFrequency}`}
             />
 
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Years Investing
-              </label>
-              <input
-                type="number"
-                value={yearsInvesting}
-                onChange={(e) => setYearsInvesting(Math.max(1, Math.min(50, parseInt(e.target.value) || 1)))}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-                min="1"
-                max="50"
-              />
-            </div>
+            <InputGroup
+              label="Years Investing"
+              value={yearsInvesting}
+              onChange={setYearsInvesting}
+              tooltip="How long contributions and investment growth continue"
+              suffix="years"
+              min={1}
+              max={50}
+              showSlider
+            />
 
             <PercentageInput
               label="Expected Annual Return"
               value={params.expectedReturn}
               onChange={(v) => setParam('expectedReturn', v)}
+              tooltip="Average annual investment return before inflation"
               min={0}
               max={0.15}
             />
@@ -271,6 +269,7 @@ export default function SavingsRate() {
               label="Inflation Rate"
               value={params.inflationRate}
               onChange={(v) => setParam('inflationRate', v)}
+              tooltip="Expected annual increase in prices"
               min={0}
               max={0.10}
             />

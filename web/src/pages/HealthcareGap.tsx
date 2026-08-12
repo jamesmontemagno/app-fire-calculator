@@ -170,6 +170,8 @@ export default function HealthcareGap() {
               label="Current Age"
               value={params.currentAge}
               onChange={(v) => setParam('currentAge', v)}
+              tooltip="Your current age"
+              showSlider
             />
             <AgeInput
               label="Early Retirement Age"
@@ -177,6 +179,7 @@ export default function HealthcareGap() {
               onChange={(v) => setParam('retirementAge', v)}
               tooltip="When you plan to leave employer-sponsored insurance"
               max={64}
+              showSlider
             />
             <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
               <p className="text-sm text-gray-600 dark:text-gray-400">

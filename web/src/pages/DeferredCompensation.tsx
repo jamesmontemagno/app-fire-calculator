@@ -148,31 +148,41 @@ export default function DeferredCompensation() {
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Retirement scenario</h2>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} />
               <AgeInput
-                label="Retirement age"
+                label="Current Age"
+                value={params.currentAge}
+                onChange={value => setParam('currentAge', value)}
+                tooltip="Your current age"
+                showSlider
+              />
+              <AgeInput
+                label="Retirement Age"
                 value={params.semiRetirementAge}
                 onChange={value => setParam('semiRetirementAge', value)}
                 min={params.currentAge}
                 tooltip="Portfolio withdrawals begin at this age unless you allow them earlier."
+                showSlider
               />
               <AgeInput
-                label="Plan through age"
+                label="Plan Through Age"
                 value={params.planThroughAge}
                 onChange={value => setParam('planThroughAge', value)}
                 min={params.semiRetirementAge}
+                tooltip="The final age included in this retirement cash-flow plan."
+                showSlider
               />
               <CurrencyInput
-                label="Annual retirement spending"
+                label="Annual Retirement Expenses"
                 value={params.annualExpenses}
                 onChange={value => setParam('annualExpenses', value)}
                 tooltip="Your after-tax annual spending target in today’s dollars."
                 allowMonthlyToggle
               />
               <PercentageInput
-                label="Inflation rate"
+                label="Inflation Rate"
                 value={params.inflationRate}
                 onChange={value => setParam('inflationRate', value)}
+                tooltip="Expected annual increase in prices and retirement expenses."
                 min={0}
                 max={0.15}
               />
