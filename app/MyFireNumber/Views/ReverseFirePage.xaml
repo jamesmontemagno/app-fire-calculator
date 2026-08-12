@@ -43,15 +43,10 @@
                        LineHeight="1.3" />
             </Border>
 
-                <Border Padding="16" Background="{AppThemeBinding Light=#E8F7F7, Dark=#19393C}" Stroke="{AppThemeBinding Light=#9CD8DA, Dark=#39777B}" StrokeShape="RoundRectangle 8">
-                    <VerticalStackLayout Spacing="6">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Label Text="&#xf2f1;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#167077, Dark=#8ED7D8}" SemanticProperties.Description="Reverse FIRE explanation" />
-                            <Label Grid.Column="1" Text="How Reverse FIRE works" TextColor="{AppThemeBinding Light=#11545A, Dark=#D5FAFA}" FontAttributes="Bold" FontSize="20" />
-                        </Grid>
-                        <Label Text="Set your target FIRE age and work backward to see the savings needed to reach your portfolio goal." TextColor="{AppThemeBinding Light=#21686D, Dark=#BCEBEB}" LineHeight="1.3" />
-                    </VerticalStackLayout>
-                </Border>
+                <controls:CalculatorInfoView Title="How does Reverse FIRE work?"
+                                             Summary="Choose your target retirement age and work backward to find the savings required."
+                                             Details="Reverse FIRE starts with when you want to reach financial independence, then estimates the monthly and annual contributions needed to reach your portfolio target. It makes the tradeoff between time and savings explicit. It may fit goal-oriented planners with a specific retirement date who want to test whether that timeline is realistic."
+                                             IconGlyph="&#xf2f1;" />
 
                 <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
                     <VerticalStackLayout Spacing="12">

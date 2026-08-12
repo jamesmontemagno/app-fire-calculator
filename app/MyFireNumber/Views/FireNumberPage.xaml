@@ -45,31 +45,51 @@
                 </Border>
 
                 <VerticalStackLayout Spacing="18">
+                    <controls:CalculatorInfoView IsVisible="{Binding IsStandardFire}"
+                                                Title="What is Standard FIRE?"
+                                                Summary="Calculate the portfolio needed for full financial independence using the classic 25x expenses rule."
+                                                Details="Standard FIRE is a flexible starting point for anyone planning financial independence. It assumes your invested portfolio will cover annual expenses without earned income, based on your chosen withdrawal rate. It may fit if you want to stop working entirely once you reach your target."
+                                                IconGlyph="&#xf06d;" />
+
+                    <controls:CalculatorInfoView IsVisible="{Binding IsLeanFire}"
+                                                Title="What is Lean FIRE?"
+                                                Summary="Reach financial independence sooner by planning for a lower-cost, minimalist lifestyle."
+                                                Details="Lean FIRE typically targets household expenses of up to $40,000 per year. A smaller spending target can mean a smaller portfolio and an earlier retirement, but it leaves less room for lifestyle upgrades or unexpected costs. It may fit if frugal living is sustainable and rewarding for you."
+                                                IconGlyph="&#xf06c;" />
                     <Border IsVisible="{Binding IsLeanFire}"
-                            Padding="16"
-                            Background="{AppThemeBinding Light=#EAF4EC, Dark=#1B3B2D}"
-                            Stroke="{AppThemeBinding Light=#A8D4B2, Dark=#43805B}"
+                            Padding="12"
+                            Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                            Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                             StrokeShape="RoundRectangle 8">
-                        <VerticalStackLayout Spacing="6">
-                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                                <Label Text="&#xf06c;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#2F6B57, Dark=#9ACCB3}" SemanticProperties.Description="Lean FIRE guidance" />
-                                <Label Grid.Column="1" Text="{Binding LeanStatusText}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" FontAttributes="Bold" FontSize="20" />
-                            </Grid>
-                            <Label Text="{Binding LeanGuidanceText}" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" LineHeight="1.3" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding LeanStatusText}"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding LeanGuidanceText}"
+                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   FontSize="13"
+                                   LineHeight="1.3" />
                         </VerticalStackLayout>
                     </Border>
 
+                    <controls:CalculatorInfoView IsVisible="{Binding IsFatFire}"
+                                                Title="What is Fat FIRE?"
+                                                Summary="Plan for financial independence while maintaining a comfortable, higher-spending lifestyle."
+                                                Details="Fat FIRE typically plans for annual expenses of $100,000 or more. It requires a larger portfolio and often a longer accumulation period, but provides more room for travel, hobbies, housing, and unexpected costs. It may fit if preserving lifestyle flexibility matters more than retiring as early as possible."
+                                                IconGlyph="&#xf219;" />
                     <Border IsVisible="{Binding IsFatFire}"
-                            Padding="16"
-                            Background="{AppThemeBinding Light=#F1EDF8, Dark=#34284A}"
-                            Stroke="{AppThemeBinding Light=#C8B9E2, Dark=#705993}"
+                            Padding="12"
+                            Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                            Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                             StrokeShape="RoundRectangle 8">
-                        <VerticalStackLayout Spacing="6">
-                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                                <Label Text="&#xf219;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#694C91, Dark=#D6C4F2}" SemanticProperties.Description="Fat FIRE guidance" />
-                                <Label Grid.Column="1" Text="{Binding FatStatusText}" TextColor="{AppThemeBinding Light=#33204D, Dark=#F1ECFF}" FontAttributes="Bold" FontSize="20" />
-                            </Grid>
-                            <Label Text="{Binding FatGuidanceText}" TextColor="{AppThemeBinding Light=#58456D, Dark=#DCCFF1}" LineHeight="1.3" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="{Binding FatStatusText}"
+                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding FatGuidanceText}"
+                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   FontSize="13"
+                                   LineHeight="1.3" />
                         </VerticalStackLayout>
                     </Border>
 
