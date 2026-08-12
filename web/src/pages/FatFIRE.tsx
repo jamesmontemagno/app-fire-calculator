@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateFatFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer, ExportButton } from '../components/ui'
+import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -11,275 +11,87 @@ import { calculatorSEO } from '../config/seo'
 const FAT_THRESHOLD = 100000
 
 export default function FatFIRE() {
-  const { params, setParam, resetParams, saveParams, loadParams, copyUrl, hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt } = useCalculatorParams()
-
-  const results = useMemo(() => {
-    return calculateFatFIRE({
-      currentAge: params.currentAge,
-      currentSavings: params.currentSavings,
-      annualContribution: params.annualContribution,
-      annualIncome: params.annualIncome,
-      expectedReturn: params.expectedReturn,
-      inflationRate: params.inflationRate,
-      withdrawalRate: params.withdrawalRate,
-      annualExpenses: params.annualExpenses,
-    })
-  }, [params])
-
-  const isFat = params.annualExpenses >= FAT_THRESHOLD
+  const {
+    params, setParam, setParamDebounced, resetParams, saveParams, loadParams, copyUrl,
+    hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt,
+  } = useCalculatorParams()
+  const results = useMemo(() => calculateFatFIRE({
+    currentAge: params.currentAge, retirementAge: params.retirementAge, currentSavings: params.currentSavings,
+    annualContribution: params.annualContribution, annualIncome: params.annualIncome, expectedReturn: params.expectedReturn,
+    inflationRate: params.inflationRate, withdrawalRate: params.withdrawalRate, annualExpenses: params.annualExpenses,
+  }), [params])
 
   const handleExport = () => {
-    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
-      currentAge: params.currentAge,
-      currentSavings: params.currentSavings,
-      annualContribution: params.annualContribution,
-      expectedReturn: params.expectedReturn,
-      inflationRate: params.inflationRate,
-      withdrawalRate: params.withdrawalRate,
-      annualExpenses: params.annualExpenses,
+    const { values: inputs, formats: inputFormats } = prepareInputsForExport({
+      currentAge: params.currentAge, retirementAge: params.retirementAge, currentSavings: params.currentSavings,
+      annualContribution: params.annualContribution, annualIncome: params.annualIncome, expectedReturn: params.expectedReturn,
+      inflationRate: params.inflationRate, withdrawalRate: params.withdrawalRate, annualExpenses: params.annualExpenses,
     })
-
     const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
-
-    // Define formulas for calculated results
-    const resultFormulas: Record<string, string> = {
-      // FIRE Number = Annual Expenses / Withdrawal Rate
-      fireNumber: '{annualExpenses}/{withdrawalRate}',
-      // Savings Rate = Annual Contribution / (Annual Contribution + Annual Expenses)
-      savingsRate: '{annualContribution}/({annualContribution}+{annualExpenses})',
-      // Monthly Contribution = Annual Contribution / 12
-      monthlyContribution: '{annualContribution}/12',
-    }
-
     exportToExcel({
-      calculatorName: 'Fat FIRE',
-      inputs: inputValues,
-      results: resultValues,
-      projections: results.projections,
-      inputFormats,
-      resultFormats,
-      resultFormulas,
+      calculatorName: 'Fat FIRE', inputs, results: resultValues, projections: results.projections, inputFormats, resultFormats,
+      resultFormulas: { fireNumber: '{annualExpenses}/{withdrawalRate}', savingsRate: '{annualContribution}/{annualIncome}' },
     })
   }
+
+  const isFat = params.annualExpenses >= FAT_THRESHOLD
 
   return (
     <>
       <SEO {...calculatorSEO.fat} />
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-              <span className="text-3xl" role="img" aria-label="Diamond emoji">💎</span>
-              Fat FIRE Calculator
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Retire in style without compromising your lifestyle.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
-          </div>
-      </div>
+      <div className="space-y-8">
+        <header>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Fat FIRE Calculator</h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">Estimate the portfolio required to support a higher-spending retirement.</p>
+        </header>
 
-      {/* Progress Bar */}
-      <ProgressToFIRE 
-        currentSavings={params.currentSavings} 
-        fireNumber={results.fireNumber}
-        yearsToFIRE={results.yearsToFIRE}
-      />
-
-      {/* Fat FIRE Explanation Banner */}
-      <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-4">
-        <div className="flex gap-3">
-          <span className="text-2xl">💎</span>
-          <div>
-            <h3 className="font-semibold text-purple-900 dark:text-purple-100">What is Fat FIRE?</h3>
-            <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
-              Fat FIRE means achieving financial independence while maintaining a luxurious or upper-middle-class 
-              lifestyle (typically $100,000+/year in expenses). It requires a larger nest egg but allows you to 
-              retire without sacrifice.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Inputs */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Information</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <AgeInput
-              label="Current Age"
-              value={params.currentAge}
-              onChange={(v) => setParam('currentAge', v)}
-              tooltip="Your current age"
-              showSlider
-            />
-            <CurrencyInput
-              label="Current Invested Assets"
-              value={params.currentSavings}
-              onChange={(v) => setParam('currentSavings', v)}
-              tooltip="Total invested assets (401k, IRA, brokerage)"
-            />
-            <CurrencyInput
-              label="Annual Contributions"
-              value={params.annualContribution}
-              onChange={(v) => setParam('annualContribution', v)}
-              tooltip="How much you save and invest per year"
-            />
-            <div>
-              <CurrencyInput
-                label="Annual Retirement Expenses"
-                value={params.annualExpenses}
-                onChange={(v) => setParam('annualExpenses', v)}
-                tooltip="For Fat FIRE, typically $100,000+ per year"
-              />
-              <div className="mt-2">
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                  <span>Fat threshold</span>
-                  <span>{formatCurrency(FAT_THRESHOLD)}</span>
-                </div>
-                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full transition-all ${
-                      isFat ? 'bg-purple-500' : 'bg-gray-400'
-                    }`}
-                    style={{ width: `${Math.min(100, (params.annualExpenses / FAT_THRESHOLD) * 100)}%` }}
-                  />
-                </div>
-                {isFat && (
-                  <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">Fat FIRE territory</p>
-                )}
-              </div>
-            </div>
-            <PercentageInput
-              label="Expected Annual Return"
-              value={params.expectedReturn}
-              onChange={(v) => setParam('expectedReturn', v)}
-              tooltip="Average annual investment return before inflation"
-              min={0}
-              max={0.15}
-            />
-            <PercentageInput
-              label="Inflation Rate"
-              value={params.inflationRate}
-              onChange={(v) => setParam('inflationRate', v)}
-              tooltip="Expected annual increase in prices"
-              min={0}
-              max={0.10}
-            />
-            <PercentageInput
-              label="Safe Withdrawal Rate"
-              value={params.withdrawalRate}
-              onChange={(v) => setParam('withdrawalRate', v)}
-              tooltip="Fat FIRE often uses 3.5% for extra safety"
-              min={0.02}
-              max={0.06}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Key Metrics */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ResultCard
-              label="Fat FIRE Number"
-              value={results.fireNumber}
-              format="currency"
-              highlight
-              subtext="Target portfolio value"
-            />
-            <ResultCard
-              label="Years to Fat FIRE"
-              value={results.yearsToFIRE}
-              format="years"
-              subtext={`At age ${Math.round(results.fireAge)}`}
-            />
-            <ResultCard
-              label="Monthly Lifestyle"
-              value={params.annualExpenses / 12}
-              format="currency"
-              subtext="In retirement"
-            />
-          </div>
-
-          {/* Chart */}
+        <section aria-labelledby="fat-plan-heading">
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio Projection</h2>
+              <h2 id="fat-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Fat FIRE is commonly associated with annual spending of {formatCurrency(FAT_THRESHOLD)} or more in today&apos;s dollars.</p>
             </CardHeader>
-            <CardContent>
-              <ProjectionChart
-                data={results.projections}
-                fireNumber={results.fireNumber}
-                colorScheme="purple"
-                height={350}
-              />
+            <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Your current age." min={18} max={80} showSlider />
+              <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="The age you want this plan to support." min={params.currentAge + 1} max={90} showSlider />
+              <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments available for retirement." />
+              <CurrencyInput label="Annual contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="How much you expect to invest each year." allowMonthlyToggle />
+              <CurrencyInput label="After-tax take-home income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Income after taxes, used to calculate your savings rate." allowMonthlyToggle />
+              <CurrencyInput label="Annual retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected annual after-tax spending in retirement, expressed in today’s purchasing power." allowMonthlyToggle />
             </CardContent>
           </Card>
+        </section>
 
-          {/* Fat FIRE Lifestyle Examples */}
+        <section aria-labelledby="fat-outlook-heading" className="space-y-4">
+          <div>
+            <h2 id="fat-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
+            {!isFat && <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Your spending is below the common Fat FIRE threshold; the calculation still uses your stated plan.</p>}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <ResultCard label="Fat FIRE number" value={results.fireNumber} format="currency" highlight subtext="Target portfolio in today’s dollars" />
+            <ResultCard label="Years to Fat FIRE" value={results.yearsToFIRE} format="years" subtext={`Estimated age ${Math.round(results.fireAge)}`} />
+            <ResultCard label="Monthly lifestyle" value={params.annualExpenses / 12} format="currency" subtext="Today’s dollars" />
+            <ResultCard label={`Target age ${params.retirementAge}`} value={results.retirementGoal.isOnTrack ? 'On track' : 'Off track'} subtext={results.retirementGoal.message} />
+          </div>
+          <ProgressToFIRE currentSavings={params.currentSavings} fireNumber={results.fireNumber} yearsToFIRE={results.yearsToFIRE} label="Progress to Fat FIRE" targetLabel="Fat FIRE number" />
+        </section>
+
+        <AdvancedDetails description="These long-term assumptions change the projection without changing the plan inputs.">
+          <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation." min={0} max={0.15} />
+          <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual price growth. Spending remains expressed in today’s dollars." min={0} max={0.1} />
+          <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="The share of the portfolio you plan to spend each year." min={0.025} max={0.06} />
+        </AdvancedDetails>
+
+        <section aria-labelledby="fat-projection-heading">
           <Card>
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">What Fat FIRE Lifestyle Includes</h2>
-            </CardHeader>
-            <CardContent>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="flex gap-3">
-                  <span className="text-xl">🏡</span>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Premium Housing</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Nice home in desirable area, no compromise on space</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-xl">✈️</span>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Travel Freedom</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Multiple trips per year, business class options</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-xl">🍽️</span>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Dining & Entertainment</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Fine dining, concerts, premium experiences</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-xl">🏥</span>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Healthcare</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Premium insurance, elective procedures, wellness</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-xl">🎁</span>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Generosity</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Help family, charitable giving, leave legacy</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-xl">🛡️</span>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Security Buffer</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Extra cushion for market downturns or surprises</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
+            <CardHeader><h2 id="fat-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2></CardHeader>
+            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} colorScheme="purple" height={350} /></CardContent>
           </Card>
-        </div>
-      </div>
+        </section>
 
-      <Disclaimer />
-    </div>
+        <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">A higher-spending plan needs a larger portfolio and often benefits from a more conservative withdrawal rate. Test the assumptions before relying on this estimate.</p>
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+      </div>
     </>
   )
 }

@@ -203,7 +203,7 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
 
         if (!TryParseNonNegative(RetirementExpensesText, out var annualExpenses))
         {
-            ValidationMessage = "Scenario: Annual expenses must be a number of zero or more.";
+            ValidationMessage = "Scenario: Annual retirement spending in today's dollars must be a number of zero or more.";
             return false;
         }
 

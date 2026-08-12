@@ -20,6 +20,28 @@ public sealed record ProjectionPoint(
     double TotalContributions,
     double InflationAdjusted);
 
+public sealed record RetirementGoalAssessment(
+    double TargetRetirementAge,
+    double CalculatedFireAge)
+{
+    public static RetirementGoalAssessment Unavailable { get; } = new(double.NaN, double.NaN);
+
+    // A positive gap means the calculated FIRE age is after the target age.
+    public double TargetAgeGap => CalculatedFireAge - TargetRetirementAge;
+
+    public bool IsOnTrack => double.IsFinite(CalculatedFireAge) && TargetAgeGap <= 0;
+
+    public string Message => double.IsNaN(TargetRetirementAge) || double.IsNaN(CalculatedFireAge)
+        ? "Retirement goal assessment is unavailable."
+        : double.IsPositiveInfinity(CalculatedFireAge)
+            ? "Off track: FIRE is not reachable with the current assumptions."
+            : TargetAgeGap < 0
+                ? $"On track: projected to reach FIRE {Math.Abs(TargetAgeGap):N1} years before your target retirement age."
+                : TargetAgeGap > 0
+                    ? $"Off track: projected to reach FIRE {TargetAgeGap:N1} years after your target retirement age."
+                    : "On track: projected to reach FIRE at your target retirement age.";
+}
+
 public sealed record StandardFireResult(
     double FireNumber,
     double YearsToFire,
@@ -27,7 +49,10 @@ public sealed record StandardFireResult(
     IReadOnlyList<ProjectionPoint> Projections,
     double SavingsRate,
     double MonthlyContribution,
-    double CoastFireNumber);
+    double CoastFireNumber)
+{
+    public RetirementGoalAssessment RetirementGoal { get; init; } = RetirementGoalAssessment.Unavailable;
+}
 
 public sealed record CoastFireResult(
     double CoastNumber,
@@ -37,9 +62,15 @@ public sealed record CoastFireResult(
     IReadOnlyList<ProjectionPoint> Projections,
     IReadOnlyList<ProjectionPoint> ProjectionsWithContributions);
 
-public sealed record LeanFireResult(StandardFireResult Standard, bool IsLean, double LeanThreshold);
+public sealed record LeanFireResult(StandardFireResult Standard, bool IsLean, double LeanThreshold)
+{
+    public RetirementGoalAssessment RetirementGoal => Standard.RetirementGoal;
+}
 
-public sealed record FatFireResult(StandardFireResult Standard, bool IsFat, double FatThreshold);
+public sealed record FatFireResult(StandardFireResult Standard, bool IsFat, double FatThreshold)
+{
+    public RetirementGoalAssessment RetirementGoal => Standard.RetirementGoal;
+}
 
 public sealed record BaristaFireResult(
     double BaristaNumber,

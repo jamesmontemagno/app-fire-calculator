@@ -1,138 +1,85 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
-import { 
-  calculateSnowballPayoff, 
-  calculateAvalanchePayoff, 
-  formatCurrency,
-} from '../utils/calculations'
+import { calculateAvalanchePayoff, calculateSnowballPayoff, formatCurrency, type DebtItem } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import type { DebtItem } from '../utils/calculations'
-import { CurrencyInput } from '../components/inputs'
+import { CurrencyInput, InputGroup } from '../components/inputs'
 import DebtListInput from '../components/inputs/DebtListInput'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
+import { CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
 import DebtBalanceChart from '../components/charts/DebtBalanceChart'
 import DebtBreakdownChart from '../components/charts/DebtBreakdownChart'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 
+function calculateBudgetForTarget(
+  debts: DebtItem[],
+  totalMinimumPayments: number,
+  targetMonths: number,
+  strategy: 'snowball' | 'avalanche',
+) {
+  const calculate = strategy === 'snowball' ? calculateSnowballPayoff : calculateAvalanchePayoff
+  let low = totalMinimumPayments
+  let high = Math.max(totalMinimumPayments * 2, 1000)
+
+  while (calculate(debts, high, 0).totalMonths > targetMonths && high < 1_000_000) {
+    high *= 2
+  }
+
+  for (let iteration = 0; iteration < 40; iteration += 1) {
+    const midpoint = (low + high) / 2
+    if (calculate(debts, midpoint, 0).totalMonths <= targetMonths) high = midpoint
+    else low = midpoint
+  }
+
+  return Math.ceil(high)
+}
+
 export default function DebtPayoff() {
   const {
-    params,
-    setParam,
-    resetParams,
-    saveParams,
-    loadParams,
-    copyUrl,
-    hasCustomParams,
-    hasUnsavedChanges,
-    hasSavedParams,
-    savedAt,
+    params, setParam, resetParams, saveParams, loadParams, copyUrl,
+    hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt,
   } = useCalculatorParams()
   const debts: DebtItem[] = params.debts
-  const mode = params.debtMode
-  const strategy = params.debtStrategy
-  const monthlyBudget = params.debtBudget
-  const targetMonths = params.debtMonths
-  const extraPayment = params.debtExtra
+  const totalDebt = debts.reduce((sum, debt) => sum + debt.balance, 0)
+  const totalMinPayments = debts.reduce((sum, debt) => sum + debt.minPayment, 0)
+  const canCalculate = debts.length > 0
+    && totalDebt > 0
+    && (params.debtMode === 'target' || params.debtBudget >= totalMinPayments)
 
-  // Calculate results
   const results = useMemo(() => {
-    if (debts.length === 0 || debts.some(d => d.balance <= 0)) {
-      return null
-    }
-
-    const totalMinPayments = debts.reduce((sum, d) => sum + d.minPayment, 0)
-    
-    if (mode === 'fixed' && monthlyBudget < totalMinPayments) {
-      return null // Can't afford minimum payments
-    }
-
-    const baseResult = strategy === 'snowball'
-      ? calculateSnowballPayoff(debts, monthlyBudget, 0)
-      : calculateAvalanchePayoff(debts, monthlyBudget, 0)
-
-    const withExtraResult = extraPayment > 0
-      ? (strategy === 'snowball'
-          ? calculateSnowballPayoff(debts, monthlyBudget, extraPayment)
-          : calculateAvalanchePayoff(debts, monthlyBudget, extraPayment))
-      : null
-
-    return { base: baseResult, withExtra: withExtraResult }
-  }, [debts, mode, monthlyBudget, targetMonths, strategy, extraPayment])
+    if (!canCalculate) return null
+    const calculate = params.debtStrategy === 'snowball' ? calculateSnowballPayoff : calculateAvalanchePayoff
+    const baseBudget = params.debtMode === 'target'
+      ? calculateBudgetForTarget(debts, totalMinPayments, params.debtMonths, params.debtStrategy)
+      : params.debtBudget
+    const base = calculate(debts, baseBudget, 0)
+    const withExtra = params.debtExtra > 0 ? calculate(debts, baseBudget, params.debtExtra) : null
+    return { base, withExtra, baseBudget }
+  }, [canCalculate, debts, params.debtBudget, params.debtExtra, params.debtMode, params.debtMonths, params.debtStrategy, totalMinPayments])
 
   const comparisonResults = useMemo(() => {
-    if (debts.length === 0 || debts.some(d => d.balance <= 0)) {
-      return null
+    if (!canCalculate) return null
+    const baseBudget = results?.baseBudget ?? params.debtBudget
+    return {
+      snowball: calculateSnowballPayoff(debts, baseBudget, params.debtExtra),
+      avalanche: calculateAvalanchePayoff(debts, baseBudget, params.debtExtra),
     }
-
-    const totalMinPayments = debts.reduce((sum, d) => sum + d.minPayment, 0)
-    if (monthlyBudget < totalMinPayments) return null
-
-    const snowball = calculateSnowballPayoff(debts, monthlyBudget, extraPayment)
-    const avalanche = calculateAvalanchePayoff(debts, monthlyBudget, extraPayment)
-
-    return { snowball, avalanche }
-  }, [debts, monthlyBudget, extraPayment])
-
-  const totalDebt = debts.reduce((sum, d) => sum + d.balance, 0)
-  const totalMinPayments = debts.reduce((sum, d) => sum + d.minPayment, 0)
-  const canCalculate = debts.length > 0 && totalDebt > 0 && monthlyBudget >= totalMinPayments
-
-  const extraPaymentSavings = useMemo(() => {
-    if (!results?.base || !results?.withExtra) return null
-    
-    const monthsSaved = results.base.totalMonths - results.withExtra.totalMonths
-    const interestSaved = results.base.totalInterest - results.withExtra.totalInterest
-    
-    return { monthsSaved, interestSaved }
-  }, [results])
+  }, [canCalculate, debts, params.debtBudget, params.debtExtra, results?.baseBudget])
 
   const handleExport = () => {
-    if (!results?.base) return
-
-    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
-      strategy,
-      mode,
-      monthlyBudget,
-      targetMonths,
-      extraPayment,
-      totalDebts: debts.length,
-      totalDebt,
+    if (!results) return
+    const { values: inputs, formats: inputFormats } = prepareInputsForExport({
+      strategy: params.debtStrategy, mode: params.debtMode, monthlyBudget: params.debtBudget,
+      targetMonths: params.debtMonths, extraPayment: params.debtExtra, totalDebts: debts.length, totalDebt,
     })
-
-    const baseResults = results.base
-    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(baseResults)
-
-    const additionalSheets = []
-
-    // Add debt list (keep formatted for display)
-    if (debts.length > 0) {
-      additionalSheets.push({
-        name: 'Debt List',
-        data: debts.map(d => ({
-          name: d.name,
-          balance: d.balance,
-          rate: d.rate,
-          minPayment: d.minPayment,
-        })),
-      })
-    }
-
-    // Add payoff projections
-    if (baseResults.projections) {
-      additionalSheets.push({
-        name: 'Payoff Projections',
-        data: baseResults.projections,
-      })
-    }
-
-    // Note: Debt payoff calculations are complex iterative algorithms,
-    // so we don't provide formulas for the results
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results.base)
     exportToExcel({
       calculatorName: 'Debt Payoff',
-      inputs: inputValues,
+      inputs,
       results: resultValues,
-      additionalSheets,
+      additionalSheets: [
+        { name: 'Debt List', data: debts.map(debt => ({ name: debt.name, balance: debt.balance, rate: debt.rate, minPayment: debt.minPayment })) },
+        { name: 'Payoff Projections', data: results.base.projections },
+      ],
       inputFormats,
       resultFormats,
     })
@@ -141,446 +88,135 @@ export default function DebtPayoff() {
   return (
     <>
       <SEO {...calculatorSEO['debt-payoff']} />
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-              <span className="text-3xl" role="img" aria-label="Credit card emoji">💳</span>
-              Debt Payoff Calculator
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Eliminate debt faster with Snowball or Avalanche strategies.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <ExportButton onExport={handleExport} disabled={!canCalculate} />
-            <UrlActions
-              onReset={resetParams}
-              onSave={saveParams}
-              onLoad={loadParams}
-              onCopy={copyUrl}
-              hasCustomParams={hasCustomParams}
-              hasUnsavedChanges={hasUnsavedChanges}
-              hasSavedParams={hasSavedParams}
-              savedAt={savedAt}
-            />
-          </div>
-      </div>
+      <div className="space-y-8">
+        <header>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Debt Payoff Calculator</h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">Compare a Snowball or Avalanche payoff plan using the money you can send each month.</p>
+        </header>
 
-      {/* Info Banner */}
-      <div className="bg-gradient-to-r from-red-50 to-rose-50 dark:from-red-900/20 dark:to-rose-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
-        <div className="flex items-start gap-3">
-          <span className="text-2xl flex-shrink-0">💪</span>
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-              Two Proven Debt Payoff Methods
-            </h3>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Snowball:</strong> Pay smallest debts first for quick wins and motivation. 
-              <strong className="ml-2">Avalanche:</strong> Pay highest interest rates first to save the most money.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Mode Toggle */}
-      <div className="flex justify-center">
-        <div className="inline-flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-          <button
-            onClick={() => setParam('debtMode', 'fixed')}
-            className={`px-6 py-2 rounded-md font-medium transition-colors ${
-              mode === 'fixed'
-                ? 'bg-white dark:bg-gray-700 text-fire-700 dark:text-fire-400 shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-            }`}
-          >
-            Fixed Budget
-          </button>
-          <button
-            onClick={() => setParam('debtMode', 'target')}
-            className={`px-6 py-2 rounded-md font-medium transition-colors ${
-              mode === 'target'
-                ? 'bg-white dark:bg-gray-700 text-fire-700 dark:text-fire-400 shadow-sm'
-                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-            }`}
-          >
-            Target Timeline
-          </button>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Inputs */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Debt Information</h2>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <DebtListInput debts={debts} onChange={(value) => setParam('debts', value)} />
-
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              {mode === 'fixed' ? (
-                <>
-                  <CurrencyInput
-                    label="Total Monthly Budget"
-                    value={monthlyBudget}
-                    onChange={(value) => setParam('debtBudget', value)}
-                    tooltip="Total amount you can pay toward debts each month"
-                    min={totalMinPayments}
-                    showInvalidState={true}
-                  />
-                  {monthlyBudget < totalMinPayments && totalMinPayments > 0 && (
-                    <p className="text-sm text-red-600 dark:text-red-400 mt-2">
-                      Budget must be at least ${totalMinPayments.toFixed(0)} (total minimum payments)
-                    </p>
-                  )}
-                </>
-              ) : (
+        <section aria-labelledby="debt-plan-heading">
+          <Card>
+            <CardHeader>
+              <h2 id="debt-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your debt plan</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Add each balance and minimum payment, then choose how to direct your available monthly budget.</p>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <DebtListInput debts={debts} onChange={value => setParam('debts', value)} />
+              <div className="grid gap-4 border-t border-gray-200 pt-5 sm:grid-cols-2 xl:grid-cols-3 dark:border-gray-700">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Target Payoff Timeline
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="number"
-                      value={targetMonths}
-                      onChange={(e) => setParam('debtMonths', Number(e.target.value))}
-                      min={1}
-                      max={360}
-                      className="flex-1 px-3 py-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-fire-500 focus:border-transparent text-gray-900 dark:text-gray-100"
-                    />
-                    <span className="text-sm text-gray-600 dark:text-gray-400">months</span>
+                  <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">Planning mode</span>
+                  <div className="mt-1 inline-flex rounded-lg border border-gray-200 p-1 dark:border-gray-700" role="group" aria-label="Debt payoff planning mode">
+                    {(['fixed', 'target'] as const).map(mode => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setParam('debtMode', mode)}
+                        aria-pressed={params.debtMode === mode}
+                        className={`rounded-md px-3 py-2 text-sm font-medium ${params.debtMode === mode ? 'bg-fire-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}
+                      >
+                        {mode === 'fixed' ? 'Fixed budget' : 'Target date'}
+                      </button>
+                    ))}
                   </div>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {(targetMonths / 12).toFixed(1)} years
-                  </p>
                 </div>
-              )}
-
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Extra Monthly Payment: ${extraPayment}
-                </label>
-                <input
-                  type="range"
-                  min={0}
-                  max={1000}
-                  step={25}
-                  value={extraPayment}
-                  onChange={(e) => setParam('debtExtra', Number(e.target.value))}
-                  className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-fire-600"
-                />
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  <span>$0</span>
-                  <span>$1,000</span>
+                <div>
+                  <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">Payoff method</span>
+                  <div className="mt-1 inline-flex rounded-lg border border-gray-200 p-1 dark:border-gray-700" role="group" aria-label="Debt payoff strategy">
+                    {(['snowball', 'avalanche'] as const).map(strategy => (
+                      <button
+                        key={strategy}
+                        type="button"
+                        onClick={() => setParam('debtStrategy', strategy)}
+                        aria-pressed={params.debtStrategy === strategy}
+                        className={`rounded-md px-3 py-2 text-sm font-medium ${params.debtStrategy === strategy ? 'bg-fire-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}
+                      >
+                        {strategy === 'snowball' ? 'Snowball' : 'Avalanche'}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+                {params.debtMode === 'fixed' ? (
+                  <CurrencyInput label="Monthly debt budget" value={params.debtBudget} onChange={value => setParam('debtBudget', value)} tooltip="Total amount available for all monthly debt payments." min={totalMinPayments} showInvalidState />
+                ) : (
+                  <InputGroup label="Target payoff timeline" value={params.debtMonths} onChange={value => setParam('debtMonths', value)} tooltip="The maximum number of months for the payoff plan." suffix="months" min={1} max={360} />
+                )}
+                <CurrencyInput label="Extra monthly payment" value={params.debtExtra} onChange={value => setParam('debtExtra', value)} tooltip="Additional money to apply after the regular monthly budget." />
               </div>
+              {params.debtMode === 'fixed' && params.debtBudget < totalMinPayments && totalMinPayments > 0 && <p className="text-sm text-red-700 dark:text-red-300">Your monthly budget must cover at least {formatCurrency(totalMinPayments)} in minimum payments.</p>}
+            </CardContent>
+          </Card>
+        </section>
+
+        <section aria-labelledby="debt-outlook-heading" className="space-y-4">
+          <div>
+            <h2 id="debt-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your payoff outlook</h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              {canCalculate
+                ? `${params.debtStrategy === 'snowball' ? 'Snowball' : 'Avalanche'} directs extra money toward ${params.debtStrategy === 'snowball' ? 'the smallest balance' : 'the highest interest rate'} first.`
+                : 'Add at least one debt and a monthly budget that covers minimum payments to see the payoff plan.'}
+            </p>
+          </div>
+          {results ? (
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <ResultCard label="Debt-free in" value={results.base.totalMonths} format="none" highlight subtext={`${(results.base.totalMonths / 12).toFixed(1)} years`} />
+              <ResultCard label="Total interest" value={results.base.totalInterest} format="currency" subtext={`On ${formatCurrency(totalDebt)} in balances`} />
+              <ResultCard label="Monthly payment" value={results.baseBudget + params.debtExtra} format="currency" subtext={params.debtMode === 'target' ? `Estimated for ${params.debtMonths} months` : `${formatCurrency(params.debtExtra)} extra`} />
+              <ResultCard label="Extra payment impact" value={results.withExtra ? results.base.totalMonths - results.withExtra.totalMonths : 0} format="none" subtext={results.withExtra ? 'Months saved' : 'Add an extra payment to compare'} />
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <div className="lg:col-span-2 space-y-6">
-          {!canCalculate ? (
-            <Card>
-              <CardContent className="text-center py-12">
-                <div className="text-4xl mb-3">📝</div>
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-                  Add Your Debts to Get Started
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Enter your debt information in the left panel to see your payoff strategy.
-                </p>
-              </CardContent>
-            </Card>
           ) : (
-            <>
-              {/* Strategy Toggle */}
-              <div className="flex justify-center">
-                <div className="inline-flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-                  <button
-                    onClick={() => setParam('debtStrategy', 'snowball')}
-                    className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                      strategy === 'snowball'
-                        ? 'bg-white dark:bg-gray-700 text-fire-700 dark:text-fire-400 shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-                    }`}
-                  >
-                    💪 Snowball
-                  </button>
-                  <button
-                    onClick={() => setParam('debtStrategy', 'avalanche')}
-                    className={`px-6 py-2 rounded-md font-medium transition-colors ${
-                      strategy === 'avalanche'
-                        ? 'bg-white dark:bg-gray-700 text-fire-700 dark:text-fire-400 shadow-sm'
-                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
-                    }`}
-                  >
-                    🎯 Avalanche
-                  </button>
-                </div>
-              </div>
+            <div className="border-y border-gray-200 py-5 text-sm text-gray-600 dark:border-gray-800 dark:text-gray-400">No payoff projection is available yet.</div>
+          )}
+        </section>
 
-              {/* Strategy Explanation Card */}
-              <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200 dark:border-blue-800">
-                <CardContent className="p-4">
-                  {strategy === 'snowball' ? (
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl flex-shrink-0">💪</span>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                          Snowball Method
-                        </h3>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                          Pay off debts from <strong>smallest to largest balance</strong>, regardless of interest rate. 
-                          This method provides quick wins and builds momentum as you eliminate debts one by one.
-                          Best for staying motivated on your debt-free journey.
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start gap-3">
-                      <span className="text-2xl flex-shrink-0">🎯</span>
-                      <div>
-                        <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-1">
-                          Avalanche Method
-                        </h3>
-                        <p className="text-sm text-gray-700 dark:text-gray-300">
-                          Pay off debts from <strong>highest to lowest interest rate</strong>, regardless of balance. 
-                          This method saves you the most money on interest over time and is mathematically optimal.
-                          Best for maximizing long-term savings.
-                        </p>
-                      </div>
-                    </div>
-                  )}
+        {results && (
+          <>
+            <section aria-labelledby="debt-timeline-heading">
+              <Card>
+                <CardHeader><h2 id="debt-timeline-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Debt balance timeline</h2></CardHeader>
+                <CardContent><DebtBalanceChart data={results.base.projections} milestones={results.base.debtMilestones} comparisonData={results.withExtra?.projections} height={350} /></CardContent>
+              </Card>
+            </section>
+
+            <section aria-labelledby="debt-analysis-heading" className="grid gap-6 xl:grid-cols-2">
+              <Card>
+                <CardHeader><h2 id="debt-analysis-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Payment breakdown</h2></CardHeader>
+                <CardContent><DebtBreakdownChart data={results.base.projections} height={330} /></CardContent>
+              </Card>
+              <Card>
+                <CardHeader><h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Payoff order</h2></CardHeader>
+                <CardContent>
+                  <ol className="space-y-3">
+                    {results.base.payoffOrder.map((debtName, index) => (
+                      <li key={debtName} className="flex justify-between gap-4 border-b border-gray-100 pb-3 last:border-0 last:pb-0 dark:border-gray-800">
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{index + 1}. {debtName}</span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400">Month {results.base.debtMilestones.find(milestone => milestone.debtName === debtName)?.month}</span>
+                      </li>
+                    ))}
+                  </ol>
                 </CardContent>
               </Card>
+            </section>
 
-              {/* Key Results */}
-              <div className="grid sm:grid-cols-3 gap-4">
-                <ResultCard
-                  label="Debt-Free In"
-                  value={`${results?.base.totalMonths || 0} months`}
-                  subtext={`${((results?.base.totalMonths || 0) / 12).toFixed(1)} years`}
-                  icon="🎯"
-                />
-                <ResultCard
-                  label="Total Interest"
-                  value={formatCurrency(results?.base.totalInterest || 0)}
-                  subtext={`Plus ${formatCurrency(totalDebt)} principal`}
-                  icon="💰"
-                />
-                <ResultCard
-                  label="Monthly Payment"
-                  value={formatCurrency(monthlyBudget + extraPayment)}
-                  subtext={`${formatCurrency(monthlyBudget)} base + ${formatCurrency(extraPayment)} extra`}
-                  icon="📅"
-                />
-              </div>
+            {comparisonResults && (
+              <section aria-labelledby="debt-comparison-heading">
+                <h2 id="debt-comparison-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Method comparison</h2>
+                <dl className="mt-3 grid gap-4 sm:grid-cols-2">
+                  <div className="border-y border-gray-200 py-4 dark:border-gray-800">
+                    <dt className="font-medium text-gray-900 dark:text-gray-100">Snowball</dt>
+                    <dd className="mt-1 text-sm text-gray-600 dark:text-gray-400">{comparisonResults.snowball.totalMonths} months · {formatCurrency(comparisonResults.snowball.totalInterest)} interest</dd>
+                  </div>
+                  <div className="border-y border-gray-200 py-4 dark:border-gray-800">
+                    <dt className="font-medium text-gray-900 dark:text-gray-100">Avalanche</dt>
+                    <dd className="mt-1 text-sm text-gray-600 dark:text-gray-400">{comparisonResults.avalanche.totalMonths} months · {formatCurrency(comparisonResults.avalanche.totalInterest)} interest</dd>
+                  </div>
+                </dl>
+              </section>
+            )}
+          </>
+        )}
 
-              {/* Extra Payment Impact */}
-              {extraPaymentSavings && (
-                <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800">
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                      💡 Extra Payment Impact
-                    </h3>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid sm:grid-cols-3 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Extra Payment</div>
-                        <div className="text-2xl font-bold text-gray-900 dark:text-gray-100">
-                          {formatCurrency(extraPayment)}/mo
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Time Saved</div>
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                          {extraPaymentSavings.monthsSaved} months
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Interest Saved</div>
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                          {formatCurrency(extraPaymentSavings.interestSaved)}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Payoff Order */}
-              {results?.base.payoffOrder && results.base.payoffOrder.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                      Payoff Order
-                    </h3>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {results.base.payoffOrder.map((debtName, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
-                        >
-                          <div className="flex-shrink-0 w-8 h-8 bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400 rounded-full flex items-center justify-center font-semibold text-sm">
-                            {index + 1}
-                          </div>
-                          <div className="flex-1">
-                            <div className="font-medium text-gray-900 dark:text-gray-100">
-                              {debtName}
-                            </div>
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              Paid off in month {results.base.debtMilestones.find(m => m.debtName === debtName)?.month}
-                            </div>
-                          </div>
-                          <div className="text-green-600 dark:text-green-400">
-                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Charts */}
-              {results?.base && (
-                <>
-                  <Card>
-                    <CardHeader>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                        Debt Payoff Timeline
-                      </h3>
-                    </CardHeader>
-                    <CardContent>
-                      <DebtBalanceChart
-                        data={results.base.projections}
-                        milestones={results.base.debtMilestones}
-                        comparisonData={results.withExtra?.projections}
-                        height={350}
-                      />
-                    </CardContent>
-                  </Card>
-
-                  <Card>
-                    <CardHeader>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                        Payment Breakdown
-                      </h3>
-                    </CardHeader>
-                    <CardContent>
-                      <DebtBreakdownChart
-                        data={results.base.projections}
-                        height={350}
-                      />
-                      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <div className="grid grid-cols-2 gap-4 text-center">
-                          <div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                              Total Principal
-                            </div>
-                            <div className="text-xl font-bold text-emerald-600 dark:text-emerald-400">
-                              {formatCurrency(results.base.totalPrincipal)}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                              Total Interest
-                            </div>
-                            <div className="text-xl font-bold text-red-600 dark:text-red-400">
-                              {formatCurrency(results.base.totalInterest)}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </>
-              )}
-
-              {/* Strategy Comparison */}
-              {comparisonResults && (
-                <Card className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-purple-200 dark:border-purple-800">
-                  <CardHeader>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                      📊 Snowball vs Avalanche Comparison
-                    </h3>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid sm:grid-cols-2 gap-4">
-                      <div className="p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg">
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-xl">💪</span>
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">Snowball</h4>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 dark:text-gray-400">Payoff Time:</span>
-                            <span className="font-medium text-gray-900 dark:text-gray-100">
-                              {comparisonResults.snowball.totalMonths} months
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 dark:text-gray-400">Total Interest:</span>
-                            <span className="font-medium text-gray-900 dark:text-gray-100">
-                              {formatCurrency(comparisonResults.snowball.totalInterest)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className="p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg">
-                        <div className="flex items-center gap-2 mb-3">
-                          <span className="text-xl">🎯</span>
-                          <h4 className="font-semibold text-gray-900 dark:text-gray-100">Avalanche</h4>
-                        </div>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 dark:text-gray-400">Payoff Time:</span>
-                            <span className="font-medium text-gray-900 dark:text-gray-100">
-                              {comparisonResults.avalanche.totalMonths} months
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-gray-600 dark:text-gray-400">Total Interest:</span>
-                            <span className="font-medium text-gray-900 dark:text-gray-100">
-                              {formatCurrency(comparisonResults.avalanche.totalInterest)}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/30 rounded-lg">
-                      <p className="text-sm text-gray-700 dark:text-gray-300">
-                        <strong>Winner:</strong> {comparisonResults.avalanche.totalInterest < comparisonResults.snowball.totalInterest ? 'Avalanche' : 'Snowball'} saves{' '}
-                        <strong className="text-green-600 dark:text-green-400">
-                          {formatCurrency(Math.abs(comparisonResults.snowball.totalInterest - comparisonResults.avalanche.totalInterest))}
-                        </strong>{' '}
-                        in interest and finishes{' '}
-                        <strong className="text-green-600 dark:text-green-400">
-                          {Math.abs(comparisonResults.snowball.totalMonths - comparisonResults.avalanche.totalMonths)} months
-                        </strong>{' '}
-                        {comparisonResults.avalanche.totalMonths < comparisonResults.snowball.totalMonths ? 'faster' : 'slower'}.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-            </>
-          )}
-        </div>
+        <CalculatorFooter onExport={handleExport} exportDisabled={!canCalculate} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
-
-      <Disclaimer />
-    </div>
     </>
   )
 }

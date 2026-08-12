@@ -22,6 +22,7 @@ public sealed class ReverseFireWorkbookTests : IDisposable
         var sheets = (workbookPart.Workbook?.Sheets ?? throw new InvalidOperationException("Workbook sheets were not created.")).Elements<Sheet>().ToArray();
 
         Assert.Equal(["Inputs", "Results", "Projection"], sheets.Select(sheet => sheet.Name!.Value));
+        Assert.Equal("Annual retirement spending (today's dollars)", GetCellText(workbookPart, sheets[0], "A8"));
         Assert.Equal("55", GetCell(workbookPart, sheets[0], "B6").CellValue!.Text);
         Assert.Equal("Inputs!B8/Inputs!B11", GetCell(workbookPart, sheets[1], "B5").CellFormula!.Text);
         Assert.Equal("Inputs!B6-Inputs!B5", GetCell(workbookPart, sheets[1], "B6").CellFormula!.Text);
@@ -42,5 +43,10 @@ public sealed class ReverseFireWorkbookTests : IDisposable
         var worksheetPart = (WorksheetPart)workbookPart.GetPartById(relationshipId);
         var worksheet = worksheetPart.Worksheet ?? throw new InvalidOperationException("Worksheet was not created.");
         return Assert.Single(worksheet.Descendants<Cell>(), cell => cell.CellReference?.Value == cellReference);
+    }
+
+    private static string GetCellText(WorkbookPart workbookPart, Sheet sheet, string cellReference)
+    {
+        return GetCell(workbookPart, sheet, cellReference).InlineString?.Text?.Text ?? string.Empty;
     }
 }

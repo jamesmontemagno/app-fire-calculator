@@ -31,6 +31,15 @@ export interface StandardFIREResult {
   savingsRate: number
   monthlyContribution: number
   coastFireNumber: number
+  retirementGoal: RetirementGoalAssessment
+}
+
+export interface RetirementGoalAssessment {
+  targetRetirementAge: number
+  calculatedFireAge: number
+  targetAgeGap: number
+  isOnTrack: boolean
+  message: string
 }
 
 export interface CoastFIREResult {
@@ -263,6 +272,17 @@ export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
   // Coast FIRE Number (amount needed now to coast to FIRE at target retirement age)
   const yearsToRetirement = Math.max(0, (inputs.retirementAge ?? fireAge) - currentAge)
   const coastFireNumber = presentValue(fireNumber, realReturn, yearsToRetirement)
+  const roundedFireAge = Math.round(fireAge * 10) / 10
+  const targetRetirementAge = inputs.retirementAge ?? roundedFireAge
+  const targetAgeGap = roundedFireAge - targetRetirementAge
+  const isOnTrack = Number.isFinite(roundedFireAge) && targetAgeGap <= 0
+  const retirementGoalMessage = !Number.isFinite(roundedFireAge)
+    ? 'Off track: FIRE is not reachable with the current assumptions.'
+    : targetAgeGap < 0
+      ? `On track: projected to reach FIRE ${Math.abs(targetAgeGap).toFixed(1)} years before your target retirement age.`
+      : targetAgeGap > 0
+        ? `Off track: projected to reach FIRE ${targetAgeGap.toFixed(1)} years after your target retirement age.`
+        : 'On track: projected to reach FIRE at your target retirement age.'
 
   // Calculate savings rate based on annual income
   const savingsRate = annualIncome > 0 ? annualContribution / annualIncome : 0
@@ -281,11 +301,18 @@ export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
   return {
     fireNumber: Math.round(fireNumber),
     yearsToFIRE: Math.round(yearsToFIRE * 10) / 10,
-    fireAge: Math.round(fireAge * 10) / 10,
+    fireAge: roundedFireAge,
     projections,
     savingsRate,
     monthlyContribution: annualContribution / 12,
     coastFireNumber: Math.round(coastFireNumber),
+    retirementGoal: {
+      targetRetirementAge,
+      calculatedFireAge: roundedFireAge,
+      targetAgeGap,
+      isOnTrack,
+      message: retirementGoalMessage,
+    },
   }
 }
 

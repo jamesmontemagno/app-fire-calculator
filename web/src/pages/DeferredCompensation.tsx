@@ -13,10 +13,9 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Disclaimer,
-  ExportButton,
+  AdvancedDetails,
+  CalculatorFooter,
   ResultCard,
-  UrlActions,
 } from '../components/ui'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -34,6 +33,7 @@ export default function DeferredCompensation() {
   const {
     params,
     setParam,
+    setParamDebounced,
     resetParams,
     saveParams,
     loadParams,
@@ -105,53 +105,23 @@ export default function DeferredCompensation() {
     <>
       <SEO {...calculatorSEO['retirement-cash-flow']} />
       <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-              <span className="text-3xl" role="img" aria-label="Calendar and money">🗓️</span>
-              Retirement Cash Flow
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              See how income offsets spending before your portfolio fills the remaining gap.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <ExportButton onExport={handleExport} />
-            <UrlActions
-              onReset={resetParams}
-              onSave={saveParams}
-              onLoad={loadParams}
-              onCopy={copyUrl}
-              hasCustomParams={hasCustomParams}
-              hasUnsavedChanges={hasUnsavedChanges}
-              hasSavedParams={hasSavedParams}
-              savedAt={savedAt}
-            />
-          </div>
-        </div>
-
-        <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-4">
-          <div className="flex gap-3">
-            <span className="text-2xl" aria-hidden="true">📊</span>
-            <div>
-              <h2 className="font-semibold text-indigo-900 dark:text-indigo-100">Plan the gap, not gross income</h2>
-              <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">
-                Expenses are shown in today&apos;s dollars and grow with inflation. Each income source lowers
-                the amount your portfolio needs to withdraw.
-              </p>
-            </div>
-          </div>
-        </div>
+        <header>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Retirement Cash Flow</h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">
+            See how after-tax income offsets today-dollar retirement spending before your portfolio fills the remaining gap.
+          </p>
+        </header>
 
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Retirement scenario</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your retirement scenario</h2>
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput
                 label="Current Age"
                 value={params.currentAge}
                 onChange={value => setParam('currentAge', value)}
+                onSliderChange={value => setParamDebounced('currentAge', value)}
                 tooltip="Your current age"
                 showSlider
               />
@@ -159,6 +129,7 @@ export default function DeferredCompensation() {
                 label="Retirement Age"
                 value={params.semiRetirementAge}
                 onChange={value => setParam('semiRetirementAge', value)}
+                onSliderChange={value => setParamDebounced('semiRetirementAge', value)}
                 min={params.currentAge}
                 tooltip="Portfolio withdrawals begin at this age unless you allow them earlier."
                 showSlider
@@ -167,67 +138,20 @@ export default function DeferredCompensation() {
                 label="Plan Through Age"
                 value={params.planThroughAge}
                 onChange={value => setParam('planThroughAge', value)}
+                onSliderChange={value => setParamDebounced('planThroughAge', value)}
                 min={params.semiRetirementAge}
                 tooltip="The final age included in this retirement cash-flow plan."
                 showSlider
               />
               <CurrencyInput
-                label="Annual Retirement Expenses"
+                label="Annual retirement spending (today's dollars)"
                 value={params.annualExpenses}
                 onChange={value => setParam('annualExpenses', value)}
                 tooltip="Your after-tax annual spending target in today’s dollars."
                 allowMonthlyToggle
               />
-              <PercentageInput
-                label="Inflation Rate"
-                value={params.inflationRate}
-                onChange={value => setParam('inflationRate', value)}
-                tooltip="Expected annual increase in prices and retirement expenses."
-                min={0}
-                max={0.15}
-              />
-              <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
-                <input
-                  type="checkbox"
-                  checked={params.withdrawOnlyAfterRetirement}
-                  onChange={event => setParam('withdrawOnlyAfterRetirement', event.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus:ring-fire-500"
-                />
-                <span>
-                  <span className="font-medium">Wait until retirement to withdraw</span>
-                  <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Leave this off to let accounts cover a gap as soon as each is available.
-                  </span>
-                </span>
-              </label>
-              <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
-                <input
-                  type="checkbox"
-                  checked={params.reinvestSurplus}
-                  onChange={event => setParam('reinvestSurplus', event.target.checked)}
-                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus:ring-fire-500"
-                />
-                <span>
-                  <span className="font-medium">Reinvest income surplus</span>
-                  <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    Add income above expenses back into accounts proportionally.
-                  </span>
-                </span>
-              </label>
           </CardContent>
         </Card>
-
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <ResultCard label="At retirement" value={results.balanceAtSemiRetirement} format="currency" highlight />
-          <ResultCard label="First-year income" value={results.firstYearIncome} format="currency" />
-          <ResultCard
-            label="Funded years"
-            value={results.fundedYears}
-            format="years"
-            subtext={`of ${results.projections.filter(point => point.age >= params.semiRetirementAge).length} projected`}
-          />
-          <ResultCard label="Ending portfolio" value={results.endingBalance} format="currency" />
-        </div>
 
         <Card>
           <CardHeader>
@@ -268,6 +192,57 @@ export default function DeferredCompensation() {
             />
           </CardContent>
         </Card>
+
+        <AdvancedDetails description="These slower-moving rules control inflation, timing, and what happens when income exceeds spending.">
+          <PercentageInput
+            label="Inflation rate"
+            value={params.inflationRate}
+            onChange={value => setParam('inflationRate', value)}
+            onSliderChange={value => setParamDebounced('inflationRate', value)}
+            tooltip="Expected annual increase in prices and retirement spending."
+            min={0}
+            max={0.15}
+          />
+          <div className="space-y-4">
+            <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <input
+                type="checkbox"
+                checked={params.withdrawOnlyAfterRetirement}
+                onChange={event => setParam('withdrawOnlyAfterRetirement', event.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus:ring-fire-500"
+              />
+              <span>
+                <span className="font-medium">Wait until retirement to withdraw</span>
+                <span className="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">Leave this off to let accounts cover a gap as soon as each is available.</span>
+              </span>
+            </label>
+            <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+              <input
+                type="checkbox"
+                checked={params.reinvestSurplus}
+                onChange={event => setParam('reinvestSurplus', event.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus:ring-fire-500"
+              />
+              <span>
+                <span className="font-medium">Reinvest income surplus</span>
+                <span className="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">Add income above spending back into accounts proportionally.</span>
+              </span>
+            </label>
+          </div>
+        </AdvancedDetails>
+
+        <section aria-labelledby="cash-flow-outlook-heading" className="space-y-4">
+          <div>
+            <h2 id="cash-flow-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Results update from the scenario, income sources, accounts, and additional spending above.</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <ResultCard label="At retirement" value={results.balanceAtSemiRetirement} format="currency" highlight />
+            <ResultCard label="First-year income" value={results.firstYearIncome} format="currency" subtext="After tax where configured" />
+            <ResultCard label="Funded years" value={results.fundedYears} format="years" subtext={`of ${results.projections.filter(point => point.age >= params.semiRetirementAge).length} projected`} />
+            <ResultCard label="Ending portfolio" value={results.endingBalance} format="currency" />
+          </div>
+        </section>
 
         <div className="grid xl:grid-cols-2 gap-6">
           <Card>
@@ -399,7 +374,17 @@ export default function DeferredCompensation() {
           </CardContent>
         </Card>
 
-        <Disclaimer />
+        <CalculatorFooter
+          onExport={handleExport}
+          onReset={resetParams}
+          onSave={saveParams}
+          onLoad={loadParams}
+          onCopy={copyUrl}
+          hasCustomParams={hasCustomParams}
+          hasUnsavedChanges={hasUnsavedChanges}
+          hasSavedParams={hasSavedParams}
+          savedAt={savedAt}
+        />
       </div>
     </>
   )

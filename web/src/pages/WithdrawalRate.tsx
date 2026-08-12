@@ -2,265 +2,109 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateWithdrawal, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { CurrencyInput, PercentageInput, InputGroup } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
+import { CurrencyInput, InputGroup, PercentageInput } from '../components/inputs'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
 import { WithdrawalChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 
 export default function WithdrawalRate() {
-  const { params, setParam, resetParams, saveParams, loadParams, copyUrl, hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt } = useCalculatorParams()
-
-  const results = useMemo(() => {
-    return calculateWithdrawal(
-      params.portfolioValue,
-      params.withdrawalRate,
-      params.expectedReturn,
-      params.inflationRate,
-      params.retirementYears
-    )
-  }, [params])
+  const {
+    params, setParam, setParamDebounced, resetParams, saveParams, loadParams, copyUrl,
+    hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt,
+  } = useCalculatorParams()
+  const results = useMemo(() => calculateWithdrawal(
+    params.portfolioValue, params.withdrawalRate, params.expectedReturn, params.inflationRate, params.retirementYears,
+  ), [params])
 
   const handleExport = () => {
-    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
-      portfolioValue: params.portfolioValue,
-      withdrawalRate: params.withdrawalRate,
-      expectedReturn: params.expectedReturn,
-      inflationRate: params.inflationRate,
-      retirementYears: params.retirementYears,
+    const { values: inputs, formats: inputFormats } = prepareInputsForExport({
+      portfolioValue: params.portfolioValue, withdrawalRate: params.withdrawalRate, expectedReturn: params.expectedReturn,
+      inflationRate: params.inflationRate, retirementYears: params.retirementYears,
     })
-
     const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
-
-    // Define formulas for calculated results
-    const resultFormulas: Record<string, string> = {
-      // Annual Withdrawal = Portfolio Value * Withdrawal Rate
-      annualWithdrawal: '{portfolioValue}*{withdrawalRate}',
-      // Monthly Withdrawal = Annual Withdrawal / 12
-      monthlyWithdrawal: '({portfolioValue}*{withdrawalRate})/12',
-    }
-
     exportToExcel({
-      calculatorName: 'Withdrawal Rate',
-      inputs: inputValues,
-      results: resultValues,
-      projections: results.withdrawalProjections,
-      additionalSheets: [{
-        name: 'Rate Analysis',
-        data: results.rateAnalysis,
-      }],
-      inputFormats,
-      resultFormats,
-      resultFormulas,
+      calculatorName: 'Withdrawal Rate', inputs, results: resultValues, projections: results.withdrawalProjections,
+      additionalSheets: [{ name: 'Rate Analysis', data: results.rateAnalysis }], inputFormats, resultFormats,
+      resultFormulas: {
+        annualWithdrawal: '{portfolioValue}*{withdrawalRate}',
+        monthlyWithdrawal: '({portfolioValue}*{withdrawalRate})/12',
+      },
     })
-  }
-
-  const getSuccessColor = (rate: number) => {
-    const analysis = results.rateAnalysis.find(a => a.rate === rate)
-    if (!analysis) return 'text-gray-600'
-    if (analysis.years >= params.retirementYears) return 'text-green-600 dark:text-green-400'
-    if (analysis.years >= params.retirementYears * 0.8) return 'text-amber-600 dark:text-amber-400'
-    return 'text-red-600 dark:text-red-400'
   }
 
   return (
     <>
       <SEO {...calculatorSEO.withdrawal} />
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-              <span className="text-3xl" role="img" aria-label="Chart emoji">📊</span>
-              Withdrawal Rate Calculator
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Test your portfolio's longevity and find your safe withdrawal rate.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
-        </div>
-      </div>
+      <div className="space-y-8">
+        <header>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Withdrawal Rate Calculator</h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">Test how a starting withdrawal may affect portfolio longevity.</p>
+        </header>
 
-      {/* 4% Rule Explanation Banner */}
-      <div className="bg-sky-50 dark:bg-sky-900/20 border border-sky-200 dark:border-sky-800 rounded-xl p-4">
-        <div className="flex gap-3">
-          <span className="text-2xl">📚</span>
-          <div>
-            <h3 className="font-semibold text-sky-900 dark:text-sky-100">The 4% Rule</h3>
-            <p className="text-sm text-sky-700 dark:text-sky-300 mt-1">
-              The famous "4% rule" from the Trinity Study suggests withdrawing 4% of your portfolio in year one, 
-              then adjusting for inflation each year. This has historically provided a 95%+ success rate over 
-              30-year retirements. However, longer retirements may require lower rates (3-3.5%).
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Inputs */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Portfolio</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <CurrencyInput
-              label="Portfolio Value"
-              value={params.portfolioValue}
-              onChange={(v) => setParam('portfolioValue', v)}
-              tooltip="Current total invested assets"
-            />
-            <PercentageInput
-              label="Withdrawal Rate"
-              value={params.withdrawalRate}
-              onChange={(v) => setParam('withdrawalRate', v)}
-              tooltip="Percentage of portfolio to withdraw yearly"
-              min={0.02}
-              max={0.08}
-              step={0.005}
-            />
-            <InputGroup
-              label="Retirement Duration"
-              value={params.retirementYears}
-              onChange={(v) => setParam('retirementYears', v)}
-              tooltip="How many years you need the portfolio to last"
-              suffix="years"
-              min={10}
-              max={60}
-              showSlider
-            />
-            <PercentageInput
-              label="Expected Annual Return"
-              value={params.expectedReturn}
-              onChange={(v) => setParam('expectedReturn', v)}
-              tooltip="Average annual investment return before inflation"
-              min={0}
-              max={0.15}
-            />
-            <PercentageInput
-              label="Inflation Rate"
-              value={params.inflationRate}
-              onChange={(v) => setParam('inflationRate', v)}
-              tooltip="Expected annual increase in prices and withdrawals"
-              min={0}
-              max={0.10}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Key Metrics */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <ResultCard
-              label="Annual Withdrawal"
-              value={results.annualWithdrawal}
-              format="currency"
-              highlight
-            />
-            <ResultCard
-              label="Monthly Withdrawal"
-              value={results.monthlyWithdrawal}
-              format="currency"
-            />
-            <ResultCard
-              label="Portfolio Lasts"
-              value={results.portfolioLongevity}
-              format="years"
-              subtext={results.portfolioLongevity >= params.retirementYears ? 'Sustainable' : 'May run out'}
-            />
-            <ResultCard
-              label="Success Rate"
-              value={results.successRate}
-              format="percent"
-              subtext={results.successRate >= 1 ? 'Good' : 'Risky'}
-            />
-          </div>
-
-          {/* Chart */}
+        <section aria-labelledby="withdrawal-plan-heading">
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio Balance Over Time</h2>
+              <h2 id="withdrawal-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your withdrawal plan</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Choose a portfolio, a first-year withdrawal rate, and how long the money needs to last.</p>
             </CardHeader>
-            <CardContent>
-              <WithdrawalChart
-                data={results.withdrawalProjections}
-                height={300}
-              />
+            <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <CurrencyInput label="Portfolio value" value={params.portfolioValue} onChange={value => setParam('portfolioValue', value)} tooltip="Current total invested assets available for withdrawals." />
+              <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="Percentage of the starting portfolio withdrawn in the first year." min={0.02} max={0.08} step={0.005} />
+              <InputGroup label="Retirement duration" value={params.retirementYears} onChange={value => setParam('retirementYears', value)} onSliderChange={value => setParamDebounced('retirementYears', value)} tooltip="How many years the portfolio needs to support withdrawals." suffix="years" min={10} max={60} showSlider />
             </CardContent>
           </Card>
+        </section>
 
-          {/* Rate Analysis Table */}
+        <section aria-labelledby="withdrawal-outlook-heading" className="space-y-4">
+          <div>
+            <h2 id="withdrawal-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">{results.portfolioLongevity >= params.retirementYears ? 'This plan reaches your time horizon' : 'This plan may fall short'}</h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">The model increases withdrawals with inflation each year and projects a steady return.</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <ResultCard label="Annual withdrawal" value={results.annualWithdrawal} format="currency" highlight subtext="First year" />
+            <ResultCard label="Monthly withdrawal" value={results.monthlyWithdrawal} format="currency" subtext="First year" />
+            <ResultCard label="Portfolio lasts" value={results.portfolioLongevity} format="years" subtext={results.portfolioLongevity >= params.retirementYears ? 'Meets your selected duration' : 'Below your selected duration'} />
+            <ResultCard label="Modeled success rate" value={results.successRate} format="percent" subtext="Scenario-based estimate" />
+          </div>
+        </section>
+
+        <AdvancedDetails description="These assumptions affect how withdrawals grow and how the portfolio is projected to recover.">
+          <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation." min={0} max={0.15} />
+          <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual increase in withdrawals and prices." min={0} max={0.1} />
+        </AdvancedDetails>
+
+        <section aria-labelledby="withdrawal-projection-heading">
+          <Card>
+            <CardHeader><h2 id="withdrawal-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio balance over time</h2></CardHeader>
+            <CardContent><WithdrawalChart data={results.withdrawalProjections} height={320} /></CardContent>
+          </Card>
+        </section>
+
+        <section aria-labelledby="rate-analysis-heading">
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Withdrawal Rate Analysis</h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                Compare different withdrawal rates for your portfolio of {formatCurrency(params.portfolioValue)}
-              </p>
+              <h2 id="rate-analysis-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Compare withdrawal rates</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">See the same portfolio tested against nearby first-year rates.</p>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-gray-200 dark:border-gray-700">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Rate</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Annual Withdrawal</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Monthly</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Portfolio Lasts</th>
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-100">Status</th>
+                      {['Rate', 'Annual withdrawal', 'Monthly withdrawal', 'Portfolio lasts', 'Assessment'].map(label => <th key={label} className="whitespace-nowrap px-3 py-3 text-left font-semibold text-gray-900 dark:text-gray-100">{label}</th>)}
                     </tr>
                   </thead>
                   <tbody>
-                    {results.rateAnalysis.map((analysis) => {
-                      const annualWithdrawal = params.portfolioValue * analysis.rate
+                    {results.rateAnalysis.map(analysis => {
                       const meetsGoal = analysis.years >= params.retirementYears
                       return (
-                        <tr 
-                          key={analysis.rate} 
-                          className={`border-b border-gray-100 dark:border-gray-800 ${
-                            analysis.rate === params.withdrawalRate ? 'bg-sky-50 dark:bg-sky-900/20' : ''
-                          }`}
-                        >
-                          <td className="py-3 px-4">
-                            <span className={`font-medium ${getSuccessColor(analysis.rate)}`}>
-                              {(analysis.rate * 100).toFixed(1)}%
-                            </span>
-                            {analysis.rate === params.withdrawalRate && (
-                              <span className="ml-2 text-xs bg-sky-100 dark:bg-sky-800 text-sky-700 dark:text-sky-300 px-2 py-0.5 rounded">
-                                Selected
-                              </span>
-                            )}
-                          </td>
-                          <td className="py-3 px-4 text-gray-900 dark:text-gray-100">
-                            {formatCurrency(annualWithdrawal)}
-                          </td>
-                          <td className="py-3 px-4 text-gray-600 dark:text-gray-400">
-                            {formatCurrency(annualWithdrawal / 12)}
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className={getSuccessColor(analysis.rate)}>
-                              {analysis.years >= 50 ? '50+ years' : `${analysis.years} years`}
-                            </span>
-                          </td>
-                          <td className="py-3 px-4">
-                            {meetsGoal ? (
-                              <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
-                                Sustainable
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                Too High
-                              </span>
-                            )}
-                          </td>
+                        <tr key={analysis.rate} className={analysis.rate === params.withdrawalRate ? 'border-b border-gray-100 bg-gray-50 dark:border-gray-800 dark:bg-gray-800/50' : 'border-b border-gray-100 dark:border-gray-800'}>
+                          <td className="px-3 py-3 font-medium text-gray-900 dark:text-gray-100">{(analysis.rate * 100).toFixed(1)}%</td>
+                          <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatCurrency(params.portfolioValue * analysis.rate)}</td>
+                          <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatCurrency(params.portfolioValue * analysis.rate / 12)}</td>
+                          <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{analysis.years >= 50 ? '50+ years' : `${analysis.years} years`}</td>
+                          <td className={`px-3 py-3 font-medium ${meetsGoal ? 'text-green-700 dark:text-green-400' : 'text-amber-700 dark:text-amber-300'}`}>{meetsGoal ? 'Meets duration' : 'May fall short'}</td>
                         </tr>
                       )
                     })}
@@ -269,50 +113,10 @@ export default function WithdrawalRate() {
               </div>
             </CardContent>
           </Card>
+        </section>
 
-          {/* Recommendations */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Recommendations</h2>
-            </CardHeader>
-            <CardContent className="prose dark:prose-invert max-w-none text-sm">
-              {results.portfolioLongevity >= params.retirementYears ? (
-                <div className="flex gap-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <span className="text-xl">✅</span>
-                  <p className="text-green-800 dark:text-green-200 m-0">
-                    <strong>Your withdrawal rate is sustainable!</strong> At {(params.withdrawalRate * 100).toFixed(1)}%, 
-                    your portfolio of {formatCurrency(params.portfolioValue)} should last {results.portfolioLongevity} years, 
-                    meeting your {params.retirementYears}-year goal.
-                  </p>
-                </div>
-              ) : (
-                <div className="flex gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                  <span className="text-xl">⚠️</span>
-                  <p className="text-amber-800 dark:text-amber-200 m-0">
-                    <strong>Consider lowering your withdrawal rate.</strong> At {(params.withdrawalRate * 100).toFixed(1)}%, 
-                    your portfolio would only last {results.portfolioLongevity} years. Try reducing to 3.5% or 3% for 
-                    a longer-lasting portfolio.
-                  </p>
-                </div>
-              )}
-              
-              <div className="mt-4 space-y-2 text-gray-600 dark:text-gray-400">
-                <p>
-                  <strong>For early retirees (40+ year retirements):</strong> Consider a 3-3.5% withdrawal rate 
-                  for extra safety margin.
-                </p>
-                <p>
-                  <strong>Flexible spending:</strong> Being willing to reduce spending during market downturns 
-                  significantly improves success rates.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
-
-      <Disclaimer />
-    </div>
     </>
   )
 }

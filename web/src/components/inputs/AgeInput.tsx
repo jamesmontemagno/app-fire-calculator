@@ -6,6 +6,7 @@ interface AgeInputProps {
   tooltip?: string
   value: number
   onChange: (value: number) => void
+  onSliderChange?: (value: number) => void
   min?: number
   max?: number
   showSlider?: boolean
@@ -17,6 +18,7 @@ export default function AgeInput({
   tooltip,
   value,
   onChange,
+  onSliderChange,
   min = 18,
   max = 100,
   showSlider = false,
@@ -89,7 +91,7 @@ export default function AgeInput({
         <input
           type="range"
           value={value}
-          onChange={(event) => onChange(parseInt(event.target.value, 10))}
+          onChange={(event) => (onSliderChange ?? onChange)(parseInt(event.target.value, 10))}
           min={min}
           max={max}
           step={1}

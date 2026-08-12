@@ -6,6 +6,7 @@ interface PercentageInputProps {
   tooltip?: string
   value: number // as decimal (0.07 for 7%)
   onChange: (value: number) => void
+  onSliderChange?: (value: number) => void
   min?: number
   max?: number
   step?: number
@@ -18,6 +19,7 @@ export default function PercentageInput({
   tooltip,
   value,
   onChange,
+  onSliderChange,
   min = 0,
   max = 1,
   step = 0.005,
@@ -59,7 +61,7 @@ export default function PercentageInput({
   }
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(parseFloat(e.target.value))
+    ;(onSliderChange ?? onChange)(parseFloat(e.target.value))
   }
 
   return (

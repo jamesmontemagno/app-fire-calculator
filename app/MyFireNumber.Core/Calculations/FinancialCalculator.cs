@@ -89,16 +89,23 @@ public static class FinancialCalculator
         var realReturn = RealReturn(inputs.ExpectedReturn, inputs.InflationRate);
         var yearsToFire = YearsToTarget(inputs.CurrentSavings, inputs.AnnualContribution, realReturn, fireNumber);
         var yearsToRetirement = Math.Max(0, inputs.RetirementAge - inputs.CurrentAge);
-        var projectionYears = Math.Min((int)Math.Ceiling(yearsToFire) + 10, 50);
+        var projectionYears = double.IsFinite(yearsToFire)
+            ? Math.Min((int)Math.Ceiling(yearsToFire) + 10, 50)
+            : 50;
+
+        var fireAge = RoundToTenth(inputs.CurrentAge + yearsToFire);
 
         return new StandardFireResult(
             Round(fireNumber),
             RoundToTenth(yearsToFire),
-            RoundToTenth(inputs.CurrentAge + yearsToFire),
+            fireAge,
             GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, inputs.AnnualContribution, inputs.ExpectedReturn, inputs.InflationRate, projectionYears, inputs.ProjectionStartYear),
             inputs.AnnualIncome > 0 ? inputs.AnnualContribution / inputs.AnnualIncome : 0,
             inputs.AnnualContribution / 12,
-            Round(PresentValue(fireNumber, realReturn, yearsToRetirement)));
+            Round(PresentValue(fireNumber, realReturn, yearsToRetirement)))
+        {
+            RetirementGoal = new RetirementGoalAssessment(inputs.RetirementAge, fireAge)
+        };
     }
 
     public static CoastFireResult CalculateCoastFire(FireInputs inputs)

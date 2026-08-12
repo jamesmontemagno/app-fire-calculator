@@ -1,229 +1,77 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <views:CalculatorPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
-             xmlns:views="clr-namespace:MyFireNumber.Views"
-             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
-             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
-             x:Class="MyFireNumber.Views.CoastFirePage"
-             x:DataType="viewModels:CoastFireViewModel"
-             Title="{Binding Title}"
-             Shell.NavBarIsVisible="True"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
-
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Save"
-                     Order="Primary"
-                     Priority="0"
-                     Command="{Binding SavePlanAndCloseCommand}"
-                     SemanticProperties.Description="{Binding SavePlanActionDescription}">
-            <ToolbarItem.IconImageSource>
-                <FontImageSource FontFamily="FontAwesomeSolid"
-                                 Glyph="&#xf0c7;"
-                                 Color="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                 Size="18" />
-            </ToolbarItem.IconImageSource>
-        </ToolbarItem>
-    </ContentPage.ToolbarItems>
-
+                          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                          xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+                          xmlns:views="clr-namespace:MyFireNumber.Views"
+                          xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+                          xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+                          x:Class="MyFireNumber.Views.CoastFirePage"
+                          x:DataType="viewModels:CoastFireViewModel"
+                          Title="{Binding Title}"
+                          Shell.NavBarIsVisible="True"
+                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
     <ScrollView>
         <VerticalStackLayout Padding="20,20,20,32" Spacing="18">
-            <ActivityIndicator IsRunning="{Binding IsLoading}"
-                               IsVisible="{Binding IsLoading}"
-                               HorizontalOptions="Center"
-                               SemanticProperties.Description="Restoring your local calculator draft." />
-
-            <Border IsVisible="{Binding HasValidationMessage}"
-                    Padding="14"
-                    Background="{AppThemeBinding Light=#FFF4E8, Dark=#4A3323}"
-                    Stroke="{AppThemeBinding Light=#C97727, Dark=#F2B56D}"
-                    StrokeShape="RoundRectangle 8">
-                <Label Text="{Binding ValidationMessage}"
-                       TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}"
-                       LineHeight="1.3" />
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" SemanticProperties.Description="Restoring your local calculator draft." />
+            <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light=#FFF4E8, Dark=#4A3323}" Stroke="{AppThemeBinding Light=#C97727, Dark=#F2B56D}" StrokeShape="RoundRectangle 8">
+                <Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}" LineHeight="1.3" />
             </Border>
 
-                <controls:CalculatorInfoView Title="What is Coast FIRE?"
-                                            Summary="Find the amount you need invested now so compound growth can carry you to retirement."
-                                            Details="You reach Coast FIRE when your current investments can grow to your full FIRE number by a traditional retirement age without additional contributions. You still need income for today's expenses, but may be able to reduce saving or choose more flexible, lower-paying work. It may fit younger savers who value flexibility before full retirement."
-                                            IconGlyph="&#xf0eb;" />
+            <controls:CalculatorInfoView Title="What is Coast FIRE?"
+                                         Summary="Find the amount you need invested now so compound growth can carry you to retirement."
+                                         Details="Coast FIRE means current investments could grow to a full FIRE number without more contributions. You still need income for today’s expenses."
+                                         IconGlyph="&#xf0eb;" />
 
-                <Border Padding="16"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                        StrokeShape="RoundRectangle 8">
-                    <VerticalStackLayout Spacing="14">
-                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="8">
-                            <Label Text="&#xf1ec;"
-                                   FontFamily="FontAwesomeSolid"
-                                   VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#245D8B, Dark=#A9D5FF}"
-                                   SemanticProperties.Description="Coast FIRE assumptions" />
-                            <Label Grid.Column="1"
-                                   Text="Your Coast FIRE assumptions"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                   FontAttributes="Bold"
-                                   FontSize="20" />
-                            <Button Grid.Column="2"
-                                    Text="Reset"
-                                    Command="{Binding ResetDefaultsCommand}"
-                                    Background="#E4F0E9"
-                                    TextColor="#245744"
-                                    FontSize="12"
-                                    MinimumWidthRequest="86"
-                                    SemanticProperties.Description="Reset Coast FIRE values to their defaults.">
-                                <Button.ImageSource>
-                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf01e;" Color="#245744" Size="12" />
-                                </Button.ImageSource>
-                            </Button>
+            <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="14">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Label Text="Your starting point" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Coast FIRE values to their defaults." />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                        <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="30" Text="{Binding CurrentAgeText}" />
+                        <controls:NumericInputView Grid.Column="1" Header="Retirement age" HelpText="The age when your portfolio should be ready to fund retirement." Placeholder="55" Text="{Binding RetirementAgeText}" />
+                        <controls:NumericInputView Grid.Row="1" Grid.ColumnSpan="2" Header="Current savings" HelpText="Invested assets available for this goal, in dollars." Placeholder="100000" Text="{Binding CurrentSavingsText}" />
+                        <controls:NumericInputView Grid.Row="2" Header="Annual contribution" HelpText="How much you expect to invest each year, in dollars." Placeholder="24000" Text="{Binding AnnualContributionText}" />
+                        <controls:NumericInputView Grid.Row="2" Grid.Column="1" Header="Annual retirement expenses" HelpText="Expected annual spending after retirement, in today’s dollars." Placeholder="48000" Text="{Binding AnnualExpensesText}" />
+                    </Grid>
+                    <controls:AdvancedAssumptionsExpander>
+                        <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                            <controls:PercentageInputView Header="Expected return (%)" HelpText="Expected average annual investment return before inflation." Placeholder="7" Minimum="0" Maximum="15" Text="{Binding ExpectedReturnText}" />
+                            <controls:PercentageInputView Grid.Column="1" Header="Inflation (%)" HelpText="Expected annual increase in the cost of living." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding InflationRateText}" />
+                            <controls:PercentageInputView Grid.Row="1" Grid.ColumnSpan="2" Header="Safe withdrawal rate (%)" HelpText="First-year percentage withdrawn from the portfolio. This is an assumption, not a promise." Placeholder="4" Minimum="2" Maximum="6" Text="{Binding WithdrawalRateText}" />
                         </Grid>
+                    </controls:AdvancedAssumptionsExpander>
+                </VerticalStackLayout>
+            </Border>
 
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto,Auto,Auto,Auto" RowSpacing="12">
-                            <VerticalStackLayout Spacing="4">
-                                <Label Text="Current age" FontAttributes="Bold" />
-                                <Entry Text="{Binding CurrentAgeText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="30" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Current age in years" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="1" Spacing="4">
-                                <Label Text="Retirement age" FontAttributes="Bold" />
-                                <Entry Text="{Binding RetirementAgeText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="55" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Target retirement age in years" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Row="1" Grid.ColumnSpan="2" Spacing="4">
-                                <Label Text="Current savings" FontAttributes="Bold" />
-                                <Entry Text="{Binding CurrentSavingsText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="100000" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Current invested savings in dollars" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Row="2" Spacing="4">
-                                <Label Text="Annual contribution" FontAttributes="Bold" />
-                                <Entry Text="{Binding AnnualContributionText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="24000" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Annual contribution in dollars" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="4">
-                                <Label Text="Annual retirement expenses" FontAttributes="Bold" />
-                                <Entry Text="{Binding AnnualExpensesText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="48000" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Expected annual retirement expenses in dollars" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Row="3" Spacing="4">
-                                <Label Text="Expected return (%)" FontAttributes="Bold" />
-                                <Entry Text="{Binding ExpectedReturnText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="7" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Expected annual investment return as a percentage" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Row="3" Grid.Column="1" Spacing="4">
-                                <Label Text="Inflation (%)" FontAttributes="Bold" />
-                                <Entry Text="{Binding InflationRateText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="3" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Annual inflation rate as a percentage" />
-                            </VerticalStackLayout>
-                        </Grid>
+            <VerticalStackLayout Spacing="10">
+                <Label Text="{Binding CoastStatusText}" Style="{StaticResource CalculatorSectionHeading}" />
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                    <Border Padding="12" Background="{AppThemeBinding Light=#EAF2FF, Dark=#1D3040}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Coast FIRE number" FontSize="12" /><Label Text="{Binding CoastNumberText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                    <Border Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Full FIRE number" FontSize="12" /><Label Text="{Binding FullFireNumberText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Grid.ColumnSpan="2" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Time to Coast FIRE" FontSize="12" /><Label Text="{Binding YearsToCoastText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                </Grid>
+                <Label Text="{Binding CoastProgressDescription}" Style="{StaticResource CalculatorSupportingText}" />
+            </VerticalStackLayout>
 
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Safe withdrawal rate (%)" FontAttributes="Bold" />
-                            <Entry Text="{Binding WithdrawalRateText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="4" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Safe annual withdrawal rate as a percentage" />
-                        </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
+            <VerticalStackLayout Spacing="10">
+                <Label Text="Coast vs. continue contributing" Style="{StaticResource CalculatorSectionHeading}" />
+                <lvc:CartesianChart Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" HeightRequest="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
+                <Label Text="{Binding CoastProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
+            </VerticalStackLayout>
 
-                <Border Padding="16"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                        StrokeShape="RoundRectangle 8">
-                    <VerticalStackLayout Spacing="10">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Label Text="&#xf15c;"
-                                   FontFamily="FontAwesomeSolid"
-                                   VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#245D8B, Dark=#A9D5FF}"
-                                   SemanticProperties.Description="Saved Coast FIRE plan" />
-                            <Label Grid.Column="1"
-                                   Text="Save this Coast FIRE scenario"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                   FontAttributes="Bold"
-                                   FontSize="20" />
-                        </Grid>
-                        <Label Text="Plan name" FontAttributes="Bold" />
-                        <Entry Text="{Binding PlanNameText, Mode=TwoWay}"
-                               Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                               Placeholder="My Coast FIRE Plan"
-                               PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
-                               SemanticProperties.Description="Name for this saved Coast FIRE plan" />
-                        <Button Text="{Binding SavePlanActionText}"
-                                Command="{Binding SavePlanCommand}"
-                                SemanticProperties.Description="{Binding SavePlanActionDescription}"
-                                Background="#2F6B57"
-                                TextColor="#FFFFFF">
-                            <Button.ImageSource>
-                                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="#FFFFFF" Size="14" />
-                            </Button.ImageSource>
-                        </Button>
-                        <Label IsVisible="{Binding HasPlanStatusMessage}"
-                               Text="{Binding PlanStatusMessage}"
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                               FontSize="13"
-                               LineHeight="1.3" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Padding="16"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                        StrokeShape="RoundRectangle 8">
-                    <VerticalStackLayout Spacing="14">
-                        <Label Text="{Binding CoastStatusText}"
-                               HorizontalTextAlignment="Center"
-                               TextColor="{AppThemeBinding Light=#245D8B, Dark=#A9D5FF}"
-                               FontAttributes="Bold"
-                               FontSize="20"
-                               SemanticProperties.Description="{Binding CoastStatusText}" />
-                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                            <Border Padding="12" Background="{AppThemeBinding Light=#EAF2FF, Dark=#1D3040}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Coast FIRE Number" FontSize="12" TextColor="{AppThemeBinding Light=#24506F, Dark=#C7E4FA}" /><Label Text="{Binding CoastNumberText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
-                            <Border Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Full FIRE Number" FontSize="12" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" /><Label Text="{Binding FullFireNumberText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                            <Border Grid.Row="1" Grid.ColumnSpan="2" Padding="12" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Time to Coast FIRE" FontSize="12" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" /><Label Text="{Binding YearsToCoastText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                        </Grid>
-                        <Label Text="{Binding CoastProgressDescription}"
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                               FontSize="13"
-                               LineHeight="1.3" />
-                        <Button Text="Export to Excel"
-                                Command="{Binding ExportCommand}"
-                                Background="#2F6B57"
-                                TextColor="#FFFFFF"
-                                SemanticProperties.Description="Create a Coast FIRE workbook on this device and open the native share sheet.">
-                            <Button.ImageSource>
-                                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf56d;" Color="#FFFFFF" Size="14" />
-                            </Button.ImageSource>
-                        </Button>
-                        <Label IsVisible="{Binding HasExportStatusMessage}"
-                               Text="{Binding ExportStatusMessage}"
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                               FontSize="13"
-                               LineHeight="1.3" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Padding="16"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                        StrokeShape="RoundRectangle 8">
-                    <VerticalStackLayout Spacing="10">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Label Text="&#xf201;"
-                                   FontFamily="FontAwesomeSolid"
-                                   VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#245D8B, Dark=#A9D5FF}"
-                                   SemanticProperties.Description="Coast FIRE projection" />
-                            <Label Grid.Column="1"
-                                   Text="Coast vs. continue contributing"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                   FontAttributes="Bold"
-                                   FontSize="20" />
-                        </Grid>
-                        <lvc:CartesianChart Series="{Binding ProjectionSeries}"
-                                            XAxes="{Binding ProjectionXAxes}"
-                                            AnimationsSpeed="{Binding ChartAnimationsSpeed}"
-                                            HeightRequest="300"
-                                            SemanticProperties.Description="{Binding ProjectionChartDescription}" />
-                        <Label Text="{Binding CoastProjectionSummary}"
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
-                               FontSize="13"
-                               LineHeight="1.3" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <controls:EducationalDisclaimerView />
+            <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
+                    <Entry Text="{Binding PlanNameText}" Placeholder="My Coast FIRE Plan" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" SemanticProperties.Description="Name for this saved Coast FIRE plan" />
+                    <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />
+                    <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Create a Coast FIRE workbook on this device and open the native share sheet." />
+                    <Label IsVisible="{Binding HasPlanStatusMessage}" Text="{Binding PlanStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
+                    <Label IsVisible="{Binding HasExportStatusMessage}" Text="{Binding ExportStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
+                    <controls:EducationalDisclaimerView />
+                </VerticalStackLayout>
+            </Border>
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>

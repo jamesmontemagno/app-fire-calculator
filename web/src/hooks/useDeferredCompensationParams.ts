@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useSearchParams } from 'react-router-dom'
 import type {
   RetirementAccount,
@@ -274,16 +274,41 @@ const sanitizeAdditionalExpenses = (value: string | null): RetirementExpense[] =
   }
 }
 
+function applyDeferredParamToSearchParams<Key extends keyof DeferredCompensationParams>(
+  searchParams: URLSearchParams,
+  key: Key,
+  value: DeferredCompensationParams[Key],
+  savedParams: Partial<DeferredCompensationParams> | null,
+) {
+  const defaultValue = DEFAULTS[key]
+  const isDefault = JSON.stringify(value) === JSON.stringify(defaultValue)
+  const savedValue = savedParams?.[key]
+  const matchesSavedValue = JSON.stringify(value) === JSON.stringify(savedValue)
+  if (isDefault && (savedValue === undefined || matchesSavedValue)) {
+    searchParams.delete(PARAM_KEYS[key])
+  } else {
+    searchParams.set(
+      PARAM_KEYS[key],
+      key === 'accounts' || key === 'incomeSources' || key === 'additionalExpenses'
+        ? JSON.stringify(value)
+        : String(value),
+    )
+  }
+}
+
 export function useDeferredCompensationParams() {
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
+  const debounceTimersRef = useRef<Partial<Record<keyof DeferredCompensationParams, ReturnType<typeof setTimeout>>>>({})
   const storageKey = `${DEFERRED_STORAGE_KEY_PREFIX}:${location.pathname}`
   const [storedParams, setStoredParams] = useState<SavedDeferredCompensationParams | null>(
     () => loadFromStorage(storageKey),
   )
   const [savedParams, setSavedParams] = useState<Partial<DeferredCompensationParams> | null>(null)
+  const [pendingParams, setPendingParams] = useState<Partial<DeferredCompensationParams>>({})
+  const pendingParamsRef = useRef<Partial<DeferredCompensationParams>>({})
 
-  const params = useMemo<DeferredCompensationParams>(() => {
+  const resolvedParams = useMemo<DeferredCompensationParams>(() => {
     const currentAge = Math.min(100, Math.max(
       18,
       numberParam(searchParams.get(PARAM_KEYS.currentAge), savedParams?.currentAge ?? DEFAULTS.currentAge),
@@ -332,32 +357,90 @@ export function useDeferredCompensationParams() {
         : savedParams?.reinvestSurplus ?? DEFAULTS.reinvestSurplus,
     }
   }, [savedParams, searchParams])
+  const params = useMemo(() => ({ ...resolvedParams, ...pendingParams }), [pendingParams, resolvedParams])
+
+  useEffect(() => {
+    pendingParamsRef.current = pendingParams
+  }, [pendingParams])
+
+  useEffect(() => () => {
+    Object.values(debounceTimersRef.current).forEach(timer => {
+      if (timer) clearTimeout(timer)
+    })
+  }, [])
+
+  const clearPendingParam = useCallback((key: keyof DeferredCompensationParams) => {
+    const timer = debounceTimersRef.current[key]
+    if (timer) clearTimeout(timer)
+    delete debounceTimersRef.current[key]
+
+    if (!(key in pendingParamsRef.current)) return
+    const nextPendingParams = { ...pendingParamsRef.current }
+    delete nextPendingParams[key]
+    pendingParamsRef.current = nextPendingParams
+    setPendingParams(nextPendingParams)
+  }, [])
+
+  const cancelPendingParams = useCallback(() => {
+    Object.values(debounceTimersRef.current).forEach(timer => {
+      if (timer) clearTimeout(timer)
+    })
+    debounceTimersRef.current = {}
+    pendingParamsRef.current = {}
+    setPendingParams({})
+  }, [])
 
   const setParam = useCallback(<Key extends keyof DeferredCompensationParams>(
     key: Key,
     value: DeferredCompensationParams[Key],
   ) => {
+    clearPendingParam(key)
     setSearchParams(previous => {
       const next = new URLSearchParams(previous)
-      const defaultValue = DEFAULTS[key]
-      const isDefault = JSON.stringify(value) === JSON.stringify(defaultValue)
-      const savedValue = savedParams?.[key]
-      const matchesSavedValue = JSON.stringify(value) === JSON.stringify(savedValue)
-      if (isDefault && (savedValue === undefined || matchesSavedValue)) {
-        next.delete(PARAM_KEYS[key])
-      } else {
-        next.set(
-          PARAM_KEYS[key],
-          key === 'accounts' || key === 'incomeSources' || key === 'additionalExpenses'
-            ? JSON.stringify(value)
-            : String(value),
-        )
-      }
+      applyDeferredParamToSearchParams(next, key, value, savedParams)
       return next
     }, { replace: true })
+  }, [clearPendingParam, savedParams, setSearchParams])
+
+  const setParamDebounced = useCallback(<Key extends keyof DeferredCompensationParams>(
+    key: Key,
+    value: DeferredCompensationParams[Key],
+    delay = 300,
+  ) => {
+    const timer = debounceTimersRef.current[key]
+    if (timer) clearTimeout(timer)
+
+    const nextPendingParams = { ...pendingParamsRef.current, [key]: value }
+    pendingParamsRef.current = nextPendingParams
+    setPendingParams(nextPendingParams)
+    debounceTimersRef.current[key] = setTimeout(() => {
+      delete debounceTimersRef.current[key]
+      setParam(key, value)
+    }, delay)
+  }, [setParam])
+
+  const flushPendingParams = useCallback(() => {
+    const pending = pendingParamsRef.current
+    if (Object.keys(pending).length === 0) return
+
+    Object.values(debounceTimersRef.current).forEach(timer => {
+      if (timer) clearTimeout(timer)
+    })
+    debounceTimersRef.current = {}
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous)
+      ;(Object.keys(pending) as (keyof DeferredCompensationParams)[]).forEach(key => {
+        const value = pending[key]
+        if (value !== undefined) applyDeferredParamToSearchParams(next, key, value, savedParams)
+      })
+      return next
+    }, { replace: true })
+    pendingParamsRef.current = {}
+    setPendingParams({})
   }, [savedParams, setSearchParams])
 
   const resetParams = useCallback(() => {
+    cancelPendingParams()
     setSearchParams(previous => {
       const next = new URLSearchParams(previous)
       Object.values(PARAM_KEYS).forEach(key => next.delete(key))
@@ -366,9 +449,10 @@ export function useDeferredCompensationParams() {
     clearStorage(storageKey)
     setStoredParams(null)
     setSavedParams(null)
-  }, [setSearchParams, storageKey])
+  }, [cancelPendingParams, setSearchParams, storageKey])
 
   const saveParams = useCallback(() => {
+    flushPendingParams()
     const nextSavedParams = {
       params,
       savedAt: new Date().toISOString(),
@@ -376,10 +460,11 @@ export function useDeferredCompensationParams() {
     saveToStorage(storageKey, nextSavedParams)
     setStoredParams(nextSavedParams)
     setSavedParams(params)
-  }, [params, storageKey])
+  }, [flushPendingParams, params, storageKey])
 
   const loadParams = useCallback(() => {
     if (!storedParams) return
+    cancelPendingParams()
     setSearchParams(previous => {
       const next = new URLSearchParams(previous)
       ;(Object.keys(PARAM_KEYS) as (keyof DeferredCompensationParams)[]).forEach(key => {
@@ -398,24 +483,34 @@ export function useDeferredCompensationParams() {
       return next
     }, { replace: true })
     setSavedParams(storedParams.params)
-  }, [setSearchParams, storedParams])
+  }, [cancelPendingParams, setSearchParams, storedParams])
 
   const copyUrl = useCallback(async () => {
+    const pending = pendingParamsRef.current
+    const next = new URLSearchParams(searchParams)
+    ;(Object.keys(pending) as (keyof DeferredCompensationParams)[]).forEach(key => {
+      const value = pending[key]
+      if (value !== undefined) applyDeferredParamToSearchParams(next, key, value, savedParams)
+    })
+    const url = new URL(window.location.href)
+    url.search = next.toString()
+    flushPendingParams()
     try {
-      await navigator.clipboard.writeText(window.location.href)
+      await navigator.clipboard.writeText(url.toString())
       return true
     } catch {
       return false
     }
-  }, [])
+  }, [flushPendingParams, savedParams, searchParams])
 
   return {
     params,
     setParam,
+    setParamDebounced,
     resetParams,
     saveParams,
     copyUrl,
-    hasCustomParams: Object.values(PARAM_KEYS).some(key => searchParams.has(key)),
+    hasCustomParams: Object.values(PARAM_KEYS).some(key => searchParams.has(key)) || Object.keys(pendingParams).length > 0,
     hasUnsavedChanges: savedParams
       ? !matchesSavedParams(params, savedParams)
       : storedParams

@@ -88,8 +88,8 @@ public static class StandardFireWorkbook
             ("Retirement age", draft.RetirementAge, DecimalStyleIndex),
             ("Current savings", draft.CurrentSavings, CurrencyStyleIndex),
             ("Annual contribution", draft.AnnualContribution, CurrencyStyleIndex),
-            ("Annual net income", draft.AnnualIncome, CurrencyStyleIndex),
-            ("Annual retirement expenses", draft.AnnualExpenses, CurrencyStyleIndex),
+            ("Annual take-home income (after tax)", draft.AnnualIncome, CurrencyStyleIndex),
+            ("Annual retirement spending (today's dollars)", draft.AnnualExpenses, CurrencyStyleIndex),
             ("Expected return", draft.ExpectedReturn, PercentageStyleIndex),
             ("Inflation rate", draft.InflationRate, PercentageStyleIndex),
             ("Safe withdrawal rate", draft.WithdrawalRate, PercentageStyleIndex)
@@ -119,7 +119,9 @@ public static class StandardFireWorkbook
             new(CreateTextCell("A7", "FIRE age"), CreateNumberCell("B7", result.FireAge, DecimalStyleIndex)),
             new(CreateTextCell("A8", "Savings rate"), CreateFormulaCell("B8", "Inputs!B8/Inputs!B9", PercentageStyleIndex)),
             new(CreateTextCell("A9", "Monthly contribution"), CreateFormulaCell("B9", "Inputs!B8/12", CurrencyStyleIndex)),
-            new(CreateTextCell("A10", "Coast FIRE Number"), CreateNumberCell("B10", result.CoastFireNumber, CurrencyStyleIndex))
+            new(CreateTextCell("A10", "Coast FIRE Number"), CreateNumberCell("B10", result.CoastFireNumber, CurrencyStyleIndex)),
+            new(CreateTextCell("A11", "Target retirement age"), CreateNumberCell("B11", result.RetirementGoal.TargetRetirementAge, DecimalStyleIndex)),
+            new(CreateTextCell("A12", "Target-age goal"), CreateTextCell("B12", result.RetirementGoal.Message))
         };
 
         AddWorksheet(workbookPart, sheets, "Results", 2, rows, 32, 20);

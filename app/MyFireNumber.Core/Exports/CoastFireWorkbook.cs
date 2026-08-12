@@ -52,7 +52,7 @@ public static class CoastFireWorkbook
             ("Retirement age", draft.RetirementAge, DecimalStyleIndex),
             ("Current savings", draft.CurrentSavings, CurrencyStyleIndex),
             ("Annual contribution", draft.AnnualContribution, CurrencyStyleIndex),
-            ("Annual retirement expenses", draft.AnnualExpenses, CurrencyStyleIndex),
+            ("Annual retirement spending (today's dollars)", draft.AnnualExpenses, CurrencyStyleIndex),
             ("Expected return", draft.ExpectedReturn, PercentageStyleIndex),
             ("Inflation rate", draft.InflationRate, PercentageStyleIndex),
             ("Safe withdrawal rate", draft.WithdrawalRate, PercentageStyleIndex)

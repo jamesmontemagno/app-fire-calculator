@@ -45,6 +45,7 @@ public sealed class DeferredCompensationWorkbookTests : IDisposable
         Assert.Equal(
             ["Inputs", "Results", "Annual Cash Flow", "Accounts", "Income Sources", "Additional Expenses"],
             sheets.Select(sheet => sheet.Name!.Value));
+        Assert.Equal("Annual retirement spending (today's dollars)", GetCellText(workbookPart, sheets[0], "A8"));
         Assert.Equal("Custom Deferred", GetCell(workbookPart, sheets[3], "A2").InlineString!.Text!.Text);
         Assert.Equal("Equal annual payouts", GetCell(workbookPart, sheets[3], "G2").InlineString!.Text!.Text);
         Assert.Equal("5", GetCell(workbookPart, sheets[3], "H2").CellValue!.Text);
@@ -52,6 +53,7 @@ public sealed class DeferredCompensationWorkbookTests : IDisposable
         Assert.Equal("Withdrawal rate", GetCell(workbookPart, sheets[3], "G3").InlineString!.Text!.Text);
         Assert.Equal("0.04", GetCell(workbookPart, sheets[3], "H3").CellValue!.Text);
         Assert.Equal("Custom Pension", GetCell(workbookPart, sheets[4], "A2").InlineString!.Text!.Text);
+        Assert.Equal("Annual amount (today's dollars)", GetCellText(workbookPart, sheets[5], "B1"));
         Assert.Equal("Custom Travel", GetCell(workbookPart, sheets[5], "A2").InlineString!.Text!.Text);
     }
 
@@ -70,5 +72,10 @@ public sealed class DeferredCompensationWorkbookTests : IDisposable
         return Assert.Single(
             (worksheetPart.Worksheet ?? throw new InvalidOperationException("Worksheet was not created.")).Descendants<Cell>(),
             cell => cell.CellReference?.Value == cellReference);
+    }
+
+    private static string GetCellText(WorkbookPart workbookPart, Sheet sheet, string cellReference)
+    {
+        return GetCell(workbookPart, sheet, cellReference).InlineString?.Text?.Text ?? string.Empty;
     }
 }

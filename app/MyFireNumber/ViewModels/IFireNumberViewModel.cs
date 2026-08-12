@@ -49,6 +49,8 @@ public interface IFireNumberViewModel : ICalculatorViewModel
 
     string FireAgeText { get; }
 
+    string RetirementGoalText { get; }
+
     string SavingsRateText { get; }
 
     string MonthlyContributionText { get; }
