@@ -43,28 +43,10 @@
                        LineHeight="1.3" />
             </Border>
 
-                <Border Padding="16"
-                        Background="{AppThemeBinding Light=#EAF2FF, Dark=#1D3040}"
-                        Stroke="{AppThemeBinding Light=#AFC9E8, Dark=#3F6685}"
-                        StrokeShape="RoundRectangle 8">
-                    <VerticalStackLayout Spacing="6">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
-                            <Label Text="&#xf0eb;"
-                                   FontFamily="FontAwesomeSolid"
-                                   VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#245D8B, Dark=#A9D5FF}"
-                                   SemanticProperties.Description="Coast FIRE explanation" />
-                            <Label Grid.Column="1"
-                                   Text="What is Coast FIRE?"
-                                   TextColor="{AppThemeBinding Light=#173B5B, Dark=#E0F1FF}"
-                                   FontAttributes="Bold"
-                                   FontSize="20" />
-                        </Grid>
-                        <Label Text="You've reached Coast FIRE when your current savings can grow to your full FIRE Number by retirement age without another contribution."
-                               TextColor="{AppThemeBinding Light=#24506F, Dark=#C7E4FA}"
-                               LineHeight="1.3" />
-                    </VerticalStackLayout>
-                </Border>
+                <controls:CalculatorInfoView Title="What is Coast FIRE?"
+                                            Summary="Find the amount you need invested now so compound growth can carry you to retirement."
+                                            Details="You reach Coast FIRE when your current investments can grow to your full FIRE number by a traditional retirement age without additional contributions. You still need income for today's expenses, but may be able to reduce saving or choose more flexible, lower-paying work. It may fit younger savers who value flexibility before full retirement."
+                                            IconGlyph="&#xf0eb;" />
 
                 <Border Padding="16"
                         Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"

@@ -43,7 +43,10 @@
                        LineHeight="1.3" />
             </Border>
 
-                <Border Padding="16" Background="{AppThemeBinding Light=#FFF1E7, Dark=#493225}" Stroke="{AppThemeBinding Light=#F1C39B, Dark=#9A6846}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="6"><Label Text="Retirement Cash Flow" TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}" FontAttributes="Bold" FontSize="20" /><Label Text="Coordinate deferred compensation, retirement accounts, part-time income, and annual expenses. Calculations stay on this device." TextColor="{AppThemeBinding Light=#7A4A1A, Dark=#F4D0A8}" LineHeight="1.3" /></VerticalStackLayout></Border>
+                <controls:CalculatorInfoView Title="What is retirement cash flow planning?"
+                                             Summary="Coordinate accounts, deferred payouts, earned income, and expenses in one retirement timeline."
+                                             Details="Retirement cash flow planning shows when money enters and leaves your plan year by year, including deferred compensation, retirement accounts, savings, part-time income, and expenses. It can reveal funding gaps that a single portfolio target may miss. It may fit people with complex, multi-account or phased-retirement plans."
+                                             IconGlyph="&#xf1da;" />
                 <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
                     <VerticalStackLayout Spacing="10">
                         <Label Text="Scenario" FontAttributes="Bold" FontSize="20" />
