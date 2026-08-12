@@ -31,14 +31,8 @@ public partial class FieldHelpView : ContentView
         set => SetValue(HelpTextProperty, value);
     }
 
-    private void OnInfoClicked(object? sender, EventArgs e)
+    private async void OnInfoClicked(object? sender, EventArgs e)
     {
-        HelpTextLabel.IsVisible = !HelpTextLabel.IsVisible;
-        InfoButton.Text = HelpTextLabel.IsVisible ? "Hide info" : "Info";
-        SemanticProperties.SetDescription(
-            InfoButton,
-            HelpTextLabel.IsVisible
-                ? "Hide help for this field"
-                : "Show help for this field");
+        await Shell.Current.DisplayAlertAsync(Header, HelpText, "Close");
     }
 }
