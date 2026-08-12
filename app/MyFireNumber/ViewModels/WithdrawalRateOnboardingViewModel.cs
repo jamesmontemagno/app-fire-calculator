@@ -6,6 +6,7 @@ namespace MyFireNumber.ViewModels;
 
 public partial class WithdrawalRateOnboardingViewModel : ObservableObject
 {
+    private const double RoundingTolerance = 0.000001;
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly INavigationService navigationService;
 
@@ -27,7 +28,7 @@ public partial class WithdrawalRateOnboardingViewModel : ObservableObject
     partial void OnWithdrawalRatePercentChanged(double value)
     {
         var rounded = Math.Round(value, 1);
-        if (Math.Abs(value - rounded) > double.Epsilon)
+        if (Math.Abs(value - rounded) > RoundingTolerance)
         {
             WithdrawalRatePercent = rounded;
         }

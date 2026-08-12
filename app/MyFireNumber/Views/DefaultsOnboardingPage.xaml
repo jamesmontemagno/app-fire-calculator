@@ -65,7 +65,7 @@
                             </Grid>
                             <Slider AutomationId="OnboardingAnnualIncomeSlider"
                                     Minimum="0"
-                                    Maximum="500000"
+                                    Maximum="{Binding MaximumAnnualIncome}"
                                     Value="{Binding AnnualIncome}"
                                     MinimumTrackColor="#2F6B57"
                                     MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
@@ -84,7 +84,7 @@
                             </Grid>
                             <Slider AutomationId="OnboardingAnnualExpensesSlider"
                                     Minimum="0"
-                                    Maximum="500000"
+                                    Maximum="{Binding MaximumAnnualExpenses}"
                                     Value="{Binding AnnualExpenses}"
                                     MinimumTrackColor="#2F6B57"
                                     MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"

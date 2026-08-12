@@ -6,6 +6,7 @@ namespace MyFireNumber.ViewModels;
 
 public partial class DefaultsOnboardingViewModel : ObservableObject
 {
+    private const double RoundingTolerance = 0.000001;
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly ICurrencyPreferencesService currencyPreferencesService;
     private readonly INavigationService navigationService;
@@ -40,6 +41,8 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
     public string CurrentAgeText => $"{CurrentAge:0}";
     public string AnnualIncomeText => currencyPreferencesService.Format(AnnualIncome);
     public string AnnualExpensesText => currencyPreferencesService.Format(AnnualExpenses);
+    public double MaximumAnnualIncome => 1_000_000;
+    public double MaximumAnnualExpenses => 500_000;
 
     partial void OnCurrentAgeChanged(double value) =>
         RoundSliderValue(value, rounded => CurrentAge = rounded, 0);
@@ -71,7 +74,7 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
     private static void RoundSliderValue(double value, Action<double> update, int digits)
     {
         var rounded = Math.Round(value, digits);
-        if (Math.Abs(value - rounded) > double.Epsilon)
+        if (Math.Abs(value - rounded) > RoundingTolerance)
         {
             update(rounded);
         }
