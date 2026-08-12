@@ -193,7 +193,11 @@ public partial class SettingsViewModel : ObservableObject
             inflationRate,
             withdrawalRate,
             currentAge,
-            retirementAge));
+            retirementAge)
+        {
+            AnnualIncome = calculatorDefaultsService.Current.AnnualIncome,
+            AnnualExpenses = calculatorDefaultsService.Current.AnnualExpenses
+        });
         DefaultsStatus = "Saved. These assumptions apply only to new calculators.";
     }
 
