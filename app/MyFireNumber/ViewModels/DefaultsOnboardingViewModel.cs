@@ -41,8 +41,8 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
     public string CurrentAgeText => $"{CurrentAge:0}";
     public string AnnualIncomeText => currencyPreferencesService.Format(AnnualIncome);
     public string AnnualExpensesText => currencyPreferencesService.Format(AnnualExpenses);
-    public double MaximumAnnualIncome => 1_000_000;
-    public double MaximumAnnualExpenses => 500_000;
+    public double MaximumAnnualIncome => 10_000_000;
+    public double MaximumAnnualExpenses => 10_000_000;
 
     partial void OnCurrentAgeChanged(double value) =>
         RoundSliderValue(value, rounded => CurrentAge = rounded, 0);
