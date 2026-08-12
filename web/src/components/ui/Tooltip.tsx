@@ -61,10 +61,7 @@ export default function Tooltip({ content }: TooltipProps) {
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onFocus={() => setIsFocused(true)}
-        onBlur={() => {
-          setIsFocused(false)
-          setIsPinned(false)
-        }}
+        onBlur={() => setIsFocused(false)}
         className="inline-flex items-center justify-center w-4 h-4 focus:outline-none focus:ring-2 focus:ring-fire-500 rounded-full"
       >
         <svg 
