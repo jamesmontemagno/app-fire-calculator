@@ -27,7 +27,7 @@ export default function AgeInput({
 
   // Sync with external value changes (e.g., from URL params or presets)
   useEffect(() => {
-    const parsed = parseInt(inputValue)
+    const parsed = parseInt(inputValue, 10)
     if (parsed !== value) {
       setInputValue(value.toString())
     }
@@ -38,7 +38,7 @@ export default function AgeInput({
     setInputValue(raw)
     
     // Only update parent if valid number in range
-    const parsed = parseInt(raw)
+    const parsed = parseInt(raw, 10)
     if (!isNaN(parsed) && parsed >= min && parsed <= max) {
       onChange(parsed)
     }
@@ -46,7 +46,7 @@ export default function AgeInput({
 
   const handleBlur = () => {
     // On blur, validate and reset to last valid value if needed
-    const parsed = parseInt(inputValue)
+    const parsed = parseInt(inputValue, 10)
     if (isNaN(parsed) || parsed < min || parsed > max) {
       setInputValue(value.toString())
     }
@@ -89,7 +89,7 @@ export default function AgeInput({
         <input
           type="range"
           value={value}
-          onChange={(event) => onChange(parseInt(event.target.value))}
+          onChange={(event) => onChange(parseInt(event.target.value, 10))}
           min={min}
           max={max}
           step={1}

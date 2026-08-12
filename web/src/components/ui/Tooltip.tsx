@@ -5,22 +5,29 @@ interface TooltipProps {
 }
 
 export default function Tooltip({ content }: TooltipProps) {
-  const [isVisible, setIsVisible] = useState(false)
+  const [isPinned, setIsPinned] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
+  const [isFocused, setIsFocused] = useState(false)
   const tooltipId = useId()
   const containerRef = useRef<HTMLSpanElement>(null)
+  const isVisible = isPinned || isHovered || isFocused
 
   useEffect(() => {
     if (!isVisible) return
 
     const handlePointerDown = (event: PointerEvent) => {
       if (!containerRef.current?.contains(event.target as Node)) {
-        setIsVisible(false)
+        setIsPinned(false)
+        setIsHovered(false)
+        setIsFocused(false)
       }
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        setIsVisible(false)
+        setIsPinned(false)
+        setIsHovered(false)
+        setIsFocused(false)
       }
     }
 
@@ -33,6 +40,16 @@ export default function Tooltip({ content }: TooltipProps) {
     }
   }, [isVisible])
 
+  const handleClick = () => {
+    if (isPinned) {
+      setIsPinned(false)
+      setIsHovered(false)
+      setIsFocused(false)
+    } else {
+      setIsPinned(true)
+    }
+  }
+
   return (
     <span ref={containerRef} className="group relative">
       <button
@@ -40,11 +57,14 @@ export default function Tooltip({ content }: TooltipProps) {
         aria-label="More information"
         aria-expanded={isVisible}
         aria-controls={tooltipId}
-        onClick={() => setIsVisible(true)}
-        onMouseEnter={() => setIsVisible(true)}
-        onMouseLeave={() => setIsVisible(false)}
-        onFocus={() => setIsVisible(true)}
-        onBlur={() => setIsVisible(false)}
+        onClick={handleClick}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => {
+          setIsFocused(false)
+          setIsPinned(false)
+        }}
         className="inline-flex items-center justify-center w-4 h-4 focus:outline-none focus:ring-2 focus:ring-fire-500 rounded-full"
       >
         <svg 
