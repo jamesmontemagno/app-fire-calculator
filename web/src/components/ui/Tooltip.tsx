@@ -44,6 +44,7 @@ export default function Tooltip({ content }: TooltipProps) {
         onMouseEnter={() => setIsVisible(true)}
         onMouseLeave={() => setIsVisible(false)}
         onFocus={() => setIsVisible(true)}
+        onBlur={() => setIsVisible(false)}
         className="inline-flex items-center justify-center w-4 h-4 focus:outline-none focus:ring-2 focus:ring-fire-500 rounded-full"
       >
         <svg 

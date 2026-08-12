@@ -121,6 +121,7 @@ export default function CoastFIRE() {
               value={params.currentAge}
               onChange={(v) => setParam('currentAge', v)}
               tooltip="Your current age"
+              showSlider
             />
             <AgeInput
               label="Target Retirement Age"
@@ -129,6 +130,7 @@ export default function CoastFIRE() {
               tooltip="Traditional retirement age (e.g., 60-67)"
               min={params.currentAge + 1}
               max={80}
+              showSlider
             />
             <CurrencyInput
               label="Current Invested Assets"

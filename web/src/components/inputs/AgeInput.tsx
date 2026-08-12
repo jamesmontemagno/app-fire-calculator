@@ -19,7 +19,7 @@ export default function AgeInput({
   onChange,
   min = 18,
   max = 100,
-  showSlider = true,
+  showSlider = false,
   className = '',
 }: AgeInputProps) {
   const id = useId()

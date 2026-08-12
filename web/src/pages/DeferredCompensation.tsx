@@ -153,6 +153,7 @@ export default function DeferredCompensation() {
                 value={params.currentAge}
                 onChange={value => setParam('currentAge', value)}
                 tooltip="Your current age"
+                showSlider
               />
               <AgeInput
                 label="Retirement Age"
@@ -160,6 +161,7 @@ export default function DeferredCompensation() {
                 onChange={value => setParam('semiRetirementAge', value)}
                 min={params.currentAge}
                 tooltip="Portfolio withdrawals begin at this age unless you allow them earlier."
+                showSlider
               />
               <AgeInput
                 label="Plan Through Age"
@@ -167,6 +169,7 @@ export default function DeferredCompensation() {
                 onChange={value => setParam('planThroughAge', value)}
                 min={params.semiRetirementAge}
                 tooltip="The final age included in this retirement cash-flow plan."
+                showSlider
               />
               <CurrencyInput
                 label="Annual Retirement Expenses"

@@ -146,6 +146,7 @@ export default function ReverseFIRE() {
               value={params.currentAge}
               onChange={(v) => setParam('currentAge', v)}
               tooltip="Your current age"
+              showSlider
             />
             <AgeInput
               label="Target Retirement Age"
@@ -153,6 +154,7 @@ export default function ReverseFIRE() {
               onChange={(v) => setParam('retirementAge', v)}
               tooltip="When do you want to achieve FIRE?"
               min={params.currentAge + 1}
+              showSlider
             />
             <CurrencyInput
               label="Current Invested Assets"

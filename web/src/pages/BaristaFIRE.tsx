@@ -120,6 +120,7 @@ export default function BaristaFIRE() {
               value={params.currentAge}
               onChange={(v) => setParam('currentAge', v)}
               tooltip="Your current age"
+              showSlider
             />
             <CurrencyInput
               label="Current Invested Assets"
