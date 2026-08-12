@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateLeanFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, Disclaimer, ExportButton } from '../components/ui'
+import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -11,279 +11,94 @@ import { calculatorSEO } from '../config/seo'
 const LEAN_THRESHOLD = 40000
 
 export default function LeanFIRE() {
-  const { params, setParam, resetParams, saveParams, loadParams, copyUrl, hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt } = useCalculatorParams()
-
-  // Use lean-appropriate defaults
+  const {
+    params, setParam, setParamDebounced, resetParams, saveParams, loadParams, copyUrl,
+    hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt,
+  } = useCalculatorParams()
   const leanExpenses = Math.min(params.annualExpenses, LEAN_THRESHOLD)
-
-  const results = useMemo(() => {
-    return calculateLeanFIRE({
-      currentAge: params.currentAge,
-      currentSavings: params.currentSavings,
-      annualContribution: params.annualContribution,
-      annualIncome: params.annualIncome,
-      expectedReturn: params.expectedReturn,
-      inflationRate: params.inflationRate,
-      withdrawalRate: params.withdrawalRate,
-      annualExpenses: leanExpenses,
-    })
-  }, [params, leanExpenses])
-
-  const isLean = params.annualExpenses <= LEAN_THRESHOLD
+  const results = useMemo(() => calculateLeanFIRE({
+    currentAge: params.currentAge,
+    retirementAge: params.retirementAge,
+    currentSavings: params.currentSavings,
+    annualContribution: params.annualContribution,
+    annualIncome: params.annualIncome,
+    expectedReturn: params.expectedReturn,
+    inflationRate: params.inflationRate,
+    withdrawalRate: params.withdrawalRate,
+    annualExpenses: leanExpenses,
+  }), [params, leanExpenses])
 
   const handleExport = () => {
-    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
-      currentAge: params.currentAge,
-      currentSavings: params.currentSavings,
-      annualContribution: params.annualContribution,
-      expectedReturn: params.expectedReturn,
-      inflationRate: params.inflationRate,
-      withdrawalRate: params.withdrawalRate,
-      annualExpenses: leanExpenses,
+    const { values: inputs, formats: inputFormats } = prepareInputsForExport({
+      currentAge: params.currentAge, retirementAge: params.retirementAge, currentSavings: params.currentSavings,
+      annualContribution: params.annualContribution, annualIncome: params.annualIncome, expectedReturn: params.expectedReturn,
+      inflationRate: params.inflationRate, withdrawalRate: params.withdrawalRate, annualExpenses: leanExpenses,
     })
-
     const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
-
-    // Define formulas for calculated results
-    const resultFormulas: Record<string, string> = {
-      // FIRE Number = Annual Expenses / Withdrawal Rate
-      fireNumber: '{annualExpenses}/{withdrawalRate}',
-      // Savings Rate = Annual Contribution / (Annual Contribution + Annual Expenses)
-      savingsRate: '{annualContribution}/({annualContribution}+{annualExpenses})',
-      // Monthly Contribution = Annual Contribution / 12
-      monthlyContribution: '{annualContribution}/12',
-    }
-
     exportToExcel({
-      calculatorName: 'Lean FIRE',
-      inputs: inputValues,
-      results: resultValues,
-      projections: results.projections,
-      inputFormats,
-      resultFormats,
-      resultFormulas,
+      calculatorName: 'Lean FIRE', inputs, results: resultValues, projections: results.projections, inputFormats, resultFormats,
+      resultFormulas: { fireNumber: '{annualExpenses}/{withdrawalRate}', savingsRate: '{annualContribution}/{annualIncome}' },
     })
   }
+
+  const isLean = params.annualExpenses <= LEAN_THRESHOLD
 
   return (
     <>
       <SEO {...calculatorSEO.lean} />
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-              <span className="text-3xl" role="img" aria-label="Leaf emoji">🌿</span>
-              Lean FIRE Calculator
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Achieve financial independence faster with a minimalist lifestyle.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
-          </div>
-      </div>
+      <div className="space-y-8">
+        <header>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Lean FIRE Calculator</h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">Plan for financial independence with a deliberately low-cost retirement.</p>
+        </header>
 
-      {/* Progress Bar */}
-      <ProgressToFIRE 
-        currentSavings={params.currentSavings} 
-        fireNumber={results.fireNumber}
-        yearsToFIRE={results.yearsToFIRE}
-      />
-
-      {/* Lean FIRE Explanation Banner */}
-      <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
-        <div className="flex gap-3">
-          <span className="text-2xl">🌿</span>
-          <div>
-            <h3 className="font-semibold text-green-900 dark:text-green-100">What is Lean FIRE?</h3>
-            <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-              Lean FIRE means achieving financial independence with minimal expenses (typically ≤$40,000/year 
-              for a household). It requires living frugally but allows you to retire much earlier than 
-              traditional or Fat FIRE approaches.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Lean Status Warning */}
-      {!isLean && (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
-          <div className="flex gap-3">
-            <span className="text-2xl">⚠️</span>
-            <div>
-              <h3 className="font-semibold text-amber-900 dark:text-amber-100">Expenses Above Lean Threshold</h3>
-              <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
-                Your expenses ({formatCurrency(params.annualExpenses)}) exceed the typical Lean FIRE threshold 
-                of {formatCurrency(LEAN_THRESHOLD)}. Consider the <strong>Standard FIRE</strong> or{' '}
-                <strong>Fat FIRE</strong> calculators, or reduce your expected expenses.
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Inputs */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Information</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <AgeInput
-              label="Current Age"
-              value={params.currentAge}
-              onChange={(v) => setParam('currentAge', v)}
-              tooltip="Your current age"
-              showSlider
-            />
-            <CurrencyInput
-              label="Current Invested Assets"
-              value={params.currentSavings}
-              onChange={(v) => setParam('currentSavings', v)}
-              tooltip="Total invested assets (401k, IRA, brokerage)"
-            />
-            <CurrencyInput
-              label="Annual Contributions"
-              value={params.annualContribution}
-              onChange={(v) => setParam('annualContribution', v)}
-              tooltip="How much you save and invest per year"
-            />
-            <div>
-              <CurrencyInput
-                label="Annual Retirement Expenses"
-                value={params.annualExpenses}
-                onChange={(v) => setParam('annualExpenses', v)}
-                tooltip="For Lean FIRE, keep this ≤$40,000"
-                max={100000}
-              />
-              <div className="mt-2">
-                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                  <span>Lean threshold</span>
-                  <span>{formatCurrency(LEAN_THRESHOLD)}</span>
-                </div>
-                <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                  <div 
-                    className={`h-full transition-all ${
-                      isLean ? 'bg-green-500' : 'bg-amber-500'
-                    }`}
-                    style={{ width: `${Math.min(100, (params.annualExpenses / LEAN_THRESHOLD) * 100)}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-            <PercentageInput
-              label="Expected Annual Return"
-              value={params.expectedReturn}
-              onChange={(v) => setParam('expectedReturn', v)}
-              tooltip="Average annual investment return before inflation"
-              min={0}
-              max={0.15}
-            />
-            <PercentageInput
-              label="Inflation Rate"
-              value={params.inflationRate}
-              onChange={(v) => setParam('inflationRate', v)}
-              tooltip="Expected annual increase in prices"
-              min={0}
-              max={0.10}
-            />
-            <PercentageInput
-              label="Safe Withdrawal Rate"
-              value={params.withdrawalRate}
-              onChange={(v) => setParam('withdrawalRate', v)}
-              tooltip="Percentage of your portfolio withdrawn each year in retirement"
-              min={0.02}
-              max={0.06}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Key Metrics */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ResultCard
-              label="Lean FIRE Number"
-              value={results.fireNumber}
-              format="currency"
-              highlight
-              subtext={isLean ? "You're in Lean territory!" : "Based on your expenses"}
-            />
-            <ResultCard
-              label="Years to Lean FIRE"
-              value={results.yearsToFIRE}
-              format="years"
-              subtext={`At age ${Math.round(results.fireAge)}`}
-            />
-            <ResultCard
-              label="Monthly Budget"
-              value={params.annualExpenses / 12}
-              format="currency"
-              subtext="In retirement"
-            />
-          </div>
-
-          {/* Chart */}
+        <section aria-labelledby="lean-plan-heading">
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio Projection</h2>
+              <h2 id="lean-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Lean FIRE is typically based on spending of {formatCurrency(LEAN_THRESHOLD)} a year or less in today&apos;s dollars.</p>
             </CardHeader>
-            <CardContent>
-              <ProjectionChart
-                data={results.projections}
-                fireNumber={results.fireNumber}
-                colorScheme="green"
-                height={350}
-              />
+            <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Your current age." min={18} max={80} showSlider />
+              <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="The age you want this plan to support." min={params.currentAge + 1} max={90} showSlider />
+              <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments available for retirement." />
+              <CurrencyInput label="Annual contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="How much you expect to invest each year." allowMonthlyToggle />
+              <CurrencyInput label="After-tax take-home income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Income after taxes, used to calculate your savings rate." allowMonthlyToggle />
+              <CurrencyInput label="Annual retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected annual after-tax spending in retirement. Lean estimates use up to $40,000." allowMonthlyToggle />
             </CardContent>
           </Card>
+        </section>
 
-          {/* Lean FIRE Tips */}
+        <section aria-labelledby="lean-outlook-heading" className="space-y-4">
+          <div>
+            <h2 id="lean-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
+            {!isLean && <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">Your spending exceeds the typical Lean FIRE range, so this estimate uses {formatCurrency(LEAN_THRESHOLD)} in annual spending.</p>}
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <ResultCard label="Lean FIRE number" value={results.fireNumber} format="currency" highlight subtext="Target portfolio in today’s dollars" />
+            <ResultCard label="Years to Lean FIRE" value={results.yearsToFIRE} format="years" subtext={`Estimated age ${Math.round(results.fireAge)}`} />
+            <ResultCard label="Monthly spending" value={leanExpenses / 12} format="currency" subtext="Today’s dollars" />
+            <ResultCard label={`Target age ${params.retirementAge}`} value={results.retirementGoal.isOnTrack ? 'On track' : 'Off track'} subtext={results.retirementGoal.message} />
+          </div>
+          <ProgressToFIRE currentSavings={params.currentSavings} fireNumber={results.fireNumber} yearsToFIRE={results.yearsToFIRE} label="Progress to Lean FIRE" targetLabel="Lean FIRE number" />
+        </section>
+
+        <AdvancedDetails description="These long-term assumptions change the projection without changing the plan inputs.">
+          <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation." min={0} max={0.15} />
+          <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual price growth. Spending remains expressed in today’s dollars." min={0} max={0.1} />
+          <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="The share of the portfolio you plan to spend each year." min={0.025} max={0.06} />
+        </AdvancedDetails>
+
+        <section aria-labelledby="lean-projection-heading">
           <Card>
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Lean FIRE Tips</h2>
-            </CardHeader>
-            <CardContent>
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="flex gap-3">
-                  <span className="text-xl">🏠</span>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Housing</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Consider geo-arbitrage, house hacking, or paid-off housing</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-xl">🚗</span>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Transportation</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Bike, walk, or use one reliable used car</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-xl">🍳</span>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Food</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Cook at home, meal prep, grow some food</p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
-                  <span className="text-xl">🎭</span>
-                  <div>
-                    <h4 className="font-medium text-gray-900 dark:text-gray-100">Entertainment</h4>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">Free hobbies, libraries, nature, community events</p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
+            <CardHeader><h2 id="lean-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2></CardHeader>
+            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} colorScheme="green" height={350} /></CardContent>
           </Card>
-        </div>
-      </div>
+        </section>
 
-      <Disclaimer />
-    </div>
+        <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">Lean FIRE asks your portfolio to support a lower spending level. Review housing, healthcare, and other flexible costs before relying on this estimate.</p>
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+      </div>
     </>
   )
 }

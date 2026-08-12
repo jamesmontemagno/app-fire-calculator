@@ -49,7 +49,7 @@ public static class ReverseFireWorkbook
             ("Current age", draft.CurrentAge, DecimalStyleIndex),
             ("Target FIRE age", draft.TargetRetirementAge, DecimalStyleIndex),
             ("Current savings", draft.CurrentSavings, CurrencyStyleIndex),
-            ("Annual retirement expenses", draft.AnnualExpenses, CurrencyStyleIndex),
+            ("Annual retirement spending (today's dollars)", draft.AnnualExpenses, CurrencyStyleIndex),
             ("Expected return", draft.ExpectedReturn, PercentageStyleIndex),
             ("Inflation rate", draft.InflationRate, PercentageStyleIndex),
             ("Safe withdrawal rate", draft.WithdrawalRate, PercentageStyleIndex)

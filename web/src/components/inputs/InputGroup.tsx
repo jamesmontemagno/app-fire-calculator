@@ -9,6 +9,7 @@ interface InputGroupProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'o
   suffix?: string
   value: number
   onChange: (value: number) => void
+  onSliderChange?: (value: number) => void
   min?: number
   max?: number
   step?: number
@@ -23,6 +24,7 @@ export default function InputGroup({
   suffix,
   value,
   onChange,
+  onSliderChange,
   min,
   max,
   step = 1,
@@ -92,7 +94,10 @@ export default function InputGroup({
         <input
           type="range"
           value={value}
-          onChange={handleChange}
+          onChange={(event) => {
+            const newValue = parseFloat(event.target.value)
+            ;(onSliderChange ?? onChange)(newValue)
+          }}
           min={min}
           max={max}
           step={step}

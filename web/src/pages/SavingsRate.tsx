@@ -1,14 +1,13 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { CurrencyInput, InputGroup, PercentageInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, Disclaimer, ExportButton } from '../components/ui'
+import { AgeInput, CurrencyInput, InputGroup, PercentageInput } from '../components/inputs'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 
-// Calculate investment growth and savings rate
 function calculateInvestmentGrowth(
   startingAmount: number,
   contributionAmount: number,
@@ -17,401 +16,159 @@ function calculateInvestmentGrowth(
   expectedReturn: number,
   inflationRate: number,
   annualIncome: number,
-  currentAge: number = 30
+  currentAge: number,
 ) {
-  // Convert contributions to annual
-  const annualContribution = contributionFrequency === 'monthly' 
-    ? contributionAmount * 12 
-    : contributionAmount
-  
-  // Calculate savings rate
+  const annualContribution = contributionFrequency === 'monthly' ? contributionAmount * 12 : contributionAmount
   const savingsRate = annualIncome > 0 ? annualContribution / annualIncome : 0
-  
-  // Generate projections
   const projections = []
   let nominalBalance = startingAmount
   let inflationAdjustedBalance = startingAmount
   let totalContributions = startingAmount
   const currentYear = new Date().getFullYear()
-  
-  // Add starting point
-  projections.push({
-    age: currentAge,
-    year: currentYear,
-    yearNumber: 0,
-    portfolio: Math.round(nominalBalance),
-    inflationAdjusted: Math.round(inflationAdjustedBalance),
-    totalContributions: Math.round(totalContributions),
-    contributions: 0,
-  })
-  
-  // Real return for inflation-adjusted calculations
   const realReturn = (1 + expectedReturn) / (1 + inflationRate) - 1
-  
-  for (let i = 1; i <= yearsInvesting; i++) {
-    // Nominal growth (no inflation adjustment)
-    nominalBalance = nominalBalance * (1 + expectedReturn) + annualContribution
-    
-    // Inflation-adjusted growth
-    inflationAdjustedBalance = inflationAdjustedBalance * (1 + realReturn) + annualContribution
-    
-    totalContributions += annualContribution
-    
+
+  for (let year = 0; year <= yearsInvesting; year += 1) {
     projections.push({
-      age: currentAge + i,
-      year: currentYear + i,
-      yearNumber: i,
+      age: currentAge + year,
+      year: currentYear + year,
       portfolio: Math.round(nominalBalance),
       inflationAdjusted: Math.round(inflationAdjustedBalance),
       totalContributions: Math.round(totalContributions),
-      contributions: annualContribution,
+      contributions: year === 0 ? 0 : annualContribution,
     })
-  }
-  
-  const finalNominalBalance = nominalBalance
-  const finalInflationAdjustedBalance = inflationAdjustedBalance
-  const totalInvested = totalContributions
-  const totalGrowth = finalNominalBalance - totalInvested
-  const inflationImpact = finalNominalBalance - finalInflationAdjustedBalance
-  
-  // Savings rate categories
-  let savingsCategory = ''
-  let savingsCategoryColor = ''
-  if (savingsRate >= 0.5) {
-    savingsCategory = 'Extreme Saver'
-    savingsCategoryColor = 'text-purple-600 dark:text-purple-400'
-  } else if (savingsRate >= 0.3) {
-    savingsCategory = 'Aggressive Saver'
-    savingsCategoryColor = 'text-green-600 dark:text-green-400'
-  } else if (savingsRate >= 0.2) {
-    savingsCategory = 'Good Saver'
-    savingsCategoryColor = 'text-blue-600 dark:text-blue-400'
-  } else if (savingsRate >= 0.1) {
-    savingsCategory = 'Average Saver'
-    savingsCategoryColor = 'text-amber-600 dark:text-amber-400'
-  } else {
-    savingsCategory = 'Below Average'
-    savingsCategoryColor = 'text-red-600 dark:text-red-400'
+    if (year === yearsInvesting) break
+    nominalBalance = nominalBalance * (1 + expectedReturn) + annualContribution
+    inflationAdjustedBalance = inflationAdjustedBalance * (1 + realReturn) + annualContribution
+    totalContributions += annualContribution
   }
 
   return {
     savingsRate,
     annualContribution,
     monthlyContribution: annualContribution / 12,
-    finalNominalBalance,
-    finalInflationAdjustedBalance,
-    totalInvested,
-    totalGrowth,
-    inflationImpact,
+    finalNominalBalance: nominalBalance,
+    finalInflationAdjustedBalance: inflationAdjustedBalance,
+    totalInvested: totalContributions,
+    totalGrowth: nominalBalance - totalContributions,
+    inflationImpact: nominalBalance - inflationAdjustedBalance,
     projections,
-    savingsCategory,
-    savingsCategoryColor,
   }
 }
 
 export default function SavingsRate() {
-  const { params, setParam, resetParams, saveParams, loadParams, copyUrl, hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt } = useCalculatorParams()
-  const [contributionFrequency, setContributionFrequency] = useState<'monthly' | 'yearly'>('monthly')
-  const [yearsInvesting, setYearsInvesting] = useState(30)
-  const [contributionAmount, setContributionAmount] = useState(500)
-  const [annualIncome, setAnnualIncome] = useState(75000)
-
-  const results = useMemo(() => {
-    return calculateInvestmentGrowth(
-      params.currentSavings,
-      contributionAmount,
-      contributionFrequency,
-      yearsInvesting,
-      params.expectedReturn,
-      params.inflationRate,
-      annualIncome,
-      params.currentAge
-    )
-  }, [params.currentSavings, contributionAmount, contributionFrequency, yearsInvesting, params.expectedReturn, params.inflationRate, annualIncome, params.currentAge])
+  const {
+    params, setParam, setParamDebounced, resetParams, saveParams, loadParams, copyUrl,
+    hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt,
+  } = useCalculatorParams()
+  const results = useMemo(() => calculateInvestmentGrowth(
+    params.currentSavings, params.savingsContribution, params.savingsFrequency, params.savingsYears,
+    params.expectedReturn, params.inflationRate, params.annualIncome, params.currentAge,
+  ), [params])
 
   const handleExport = () => {
-    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
+    const { values: inputs, formats: inputFormats } = prepareInputsForExport({
       currentSavings: params.currentSavings,
-      contributionAmount: contributionFrequency === 'monthly' ? contributionAmount : contributionAmount / 12,
-      contributionFrequency,
-      yearsInvesting,
-      annualIncome,
+      contributionAmount: params.savingsContribution,
+      contributionFrequency: params.savingsFrequency,
+      yearsInvesting: params.savingsYears,
+      annualIncome: params.annualIncome,
       expectedReturn: params.expectedReturn,
       inflationRate: params.inflationRate,
       currentAge: params.currentAge,
     })
-
     const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
-
-    // Define formulas for calculated results
-    const resultFormulas: Record<string, string> = {
-      // Savings Rate = (Annual Contribution / Annual Income)
-      // Note: contributionAmount is monthly in inputs, so we multiply by 12
-      savingsRate: '({contributionAmount}*12)/{annualIncome}',
-    }
-
     exportToExcel({
-      calculatorName: 'Savings & Investment Rate',
-      inputs: inputValues,
-      results: resultValues,
-      projections: results.projections,
-      inputFormats,
-      resultFormats,
-      resultFormulas,
+      calculatorName: 'Savings & Investment Rate', inputs, results: resultValues, projections: results.projections,
+      inputFormats, resultFormats,
+      resultFormulas: {
+        savingsRate: params.savingsFrequency === 'monthly'
+          ? '({contributionAmount}*12)/{annualIncome}'
+          : '{contributionAmount}/{annualIncome}',
+      },
     })
   }
 
   return (
     <>
       <SEO {...calculatorSEO['savings-rate']} />
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-              <span className="text-3xl" role="img" aria-label="Calculator emoji">🧮</span>
-              Savings & Investment Rate Calculator
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              See how your investments can grow over time with consistent contributions.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
-          </div>
-      </div>
+      <div className="space-y-8">
+        <header>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Savings &amp; Investment Rate Calculator</h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">See how a repeatable contribution plan can grow over time.</p>
+        </header>
 
-      {/* Savings Rate Info Banner */}
-      <div className="bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-xl p-4">
-        <div className="flex gap-3">
-          <span className="text-2xl">💡</span>
-          <div>
-            <h3 className="font-semibold text-indigo-900 dark:text-indigo-100">The Power of Compound Interest</h3>
-            <p className="text-sm text-indigo-700 dark:text-indigo-300 mt-1">
-              Consistent investing is the key to building wealth. Even small amounts invested regularly can 
-              grow substantially over time thanks to compound interest. Start early and stay consistent!
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Inputs */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Investment Details</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <CurrencyInput
-              label="Starting Amount"
-              value={params.currentSavings}
-              onChange={(v) => setParam('currentSavings', v)}
-              tooltip="How much you're starting with"
-            />
-            
-            {/* Contribution Frequency Toggle */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Contribution Frequency
-              </label>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setContributionFrequency('monthly')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                    contributionFrequency === 'monthly'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  Monthly
-                </button>
-                <button
-                  onClick={() => setContributionFrequency('yearly')}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-colors ${
-                    contributionFrequency === 'yearly'
-                      ? 'bg-indigo-600 text-white'
-                      : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                  }`}
-                >
-                  Yearly
-                </button>
-              </div>
-            </div>
-
-            <CurrencyInput
-              label={`${contributionFrequency === 'monthly' ? 'Monthly' : 'Yearly'} Contribution`}
-              value={contributionAmount}
-              onChange={setContributionAmount}
-              tooltip={`Amount you'll invest ${contributionFrequency}`}
-            />
-
-            <InputGroup
-              label="Years Investing"
-              value={yearsInvesting}
-              onChange={setYearsInvesting}
-              tooltip="How long contributions and investment growth continue"
-              suffix="years"
-              min={1}
-              max={50}
-              showSlider
-            />
-
-            <PercentageInput
-              label="Expected Annual Return"
-              value={params.expectedReturn}
-              onChange={(v) => setParam('expectedReturn', v)}
-              tooltip="Average annual investment return before inflation"
-              min={0}
-              max={0.15}
-            />
-            <PercentageInput
-              label="Inflation Rate"
-              value={params.inflationRate}
-              onChange={(v) => setParam('inflationRate', v)}
-              tooltip="Expected annual increase in prices"
-              min={0}
-              max={0.10}
-            />
-
-            <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-              <CurrencyInput
-                label="Annual Income (Optional)"
-                value={annualIncome}
-                onChange={setAnnualIncome}
-                tooltip="For calculating your savings rate"
-              />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Main Result Highlight */}
-          <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl p-6 text-white">
-            <div className="space-y-4">
-              <div>
-                <p className="text-indigo-100 text-sm">Your Investment Will Grow To</p>
-                <p className="text-5xl font-bold">{formatCurrency(results.finalNominalBalance)}</p>
-                <p className="text-indigo-200 text-sm mt-1">in {yearsInvesting} years</p>
-              </div>
-              <div className="pt-4 border-t border-indigo-400/30">
-                <p className="text-indigo-100 text-sm">Inflation-Adjusted Value (Today's Dollars)</p>
-                <p className="text-3xl font-bold">{formatCurrency(results.finalInflationAdjustedBalance)}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Savings Rate Display */}
-          {annualIncome > 0 && (
-            <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl p-6 text-white">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                  <p className="text-green-100 text-sm">Your Savings Rate</p>
-                  <p className="text-5xl font-bold">{(results.savingsRate * 100).toFixed(1)}%</p>
-                  <p className={`mt-2 font-semibold ${results.savingsRate >= 0.2 ? 'text-green-200' : 'text-amber-200'}`}>
-                    {results.savingsCategory}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-green-100 text-sm">You're Investing</p>
-                  <p className="text-3xl font-bold">{formatCurrency(results.annualContribution)}</p>
-                  <p className="text-green-200 text-sm">per year</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Key Metrics */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <ResultCard
-              label="Total Invested"
-              value={results.totalInvested}
-              format="currency"
-              subtext="Your contributions"
-            />
-            <ResultCard
-              label="Investment Growth"
-              value={results.totalGrowth}
-              format="currency"
-              highlight
-              subtext="Earnings from returns"
-            />
-            <ResultCard
-              label="Inflation Impact"
-              value={results.inflationImpact}
-              format="currency"
-              subtext="Purchasing power loss"
-            />
-          </div>
-
-          {/* Chart */}
+        <section aria-labelledby="savings-plan-heading">
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Investment Growth Projection</h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                Compare nominal growth vs. inflation-adjusted purchasing power
-              </p>
+              <h2 id="savings-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Use after-tax take-home income to see the share of income you are investing.</p>
             </CardHeader>
-            <CardContent>
-              <ProjectionChart
-                data={results.projections}
-                showInflationAdjusted={true}
-                showMilestones={false}
-                colorScheme="purple"
-                height={400}
-              />
+            <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Used to label the projection timeline." min={18} max={80} showSlider />
+              <CurrencyInput label="Starting amount" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments already in the account." />
+              <div className="space-y-2">
+                <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contribution frequency</span>
+                <div className="inline-flex rounded-lg border border-gray-200 p-1 dark:border-gray-700" role="group" aria-label="Contribution frequency">
+                  {(['monthly', 'yearly'] as const).map(frequency => (
+                    <button
+                      key={frequency}
+                      type="button"
+                      onClick={() => setParam('savingsFrequency', frequency)}
+                      aria-pressed={params.savingsFrequency === frequency}
+                      className={`rounded-md px-3 py-2 text-sm font-medium ${params.savingsFrequency === frequency ? 'bg-fire-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}
+                    >
+                      {frequency === 'monthly' ? 'Monthly' : 'Yearly'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <CurrencyInput label={`${params.savingsFrequency === 'monthly' ? 'Monthly' : 'Annual'} contribution`} value={params.savingsContribution} onChange={value => setParam('savingsContribution', value)} tooltip={`Amount you invest each ${params.savingsFrequency === 'monthly' ? 'month' : 'year'}.`} />
+              <InputGroup label="Years investing" value={params.savingsYears} onChange={value => setParam('savingsYears', value)} onSliderChange={value => setParamDebounced('savingsYears', value)} tooltip="How long contributions and investment growth continue." suffix="years" min={1} max={50} showSlider />
+              <CurrencyInput label="After-tax take-home income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Annual income after taxes, used to calculate the savings rate." allowMonthlyToggle />
             </CardContent>
           </Card>
+        </section>
 
-          {/* Breakdown Details */}
+        <section aria-labelledby="savings-outlook-heading" className="space-y-4">
+          <div>
+            <h2 id="savings-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">The inflation-adjusted result reports purchasing power in today&apos;s dollars.</p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <ResultCard label="Investment rate" value={results.savingsRate} format="percent" highlight subtext={`${formatCurrency(results.annualContribution)} invested yearly`} />
+            <ResultCard label="Projected balance" value={results.finalNominalBalance} format="currency" subtext={`In ${params.savingsYears} years`} />
+            <ResultCard label="Value in today's dollars" value={results.finalInflationAdjustedBalance} format="currency" subtext="Inflation-adjusted purchasing power" />
+            <ResultCard label="Investment growth" value={results.totalGrowth} format="currency" subtext="Projected returns above contributions" />
+          </div>
+        </section>
+
+        <AdvancedDetails description="These assumptions control the nominal and inflation-adjusted growth scenarios.">
+          <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation." min={0} max={0.15} />
+          <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual price growth." min={0} max={0.1} />
+        </AdvancedDetails>
+
+        <section aria-labelledby="savings-projection-heading">
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Investment Breakdown</h2>
+              <h2 id="savings-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Investment growth projection</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">The dashed series shows the same plan in today&apos;s dollars.</p>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Starting Amount</span>
-                  <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(params.currentSavings)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {contributionFrequency === 'monthly' ? 'Monthly' : 'Yearly'} Contributions
-                  </span>
-                  <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(contributionAmount)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Total Contributions ({yearsInvesting} years)</span>
-                  <span className="font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(results.totalInvested)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Investment Earnings</span>
-                  <span className="font-semibold text-green-600 dark:text-green-400">{formatCurrency(results.totalGrowth)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-600 dark:text-gray-400">Final Balance</span>
-                  <span className="font-bold text-lg text-indigo-600 dark:text-indigo-400">{formatCurrency(results.finalNominalBalance)}</span>
-                </div>
-                <div className="flex justify-between items-center py-2">
-                  <span className="text-gray-600 dark:text-gray-400">Inflation-Adjusted Value</span>
-                  <span className="font-bold text-lg text-gray-900 dark:text-gray-100">{formatCurrency(results.finalInflationAdjustedBalance)}</span>
-                </div>
-              </div>
-              
-              <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                <p className="text-sm text-amber-800 dark:text-amber-200">
-                  <strong>Note:</strong> Inflation will reduce your purchasing power by {formatCurrency(results.inflationImpact)} 
-                  over {yearsInvesting} years at {(params.inflationRate * 100).toFixed(1)}% annual inflation.
-                </p>
-              </div>
-            </CardContent>
+            <CardContent><ProjectionChart data={results.projections} showMilestones={false} colorScheme="purple" height={380} /></CardContent>
           </Card>
-        </div>
-      </div>
+        </section>
 
-      <Disclaimer />
-    </div>
+        <section aria-labelledby="savings-breakdown-heading">
+          <h2 id="savings-breakdown-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Supporting analysis</h2>
+          <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
+            <div><dt className="text-gray-600 dark:text-gray-400">Starting amount</dt><dd className="mt-1 font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(params.currentSavings)}</dd></div>
+            <div><dt className="text-gray-600 dark:text-gray-400">Total contributions</dt><dd className="mt-1 font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(results.totalInvested)}</dd></div>
+            <div><dt className="text-gray-600 dark:text-gray-400">Inflation impact</dt><dd className="mt-1 font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(results.inflationImpact)}</dd></div>
+            <div><dt className="text-gray-600 dark:text-gray-400">Monthly contribution</dt><dd className="mt-1 font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(results.monthlyContribution)}</dd></div>
+          </dl>
+        </section>
+
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+      </div>
     </>
   )
 }

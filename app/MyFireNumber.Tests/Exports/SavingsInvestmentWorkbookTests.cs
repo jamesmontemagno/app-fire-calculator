@@ -23,6 +23,7 @@ public sealed class SavingsInvestmentWorkbookTests : IDisposable
 
         Assert.Equal(["Inputs", "Results", "Projection"], sheets.Select(sheet => sheet.Name!.Value));
         Assert.Equal("Monthly", GetCellText(workbookPart, sheets[0], "B7"));
+        Assert.Equal("Annual take-home income (after tax)", GetCellText(workbookPart, sheets[0], "A11"));
         Assert.Equal("IF(Inputs!B7=\"Monthly\",Inputs!B6*12,Inputs!B6)", GetCell(workbookPart, sheets[1], "B5").CellFormula!.Text);
         Assert.Equal("IF(Inputs!B11=0,0,B5/Inputs!B11)", GetCell(workbookPart, sheets[1], "B6").CellFormula!.Text);
         Assert.Equal("C2*(1+Inputs!$B$9)+D3", GetCell(workbookPart, sheets[2], "C3").CellFormula!.Text);

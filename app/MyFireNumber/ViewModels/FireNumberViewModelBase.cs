@@ -56,6 +56,9 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
     private string fireAgeText = string.Empty;
 
     [ObservableProperty]
+    private string retirementGoalText = string.Empty;
+
+    [ObservableProperty]
     private string savingsRateText = string.Empty;
 
     [ObservableProperty]
@@ -181,6 +184,7 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
             ? "Not reachable with these inputs"
             : $"{result.YearsToFire:N1} years";
         FireAgeText = double.IsPositiveInfinity(result.FireAge) ? "--" : $"Age {result.FireAge:N1}";
+        RetirementGoalText = result.RetirementGoal.Message;
         SavingsRateText = $"{result.SavingsRate:P1}";
         MonthlyContributionText = FormatCurrency(result.MonthlyContribution);
         ProgressToFire = result.FireNumber <= 0 ? 0 : Math.Clamp(standard.CurrentSavings / result.FireNumber, 0, 1);

@@ -2,31 +2,51 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateStandardFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { CurrencyInput, PercentageInput, AgeInput } from '../components/inputs'
-import { Card, CardHeader, CardContent, ResultCard, UrlActions, ProgressToFIRE, QuickPresets, Disclaimer, ExportButton } from '../components/ui'
+import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import {
+  AdvancedDetails,
+  CalculatorFooter,
+  Card,
+  CardContent,
+  CardHeader,
+  ProgressToFIRE,
+  ResultCard,
+} from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 
 export default function StandardFIRE() {
-  const { params, setParam, setParams, resetParams, saveParams, loadParams, copyUrl, hasCustomParams, hasUnsavedChanges, hasSavedParams, savedAt } = useCalculatorParams()
+  const {
+    params,
+    setParam,
+    setParamDebounced,
+    resetParams,
+    saveParams,
+    loadParams,
+    copyUrl,
+    hasCustomParams,
+    hasUnsavedChanges,
+    hasSavedParams,
+    savedAt,
+  } = useCalculatorParams()
 
-  const results = useMemo(() => {
-    return calculateStandardFIRE({
-      currentAge: params.currentAge,
-      currentSavings: params.currentSavings,
-      annualContribution: params.annualContribution,
-      annualIncome: params.annualIncome,
-      expectedReturn: params.expectedReturn,
-      inflationRate: params.inflationRate,
-      withdrawalRate: params.withdrawalRate,
-      annualExpenses: params.annualExpenses,
-    })
-  }, [params])
+  const results = useMemo(() => calculateStandardFIRE({
+    currentAge: params.currentAge,
+    retirementAge: params.retirementAge,
+    currentSavings: params.currentSavings,
+    annualContribution: params.annualContribution,
+    annualIncome: params.annualIncome,
+    expectedReturn: params.expectedReturn,
+    inflationRate: params.inflationRate,
+    withdrawalRate: params.withdrawalRate,
+    annualExpenses: params.annualExpenses,
+  }), [params])
 
   const handleExport = () => {
-    const { values: inputValues, formats: inputFormats } = prepareInputsForExport({
+    const { values: inputs, formats: inputFormats } = prepareInputsForExport({
       currentAge: params.currentAge,
+      retirementAge: params.retirementAge,
       currentSavings: params.currentSavings,
       annualContribution: params.annualContribution,
       annualIncome: params.annualIncome,
@@ -35,199 +55,88 @@ export default function StandardFIRE() {
       withdrawalRate: params.withdrawalRate,
       annualExpenses: params.annualExpenses,
     })
-
     const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
-
-    // Define formulas for calculated results
-    const resultFormulas: Record<string, string> = {
-      // FIRE Number = Annual Expenses / Withdrawal Rate
-      fireNumber: '{annualExpenses}/{withdrawalRate}',
-      // Savings Rate = Annual Contribution / (Annual Contribution + Annual Expenses)
-      savingsRate: '{annualContribution}/({annualContribution}+{annualExpenses})',
-      // Monthly Contribution = Annual Contribution / 12
-      monthlyContribution: '{annualContribution}/12',
-      // Coast FIRE Number = FIRE Number / ((1 + Real Return) ^ Years to Retirement)
-      // Real Return = (1 + Expected Return) / (1 + Inflation) - 1
-      // This is complex, so we'll use a calculated value for now
-      // Years to FIRE is also complex (logarithmic formula), so we use calculated value
-    }
-
     exportToExcel({
       calculatorName: 'Standard FIRE',
-      inputs: inputValues,
+      inputs,
       results: resultValues,
       projections: results.projections,
       inputFormats,
       resultFormats,
-      resultFormulas,
+      resultFormulas: {
+        fireNumber: '{annualExpenses}/{withdrawalRate}',
+        savingsRate: '{annualContribution}/{annualIncome}',
+        monthlyContribution: '{annualContribution}/12',
+      },
     })
   }
 
   return (
     <>
       <SEO {...calculatorSEO.standard} />
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="space-y-8">
+        <header>
+          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Standard FIRE Calculator</h1>
+          <p className="mt-1 text-gray-600 dark:text-gray-400">Estimate a practical path to financial independence using your spending and savings plan.</p>
+        </header>
+
+        <section aria-labelledby="standard-plan-heading">
+          <Card>
+            <CardHeader>
+              <h2 id="standard-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Use today&apos;s spending and after-tax income to make the estimate meaningful.</p>
+            </CardHeader>
+            <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Your current age." min={18} max={80} showSlider />
+              <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="The age you want this plan to support." min={params.currentAge + 1} max={90} showSlider />
+              <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments available for retirement, including workplace plans, IRAs, and brokerage accounts." />
+              <CurrencyInput label="Annual contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="How much you expect to invest each year." allowMonthlyToggle />
+              <CurrencyInput label="After-tax take-home income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Annual income after taxes. It is used to calculate your savings rate." allowMonthlyToggle />
+              <CurrencyInput label="Annual retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected annual after-tax spending in retirement, expressed in today’s purchasing power." allowMonthlyToggle />
+            </CardContent>
+          </Card>
+        </section>
+
+        <section aria-labelledby="standard-outlook-heading" className="space-y-4">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-              <span className="text-3xl" role="img" aria-label="Target emoji">🎯</span>
-              Standard FIRE Calculator
-            </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-1">
-              Calculate your path to financial independence using the 25x expenses rule.
-            </p>
+            <h2 id="standard-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Updates immediately as you change the plan above.</p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <ExportButton onExport={handleExport} />
-            <UrlActions onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
-        </div>
-      </div>
-
-      {/* Progress Bar */}
-      <ProgressToFIRE 
-        currentSavings={params.currentSavings} 
-        fireNumber={results.fireNumber}
-        yearsToFIRE={results.yearsToFIRE}
-      />
-
-      {/* Quick Presets */}
-      <QuickPresets onApply={(values) => setParams(values as any)} />
-
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Inputs */}
-        <Card className="lg:col-span-1">
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Your Information</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <AgeInput
-              label="Current Age"
-              value={params.currentAge}
-              onChange={(v) => setParam('currentAge', v)}
-              tooltip="Your current age"
-              showSlider
-            />
-            <CurrencyInput
-              label="Current Invested Assets"
-              value={params.currentSavings}
-              onChange={(v) => setParam('currentSavings', v)}
-              tooltip="Total invested assets (401k, IRA, brokerage)"
-            />
-            <CurrencyInput
-              label="Annual Contributions"
-              value={params.annualContribution}
-              onChange={(v) => setParam('annualContribution', v)}
-              tooltip="How much you save and invest per year"
-              allowMonthlyToggle
-            />
-            <CurrencyInput
-              label="Annual Net Income"
-              value={params.annualIncome}
-              onChange={(v) => setParam('annualIncome', v)}
-              tooltip="Your net (take-home) annual income after taxes"
-              allowMonthlyToggle
-            />
-            <CurrencyInput
-              label="Annual Retirement Expenses"
-              value={params.annualExpenses}
-              onChange={(v) => setParam('annualExpenses', v)}
-              tooltip="Your expected yearly spending in retirement"
-              allowMonthlyToggle
-            />
-            <PercentageInput
-              label="Expected Annual Return"
-              value={params.expectedReturn}
-              onChange={(v) => setParam('expectedReturn', v)}
-              tooltip="Average annual investment return (7% is typical for stocks)"
-              min={0}
-              max={0.20}
-            />
-            <PercentageInput
-              label="Inflation Rate"
-              value={params.inflationRate}
-              onChange={(v) => setParam('inflationRate', v)}
-              tooltip="Expected annual inflation (3% is historical average)"
-              min={0}
-              max={0.10}
-            />
-            <PercentageInput
-              label="Safe Withdrawal Rate"
-              value={params.withdrawalRate}
-              onChange={(v) => setParam('withdrawalRate', v)}
-              tooltip="The 4% rule - withdraw 4% of portfolio yearly"
-              min={0.02}
-              max={0.06}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Results */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* Key Metrics */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <ResultCard label="FIRE number" value={results.fireNumber} format="currency" highlight subtext="Target portfolio in today’s dollars" />
+            <ResultCard label="Years to FIRE" value={results.yearsToFIRE} format="years" subtext={`Estimated age ${Math.round(results.fireAge)}`} />
+            <ResultCard label="Savings rate" value={results.savingsRate} format="percent" subtext={`${formatCurrency(results.monthlyContribution)} per month`} />
             <ResultCard
-              label="FIRE Number"
-              value={results.fireNumber}
-              format="currency"
-              highlight
-              subtext="Target portfolio value"
-            />
-            <ResultCard
-              label="Years to FIRE"
-              value={results.yearsToFIRE}
-              format="years"
-              subtext={`At age ${Math.round(results.fireAge)}`}
-            />
-            <ResultCard
-              label="Savings Rate"
-              value={results.savingsRate}
-              format="percent"
-              subtext={`${formatCurrency(results.monthlyContribution)}/month`}
+              label={`Target age ${params.retirementAge}`}
+              value={results.retirementGoal.isOnTrack ? 'On track' : 'Off track'}
+              subtext={results.retirementGoal.message}
             />
           </div>
+          <ProgressToFIRE currentSavings={params.currentSavings} fireNumber={results.fireNumber} yearsToFIRE={results.yearsToFIRE} />
+        </section>
 
-          {/* Chart */}
+        <AdvancedDetails description="These slower-moving assumptions affect the projection and target calculation.">
+          <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation. This is an estimate, not a guarantee." min={0} max={0.15} />
+          <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual increase in prices. Spending is kept in today’s dollars for this calculation." min={0} max={0.1} />
+          <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="The portion of your portfolio you plan to spend each year in retirement." min={0.02} max={0.06} />
+        </AdvancedDetails>
+
+        <section aria-labelledby="standard-projection-heading">
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio Projection</h2>
+              <h2 id="standard-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Compare the projected portfolio with your FIRE number; the dashed line shows purchasing power in today&apos;s dollars.</p>
             </CardHeader>
-            <CardContent>
-              <ProjectionChart
-                data={results.projections}
-                fireNumber={results.fireNumber}
-                colorScheme="orange"
-                height={350}
-              />
-            </CardContent>
+            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} colorScheme="orange" height={350} /></CardContent>
           </Card>
+        </section>
 
-          {/* Additional Info */}
-          <Card>
-            <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Understanding Your Results</h2>
-            </CardHeader>
-            <CardContent className="prose dark:prose-invert max-w-none text-sm">
-              <p>
-                Your <strong>FIRE Number</strong> ({formatCurrency(results.fireNumber)}) is calculated as your 
-                annual expenses ({formatCurrency(params.annualExpenses)}) divided by your withdrawal 
-                rate ({(params.withdrawalRate * 100).toFixed(1)}%).
-              </p>
-              <p>
-                At your current savings rate, you'll reach financial independence in approximately{' '}
-                <strong>{results.yearsToFIRE.toFixed(1)} years</strong> (at age {Math.round(results.fireAge)}).
-              </p>
-              <p className="text-gray-500 dark:text-gray-400">
-                The chart shows your portfolio growth over time. The dashed line represents inflation-adjusted 
-                values (purchasing power). The red line is your FIRE target.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">
+          Your target portfolio equals annual retirement spending divided by your withdrawal rate. The target-age result compares the estimated FIRE age with your retirement-age goal; it does not change the FIRE calculation.
+        </p>
+
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
-
-      <Disclaimer />
-    </div>
     </>
   )
 }

@@ -23,8 +23,14 @@ public sealed class StandardFireWorkbookTests : IDisposable
         var sheets = (workbook.Sheets ?? throw new InvalidOperationException("Workbook sheets were not created.")).Elements<Sheet>().ToArray();
 
         Assert.Equal(["Inputs", "Results", "Projections"], sheets.Select(sheet => sheet.Name!.Value));
+        Assert.Equal("Annual take-home income (after tax)", GetCellText(workbookPart, sheets[0], "A9"));
+        Assert.Equal("Annual retirement spending (today's dollars)", GetCellText(workbookPart, sheets[0], "A10"));
         Assert.Equal("100000", GetCell(workbookPart, sheets[0], "B7").CellValue!.Text);
         Assert.Equal("Inputs!B10/Inputs!B13", GetCell(workbookPart, sheets[1], "B5").CellFormula!.Text);
+        Assert.Equal("Target retirement age", GetCellText(workbookPart, sheets[1], "A11"));
+        Assert.Equal("55", GetCell(workbookPart, sheets[1], "B11").CellValue!.Text);
+        Assert.Equal("Target-age goal", GetCellText(workbookPart, sheets[1], "A12"));
+        Assert.Equal(result.RetirementGoal.Message, GetCellText(workbookPart, sheets[1], "B12"));
         Assert.Equal("C2*(1+Inputs!$B$11)+D3", GetCell(workbookPart, sheets[2], "C3").CellFormula!.Text);
         Assert.Equal("C3/((1+Inputs!$B$12)^(A3-$A$2))", GetCell(workbookPart, sheets[2], "F3").CellFormula!.Text);
     }
@@ -79,5 +85,10 @@ public sealed class StandardFireWorkbookTests : IDisposable
         var worksheetPart = (WorksheetPart)workbookPart.GetPartById(relationshipId);
         var worksheet = worksheetPart.Worksheet ?? throw new InvalidOperationException("Worksheet was not created.");
         return Assert.Single(worksheet.Descendants<Cell>(), cell => cell.CellReference?.Value == cellReference);
+    }
+
+    private static string GetCellText(WorkbookPart workbookPart, Sheet sheet, string cellReference)
+    {
+        return GetCell(workbookPart, sheet, cellReference).InlineString?.Text?.Text ?? string.Empty;
     }
 }

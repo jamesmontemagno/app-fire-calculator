@@ -48,7 +48,7 @@ public static class SavingsInvestmentWorkbook
             new(CreateTextCell("A8", "Years investing"), CreateNumberCell("B8", draft.YearsInvesting, DecimalStyleIndex)),
             new(CreateTextCell("A9", "Expected return"), CreateNumberCell("B9", draft.ExpectedReturn, PercentageStyleIndex)),
             new(CreateTextCell("A10", "Inflation rate"), CreateNumberCell("B10", draft.InflationRate, PercentageStyleIndex)),
-            new(CreateTextCell("A11", "Annual income"), CreateNumberCell("B11", draft.AnnualIncome, CurrencyStyleIndex)),
+            new(CreateTextCell("A11", "Annual take-home income (after tax)"), CreateNumberCell("B11", draft.AnnualIncome, CurrencyStyleIndex)),
             new(CreateTextCell("A12", "Current age"), CreateNumberCell("B12", draft.CurrentAge, DecimalStyleIndex))
         };
         AddWorksheet(workbookPart, sheets, "Inputs", 1, rows, 32, 20);

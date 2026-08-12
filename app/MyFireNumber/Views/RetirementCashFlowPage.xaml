@@ -11,21 +11,6 @@
              Shell.NavBarIsVisible="True"
              Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Save"
-                     Order="Primary"
-                     Priority="0"
-                     Command="{Binding SavePlanAndCloseCommand}"
-                     SemanticProperties.Description="{Binding SavePlanActionDescription}">
-            <ToolbarItem.IconImageSource>
-                <FontImageSource FontFamily="FontAwesomeSolid"
-                                 Glyph="&#xf0c7;"
-                                 Color="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                 Size="18" />
-            </ToolbarItem.IconImageSource>
-        </ToolbarItem>
-    </ContentPage.ToolbarItems>
-
     <ScrollView>
         <VerticalStackLayout Padding="20,20,20,32" Spacing="18">
             <ActivityIndicator IsRunning="{Binding IsLoading}"
@@ -48,18 +33,28 @@
                                              Details="Retirement cash flow planning shows when money enters and leaves your plan year by year, including deferred compensation, retirement accounts, savings, part-time income, and expenses. It can reveal funding gaps that a single portfolio target may miss. It may fit people with complex, multi-account or phased-retirement plans."
                                              IconGlyph="&#xf1da;" />
                 <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
-                    <VerticalStackLayout Spacing="10">
-                        <Label Text="Scenario" FontAttributes="Bold" FontSize="20" />
-                        <VerticalStackLayout Spacing="10">
-                            <Grid ColumnDefinitions="*,*" ColumnSpacing="10" RowDefinitions="Auto,Auto,Auto"><VerticalStackLayout Spacing="4"><Label Text="Current age" FontAttributes="Bold" /><Entry Text="{Binding RetirementCurrentAgeText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="45" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" /></VerticalStackLayout><VerticalStackLayout Grid.Column="1" Spacing="4"><Label Text="Semi-retirement age" FontAttributes="Bold" /><Entry Text="{Binding RetirementSemiAgeText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="55" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" /></VerticalStackLayout><VerticalStackLayout Grid.Row="1" Spacing="4"><Label Text="Plan through age" FontAttributes="Bold" /><Entry Text="{Binding RetirementPlanThroughAgeText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="90" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" /></VerticalStackLayout><VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="4"><Label Text="Annual expenses" FontAttributes="Bold" /><Entry Text="{Binding RetirementExpensesText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="80000" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" /></VerticalStackLayout><VerticalStackLayout Grid.Row="2" Spacing="4"><Label Text="Inflation rate (%)" FontAttributes="Bold" /><Entry Text="{Binding RetirementInflationText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="3" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" /></VerticalStackLayout></Grid>
-                            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8">
-                               <Label Text="Withdraw only after semi-retirement" VerticalTextAlignment="Center" />
-                               <Switch Grid.Column="1" IsToggled="{Binding WithdrawOnlyAfterRetirement, Mode=TwoWay}" SemanticProperties.Description="Withdraw from accounts only after semi-retirement" />
-                               <Label Grid.Row="1" Text="Reinvest annual surplus" VerticalTextAlignment="Center" />
-                               <Switch Grid.Row="1" Grid.Column="1" IsToggled="{Binding ReinvestRetirementSurplus, Mode=TwoWay}" SemanticProperties.Description="Reinvest annual retirement cash-flow surplus" />
-                            </Grid>
-                            <Label Text="Default scenario: $300,000 savings, $500,000 401(k), and $20,000 part-time income from age 55 to 65." FontSize="13" TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" LineHeight="1.3" />
-                        </VerticalStackLayout>
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Scenario" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="45" Text="{Binding RetirementCurrentAgeText}" />
+                            <controls:NumericInputView Grid.Column="1" Header="Semi-retirement age" HelpText="The age when your plan changes from full-time work." Placeholder="55" Text="{Binding RetirementSemiAgeText}" />
+                        </Grid>
+                        <controls:NumericInputView Header="Annual expenses" HelpText="Expected annual retirement spending, in today’s dollars." Placeholder="80000" Text="{Binding RetirementExpensesText}" />
+                        <controls:AdvancedAssumptionsExpander>
+                            <VerticalStackLayout Margin="0,12,0,0" Spacing="12">
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                    <controls:NumericInputView Header="Plan through age" HelpText="The last age included in the cash-flow plan." Placeholder="90" Text="{Binding RetirementPlanThroughAgeText}" />
+                                    <controls:PercentageInputView Grid.Column="1" Header="Inflation rate (%)" HelpText="Expected annual increase in expenses." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding RetirementInflationText}" />
+                                </Grid>
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="8">
+                                    <Label Text="Withdraw only after semi-retirement" VerticalTextAlignment="Center" />
+                                    <Switch Grid.Column="1" IsToggled="{Binding WithdrawOnlyAfterRetirement}" SemanticProperties.Description="Withdraw from accounts only after semi-retirement" />
+                                    <Label Grid.Row="1" Text="Reinvest annual surplus" VerticalTextAlignment="Center" />
+                                    <Switch Grid.Row="1" Grid.Column="1" IsToggled="{Binding ReinvestRetirementSurplus}" SemanticProperties.Description="Reinvest annual retirement cash-flow surplus" />
+                                </Grid>
+                                <Label Text="Default scenario: $300,000 savings, $500,000 401(k), and $20,000 part-time income from age 55 to 65." Style="{StaticResource CalculatorSupportingText}" />
+                            </VerticalStackLayout>
+                        </controls:AdvancedAssumptionsExpander>
                     </VerticalStackLayout>
                 </Border>
 
@@ -204,8 +199,19 @@
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
-                <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="10"><Entry Text="{Binding PlanNameText, Mode=TwoWay}" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" Placeholder="My Retirement Cash Flow Plan" PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" SemanticProperties.Description="Name for this saved Retirement Cash Flow plan" /><Grid ColumnDefinitions="*,*" ColumnSpacing="10"><Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" Background="#9A5C17" TextColor="#FFFFFF" /><Button Grid.Column="1" Text="Export to Excel" Command="{Binding ExportCommand}" Background="#2B6F53" TextColor="#FFFFFF" /></Grid><Label IsVisible="{Binding HasExportStatusMessage}" Text="{Binding ExportStatusMessage}" FontSize="13" /></VerticalStackLayout></Border>
-                <controls:EducationalDisclaimerView />
+                <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Entry Text="{Binding PlanNameText}" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" Placeholder="My Retirement Cash Flow Plan" SemanticProperties.Description="Name for this saved Retirement Cash Flow plan" />
+                        <Button Text="Save and return"
+                                Command="{Binding SavePlanAndCloseCommand}"
+                                SemanticProperties.Description="Save this retirement cash-flow plan and return to the previous screen." />
+                        <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Create a Retirement Cash Flow workbook on this device and open the native share sheet." />
+                        <Label IsVisible="{Binding HasPlanStatusMessage}" Text="{Binding PlanStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
+                        <Label IsVisible="{Binding HasExportStatusMessage}" Text="{Binding ExportStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
+                        <controls:EducationalDisclaimerView />
+                    </VerticalStackLayout>
+                </Border>
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>

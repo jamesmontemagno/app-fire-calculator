@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyFireNumber.Views.Controls.NumericInputView"
+             x:Name="Root">
+    <Grid RowDefinitions="Auto,Auto"
+          RowSpacing="4">
+        <local:FieldHelpView xmlns:local="clr-namespace:MyFireNumber.Views.Controls"
+                             Header="{Binding Header, Source={x:Reference Root}}"
+                             HelpText="{Binding HelpText, Source={x:Reference Root}}" />
+        <Entry Grid.Row="1"
+               Text="{Binding Text, Source={x:Reference Root}, Mode=TwoWay}"
+               Placeholder="{Binding Placeholder, Source={x:Reference Root}}"
+               Keyboard="Numeric"
+               Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+               PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+               SemanticProperties.Description="{Binding HelpText, Source={x:Reference Root}}" />
+    </Grid>
+</ContentView>

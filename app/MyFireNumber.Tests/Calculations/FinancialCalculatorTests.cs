@@ -51,6 +51,68 @@ public class FinancialCalculatorTests
         Assert.Equal(2_000, result.MonthlyContribution);
         Assert.Equal(36, result.Projections.Count);
         Assert.Equal(new ProjectionPoint(30, 2026, 100_000, 100_000, 100_000, 100_000), result.Projections[0]);
+        Assert.Equal(55, result.RetirementGoal.TargetRetirementAge);
+        Assert.Equal(-0.6, result.RetirementGoal.TargetAgeGap, 10);
+        Assert.True(result.RetirementGoal.IsOnTrack);
+        Assert.Contains("On track", result.RetirementGoal.Message);
+    }
+
+    [Fact]
+    public void StandardFire_RetirementAgeChangesGoalAssessmentWithoutChangingFireMath()
+    {
+        var earlierTarget = FinancialCalculator.CalculateStandardFire(DefaultInputs with { RetirementAge = 54 });
+        var laterTarget = FinancialCalculator.CalculateStandardFire(DefaultInputs with { RetirementAge = 56 });
+
+        Assert.Equal(earlierTarget.FireNumber, laterTarget.FireNumber);
+        Assert.Equal(earlierTarget.YearsToFire, laterTarget.YearsToFire);
+        Assert.Equal(earlierTarget.FireAge, laterTarget.FireAge);
+
+        Assert.Equal(0.4, earlierTarget.RetirementGoal.TargetAgeGap, 10);
+        Assert.False(earlierTarget.RetirementGoal.IsOnTrack);
+        Assert.Contains("Off track", earlierTarget.RetirementGoal.Message);
+
+        Assert.Equal(-1.6, laterTarget.RetirementGoal.TargetAgeGap, 10);
+        Assert.True(laterTarget.RetirementGoal.IsOnTrack);
+        Assert.Contains("On track", laterTarget.RetirementGoal.Message);
+    }
+
+    [Fact]
+    public void StandardFire_WhenUnreachable_AssessesTheRetirementGoalAsOffTrack()
+    {
+        var result = FinancialCalculator.CalculateStandardFire(DefaultInputs with
+        {
+            CurrentSavings = 0,
+            AnnualContribution = 0,
+            ExpectedReturn = 0,
+            InflationRate = 0
+        });
+
+        Assert.True(double.IsPositiveInfinity(result.FireAge));
+        Assert.True(double.IsPositiveInfinity(result.RetirementGoal.CalculatedFireAge));
+        Assert.False(result.RetirementGoal.IsOnTrack);
+        Assert.Equal("Off track: FIRE is not reachable with the current assumptions.", result.RetirementGoal.Message);
+    }
+
+    [Fact]
+    public void StandardFireResult_SevenArgumentConstructorProvidesAnUnavailableGoalAssessment()
+    {
+        var result = new StandardFireResult(1, 2, 3, [], 4, 5, 6);
+
+        Assert.False(result.RetirementGoal.IsOnTrack);
+        Assert.Equal("Retirement goal assessment is unavailable.", result.RetirementGoal.Message);
+    }
+
+    [Fact]
+    public void LeanAndFatFire_ExposeTheRetirementGoalAssessment()
+    {
+        var inputs = DefaultInputs with { RetirementAge = 54 };
+        var lean = FinancialCalculator.CalculateLeanFire(inputs);
+        var fat = FinancialCalculator.CalculateFatFire(inputs);
+
+        Assert.Equal(lean.Standard.RetirementGoal, lean.RetirementGoal);
+        Assert.Equal(fat.Standard.RetirementGoal, fat.RetirementGoal);
+        Assert.False(lean.RetirementGoal.IsOnTrack);
+        Assert.False(fat.RetirementGoal.IsOnTrack);
     }
 
     [Fact]

@@ -49,8 +49,8 @@ public static class BaristaFireWorkbook
             ("Current age", draft.CurrentAge, DecimalStyleIndex),
             ("Current savings", draft.CurrentSavings, CurrencyStyleIndex),
             ("Annual contribution", draft.AnnualContribution, CurrencyStyleIndex),
-            ("Annual expenses", draft.AnnualExpenses, CurrencyStyleIndex),
-            ("Part-time annual income", draft.PartTimeAnnualIncome, CurrencyStyleIndex),
+            ("Annual retirement spending (today's dollars)", draft.AnnualExpenses, CurrencyStyleIndex),
+            ("Part-time take-home income (after tax)", draft.PartTimeAnnualIncome, CurrencyStyleIndex),
             ("Expected return", draft.ExpectedReturn, PercentageStyleIndex),
             ("Inflation rate", draft.InflationRate, PercentageStyleIndex),
             ("Safe withdrawal rate", draft.WithdrawalRate, PercentageStyleIndex)

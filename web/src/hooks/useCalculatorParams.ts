@@ -1,5 +1,5 @@
 import { useLocation, useSearchParams } from 'react-router-dom'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { DebtItem } from '../utils/calculations'
 import { STANDARD_STORAGE_KEY_PREFIX } from '../utils/savedCalculationStorage'
@@ -29,6 +29,12 @@ interface CalculatorParams {
   debtMonths: number
   debtMode: 'fixed' | 'target'
   debtStrategy: 'snowball' | 'avalanche'
+  savingsFrequency: 'monthly' | 'yearly'
+  savingsContribution: number
+  savingsYears: number
+  healthcareMonthlyPremium: number
+  healthcareAnnualDeductible: number
+  healthcareAnnualOutOfPocket: number
 }
 
 const DEFAULTS: CalculatorParams = {
@@ -50,6 +56,12 @@ const DEFAULTS: CalculatorParams = {
   debtMonths: 36,
   debtMode: 'fixed',
   debtStrategy: 'snowball',
+  savingsFrequency: 'monthly',
+  savingsContribution: 500,
+  savingsYears: 30,
+  healthcareMonthlyPremium: 600,
+  healthcareAnnualDeductible: 2500,
+  healthcareAnnualOutOfPocket: 2000,
 }
 
 const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
@@ -71,6 +83,70 @@ const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
   debtMonths: 'months',
   debtMode: 'mode',
   debtStrategy: 'strategy',
+  savingsFrequency: 'savingsFrequency',
+  savingsContribution: 'savingsContribution',
+  savingsYears: 'savingsYears',
+  healthcareMonthlyPremium: 'healthcarePremium',
+  healthcareAnnualDeductible: 'healthcareDeductible',
+  healthcareAnnualOutOfPocket: 'healthcareOop',
+}
+
+interface NumericBounds {
+  min?: number
+  max?: number
+}
+
+const NUMERIC_BOUNDS: Partial<Record<keyof CalculatorParams, NumericBounds>> = {
+  currentAge: { min: 18, max: 80 },
+  retirementAge: { min: 18, max: 90 },
+  currentSavings: { min: 0 },
+  annualContribution: { min: 0 },
+  annualIncome: { min: 0 },
+  expectedReturn: { min: 0, max: 0.15 },
+  inflationRate: { min: 0, max: 0.1 },
+  withdrawalRate: { min: 0.025, max: 0.06 },
+  annualExpenses: { min: 0 },
+  partTimeIncome: { min: 0 },
+  portfolioValue: { min: 0 },
+  retirementYears: { min: 10, max: 60 },
+  debtBudget: { min: 0 },
+  debtExtra: { min: 0 },
+  debtMonths: { min: 1, max: 360 },
+  savingsContribution: { min: 0 },
+  savingsYears: { min: 1, max: 50 },
+  healthcareMonthlyPremium: { min: 0, max: 3000 },
+  healthcareAnnualDeductible: { min: 0, max: 20000 },
+  healthcareAnnualOutOfPocket: { min: 0, max: 20000 },
+}
+
+const ROUTE_NUMERIC_BOUNDS: Record<string, Partial<Record<keyof CalculatorParams, NumericBounds>>> = {
+  '/standard': {
+    withdrawalRate: { min: 0.02, max: 0.06 },
+  },
+  '/withdrawal': {
+    withdrawalRate: { min: 0.02, max: 0.08 },
+  },
+  '/healthcare': {
+    currentAge: { min: 18, max: 64 },
+    retirementAge: { min: 18, max: 64 },
+    inflationRate: { min: 0, max: 0.15 },
+  },
+}
+
+function parseNumericParam(
+  value: string,
+  fallback: number,
+  bounds?: NumericBounds,
+): number {
+  if (value.trim() === '') return fallback
+
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return fallback
+
+  return Math.min(
+    bounds?.max ?? Number.POSITIVE_INFINITY,
+    Math.max(bounds?.min ?? Number.NEGATIVE_INFINITY, parsed),
+  )
 }
 
 // localStorage utilities
@@ -127,17 +203,42 @@ function matchesSavedParams(
   )
 }
 
+function applyParamToSearchParams<Key extends keyof CalculatorParams>(
+  searchParams: URLSearchParams,
+  key: Key,
+  value: CalculatorParams[Key],
+  savedParams: Partial<CalculatorParams> | null,
+) {
+  const defaultValue = DEFAULTS[key]
+  const isDefault = key === 'debts'
+    ? JSON.stringify(value) === JSON.stringify(defaultValue)
+    : value === defaultValue
+  const savedValue = savedParams?.[key]
+  const matchesSavedValue = key === 'debts'
+    ? JSON.stringify(value) === JSON.stringify(savedValue)
+    : value === savedValue
+
+  if (isDefault && (savedValue === undefined || matchesSavedValue)) {
+    searchParams.delete(PARAM_KEYS[key])
+  } else {
+    searchParams.set(PARAM_KEYS[key], key === 'debts' ? JSON.stringify(value) : String(value))
+  }
+}
+
 export function useCalculatorParams() {
   const [searchParams, setSearchParams] = useSearchParams()
   const location = useLocation()
-  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const debounceTimersRef = useRef<Partial<Record<keyof CalculatorParams, ReturnType<typeof setTimeout>>>>({})
   const storageKey = `${STANDARD_STORAGE_KEY_PREFIX}:${location.pathname}`
   const [storedParams, setStoredParams] = useState<SavedCalculatorParams | null>(
     () => loadFromStorage(storageKey),
   )
   const [savedParams, setSavedParams] = useState<Partial<CalculatorParams> | null>(null)
+  const [pendingParams, setPendingParams] = useState<Partial<CalculatorParams>>({})
+  const pendingParamsRef = useRef<Partial<CalculatorParams>>({})
 
-  const params = useMemo((): CalculatorParams => {
+  const resolvedParams = useMemo((): CalculatorParams => {
+    const routeBounds = ROUTE_NUMERIC_BOUNDS[location.pathname]
     const getParam = (key: keyof CalculatorParams): any => {
       const urlKey = PARAM_KEYS[key]
       const urlValue = searchParams.get(urlKey)
@@ -165,9 +266,15 @@ export function useCalculatorParams() {
         if (key === 'debtStrategy') {
           return urlValue === 'snowball' || urlValue === 'avalanche' ? urlValue : DEFAULTS[key]
         }
+        if (key === 'savingsFrequency') {
+          return urlValue === 'monthly' || urlValue === 'yearly' ? urlValue : DEFAULTS[key]
+        }
         
-        const parsed = parseFloat(urlValue)
-        return isNaN(parsed) ? DEFAULTS[key] : parsed
+        return parseNumericParam(
+          urlValue,
+          DEFAULTS[key] as number,
+          routeBounds?.[key] ?? NUMERIC_BOUNDS[key],
+        )
       }
       
       // If no URL value, try saved values for this calculator section.
@@ -183,9 +290,18 @@ export function useCalculatorParams() {
       return DEFAULTS[key]
     }
 
+    const currentAge = getParam('currentAge') as number
+    const maximumRetirementAge = location.pathname === '/healthcare' ? 64 : 90
+    const minimumRetirementAge = location.pathname === '/healthcare'
+      ? currentAge
+      : currentAge + 1
+
     return {
-      currentAge: getParam('currentAge'),
-      retirementAge: getParam('retirementAge'),
+      currentAge,
+      retirementAge: Math.min(
+        maximumRetirementAge,
+        Math.max(minimumRetirementAge, getParam('retirementAge') as number),
+      ),
       currentSavings: getParam('currentSavings'),
       annualContribution: getParam('annualContribution'),
       annualIncome: getParam('annualIncome'),
@@ -202,88 +318,118 @@ export function useCalculatorParams() {
       debtMonths: getParam('debtMonths'),
       debtMode: getParam('debtMode'),
       debtStrategy: getParam('debtStrategy'),
+      savingsFrequency: getParam('savingsFrequency'),
+      savingsContribution: getParam('savingsContribution'),
+      savingsYears: getParam('savingsYears'),
+      healthcareMonthlyPremium: getParam('healthcareMonthlyPremium'),
+      healthcareAnnualDeductible: getParam('healthcareAnnualDeductible'),
+      healthcareAnnualOutOfPocket: getParam('healthcareAnnualOutOfPocket'),
     }
-  }, [savedParams, searchParams])
+  }, [location.pathname, savedParams, searchParams])
+  const params = useMemo(() => ({ ...resolvedParams, ...pendingParams }), [pendingParams, resolvedParams])
 
-  const setParam = useCallback((key: keyof CalculatorParams, value: any) => {
-    const urlKey = PARAM_KEYS[key]
-    setSearchParams(prev => {
-      const newParams = new URLSearchParams(prev)
-      const defaultValue = DEFAULTS[key]
-      
-      // Compare with defaults
-      const isDefault = key === 'debts'
-        ? JSON.stringify(value) === JSON.stringify(defaultValue)
-        : value === defaultValue
-      
-      const savedValue = savedParams?.[key]
-      const matchesSavedValue = key === 'debts'
-        ? JSON.stringify(value) === JSON.stringify(savedValue)
-        : value === savedValue
-      
-      if (isDefault && (savedValue === undefined || matchesSavedValue)) {
-        newParams.delete(urlKey)
-      } else {
-        const stringValue = key === 'debts'
-          ? JSON.stringify(value)
-          : value.toString()
-        newParams.set(urlKey, stringValue)
-      }
-      return newParams
+  useEffect(() => {
+    pendingParamsRef.current = pendingParams
+  }, [pendingParams])
+
+  useEffect(() => () => {
+    Object.values(debounceTimersRef.current).forEach(timer => {
+      if (timer) clearTimeout(timer)
+    })
+  }, [])
+
+  const clearPendingParam = useCallback((key: keyof CalculatorParams) => {
+    const timer = debounceTimersRef.current[key]
+    if (timer) clearTimeout(timer)
+    delete debounceTimersRef.current[key]
+
+    if (!(key in pendingParamsRef.current)) return
+    const nextPendingParams = { ...pendingParamsRef.current }
+    delete nextPendingParams[key]
+    pendingParamsRef.current = nextPendingParams
+    setPendingParams(nextPendingParams)
+  }, [])
+
+  const cancelPendingParams = useCallback(() => {
+    Object.values(debounceTimersRef.current).forEach(timer => {
+      if (timer) clearTimeout(timer)
+    })
+    debounceTimersRef.current = {}
+    pendingParamsRef.current = {}
+    setPendingParams({})
+  }, [])
+
+  const setParam = useCallback(<Key extends keyof CalculatorParams>(
+    key: Key,
+    value: CalculatorParams[Key],
+  ) => {
+    clearPendingParam(key)
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous)
+      applyParamToSearchParams(next, key, value, savedParams)
+      return next
     }, { replace: true })
-  }, [savedParams, setSearchParams])
+  }, [clearPendingParam, savedParams, setSearchParams])
 
-  // Debounced version of setParam for high-frequency updates (like slider inputs)
-  const setParamDebounced = useCallback((key: keyof CalculatorParams, value: any, delay = 300) => {
-    // Clear existing timer
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current)
-    }
-    
-    // Set new timer
-    debounceTimerRef.current = setTimeout(() => {
+  const setParamDebounced = useCallback(<Key extends keyof CalculatorParams>(
+    key: Key,
+    value: CalculatorParams[Key],
+    delay = 300,
+  ) => {
+    const timer = debounceTimersRef.current[key]
+    if (timer) clearTimeout(timer)
+
+    const nextPendingParams = { ...pendingParamsRef.current, [key]: value }
+    pendingParamsRef.current = nextPendingParams
+    setPendingParams(nextPendingParams)
+    debounceTimersRef.current[key] = setTimeout(() => {
+      delete debounceTimersRef.current[key]
       setParam(key, value)
     }, delay)
   }, [setParam])
 
-  const setParams = useCallback((updates: Partial<CalculatorParams>) => {
-    setSearchParams(prev => {
-      const newParams = new URLSearchParams(prev)
-      Object.entries(updates).forEach(([key, value]) => {
-        const typedKey = key as keyof CalculatorParams
-        const urlKey = PARAM_KEYS[typedKey]
-        const defaultValue = DEFAULTS[typedKey]
-        
-        const isDefault = key === 'debts'
-          ? JSON.stringify(value) === JSON.stringify(defaultValue)
-          : value === defaultValue
-        
-        const savedValue = savedParams?.[typedKey]
-        const matchesSavedValue = typedKey === 'debts'
-          ? JSON.stringify(value) === JSON.stringify(savedValue)
-          : value === savedValue
+  const flushPendingParams = useCallback(() => {
+    const pending = pendingParamsRef.current
+    if (Object.keys(pending).length === 0) return
 
-        if (isDefault && (savedValue === undefined || matchesSavedValue)) {
-          newParams.delete(urlKey)
-        } else {
-          const stringValue = key === 'debts'
-            ? JSON.stringify(value)
-            : value.toString()
-          newParams.set(urlKey, stringValue)
-        }
+    Object.values(debounceTimersRef.current).forEach(timer => {
+      if (timer) clearTimeout(timer)
+    })
+    debounceTimersRef.current = {}
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous)
+      ;(Object.keys(pending) as (keyof CalculatorParams)[]).forEach(key => {
+        const value = pending[key]
+        if (value !== undefined) applyParamToSearchParams(next, key, value, savedParams)
       })
-      return newParams
+      return next
     }, { replace: true })
+    pendingParamsRef.current = {}
+    setPendingParams({})
   }, [savedParams, setSearchParams])
 
+  const setParams = useCallback((updates: Partial<CalculatorParams>) => {
+    cancelPendingParams()
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous)
+      ;(Object.keys(updates) as (keyof CalculatorParams)[]).forEach(key => {
+        const value = updates[key]
+        if (value !== undefined) applyParamToSearchParams(next, key, value, savedParams)
+      })
+      return next
+    }, { replace: true })
+  }, [cancelPendingParams, savedParams, setSearchParams])
+
   const resetParams = useCallback(() => {
+    cancelPendingParams()
     setSearchParams(new URLSearchParams(), { replace: true })
     clearStorage(storageKey)
     setStoredParams(null)
     setSavedParams(null)
-  }, [setSearchParams, storageKey])
+  }, [cancelPendingParams, setSearchParams, storageKey])
 
   const saveParams = useCallback(() => {
+    flushPendingParams()
     const nextSavedParams = {
       params,
       savedAt: new Date().toISOString(),
@@ -291,35 +437,42 @@ export function useCalculatorParams() {
     saveToStorage(storageKey, nextSavedParams)
     setStoredParams(nextSavedParams)
     setSavedParams(params)
-  }, [params, storageKey])
+  }, [flushPendingParams, params, storageKey])
 
   const loadParams = useCallback(() => {
     if (!storedParams) return
+    cancelPendingParams()
     setSearchParams(() => {
       const next = new URLSearchParams()
       ;(Object.keys(DEFAULTS) as (keyof CalculatorParams)[]).forEach(key => {
         const value = storedParams.params[key]
         if (value === undefined || value === null) return
-        next.set(
-          PARAM_KEYS[key],
-          key === 'debts' ? JSON.stringify(value) : String(value),
-        )
+        next.set(PARAM_KEYS[key], key === 'debts' ? JSON.stringify(value) : String(value))
       })
       return next
     }, { replace: true })
     setSavedParams(storedParams.params)
-  }, [setSearchParams, storedParams])
+  }, [cancelPendingParams, setSearchParams, storedParams])
 
   const copyUrl = useCallback(async () => {
+    const pending = pendingParamsRef.current
+    const next = new URLSearchParams(searchParams)
+    ;(Object.keys(pending) as (keyof CalculatorParams)[]).forEach(key => {
+      const value = pending[key]
+      if (value !== undefined) applyParamToSearchParams(next, key, value, savedParams)
+    })
+    const url = new URL(window.location.href)
+    url.search = next.toString()
+    flushPendingParams()
     try {
-      await navigator.clipboard.writeText(window.location.href)
+      await navigator.clipboard.writeText(url.toString())
       return true
     } catch {
       return false
     }
-  }, [])
+  }, [flushPendingParams, savedParams, searchParams])
 
-  const hasCustomParams = searchParams.toString().length > 0
+  const hasCustomParams = searchParams.toString().length > 0 || Object.keys(pendingParams).length > 0
   const hasUnsavedChanges = savedParams
     ? !matchesSavedParams(params, savedParams)
     : storedParams
