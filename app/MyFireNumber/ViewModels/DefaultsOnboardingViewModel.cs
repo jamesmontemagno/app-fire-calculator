@@ -6,108 +6,75 @@ namespace MyFireNumber.ViewModels;
 
 public partial class DefaultsOnboardingViewModel : ObservableObject
 {
+    private const double RoundingTolerance = 0.000001;
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
+    private readonly ICurrencyPreferencesService currencyPreferencesService;
     private readonly INavigationService navigationService;
 
     public DefaultsOnboardingViewModel(
         ICalculatorDefaultsService calculatorDefaultsService,
+        ICurrencyPreferencesService currencyPreferencesService,
         INavigationService navigationService)
     {
         this.calculatorDefaultsService = calculatorDefaultsService;
+        this.currencyPreferencesService = currencyPreferencesService;
         this.navigationService = navigationService;
 
         var defaults = calculatorDefaultsService.Current;
-        expectedReturnPercent = defaults.ExpectedReturn * 100;
-        inflationRatePercent = defaults.InflationRate * 100;
-        withdrawalRatePercent = defaults.WithdrawalRate * 100;
         currentAge = defaults.CurrentAge;
-        retirementAge = defaults.RetirementAge;
+        annualIncome = defaults.AnnualIncome;
+        annualExpenses = defaults.AnnualExpenses;
     }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ExpectedReturnText))]
-    private double expectedReturnPercent;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(InflationRateText))]
-    private double inflationRatePercent;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(WithdrawalRateText))]
-    private double withdrawalRatePercent;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(CurrentAgeText), nameof(MinimumRetirementAge))]
+    [NotifyPropertyChangedFor(nameof(CurrentAgeText))]
     private double currentAge;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(RetirementAgeText))]
-    private double retirementAge;
+    [NotifyPropertyChangedFor(nameof(AnnualIncomeText))]
+    private double annualIncome;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasValidationMessage))]
-    private string validationMessage = string.Empty;
+    [NotifyPropertyChangedFor(nameof(AnnualExpensesText))]
+    private double annualExpenses;
 
-    public string ExpectedReturnText => $"{ExpectedReturnPercent:0.0}%";
-    public string InflationRateText => $"{InflationRatePercent:0.0}%";
-    public string WithdrawalRateText => $"{WithdrawalRatePercent:0.0}%";
     public string CurrentAgeText => $"{CurrentAge:0}";
-    public string RetirementAgeText => $"{RetirementAge:0}";
-    public double MinimumRetirementAge => CurrentAge + 1;
-    public bool HasValidationMessage => !string.IsNullOrWhiteSpace(ValidationMessage);
+    public string AnnualIncomeText => currencyPreferencesService.Format(AnnualIncome);
+    public string AnnualExpensesText => currencyPreferencesService.Format(AnnualExpenses);
+    public double MaximumAnnualIncome => 1_000_000;
+    public double MaximumAnnualExpenses => 500_000;
 
-    partial void OnExpectedReturnPercentChanged(double value) =>
-        RoundSliderValue(value, rounded => ExpectedReturnPercent = rounded, 1);
-
-    partial void OnInflationRatePercentChanged(double value) =>
-        RoundSliderValue(value, rounded => InflationRatePercent = rounded, 1);
-
-    partial void OnWithdrawalRatePercentChanged(double value) =>
-        RoundSliderValue(value, rounded => WithdrawalRatePercent = rounded, 1);
-
-    partial void OnCurrentAgeChanged(double value)
-    {
+    partial void OnCurrentAgeChanged(double value) =>
         RoundSliderValue(value, rounded => CurrentAge = rounded, 0);
-        if (RetirementAge <= CurrentAge)
-        {
-            RetirementAge = Math.Min(100, CurrentAge + 1);
-        }
 
-        ValidationMessage = string.Empty;
-    }
+    partial void OnAnnualIncomeChanged(double value) =>
+        RoundSliderValue(value, rounded => AnnualIncome = rounded, -3);
 
-    partial void OnRetirementAgeChanged(double value)
-    {
-        RoundSliderValue(value, rounded => RetirementAge = rounded, 0);
-        ValidationMessage = string.Empty;
-    }
+    partial void OnAnnualExpensesChanged(double value) =>
+        RoundSliderValue(value, rounded => AnnualExpenses = rounded, -3);
 
     [RelayCommand]
     private async Task SaveAndContinueAsync()
     {
-        if (RetirementAge <= CurrentAge)
+        var defaults = calculatorDefaultsService.Current;
+        calculatorDefaultsService.Save(defaults with
         {
-            ValidationMessage = "Retirement age must be later than your current age.";
-            return;
-        }
+            CurrentAge = (int)CurrentAge,
+            RetirementAge = Math.Max(defaults.RetirementAge, (int)CurrentAge + 1),
+            AnnualIncome = AnnualIncome,
+            AnnualExpenses = AnnualExpenses
+        });
 
-        calculatorDefaultsService.Save(new CalculatorDefaults(
-            ExpectedReturnPercent / 100,
-            InflationRatePercent / 100,
-            WithdrawalRatePercent / 100,
-            (int)CurrentAge,
-            (int)RetirementAge));
-
-        await navigationService.GoToAsync("../onboarding-choice");
+        await navigationService.GoToAsync("../onboarding-withdrawal-rate");
     }
 
     [RelayCommand]
-    private Task SkipAsync() => navigationService.GoToAsync("../onboarding-choice");
+    private Task SkipAsync() => navigationService.GoToAsync("../onboarding-withdrawal-rate");
 
     private static void RoundSliderValue(double value, Action<double> update, int digits)
     {
         var rounded = Math.Round(value, digits);
-        if (Math.Abs(value - rounded) > double.Epsilon)
+        if (Math.Abs(value - rounded) > RoundingTolerance)
         {
             update(rounded);
         }

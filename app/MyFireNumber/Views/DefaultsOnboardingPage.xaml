@@ -5,153 +5,101 @@
              xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
              x:Class="MyFireNumber.Views.DefaultsOnboardingPage"
              x:DataType="viewModels:DefaultsOnboardingViewModel"
-             Title="Starting defaults"
+             Title="About you"
              Shell.NavBarIsVisible="True"
              Shell.TabBarIsVisible="False"
              Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Skip"
                      Command="{Binding SkipCommand}"
-                     SemanticProperties.Description="Skip default setup and choose how to start." />
+                     SemanticProperties.Description="Skip these details and continue to withdrawal rate." />
     </ContentPage.ToolbarItems>
 
     <Grid>
         <ScrollView>
             <VerticalStackLayout Padding="24,20,24,32" Spacing="18">
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
-                    <Label Text="&#xf1ec;"
-                           FontFamily="FontAwesomeSolid"
-                           FontSize="30"
-                           VerticalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
-                           SemanticProperties.Description="Calculator defaults" />
-                    <VerticalStackLayout Grid.Column="1" Spacing="3">
-                        <Label Text="Choose your starting assumptions"
-                               FontSize="26"
-                               FontAttributes="Bold"
-                               LineHeight="1.1"
-                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                               SemanticProperties.HeadingLevel="Level1" />
-                        <Label Text="You can change these any time in Settings."
-                               FontSize="13"
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
-                    </VerticalStackLayout>
-                </Grid>
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="Tell us about today"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           LineHeight="1.1"
+                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                           SemanticProperties.HeadingLevel="Level1" />
+                    <Label Text="These three details give your calculators a useful starting point. You can fine-tune everything later."
+                           LineHeight="1.35"
+                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                </VerticalStackLayout>
 
                 <Border Padding="18"
                         Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                         Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                         StrokeShape="RoundRectangle 12">
-                    <VerticalStackLayout Spacing="18">
+                    <VerticalStackLayout Spacing="22">
                         <VerticalStackLayout Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="Expected annual return"
+                                <Label Text="Current age"
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
                                 <Label Grid.Column="1"
-                                       Text="{Binding ExpectedReturnText}"
+                                       Text="{Binding CurrentAgeText}"
                                        TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
                             </Grid>
-                            <Slider AutomationId="OnboardingExpectedReturnSlider"
-                                    Minimum="1"
-                                    Maximum="15"
-                                    Value="{Binding ExpectedReturnPercent}"
+                            <Slider AutomationId="OnboardingCurrentAgeSlider"
+                                    Minimum="18"
+                                    Maximum="80"
+                                    Value="{Binding CurrentAge}"
                                     MinimumTrackColor="#2F6B57"
                                     MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                                     ThumbColor="#2F6B57"
-                                    SemanticProperties.Description="Expected annual return percentage" />
+                                    SemanticProperties.Description="Current age" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="Annual inflation"
+                                <Label Text="Annual pre-tax income"
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
                                 <Label Grid.Column="1"
-                                       Text="{Binding InflationRateText}"
+                                       Text="{Binding AnnualIncomeText}"
                                        TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
                             </Grid>
-                            <Slider AutomationId="OnboardingInflationSlider"
+                            <Slider AutomationId="OnboardingAnnualIncomeSlider"
                                     Minimum="0"
-                                    Maximum="10"
-                                    Value="{Binding InflationRatePercent}"
+                                    Maximum="{Binding MaximumAnnualIncome}"
+                                    Value="{Binding AnnualIncome}"
                                     MinimumTrackColor="#2F6B57"
                                     MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                                     ThumbColor="#2F6B57"
-                                    SemanticProperties.Description="Annual inflation percentage" />
+                                    SemanticProperties.Description="Current annual pre-tax income in dollars" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="Safe withdrawal rate"
+                                <Label Text="Current annual expenses"
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
                                 <Label Grid.Column="1"
-                                       Text="{Binding WithdrawalRateText}"
+                                       Text="{Binding AnnualExpensesText}"
                                        TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
                             </Grid>
-                            <Slider AutomationId="OnboardingWithdrawalSlider"
-                                    Minimum="1"
-                                    Maximum="10"
-                                    Value="{Binding WithdrawalRatePercent}"
+                            <Slider AutomationId="OnboardingAnnualExpensesSlider"
+                                    Minimum="0"
+                                    Maximum="{Binding MaximumAnnualExpenses}"
+                                    Value="{Binding AnnualExpenses}"
                                     MinimumTrackColor="#2F6B57"
                                     MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                                     ThumbColor="#2F6B57"
-                                    SemanticProperties.Description="Safe withdrawal rate percentage" />
+                                    SemanticProperties.Description="Current annual expenses in dollars" />
                         </VerticalStackLayout>
-
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="18">
-                            <VerticalStackLayout Spacing="6">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="Current age"
-                                           FontAttributes="Bold"
-                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
-                                    <Label Grid.Column="1"
-                                           Text="{Binding CurrentAgeText}"
-                                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
-                                </Grid>
-                                <Slider AutomationId="OnboardingCurrentAgeSlider"
-                                        Minimum="18"
-                                        Maximum="80"
-                                        Value="{Binding CurrentAge}"
-                                        MinimumTrackColor="#2F6B57"
-                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                                        ThumbColor="#2F6B57"
-                                        SemanticProperties.Description="Current age" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="1" Spacing="6">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label Text="Retirement age"
-                                           FontAttributes="Bold"
-                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
-                                    <Label Grid.Column="1"
-                                           Text="{Binding RetirementAgeText}"
-                                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
-                                </Grid>
-                                <Slider AutomationId="OnboardingRetirementAgeSlider"
-                                        Minimum="{Binding MinimumRetirementAge}"
-                                        Maximum="100"
-                                        Value="{Binding RetirementAge}"
-                                        MinimumTrackColor="#2F6B57"
-                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                                        ThumbColor="#2F6B57"
-                                        SemanticProperties.Description="Target retirement age" />
-                            </VerticalStackLayout>
-                        </Grid>
                     </VerticalStackLayout>
                 </Border>
 
-                <Label Text="{Binding ValidationMessage}"
-                       IsVisible="{Binding HasValidationMessage}"
-                       TextColor="{AppThemeBinding Light=#8A342B, Dark=#FFB9B1}"
-                       FontSize="13" />
-
                 <Button AutomationId="SaveOnboardingDefaultsButton"
-                        Text="Save defaults and continue"
+                        Text="Continue"
                         Command="{Binding SaveAndContinueCommand}"
                         Background="#2F6B57"
                         TextColor="#FFFFFF"
-                        SemanticProperties.Description="Save these defaults and choose how to start." />
+                        SemanticProperties.Description="Save these details and continue to withdrawal rate." />
 
                 <controls:EducationalDisclaimerView />
             </VerticalStackLayout>

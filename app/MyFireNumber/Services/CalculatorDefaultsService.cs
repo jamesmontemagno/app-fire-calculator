@@ -7,7 +7,11 @@ public sealed record CalculatorDefaults(
     double InflationRate,
     double WithdrawalRate,
     int CurrentAge,
-    int RetirementAge);
+    int RetirementAge)
+{
+    public double AnnualIncome { get; init; } = StandardFireDraft.Default.AnnualIncome;
+    public double AnnualExpenses { get; init; } = StandardFireDraft.Default.AnnualExpenses;
+}
 
 public interface ICalculatorDefaultsService
 {
@@ -34,13 +38,19 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
     private const string WithdrawalRateKey = "defaults-withdrawal-rate";
     private const string CurrentAgeKey = "defaults-current-age";
     private const string RetirementAgeKey = "defaults-retirement-age";
+    private const string AnnualIncomeKey = "defaults-annual-income";
+    private const string AnnualExpensesKey = "defaults-annual-expenses";
 
     public CalculatorDefaults Current => new(
         Preferences.Default.Get(ExpectedReturnKey, 0.07),
         Preferences.Default.Get(InflationRateKey, 0.03),
         Preferences.Default.Get(WithdrawalRateKey, 0.04),
         Preferences.Default.Get(CurrentAgeKey, 30),
-        Preferences.Default.Get(RetirementAgeKey, 55));
+        Preferences.Default.Get(RetirementAgeKey, 55))
+    {
+        AnnualIncome = Preferences.Default.Get(AnnualIncomeKey, StandardFireDraft.Default.AnnualIncome),
+        AnnualExpenses = Preferences.Default.Get(AnnualExpensesKey, StandardFireDraft.Default.AnnualExpenses)
+    };
 
     public StandardFireDraft StandardFire => Apply(StandardFireDraft.Default);
     public CoastFireDraft CoastFire => Apply(CoastFireDraft.Default);
@@ -60,6 +70,8 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
         Preferences.Default.Set(WithdrawalRateKey, defaults.WithdrawalRate);
         Preferences.Default.Set(CurrentAgeKey, defaults.CurrentAge);
         Preferences.Default.Set(RetirementAgeKey, defaults.RetirementAge);
+        Preferences.Default.Set(AnnualIncomeKey, defaults.AnnualIncome);
+        Preferences.Default.Set(AnnualExpensesKey, defaults.AnnualExpenses);
     }
 
     private StandardFireDraft Apply(StandardFireDraft draft)
@@ -71,7 +83,9 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
             InflationRate = defaults.InflationRate,
             WithdrawalRate = defaults.WithdrawalRate,
             CurrentAge = defaults.CurrentAge,
-            RetirementAge = defaults.RetirementAge
+            RetirementAge = defaults.RetirementAge,
+            AnnualIncome = defaults.AnnualIncome,
+            AnnualExpenses = defaults.AnnualExpenses
         };
     }
 
@@ -84,7 +98,8 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
             InflationRate = defaults.InflationRate,
             WithdrawalRate = defaults.WithdrawalRate,
             CurrentAge = defaults.CurrentAge,
-            RetirementAge = defaults.RetirementAge
+            RetirementAge = defaults.RetirementAge,
+            AnnualExpenses = defaults.AnnualExpenses
         };
     }
 
@@ -97,7 +112,9 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
             InflationRate = defaults.InflationRate,
             WithdrawalRate = defaults.WithdrawalRate,
             CurrentAge = defaults.CurrentAge,
-            RetirementAge = defaults.RetirementAge
+            RetirementAge = defaults.RetirementAge,
+            AnnualIncome = defaults.AnnualIncome,
+            AnnualExpenses = defaults.AnnualExpenses
         };
     }
 
@@ -110,7 +127,9 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
             InflationRate = defaults.InflationRate,
             WithdrawalRate = defaults.WithdrawalRate,
             CurrentAge = defaults.CurrentAge,
-            RetirementAge = defaults.RetirementAge
+            RetirementAge = defaults.RetirementAge,
+            AnnualIncome = defaults.AnnualIncome,
+            AnnualExpenses = defaults.AnnualExpenses
         };
     }
 
@@ -122,7 +141,8 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
             ExpectedReturn = defaults.ExpectedReturn,
             InflationRate = defaults.InflationRate,
             WithdrawalRate = defaults.WithdrawalRate,
-            CurrentAge = defaults.CurrentAge
+            CurrentAge = defaults.CurrentAge,
+            AnnualExpenses = defaults.AnnualExpenses
         };
     }
 
@@ -135,7 +155,8 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
             InflationRate = defaults.InflationRate,
             WithdrawalRate = defaults.WithdrawalRate,
             CurrentAge = defaults.CurrentAge,
-            TargetRetirementAge = defaults.RetirementAge
+            TargetRetirementAge = defaults.RetirementAge,
+            AnnualExpenses = defaults.AnnualExpenses
         };
     }
 
@@ -157,7 +178,8 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
         {
             ExpectedReturn = defaults.ExpectedReturn,
             InflationRate = defaults.InflationRate,
-            CurrentAge = defaults.CurrentAge
+            CurrentAge = defaults.CurrentAge,
+            AnnualIncome = defaults.AnnualIncome
         };
     }
 
