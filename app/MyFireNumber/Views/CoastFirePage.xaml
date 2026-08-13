@@ -10,6 +10,14 @@
                           Title="{Binding Title}"
                           Shell.NavBarIsVisible="True"
                           Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding SavePlanCommand}"
+                     SemanticProperties.Description="Save the current calculator values as a plan.">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Size="18" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
     <ScrollView>
         <VerticalStackLayout Padding="20,20,20,32" Spacing="18">
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" SemanticProperties.Description="Restoring your local calculator draft." />

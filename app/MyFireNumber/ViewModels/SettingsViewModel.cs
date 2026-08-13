@@ -99,6 +99,12 @@ public partial class SettingsViewModel : ObservableObject
     private string defaultRetirementAge = string.Empty;
 
     [ObservableProperty]
+    private string defaultAnnualIncome = string.Empty;
+
+    [ObservableProperty]
+    private string defaultAnnualExpenses = string.Empty;
+
+    [ObservableProperty]
     private string defaultsStatus = string.Empty;
 
     [ObservableProperty]
@@ -180,11 +186,15 @@ public partial class SettingsViewModel : ObservableObject
             || !TryParsePercent(WithdrawalRatePercent, out var withdrawalRate)
             || !int.TryParse(DefaultCurrentAge, NumberStyles.Integer, CultureInfo.CurrentCulture, out var currentAge)
             || !int.TryParse(DefaultRetirementAge, NumberStyles.Integer, CultureInfo.CurrentCulture, out var retirementAge)
+            || !double.TryParse(DefaultAnnualIncome, NumberStyles.Number, CultureInfo.CurrentCulture, out var annualIncome)
+            || !double.TryParse(DefaultAnnualExpenses, NumberStyles.Number, CultureInfo.CurrentCulture, out var annualExpenses)
             || currentAge is < 18 or > 100
             || retirementAge <= currentAge
-            || retirementAge > 100)
+            || retirementAge > 100
+            || annualIncome < 0
+            || annualExpenses < 0)
         {
-            DefaultsStatus = "Enter percentages from 0 to 100 and ages from 18 to 100. Retirement age must be later.";
+            DefaultsStatus = "Enter valid percentages, ages from 18 to 100, and non-negative annual income and expenses. Retirement age must be later.";
             return;
         }
 
@@ -195,8 +205,8 @@ public partial class SettingsViewModel : ObservableObject
             currentAge,
             retirementAge)
         {
-            AnnualIncome = calculatorDefaultsService.Current.AnnualIncome,
-            AnnualExpenses = calculatorDefaultsService.Current.AnnualExpenses
+            AnnualIncome = annualIncome,
+            AnnualExpenses = annualExpenses
         });
         DefaultsStatus = "Saved. These assumptions apply only to new calculators.";
     }
@@ -387,6 +397,8 @@ public partial class SettingsViewModel : ObservableObject
         isSynchronizingDefaultPercentages = false;
         DefaultCurrentAge = defaults.CurrentAge.ToString(CultureInfo.CurrentCulture);
         DefaultRetirementAge = defaults.RetirementAge.ToString(CultureInfo.CurrentCulture);
+        DefaultAnnualIncome = defaults.AnnualIncome.ToString("0", CultureInfo.CurrentCulture);
+        DefaultAnnualExpenses = defaults.AnnualExpenses.ToString("0", CultureInfo.CurrentCulture);
         DefaultsStatus = string.Empty;
     }
 
