@@ -60,7 +60,7 @@
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
                                 <Label Grid.Column="1"
-                                       Text="{Binding AnnualIncomeText}"
+                                        Text="{Binding AnnualIncomeText, Mode=OneWay}"
                                        TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
                             </Grid>
                             <Slider AutomationId="OnboardingAnnualIncomeSlider"
@@ -79,7 +79,7 @@
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
                                 <Label Grid.Column="1"
-                                       Text="{Binding AnnualExpensesText}"
+                                        Text="{Binding AnnualExpensesText, Mode=OneWay}"
                                        TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
                             </Grid>
                             <Slider AutomationId="OnboardingAnnualExpensesSlider"

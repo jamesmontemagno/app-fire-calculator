@@ -45,13 +45,13 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
     public double MaximumAnnualExpenses => 500_000;
 
     partial void OnCurrentAgeChanged(double value) =>
-        RoundSliderValue(value, rounded => CurrentAge = rounded, 0);
+        RoundSliderValue(value, rounded => CurrentAge = rounded, 1);
 
     partial void OnAnnualIncomeChanged(double value) =>
-        RoundSliderValue(value, rounded => AnnualIncome = rounded, -3);
+        RoundSliderValue(value, rounded => AnnualIncome = rounded, 1_000);
 
     partial void OnAnnualExpensesChanged(double value) =>
-        RoundSliderValue(value, rounded => AnnualExpenses = rounded, -3);
+        RoundSliderValue(value, rounded => AnnualExpenses = rounded, 1_000);
 
     [RelayCommand]
     private async Task SaveAndContinueAsync()
@@ -71,9 +71,9 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
     [RelayCommand]
     private Task SkipAsync() => navigationService.GoToAsync("../onboarding-withdrawal-rate");
 
-    private static void RoundSliderValue(double value, Action<double> update, int digits)
+    private static void RoundSliderValue(double value, Action<double> update, double increment)
     {
-        var rounded = Math.Round(value, digits);
+        var rounded = Math.Round(value / increment) * increment;
         if (Math.Abs(value - rounded) > RoundingTolerance)
         {
             update(rounded);
