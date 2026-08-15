@@ -433,11 +433,15 @@ const EXPORT_FIELD_FORMATS: Record<string, ExportFormat> = {
   // integer 'age' format would silently show 51.5 as 52.
   fireAge: 'years',
   portfolioLongevity: 'years',
-  gapYears: 'years',
 
   // --- Whole counts -----------------------------------------------------------------------------
   // Integers, so '#,##0' rather than the '0.0' of the duration formats above. `totalMonths` is the
   // #62 defect: it used to render as '$25' for a 25-month payoff.
+  // gapYears looks like it belongs in the fractional bucket above with fireAge/portfolioLongevity,
+  // but it is provably integral: gapYears = max(0, MEDICARE_AGE - earlyRetirementAge), the constant
+  // 65 minus an age parsed with parseInt/step=1, so it can never be fractional. It gets '#,##0' so
+  // web matches MAUI (#69), which renders it as 20, not 20.0. Do not move it back up.
+  gapYears: 'number',
   totalMonths: 'number',
   targetMonths: 'number',
   retirementYears: 'number',

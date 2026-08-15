@@ -1,3 +1,4 @@
+using System;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -8,9 +9,11 @@ namespace MyFireNumber.Core.Exports;
 
 public static class BaristaFireWorkbook
 {
-    private const uint CurrencyStyleIndex = 1;
-    private const uint PercentageStyleIndex = 2;
-    private const uint DecimalStyleIndex = 3;
+    private const uint CurrencyStyleIndex = WorkbookStyles.CurrencyStyleIndex;
+    private const uint PercentageStyleIndex = WorkbookStyles.PercentageStyleIndex;
+    private const uint DecimalStyleIndex = WorkbookStyles.DecimalStyleIndex;
+    private const uint IntegerStyleIndex = WorkbookStyles.IntegerStyleIndex;
+    private const uint PlainIntegerStyleIndex = WorkbookStyles.PlainIntegerStyleIndex;
 
     public static void Create(string filePath, BaristaFireDraft draft, BaristaFireResult result, DateTimeOffset generatedAt)
     {
@@ -44,23 +47,24 @@ public static class BaristaFireWorkbook
             new(CreateTextCell("A2", "Generated UTC"), CreateTextCell("B2", generatedAt.UtcDateTime.ToString("O", CultureInfo.InvariantCulture))),
             new(CreateTextCell("A4", "Input"), CreateTextCell("B4", "Value"))
         };
-        var inputs = new (string Label, double Value, uint Style)[]
+        var inputs = new (string Label, Cell Value)[]
         {
-            ("Current age", draft.CurrentAge, DecimalStyleIndex),
-            ("Current savings", draft.CurrentSavings, CurrencyStyleIndex),
-            ("Annual contribution", draft.AnnualContribution, CurrencyStyleIndex),
-            ("Annual retirement spending (today's dollars)", draft.AnnualExpenses, CurrencyStyleIndex),
-            ("Part-time take-home income (after tax)", draft.PartTimeAnnualIncome, CurrencyStyleIndex),
-            ("Expected return", draft.ExpectedReturn, PercentageStyleIndex),
-            ("Inflation rate", draft.InflationRate, PercentageStyleIndex),
-            ("Safe withdrawal rate", draft.WithdrawalRate, PercentageStyleIndex)
+            ("Current age", CreateNumberCell("", draft.CurrentAge, IntegerFormat.Plain)),
+            ("Current savings", CreateNumberCell("", draft.CurrentSavings, CurrencyStyleIndex)),
+            ("Annual contribution", CreateNumberCell("", draft.AnnualContribution, CurrencyStyleIndex)),
+            ("Annual retirement spending (today's dollars)", CreateNumberCell("", draft.AnnualExpenses, CurrencyStyleIndex)),
+            ("Part-time take-home income (after tax)", CreateNumberCell("", draft.PartTimeAnnualIncome, CurrencyStyleIndex)),
+            ("Expected return", CreateNumberCell("", draft.ExpectedReturn, PercentageStyleIndex)),
+            ("Inflation rate", CreateNumberCell("", draft.InflationRate, PercentageStyleIndex)),
+            ("Safe withdrawal rate", CreateNumberCell("", draft.WithdrawalRate, PercentageStyleIndex))
         };
 
         for (var index = 0; index < inputs.Length; index++)
         {
             var rowNumber = index + 5;
             var input = inputs[index];
-            rows.Add(new Row(CreateTextCell($"A{rowNumber}", input.Label), CreateNumberCell($"B{rowNumber}", input.Value, input.Style)));
+            input.Value.CellReference = $"B{rowNumber}";
+            rows.Add(new Row(CreateTextCell($"A{rowNumber}", input.Label), input.Value));
         }
 
         AddWorksheet(workbookPart, sheets, "Inputs", 1, rows, 32, 20);
@@ -103,9 +107,9 @@ public static class BaristaFireWorkbook
             {
                 rows.Add(new Row(
                     CreateNumberCell($"A{rowNumber}", point.Age, DecimalStyleIndex),
-                    CreateNumberCell($"B{rowNumber}", point.Year, DecimalStyleIndex),
+                    CreateNumberCell($"B{rowNumber}", point.Year, IntegerFormat.Plain),
                     CreateNumberCell($"C{rowNumber}", point.Portfolio, CurrencyStyleIndex),
-                    CreateNumberCell($"D{rowNumber}", 0, CurrencyStyleIndex),
+                    CreateNumberCell($"D{rowNumber}", 0d, CurrencyStyleIndex),
                     CreateNumberCell($"E{rowNumber}", point.TotalContributions, CurrencyStyleIndex),
                     CreateNumberCell($"F{rowNumber}", point.InflationAdjusted, CurrencyStyleIndex)));
                 continue;
@@ -114,7 +118,7 @@ public static class BaristaFireWorkbook
             var previousRowNumber = rowNumber - 1;
             rows.Add(new Row(
                 CreateNumberCell($"A{rowNumber}", point.Age, DecimalStyleIndex),
-                CreateNumberCell($"B{rowNumber}", point.Year, DecimalStyleIndex),
+                CreateNumberCell($"B{rowNumber}", point.Year, IntegerFormat.Plain),
                 CreateFormulaCell($"C{rowNumber}", $"C{previousRowNumber}*(1+Inputs!$B$10)+D{rowNumber}", CurrencyStyleIndex),
                 CreateNumberCell($"D{rowNumber}", point.Contributions, CurrencyStyleIndex),
                 CreateFormulaCell($"E{rowNumber}", $"E{previousRowNumber}+D{rowNumber}", CurrencyStyleIndex),
@@ -150,6 +154,21 @@ public static class BaristaFireWorkbook
         InlineString = new InlineString(new Text(value))
     };
 
+    // This overload exists solely to be un-callable. Without it, CreateNumberCell("B5", someInt,
+    // DecimalStyleIndex) would bind to the (double, uint) overload via int->double widening and
+    // silently reintroduce #69. Making the (int, uint) shape a compile error (error: true) forces
+    // every integer cell through the IntegerFormat overload, so an int can never carry a fractional
+    // format. This is what makes the guarantee hold at compile time rather than merely by convention.
+    [Obsolete("An int cell must use IntegerFormat, never a raw style index (issue #69).", error: true)]
+    private static Cell CreateNumberCell(string reference, int value, uint styleIndex) =>
+        throw new InvalidOperationException();
+
+    // Integer cells route through IntegerFormat, never a raw style index, so an int can never be
+    // written with the fractional DecimalStyleIndex (issue #69). Overload resolution prefers this
+    // exact-type method over widening the int to the double overload.
+    private static Cell CreateNumberCell(string reference, int value, IntegerFormat format) =>
+        CreateNumberCell(reference, (double)value, WorkbookStyles.StyleIndexFor(format));
+
     // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
     // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
     private static Cell CreateNumberCell(string reference, double value, uint styleIndex) => double.IsFinite(value)
@@ -168,22 +187,5 @@ public static class BaristaFireWorkbook
         CellFormula = new CellFormula(formula)
     };
 
-    private static void AddStyles(WorkbookPart workbookPart)
-    {
-        var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
-        stylesPart.Stylesheet = new Stylesheet(
-            new NumberingFormats(
-                new NumberingFormat { NumberFormatId = 164U, FormatCode = "$#,##0" },
-                new NumberingFormat { NumberFormatId = 165U, FormatCode = "0.0%" },
-                new NumberingFormat { NumberFormatId = 166U, FormatCode = "0.0" }),
-            new Fonts(new Font()),
-            new Fills(new Fill(new PatternFill { PatternType = PatternValues.None }), new Fill(new PatternFill { PatternType = PatternValues.Gray125 })),
-            new Borders(new Border()),
-            new CellStyleFormats(new CellFormat()),
-            new CellFormats(
-                new CellFormat(),
-                new CellFormat { NumberFormatId = 164U, ApplyNumberFormat = true },
-                new CellFormat { NumberFormatId = 165U, ApplyNumberFormat = true },
-                new CellFormat { NumberFormatId = 166U, ApplyNumberFormat = true }));
-    }
+    private static void AddStyles(WorkbookPart workbookPart) => WorkbookStyles.Apply(workbookPart);
 }

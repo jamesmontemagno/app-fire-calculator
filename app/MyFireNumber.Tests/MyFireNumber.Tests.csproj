@@ -25,9 +25,7 @@
 
   <ItemGroup>
     <!-- Same file the web Vitest suite reads, so both platforms are pinned to one set of numbers. -->
-    <None Include="..\..\shared\parity\fire-parity-cases.json"
-          Link="SharedParity\fire-parity-cases.json"
-          CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\shared\parity\fire-parity-cases.json" Link="SharedParity\fire-parity-cases.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
