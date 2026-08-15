@@ -10,11 +10,13 @@ import {
   realBalanceClosedForm,
   realFixedPoint,
   realRate,
+  roundHalfAwayFromZero,
   yearsToTargetClosedForm,
 } from './oracles'
 import {
   debtCases,
   decode,
+  deferredCases,
   fireCases,
   healthcareCases,
   investmentCases,
@@ -333,6 +335,89 @@ describe('healthcare cases match the geometric sum', () => {
     '%s gap runs from early retirement to Medicare at 65',
     (_id, testCase) => {
       expect(testCase.expected.gapYears).toBe(Math.max(0, 65 - testCase.inputs.earlyRetirementAge))
+    },
+  )
+})
+
+/**
+ * The deferred cases exist to pin issue #63, so the thing that most needs independent checking is
+ * the surplus and the funded/shortfall verdict derived from it — the two values that disagreed
+ * across platforms.
+ *
+ * Each case is a deliberately flat plan, so the arithmetic is exact and can be done by hand. The
+ * first test asserts that the case really is that construction rather than trusting the prose in its
+ * `derivation`; a case that quietly grew an account or a non-zero inflation rate would make the
+ * closed form below wrong while still looking plausible.
+ */
+describe('deferred cases match hand arithmetic', () => {
+  /** Half the whole-dollar display unit. Stated here, not imported, so a change to the shipped
+   *  constant has to be made deliberately in two places. */
+  const SHORTFALL_TOLERANCE = 0.5
+
+  it.each(deferredCases.map((c) => [c.id, c] as const))(
+    '%s really is the flat single-pension construction its derivation claims',
+    (_id, testCase) => {
+      const i = testCase.inputs
+      expect(i.inflationRate).toBe(0)
+      expect(i.accounts).toEqual([])
+      expect(i.additionalExpenses).toEqual([])
+      expect(i.reinvestSurplus).toBe(false)
+      expect(i.incomeSources).toHaveLength(1)
+
+      const [source] = i.incomeSources
+      expect(source.isAfterTax).toBe(true)
+      expect(source.annualGrowth).toBe(0)
+      // Active across every projected year, so its contribution is the same in each of them.
+      expect(source.startAge).toBeLessThanOrEqual(i.currentAge)
+      expect(source.endAge).toBeGreaterThanOrEqual(i.planThroughAge)
+    },
+  )
+
+  it.each(deferredCases.map((c) => [c.id, c] as const))(
+    '%s surplus is income minus expenses, rounded away from zero',
+    (_id, testCase) => {
+      const i = testCase.inputs
+      // Zero inflation and zero growth make every year identical: income is the pension's nominal
+      // amount and expenses are the entered figure, both exactly.
+      const income = i.incomeSources[0].annualAmount
+      const exactSurplus = income - i.annualExpenses
+
+      // Textbook away-from-zero rounding produces NEGATIVE zero for a gap inside half a dollar.
+      // Both platforms deliberately collapse that to positive zero, because -0 formats as "-$0"
+      // through both Intl.NumberFormat and C# ToString("C0") while still satisfying `>= 0` — the
+      // display half of issue #63. That normalization is modelled here rather than folded into the
+      // oracle, so it stays a visible step of the convention instead of an invisible one.
+      const rounded = roundHalfAwayFromZero(exactSurplus)
+      const displayed = Object.is(rounded, -0) ? 0 : rounded
+
+      expect(testCase.expected.firstYearSurplus).toBe(displayed)
+      for (const sample of testCase.expected.annualSamples) {
+        expect(sample.totalIncome).toBe(roundHalfAwayFromZero(income))
+        expect(sample.expenses).toBe(roundHalfAwayFromZero(i.annualExpenses))
+        expect(sample.surplus).toBe(displayed)
+      }
+
+      // Negative zero would satisfy every assertion above under `>=` comparisons and would format as
+      // "-$0". `toBe` uses Object.is, so this states outright what the fixture must not contain.
+      expect(Object.is(testCase.expected.firstYearSurplus, -0)).toBe(false)
+    },
+  )
+
+  it.each(deferredCases.map((c) => [c.id, c] as const))(
+    '%s verdict follows from the unrounded surplus, not the displayed one',
+    (_id, testCase) => {
+      const i = testCase.inputs
+      const exactSurplus = i.incomeSources[0].annualAmount - i.annualExpenses
+      const short = exactSurplus <= -SHORTFALL_TOLERANCE
+      // Retirement age equals current age in these cases, so every projected year is a retirement
+      // year, and every year has the same surplus.
+      const years = i.planThroughAge - i.semiRetirementAge + 1
+
+      expect(testCase.expected.retirementYears).toBe(years)
+      expect(testCase.expected.projectionCount).toBe(years)
+      expect(testCase.expected.fundedYears).toBe(short ? 0 : years)
+      expect(testCase.expected.yearsFullyCovered).toBe(short ? 0 : years)
+      expect(testCase.expected.firstShortfallAge).toBe(short ? i.semiRetirementAge : null)
     },
   )
 })

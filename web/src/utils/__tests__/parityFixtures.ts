@@ -1,6 +1,12 @@
 import rawFixture from '../../../../shared/parity/fire-parity-cases.json'
 
 import type { ContributionGrowth, DebtItem, FIREInputs } from '../calculations'
+import type {
+  DeferredCompensationInputs,
+  RetirementAccount,
+  RetirementExpense,
+  RetirementIncomeSource,
+} from '../deferredCompensation'
 
 /**
  * Typed view over `shared/parity/fire-parity-cases.json`.
@@ -28,6 +34,21 @@ export interface ProjectionSample {
   inflationAdjusted: number
   totalContributions: number
   contributions: number
+}
+
+/**
+ * One projected retirement year of a deferred-compensation case.
+ *
+ * `surplus` is the value the app *displays*, rounded to whole dollars away from zero on both
+ * platforms. The funded/shortfall fields alongside it are decided from the unrounded surplus, so a
+ * case can legitimately pin `surplus: 0` next to `fundedYears: 3` — see the `deferred-sub-tolerance-gap`
+ * case and issue #63.
+ */
+export interface DeferredAnnualSample {
+  age: number
+  totalIncome: number
+  expenses: number
+  surplus: number
 }
 
 export interface FireCase {
@@ -157,7 +178,46 @@ export interface HealthcareCase {
   }
 }
 
-export type ParityCase = FireCase | DebtCase | WithdrawalCase | InvestmentCase | HealthcareCase
+export interface DeferredCase {
+  id: string
+  kind: 'deferred'
+  description: string
+  derivation: string
+  inputs: {
+    currentAge: number
+    semiRetirementAge: number
+    planThroughAge: number
+    annualExpenses: number
+    inflationRate: number
+    withdrawOnlyAfterRetirement: boolean
+    reinvestSurplus: boolean
+    accounts: RetirementAccount[]
+    incomeSources: RetirementIncomeSource[]
+    additionalExpenses: RetirementExpense[]
+  }
+  expected: {
+    projectionCount: number
+    currentBalance: number
+    balanceAtSemiRetirement: number
+    endingBalance: number
+    firstYearIncome: number
+    firstYearSurplus: number
+    retirementYears: number
+    fundedYears: number
+    yearsFullyCovered: number
+    /** `null` means the plan never falls short, which is an answer rather than a missing value. */
+    firstShortfallAge: number | null
+    annualSamples: DeferredAnnualSample[]
+  }
+}
+
+export type ParityCase =
+  | FireCase
+  | DebtCase
+  | WithdrawalCase
+  | InvestmentCase
+  | HealthcareCase
+  | DeferredCase
 
 /**
  * The compile-time guard. If a case in the JSON gains a stray field, loses a required one, or uses
@@ -178,6 +238,7 @@ export const debtCases = casesOfKind('debt')
 export const withdrawalCases = casesOfKind('withdrawal')
 export const investmentCases = casesOfKind('investment')
 export const healthcareCases = casesOfKind('healthcare')
+export const deferredCases = casesOfKind('deferred')
 
 /** Maps a fixture case's named inputs onto the single-object shape the FIRE calculators take. */
 export function toFireInputs(testCase: FireCase): FIREInputs {
@@ -193,5 +254,30 @@ export function toFireInputs(testCase: FireCase): FIREInputs {
     withdrawalRate: inputs.withdrawalRate,
     annualExpenses: inputs.annualExpenses,
     contributionGrowth: inputs.contributionGrowth,
+  }
+}
+
+/**
+ * Maps a fixture case's named inputs onto the deferred-compensation engine's call shape.
+ *
+ * `currentYear` is pinned rather than defaulted to `new Date().getFullYear()` so the case is
+ * reproducible, but no expectation reads the calendar year: the two platforms derive it differently
+ * (web from the system clock, MAUI from an explicit `ProjectionStartYear`), so it is covered
+ * per-platform instead of pretending it is shared.
+ */
+export function toDeferredInputs(testCase: DeferredCase): DeferredCompensationInputs {
+  const { inputs } = testCase
+  return {
+    currentAge: inputs.currentAge,
+    semiRetirementAge: inputs.semiRetirementAge,
+    planThroughAge: inputs.planThroughAge,
+    annualExpenses: inputs.annualExpenses,
+    inflationRate: inputs.inflationRate,
+    accounts: inputs.accounts,
+    incomeSources: inputs.incomeSources,
+    additionalExpenses: inputs.additionalExpenses,
+    withdrawOnlyAfterRetirement: inputs.withdrawOnlyAfterRetirement,
+    reinvestSurplus: inputs.reinvestSurplus,
+    currentYear: 2025,
   }
 }

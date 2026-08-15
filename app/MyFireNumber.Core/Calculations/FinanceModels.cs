@@ -286,6 +286,15 @@ public sealed record DeferredCompensationInputs(
     bool ReinvestSurplus,
     int CurrentYear = 0);
 
+/// <summary>
+/// One projected retirement year. Currency fields are rounded to whole dollars for display —
+/// <c>Surplus</c> away from zero, everything else clamped at zero first.
+///
+/// <para><c>Surplus</c> is a presentation value and must not be used to decide whether a year is
+/// short. <see cref="DeferredCompensationCalculator"/> keeps that verdict on the unrounded surplus;
+/// see issue #63, where classifying from the rounded field made web and MAUI give opposite answers to
+/// "is my plan funded" for the same inputs.</para>
+/// </summary>
 public sealed record RetirementCashFlowPoint(
     int Age,
     int Year,

@@ -574,25 +574,30 @@ describe('degenerate inputs', () => {
 })
 
 /**
- * KNOWN CROSS-PLATFORM DIVERGENCE — tracked in issue #63. Not fixed here; this PR is test-only.
+ * Cross-platform agreement on the sign and rounding of `surplus` — the fix for issue #63.
  *
- * `surplus` is the one field that uses bare `Math.round` (line 284) rather than the `round` helper,
- * because it is legitimately allowed to be negative — the helper clamps at zero. The MAUI mirror
- * rounds the same field with `MidpointRounding.AwayFromZero`.
- *
- * Those two agree everywhere except at an exact negative half-integer:
+ * WHAT WAS WRONG. `surplus` is the one field that cannot use the clamping `round` helper, because
+ * clamping at zero would hide every shortfall. It used bare `Math.round`, which rounds half *up*
+ * (toward +Infinity), while the MAUI mirror used `MidpointRounding.AwayFromZero`. Those agree on
+ * positives and away from midpoints, and disagree at an exact negative half-integer:
  *
  *     JS  Math.round(-2.5)                             === -2
  *     C#  Math.Round(-2.5, MidpointRounding.AwayFromZero) == -3
  *
- * The inputs below make the raw surplus exactly -2.50 and exactly -0.50. Both operands are exactly
- * representable in binary64, so these are deterministic midpoints, not floating-point noise.
+ * WHY IT WAS SEVERE. Both platforms then classified shortfall from that ROUNDED value.
+ * `Math.round(-0.5)` is `-0`, and `-0 < 0` is false, so this engine reported a fifty-cent shortfall
+ * as a fully funded plan that never falls short, while MAUI — rounding to -1 — reported failure at
+ * the first retirement age. Same inputs, opposite answers to "does my plan work".
  *
- * These tests assert the CURRENT WEB VALUES so the divergence is visible and cannot drift further
- * unnoticed. They are deliberately NOT in shared/parity/fire-parity-cases.json: that fixture asserts
- * agreement between the platforms, and adding a case would have forced a choice of which platform is
- * right, which is a behaviour change. When #63 unifies the rounding, these tests SHOULD fail — that
- * is the signal. The matching pins live in SharedParityFixtureTests.cs.
+ * WHAT CHANGED. This engine now rounds signed money away from zero, so the values below moved to
+ * meet the MAUI ones, which were already the target. Separately, the verdict on both platforms now
+ * reads the *unrounded* surplus through an explicit half-dollar tolerance, so no display rounding
+ * rule can move a headline boolean again.
+ *
+ * The inputs below make the raw surplus land on exact midpoints. Both operands are exactly
+ * representable in binary64, so these are deterministic, not floating-point noise. The same
+ * scenarios are pinned as shared agreement in `shared/parity/fire-parity-cases.json` (the
+ * `deferred-*` cases) and mirrored in `SurplusRoundingParityTests.cs`.
  */
 describe('negative-midpoint surplus rounding (issue #63)', () => {
   // A flat, after-tax $10,000 pension with zero inflation and no accounts, so surplus is exactly
@@ -611,50 +616,86 @@ describe('negative-midpoint surplus rounding (issue #63)', () => {
       }),
     )
 
-  it('rounds a -2.50 surplus toward zero, where the MAUI mirror rounds away from it', () => {
-    // 10,000 - 10,002.50 = -2.50 exactly. MAUI reports -3 for this same input.
+  it('rounds a -2.50 surplus away from zero, matching the MAUI mirror', () => {
+    // 10,000 - 10,002.50 = -2.50 exactly. This engine reported -2 before #63; MAUI reported -3.
     const result = flatShortfall(10_002.5)
 
-    expect(result.projections[0].surplus).toBe(-2)
-    expect(result.firstYearSurplus).toBe(-2)
+    expect(result.projections[0].surplus).toBe(-3)
+    expect(result.firstYearSurplus).toBe(-3)
   })
 
-  it('rounds a -0.50 surplus to negative zero, which flips the funded/shortfall verdict', () => {
+  it('reports a shortfall for a -0.50 surplus, as the MAUI mirror already did', () => {
     /*
-     * This is the consequential half. The shortfall predicates below (`point.surplus < 0`, lines
-     * 296-299) read the ROUNDED surplus, so the rounding mode decides a categorical outcome rather
-     * than a display cent.
-     *
-     * `Math.round(-0.5)` is `-0`, and `-0 < 0` is false, so web classifies a fifty-cent shortfall as
-     * a fully funded year. The MAUI mirror gets -1, which IS < 0, and reports a shortfall at the
-     * first retirement age. Same inputs, opposite answers to "does my plan work":
+     * This was the consequential half. Before #63 the same inputs produced:
      *
      *              web        MAUI
      *   surplus     -0          -1
      *   fundedYears  3           0
      *   firstShortfallAge null   60
      *   yearsFullyCovered 3      0
+     *
+     * The MAUI column is the behaviour that survived. -0.50 <= -0.50, so every year of this plan is
+     * short and none of them counts as covered.
      */
     const result = flatShortfall(10_000.5)
 
-    expect(Object.is(result.projections[0].surplus, -0)).toBe(true)
+    expect(result.projections[0].surplus).toBe(-1)
+    expect(result.fundedYears).toBe(0)
+    expect(result.firstShortfallAge).toBe(60)
+    expect(result.yearsFullyCovered).toBe(0)
+  })
+
+  it('agrees with the mirror at a positive midpoint, which is why this went unnoticed', () => {
+    // Math.round(2.5) === 3 and MidpointRounding.AwayFromZero also gives 3. The two modes differed
+    // only on negatives, and surplus is the only signed field, so nothing else was exposed.
+    const result = flatShortfall(9_997.5)
+
+    expect(result.projections[0].surplus).toBe(3)
     expect(result.fundedYears).toBe(3)
     expect(result.firstShortfallAge).toBeNull()
     expect(result.yearsFullyCovered).toBe(3)
   })
 
-  it('agrees with the mirror at a positive midpoint, which is why this went unnoticed', () => {
-    // Math.round(2.5) === 3 and MidpointRounding.AwayFromZero also gives 3. The two modes differ
-    // only on negatives, and surplus is the only signed field, so nothing else is exposed.
-    const result = flatShortfall(9_997.5)
-
-    expect(result.projections[0].surplus).toBe(3)
-  })
-
   it('agrees with the mirror away from midpoints', () => {
-    // -2.4 rounds to -2 under both modes; the divergence needs an exact half.
+    // -2.4 rounds to -2 under both modes; the divergence needed an exact half.
     const result = flatShortfall(10_002.4)
 
     expect(result.projections[0].surplus).toBe(-2)
+  })
+
+  it('never emits negative zero, and treats a sub-50-cent gap as funded', () => {
+    /*
+     * The third symptom of #63. `Math.round(-0.4)` is `-0`, and `formatCurrency(-0)` renders "-$0".
+     * No shipped web path reached it — the table renders `Math.abs(surplus)` behind a `>= 0` test,
+     * so web showed a green "+$0" — but MAUI formats `point.Surplus` directly and printed "-$0" for
+     * the same inputs, an undocumented display divergence in its own right. `roundSigned` now
+     * normalises negative zero away on both platforms.
+     */
+    const result = flatShortfall(10_000.4)
+
+    expect(Object.is(result.projections[0].surplus, -0)).toBe(false)
+    expect(result.projections[0].surplus).toBe(0)
+    expect(Object.is(result.firstYearSurplus, -0)).toBe(false)
+
+    // -0.40 > -0.50, so this is inside the tolerance and the plan still reads as funded. That is the
+    // documented cost of a whole-dollar calculator: a sub-fifty-cent gap is not a shortfall.
+    expect(result.fundedYears).toBe(3)
+    expect(result.firstShortfallAge).toBeNull()
+  })
+
+  it('keeps the verdict on the unrounded surplus, not the displayed one', () => {
+    /*
+     * The structural half of the fix. `-0.50` displays as `-$1` and `-0.40` displays as `$0`, and the
+     * verdict agrees with each: the tolerance is exactly half a display unit, so
+     * `exact <= -0.5` and `roundSigned(exact) < 0` select the same years. A reader can therefore
+     * trust that no row ever shows `$0` next to a headline claiming that year is short.
+     */
+    for (const expenses of [9_997.5, 10_000, 10_000.4, 10_000.5, 10_002.4, 10_002.5]) {
+      const result = flatShortfall(expenses)
+      const displayedAsShort = result.projections[0].surplus < 0
+      const classifiedAsShort = result.firstShortfallAge !== null
+
+      expect(classifiedAsShort).toBe(displayedAsShort)
+    }
   })
 })

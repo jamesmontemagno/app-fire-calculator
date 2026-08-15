@@ -9,12 +9,15 @@ import {
   calculateStandardFIRE,
   calculateWithdrawal,
 } from '../calculations'
+import { calculateDeferredCompensation } from '../deferredCompensation'
 import {
   debtCases,
   decode,
+  deferredCases,
   fireCases,
   healthcareCases,
   investmentCases,
+  toDeferredInputs,
   toFireInputs,
   withdrawalCases,
 } from './parityFixtures'
@@ -165,5 +168,46 @@ describe('healthcare gap parity', () => {
     expect(result.annualCost).toBe(expected.annualCost)
     expect(result.totalCost).toBe(expected.totalCost)
     expect(result.avgAnnualCost).toBe(expected.avgAnnualCost)
+  })
+})
+
+/**
+ * Deferred-compensation cases exist because of issue #63, where the two platforms rounded a negative
+ * `surplus` with different midpoint rules and then classified funded/shortfall from that rounded
+ * value. The result was a categorical disagreement — web said "fully funded, never falls short",
+ * MAUI said "fails at 60" — from identical inputs, and no shared case could catch it because none
+ * produced a negative surplus.
+ *
+ * Each case asserts the surplus of every projected year, not just the headline, so the displayed
+ * figure and the verdict derived from it are both pinned across platforms.
+ */
+describe('deferred compensation parity', () => {
+  it.each(deferredCases.map((c) => [c.id, c] as const))('%s', (_id, testCase) => {
+    const result = calculateDeferredCompensation(toDeferredInputs(testCase))
+    const expected = testCase.expected
+
+    expect(result.projections).toHaveLength(expected.projectionCount)
+    expect(result.currentBalance).toBe(expected.currentBalance)
+    expect(result.balanceAtSemiRetirement).toBe(expected.balanceAtSemiRetirement)
+    expect(result.endingBalance).toBe(expected.endingBalance)
+    expect(result.firstYearIncome).toBe(expected.firstYearIncome)
+    expect(result.firstYearSurplus).toBe(expected.firstYearSurplus)
+    expect(result.retirementYears).toBe(expected.retirementYears)
+    expect(result.fundedYears).toBe(expected.fundedYears)
+    expect(result.yearsFullyCovered).toBe(expected.yearsFullyCovered)
+    expect(result.firstShortfallAge).toBe(expected.firstShortfallAge)
+
+    for (const sample of expected.annualSamples) {
+      const point = result.projections.find((p) => p.age === sample.age)
+      expect(point).toBeDefined()
+      expect(point!.totalIncome).toBe(sample.totalIncome)
+      expect(point!.expenses).toBe(sample.expenses)
+      expect(point!.surplus).toBe(sample.surplus)
+
+      // `toBe` uses Object.is, so it already distinguishes -0 from 0 and the assertion above would
+      // catch a regression. This states the intent outright, because negative zero silently
+      // satisfying `>= 0` is the mechanism that made #63 severe.
+      expect(Object.is(point!.surplus, -0)).toBe(false)
+    }
   })
 })

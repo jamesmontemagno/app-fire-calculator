@@ -84,6 +84,11 @@ export interface RetirementCashFlowPoint {
   /** Spendable income: outside income plus after-tax deferred payouts and gap withdrawals. */
   totalIncome: number
   expenses: number
+  /**
+   * Displayed surplus, rounded to whole dollars away from zero. This is a presentation value — the
+   * funded/shortfall verdict is decided from the unrounded surplus by `isShortfall`, never from this
+   * field. See issue #63.
+   */
   surplus: number
   /** Gross amounts leaving each account, before withdrawal tax. */
   withdrawals: Record<string, number>
@@ -132,6 +137,50 @@ export interface DeferredCompensationResult {
 
 const round = (value: number) => Math.round(Math.max(0, value))
 
+/**
+ * Rounds a value that is allowed to be negative, for display only.
+ *
+ * `surplus` is the one field the clamping `round` helper above cannot serve, because clamping at
+ * zero would hide every shortfall. Bare `Math.round` is not usable either: it rounds half *up*
+ * (toward +Infinity), so `Math.round(-2.5)` is `-2` while the MAUI mirror's
+ * `MidpointRounding.AwayFromZero` gives `-3`. That pairing was issue #63. Both platforms now round
+ * signed money away from zero.
+ *
+ * The trailing `+ 0` normalizes negative zero to positive zero. `Math.round(-0.4)` is `-0`, which
+ * formats as `"-$0"` through `Intl.NumberFormat` and as `-$0` through C# `ToString("C0")`, so leaving
+ * it in the data model lets a screen show a negative surplus for a year that is not short. IEEE 754
+ * gives `-0 + 0 === +0` while leaving every other value — including `NaN` and both infinities —
+ * untouched, so the MAUI mirror applies the identical `+ 0d`.
+ */
+const roundSigned = (value: number) => Math.sign(value) * Math.round(Math.abs(value)) + 0
+
+/**
+ * Half of the whole-dollar unit the surplus is displayed in.
+ *
+ * The funded/shortfall verdict is a tolerance question, not an exact comparison: `surplus` is
+ * `totalIncome - expenses`, and both operands accumulate floating-point error over as many as sixty
+ * compounding steps, so a bare `surplus < 0` would report a shortfall for a residue of a millionth of
+ * a cent. Half a dollar sits roughly thirteen orders of magnitude above that residue at realistic
+ * balances, so no accumulation can reach it.
+ *
+ * It is exactly half a display unit for a second reason: `exact <= -0.5` is equivalent to
+ * `roundSigned(exact) < 0` for every double, so the figure shown to the user and the verdict about
+ * it can never contradict each other. A tighter threshold would flag a shortfall for a year the
+ * table still renders as `$0`.
+ */
+const SHORTFALL_TOLERANCE = 0.5
+
+/**
+ * Decides whether a year is short, from the UNROUNDED surplus.
+ *
+ * Reading the rounded field instead is what made issue #63 severe: `Math.round(-0.5)` is `-0`, and
+ * `-0 < 0` is `false`, so web reported a fifty-cent shortfall as a fully funded year while MAUI —
+ * rounding to `-1` — reported failure at the first retirement age, from identical inputs. Keeping the
+ * verdict on the exact value means no display rounding rule can move a headline again, and a negative
+ * zero can never enter the comparison.
+ */
+const isShortfall = (exactSurplus: number) => exactSurplus <= -SHORTFALL_TOLERANCE
+
 const clampRate = (value: number) => Math.min(1, Math.max(0, value))
 
 const distributeSurplus = (
@@ -168,6 +217,8 @@ export function calculateDeferredCompensation({
   const endAge = Math.max(retirementAge, Math.floor(planThroughAge))
   const balances = new Map(accounts.map(account => [account.id, Math.max(0, account.balance)]))
   const projections: RetirementCashFlowPoint[] = []
+  // The verdict below reads these, not the rounded `surplus` on the projection points. See #63.
+  const exactSurplusByAge = new Map<number, number>()
 
   for (let age = startAge; age <= endAge; age++) {
     const yearsFromNow = age - startAge
@@ -263,6 +314,7 @@ export function calculateDeferredCompensation({
 
     const totalIncome = outsideIncome + deferredIncome + portfolioWithdrawals
     const surplus = totalIncome - expenses
+    exactSurplusByAge.set(age, surplus)
     if (reinvestSurplus && surplus > 0) distributeSurplus(balances, accounts, surplus)
 
     for (const account of accounts) {
@@ -281,7 +333,7 @@ export function calculateDeferredCompensation({
       expenses: round(expenses),
       coreExpenses: round(coreExpenses),
       additionalExpenses: round(additionalExpenseTotal),
-      surplus: Math.round(surplus),
+      surplus: roundSigned(surplus),
       withdrawals: accountWithdrawals,
       balances: accountBalances,
       incomeBySource,
@@ -293,9 +345,10 @@ export function calculateDeferredCompensation({
 
   const retirementProjection = projections.find(point => point.age === retirementAge) ?? projections[0]
   const retirementProjections = projections.filter(point => point.age >= retirementAge)
-  const firstShortfall = retirementProjections.find(point => point.surplus < 0)
+  const shortAt = (point: RetirementCashFlowPoint) => isShortfall(exactSurplusByAge.get(point.age) ?? 0)
+  const firstShortfall = retirementProjections.find(shortAt)
   const consecutiveFundedYears = firstShortfall
-    ? retirementProjections.findIndex(point => point.surplus < 0)
+    ? retirementProjections.findIndex(shortAt)
     : retirementProjections.length
 
   return {
@@ -306,7 +359,7 @@ export function calculateDeferredCompensation({
     firstYearSurplus: retirementProjection?.surplus ?? 0,
     endingBalance: projections.at(-1)?.totalBalance ?? 0,
     fundedYears: consecutiveFundedYears,
-    yearsFullyCovered: retirementProjections.filter(point => point.surplus >= 0).length,
+    yearsFullyCovered: retirementProjections.filter(point => !shortAt(point)).length,
     firstShortfallAge: firstShortfall?.age ?? null,
     retirementYears: retirementProjections.length,
   }

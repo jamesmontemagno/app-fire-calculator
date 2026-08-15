@@ -371,6 +371,14 @@ export default function DeferredCompensation() {
                           <td className="py-3 px-3">{formatCurrency(point.outsideIncome + point.deferredIncome)}</td>
                           <td className="py-3 px-3">{formatCurrency(point.portfolioWithdrawals)}</td>
                           <td className="py-3 px-3">{formatCurrency(point.expenses)}</td>
+                          {/*
+                            Reads the rounded `surplus` rather than the calculator's `isShortfall`
+                            predicate, which is safe only because the two are exactly equivalent:
+                            `roundSigned` rounds away from zero, so `surplus >= 0` holds for precisely
+                            the years where `exact > -0.5`. Keep them in step — a tighter tolerance in
+                            the calculator would let this cell render a green `+$0` for a year the
+                            headline calls a shortfall. See issue #63.
+                          */}
                           <td className={`py-3 px-3 font-medium ${point.surplus >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                             {point.surplus >= 0 ? '+' : '−'}{formatCurrency(Math.abs(point.surplus))}
                           </td>

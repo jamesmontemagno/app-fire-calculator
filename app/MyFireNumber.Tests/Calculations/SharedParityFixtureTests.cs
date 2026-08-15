@@ -60,6 +60,8 @@ public class SharedParityFixtureTests
 
     public static TheoryData<string> HealthcareCaseIds => IdsOfKind("healthcare");
 
+    public static TheoryData<string> DeferredCaseIds => IdsOfKind("deferred");
+
     [Fact]
     public void FixtureLoads_AndEveryCaseDocumentsItsDerivation()
     {
@@ -388,6 +390,58 @@ public class SharedParityFixtureTests
         Assert.Equal(result.GapYears, result.YearlyBreakdown.Count);
     }
 
+    /// <summary>
+    /// Deferred-compensation cases exist because of issue #63, where the two platforms rounded a
+    /// negative <c>surplus</c> with different midpoint rules and then classified funded/shortfall from
+    /// that rounded value. The result was a categorical disagreement — web said "fully funded, never
+    /// falls short", this side said "fails at 60" — from identical inputs, and no shared case could
+    /// catch it because none produced a negative surplus.
+    ///
+    /// <para>Each case asserts the surplus of every projected year, not just the headline, so the
+    /// displayed figure and the verdict derived from it are both pinned across platforms.</para>
+    /// </summary>
+    [Theory]
+    [MemberData(nameof(DeferredCaseIds))]
+    public void DeferredCompensation_MatchesSharedFixture(string caseId)
+    {
+        var parityCase = Case(caseId);
+        var expected = parityCase.Expected;
+
+        var result = DeferredCompensationCalculator.Calculate(ToDeferredInputs(parityCase.Inputs));
+
+        Assert.Equal((int)Number(expected, "projectionCount"), result.Projections.Count);
+        Assert.Equal(Number(expected, "currentBalance"), result.CurrentBalance, ExactTolerance);
+        Assert.Equal(Number(expected, "balanceAtSemiRetirement"), result.BalanceAtSemiRetirement, ExactTolerance);
+        Assert.Equal(Number(expected, "endingBalance"), result.EndingBalance, ExactTolerance);
+        Assert.Equal(Number(expected, "firstYearIncome"), result.FirstYearIncome, ExactTolerance);
+        Assert.Equal(Number(expected, "firstYearSurplus"), result.FirstYearSurplus, ExactTolerance);
+        Assert.Equal((int)Number(expected, "retirementYears"), result.RetirementYears);
+        Assert.Equal((int)Number(expected, "fundedYears"), result.FundedYears);
+        Assert.Equal((int)Number(expected, "yearsFullyCovered"), result.YearsFullyCovered);
+
+        // Null is an answer here — "the plan never falls short" — not a missing value, so it is
+        // asserted rather than skipped.
+        var expectedShortfallAge = expected.GetProperty("firstShortfallAge");
+        Assert.Equal(
+            expectedShortfallAge.ValueKind == JsonValueKind.Null ? null : expectedShortfallAge.GetInt32(),
+            result.FirstShortfallAge);
+
+        foreach (var sample in expected.GetProperty("annualSamples").EnumerateArray())
+        {
+            var age = sample.GetProperty("age").GetInt32();
+            var point = Assert.Single(result.Projections, p => p.Age == age);
+
+            Assert.Equal(Number(sample, "totalIncome"), point.TotalIncome, ExactTolerance);
+            Assert.Equal(Number(sample, "expenses"), point.Expenses, ExactTolerance);
+            Assert.Equal(Number(sample, "surplus"), point.Surplus, ExactTolerance);
+
+            // Assert.Equal treats -0.0 and 0.0 as equal, so the line above cannot catch a negative
+            // zero. It has to be checked outright: negative zero silently satisfying `>= 0` while
+            // formatting as "-$0" is the mechanism that made #63 severe.
+            Assert.False(double.IsNegative(point.Surplus) && point.Surplus == 0);
+        }
+    }
+
     // ---- fixture plumbing ------------------------------------------------------------------
 
     private sealed record ParityCase(string Id, string Kind, string Derivation, JsonElement Inputs, JsonElement Expected);
@@ -485,4 +539,70 @@ public class SharedParityFixtureTests
         WithdrawalRate: inputs.GetProperty("withdrawalRate").GetDouble(),
         AnnualExpenses: inputs.GetProperty("annualExpenses").GetDouble(),
         ContributionGrowth: ToContributionGrowth(inputs));
+
+    /// <summary>
+    /// Maps the fixture's semantic input names onto this platform's deferred-compensation call shape.
+    ///
+    /// <para>Deliberately strict about the collections: they are read with <c>GetProperty</c> so a
+    /// case that omits <c>accounts</c> or <c>incomeSources</c> throws rather than quietly testing an
+    /// empty plan and passing. An empty array must be written out explicitly.</para>
+    /// </summary>
+    private static DeferredCompensationInputs ToDeferredInputs(JsonElement inputs) => new(
+        CurrentAge: inputs.GetProperty("currentAge").GetInt32(),
+        SemiRetirementAge: inputs.GetProperty("semiRetirementAge").GetInt32(),
+        PlanThroughAge: inputs.GetProperty("planThroughAge").GetInt32(),
+        AnnualExpenses: inputs.GetProperty("annualExpenses").GetDouble(),
+        InflationRate: inputs.GetProperty("inflationRate").GetDouble(),
+        Accounts: inputs.GetProperty("accounts").EnumerateArray().Select(ToRetirementAccount).ToArray(),
+        IncomeSources: inputs.GetProperty("incomeSources").EnumerateArray().Select(ToIncomeSource).ToArray(),
+        AdditionalExpenses: inputs.GetProperty("additionalExpenses").EnumerateArray().Select(ToExpense).ToArray(),
+        WithdrawOnlyAfterRetirement: inputs.GetProperty("withdrawOnlyAfterRetirement").GetBoolean(),
+        ReinvestSurplus: inputs.GetProperty("reinvestSurplus").GetBoolean(),
+        // Pinned rather than defaulted to DateTime.Now.Year so the case is reproducible. No
+        // expectation reads the calendar year: the platforms derive it differently, so it is covered
+        // per-platform instead of pretending it is shared.
+        CurrentYear: 2025);
+
+    private static RetirementAccount ToRetirementAccount(JsonElement account) => new(
+        Id: account.GetProperty("id").GetString()!,
+        Name: account.GetProperty("name").GetString()!,
+        Type: account.GetProperty("type").GetString() switch
+        {
+            "deferred" => RetirementAccountType.Deferred,
+            "traditional" => RetirementAccountType.Traditional,
+            "roth" => RetirementAccountType.Roth,
+            "taxable" => RetirementAccountType.Taxable,
+            "savings" => RetirementAccountType.Savings,
+            "hsa" => RetirementAccountType.Hsa,
+            "other" => RetirementAccountType.Other,
+            var other => throw new FormatException($"Unrecognised account type '{other}'."),
+        },
+        Balance: account.GetProperty("balance").GetDouble(),
+        AnnualContribution: account.GetProperty("annualContribution").GetDouble(),
+        AnnualReturn: account.GetProperty("annualReturn").GetDouble(),
+        AvailableAge: account.GetProperty("availableAge").GetInt32(),
+        WithdrawalRate: account.GetProperty("withdrawalRate").GetDouble(),
+        PayoutYears: account.GetProperty("payoutYears").GetInt32(),
+        WithdrawalTaxRate: account.GetProperty("withdrawalTaxRate").GetDouble());
+
+    /// <summary>
+    /// The fixture carries a <c>type</c> on each income source because the web model requires one.
+    /// This platform's record has no such field, which is exactly the kind of shape difference the
+    /// per-platform adapters exist to absorb.
+    /// </summary>
+    private static RetirementIncomeSource ToIncomeSource(JsonElement source) => new(
+        Id: source.GetProperty("id").GetString()!,
+        Name: source.GetProperty("name").GetString()!,
+        AnnualAmount: source.GetProperty("annualAmount").GetDouble(),
+        StartAge: source.GetProperty("startAge").GetInt32(),
+        EndAge: source.GetProperty("endAge").GetInt32(),
+        AnnualGrowth: source.GetProperty("annualGrowth").GetDouble(),
+        IsAfterTax: source.GetProperty("isAfterTax").GetBoolean(),
+        TaxRate: source.GetProperty("taxRate").GetDouble());
+
+    private static RetirementExpense ToExpense(JsonElement expense) => new(
+        Id: expense.GetProperty("id").GetString()!,
+        Name: expense.GetProperty("name").GetString()!,
+        AnnualAmount: expense.GetProperty("annualAmount").GetDouble(),
+        StartAge: expense.GetProperty("startAge").GetInt32());
 }
