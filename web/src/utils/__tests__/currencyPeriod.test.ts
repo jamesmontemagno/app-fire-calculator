@@ -500,17 +500,16 @@ describe('the preconditions that keep negatives away from the rounding', () => {
   })
 
   /**
-   * A known divergence from the MAUI port, pinned as-is rather than fixed.
-   *
-   * `CurrencyPeriodMath.Format` deliberately never emits `"-0"`; `formatPeriodAmount` will, because
-   * `Intl.NumberFormat` preserves the sign of negative zero. It is unreachable today — the sanitizer
-   * strips `-`, the edit path floors negatives, and `0 / 12` is `+0` — so this pins the precondition
-   * and records the latent difference instead of changing behaviour that both platforms share.
+   * Issue #87, now fixed: `formatPeriodAmount` used to render `"-0"` here, where
+   * `CurrencyPeriodMath.RoundHalfUp` on the MAUI side returns positive zero. The formatter is
+   * asserted properly under `formatPeriodAmount` below; what this test still owns are the three
+   * preconditions that keep a negative away from it in the first place, which the fix does not
+   * replace. They are pinned so removing a guard shows up here rather than quietly making the
+   * negative rows live.
    */
-  it('would render negative zero as "-0", which is why negatives are kept out upstream', () => {
-    expect(formatPeriodAmount(-0)).toBe('-0')
-
-    // And the reasons it cannot happen.
+  it('cannot be handed a negative zero in the first place', () => {
+    // `Object.is`, not `===`: `-0 === 0` is true, so an equality assertion would pass on either zero
+    // and prove nothing about the sign these guards exist to keep out.
     expect(Object.is(convertPeriod(0, 'annual', 'monthly'), 0)).toBe(true)
     expect(Object.is(editField('-0', 50_000, 'annual', 'annual'), 0)).toBe(true)
     expect(formatPeriodAmount(convertPeriod(0, 'annual', 'monthly'))).toBe('0')
@@ -612,6 +611,55 @@ describe('formatPeriodAmount', () => {
     // compared without this looking like a bug in either.
     expect(formatPeriodAmount(50_000)).toBe('50,000')
     expect(sanitize(formatPeriodAmount(50_000))).toBe('50000')
+  })
+
+  /**
+   * Issue #87.
+   *
+   * `Intl.NumberFormat` keeps the sign of a value whose magnitude `maximumFractionDigits: 2` rounds
+   * away, so every one of these rendered `"-0"` before the normalisation.
+   *
+   * The rows are deliberately three *different* numbers. Only the first is negative zero; `-0.001`
+   * and `-1e-7` are ordinary negative numbers that merely round to nothing. A fix written as
+   * `Object.is(value, -0)` would have handled the rare input and left the likelier two broken, which
+   * is why the normalisation is applied to the rendered text instead of to the input.
+   */
+  it.each<[string, number]>([
+    ['negative zero', -0],
+    ['a negative just under half a cent', -0.001],
+    ['a negative far under half a cent', -1e-7],
+  ])('renders %s as an unsigned zero', (_name, value) => {
+    expect(formatPeriodAmount(value)).toBe('0')
+    expect(formatPeriodAmount(value)).not.toContain('-')
+  })
+
+  it('the three rows above are genuinely different inputs', () => {
+    // Guards the guard. `-0 === 0` is true, so an equality assertion is blind to the exact thing
+    // being fixed — that blind spot is why the bug survived. `Object.is` is what can see it, and it
+    // is also what shows the last two rows are not negative zero at all.
+    expect(Object.is(-0, 0)).toBe(false)
+    expect(Object.is(-0, -0)).toBe(true)
+    expect(Object.is(-0.001, -0)).toBe(false)
+    expect(Object.is(-1e-7, -0)).toBe(false)
+    expect([-0.001, -1e-7].every(value => value < 0)).toBe(true)
+  })
+
+  it('keeps the sign of a negative big enough to survive the rounding', () => {
+    // The normalisation rewrites a rendering that is nothing but zeros, so it cannot swallow a real
+    // amount. Half a cent is the first magnitude that still shows, and it still shows as negative.
+    expect(formatPeriodAmount(-0.005)).toBe('-0.01')
+    expect(formatPeriodAmount(-0.01)).toBe('-0.01')
+    expect(formatPeriodAmount(-1_234.5)).toBe('-1,234.5')
+    expect(formatPeriodAmount(-50_000)).toBe('-50,000')
+  })
+
+  it('leaves positive amounts exactly as they were', () => {
+    // The fix is scoped to the sign. Nothing above zero changes shape, including the boundary values
+    // the normalisation inspects.
+    expect(formatPeriodAmount(0)).toBe('0')
+    expect(formatPeriodAmount(0.001)).toBe('0')
+    expect(formatPeriodAmount(0.005)).toBe('0.01')
+    expect(formatPeriodAmount(50_000 / 12)).toBe('4,166.67')
   })
 })
 

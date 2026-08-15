@@ -227,6 +227,74 @@ public class CurrencyPeriodMathTests
         Assert.Equal(expected, CurrencyPeriodMath.Format(value, CultureInfo.InvariantCulture));
     }
 
+    /// <summary>
+    /// The counterpart to the negative-zero rows web added for issue #87 — and the one place the two
+    /// suites now deliberately disagree.
+    ///
+    /// <para>#87 was filed on the premise that <c>Format</c> "deliberately never emits -0", which
+    /// would make web the only unsafe side. Measured here on .NET 10, that premise does not hold: the
+    /// custom format string <c>"0.##"</c> keeps the sign under IEEE-compliant formatting, so this side
+    /// renders <c>"-0"</c> for exactly the inputs web used to. The extra safety established in #77
+    /// belongs to <see cref="CurrencyPeriodMath.RoundHalfUp"/>, which never *produces* a negative
+    /// zero, and <see cref="RoundHalfUp_does_not_produce_negative_zero"/> passes because it hands
+    /// <c>Format</c> a positive zero — not because <c>Format</c> normalises a negative one it is
+    /// given. The two facts were adjacent enough to be read as one.</para>
+    /// <para>Pinned as measured rather than fixed. #87 is scoped to the web formatter, and changing
+    /// shared display behaviour in Core is a separate decision. What makes it safe to leave is the
+    /// same thing that kept it invisible: the entry rejects negatives before they are converted (see
+    /// <see cref="A_negative_amount_never_reaches_the_rounding_helper"/>), so nothing below is
+    /// reachable from a field. Recorded so the next reader compares the suites against what the code
+    /// does rather than against #87's description of it.</para>
+    /// </summary>
+    [Theory]
+    [InlineData(-0.0, "-0")]
+    [InlineData(-0.001, "-0")]
+    [InlineData(-1e-7, "-0")]
+    public void Format_still_signs_a_rounded_away_zero_where_web_no_longer_does(double value, string expected)
+    {
+        Assert.Equal(expected, CurrencyPeriodMath.Format(value, CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>
+    /// Guards the guard above: its three rows are three different numbers, and only the first is
+    /// negative zero.
+    ///
+    /// <para><c>double.IsNegative</c> is the C# counterpart to web's <c>Object.is</c> here.
+    /// <c>-0.0 == 0.0</c> is <c>true</c> in both languages, so an equality assertion cannot see the
+    /// sign at all — the blind spot that let #87 survive. The other two rows are ordinary negative
+    /// numbers whose magnitude the format string rounds away while the sign survives, so a fix
+    /// written against negative zero alone would miss them on either platform.</para>
+    /// </summary>
+    [Fact]
+    public void The_rounded_away_zero_rows_are_genuinely_different_inputs()
+    {
+        const double negativeZero = -0.0;
+
+        Assert.True(double.IsNegative(negativeZero));
+        Assert.False(double.IsNegative(0.0));
+        // The blind spot itself: this passes, and proves nothing about the sign.
+        Assert.Equal(0.0, negativeZero);
+
+        Assert.False(negativeZero < 0);
+        Assert.True(-0.001 < 0);
+        Assert.True(-1e-7 < 0);
+    }
+
+    /// <summary>
+    /// A negative large enough to survive the rounding keeps its sign, on both platforms. Half a cent
+    /// is the first magnitude that still shows, so it is the boundary worth pinning: any fix that
+    /// clamped every amount rounding to zero would swallow this row instead.
+    /// </summary>
+    [Theory]
+    [InlineData(-0.005, "-0.01")]
+    [InlineData(-0.01, "-0.01")]
+    [InlineData(-1_234.5, "-1234.5")]
+    [InlineData(-50_000, "-50000")]
+    public void Format_keeps_the_sign_of_a_negative_that_survives_the_rounding(double value, string expected)
+    {
+        Assert.Equal(expected, CurrencyPeriodMath.Format(value, CultureInfo.InvariantCulture));
+    }
+
     [Fact]
     public void Suffix_and_qualifier_name_the_period()
     {
