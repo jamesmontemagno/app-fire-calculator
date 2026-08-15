@@ -89,13 +89,13 @@ const PAGE_SOURCES = import.meta.glob('../../pages/*.tsx', {
 function readCallSiteKeys(fnName: string): Map<string, string[]> {
   const byFile = new Map<string, string[]>()
 
-  for (const [path, source] of Object.entries(PAGE_SOURCES)) {
+  for (const [path, raw] of Object.entries(PAGE_SOURCES)) {
+    const source = blankOutCommentsAndStrings(raw)
     const keys: string[] = []
-    const needle = `${fnName}({`
+    const call = new RegExp(`\\b${fnName}\\s*\\(\\s*\\{`, 'g')
 
-    let cursor = source.indexOf(needle)
-    while (cursor !== -1) {
-      const open = cursor + needle.length - 1
+    for (const match of source.matchAll(call)) {
+      const open = match.index + match[0].length - 1
       let depth = 0
       let close = -1
 
@@ -110,10 +110,11 @@ function readCallSiteKeys(fnName: string): Map<string, string[]> {
           }
         }
       }
-      if (close === -1) break
+      // An unbalanced literal means the scan lost track, and a scan that quietly returns fewer
+      // keys is worse than no scan at all: it reports success over fields nobody checked.
+      if (close === -1) throw new Error(`Could not find the end of the ${fnName} call in ${path}`)
 
       keys.push(...topLevelKeys(source.slice(open + 1, close)))
-      cursor = source.indexOf(needle, close)
     }
 
     if (keys.length > 0) byFile.set(path.split('/').pop() ?? path, keys)
@@ -122,10 +123,53 @@ function readCallSiteKeys(fnName: string): Map<string, string[]> {
   return byFile
 }
 
+/**
+ * Replace the contents of comments and string literals with spaces, preserving length and so every
+ * offset, before anything counts a brace.
+ *
+ * A `//` comment or a string holding an unbalanced `)` would otherwise end a scan early and drop
+ * every key after it, silently. That is the one failure mode this whole file cannot afford: the
+ * coverage suites would still pass, over a shorter list, which is indistinguishable from success.
+ */
+function blankOutCommentsAndStrings(source: string): string {
+  const out = source.split('')
+  let i = 0
+
+  const blankUntil = (isEnd: (index: number) => boolean, escapes: boolean) => {
+    i += 1
+    while (i < source.length && !isEnd(i)) {
+      if (escapes && source[i] === '\\') out[i++] = ' '
+      out[i] = source[i] === '\n' ? '\n' : ' '
+      i += 1
+    }
+  }
+
+  while (i < source.length) {
+    const char = source[i]
+    const next = source[i + 1]
+
+    if (char === '/' && next === '/') {
+      while (i < source.length && source[i] !== '\n') out[i++] = ' '
+    } else if (char === '/' && next === '*') {
+      out[i] = ' '
+      blankUntil(index => source[index] === '*' && source[index + 1] === '/', false)
+      out[i] = ' '
+      out[i + 1] = ' '
+      i += 2
+    } else if (char === '"' || char === "'" || char === '`') {
+      blankUntil(index => source[index] === char, true)
+      i += 1
+    } else {
+      i += 1
+    }
+  }
+
+  return out.join('')
+}
+
 /** Property names declared directly on an object literal body, ignoring anything nested. */
 function topLevelKeys(body: string): string[] {
   const keys: string[] = []
-  const withoutComments = body.replace(/\/\/[^\n]*/g, '')
   let depth = 0
   let start = 0
 
@@ -138,16 +182,16 @@ function topLevelKeys(body: string): string[] {
     if (/^[A-Za-z_$][\w$]*$/.test(name)) keys.push(name)
   }
 
-  for (let i = 0; i < withoutComments.length; i += 1) {
-    const char = withoutComments[i]
+  for (let i = 0; i < body.length; i += 1) {
+    const char = body[i]
     if (char === '{' || char === '[' || char === '(') depth += 1
     else if (char === '}' || char === ']' || char === ')') depth -= 1
     else if (char === ',' && depth === 0) {
-      take(withoutComments.slice(start, i))
+      take(body.slice(start, i))
       start = i + 1
     }
   }
-  take(withoutComments.slice(start))
+  take(body.slice(start))
 
   return keys
 }
@@ -198,13 +242,65 @@ describe('exported fields are declared', () => {
 
   it('actually finds the page call sites it claims to check', () => {
     // Without this, renaming a helper would make the scan match nothing and the two suites above
-    // would pass by checking zero fields.
-    const inputs = readCallSiteKeys('prepareInputsForExport')
-    expect(inputs.size).toBe(11)
-    expect(inputs.get('DebtPayoff.tsx')).toContain('totalDebt')
+    // would pass by checking zero fields. Rather than hard-code a page count — which passes when a
+    // twelfth page is missed, i.e. fails in the permissive direction — this locates every call
+    // independently and asserts that each one passing an object literal was actually read.
+    for (const fnName of ['prepareInputsForExport', 'prepareResultsForExport'] as const) {
+      const parsed = readCallSiteKeys(fnName)
+      let literalCallSites = 0
 
-    const results = readCallSiteKeys('prepareResultsForExport')
-    expect(results.get('DeferredCompensation.tsx')).toContain('firstShortfallAge')
+      for (const [path, raw] of Object.entries(PAGE_SOURCES)) {
+        const file = path.split('/').pop() ?? path
+        const source = blankOutCommentsAndStrings(raw)
+
+        for (const call of source.matchAll(new RegExp(`\\b${fnName}\\s*\\(`, 'g'))) {
+          // Pages either build the shape inline or hand over a result object wholesale. Only the
+          // inline ones are this scanner's job; the rest are covered by RESULT_BUILDERS above.
+          if (!/^\s*\{/.test(source.slice(call.index + call[0].length))) continue
+          literalCallSites += 1
+          expect(
+            parsed.get(file),
+            `${file} passes an object literal to ${fnName}, but the call-site scanner in this ` +
+              'file read no fields out of it, so those exports are unchecked. Fix the scanner — ' +
+              'do not delete this assertion, and do not relax it to make the build go green.',
+          ).toBeDefined()
+        }
+      }
+
+      expect(literalCallSites).toBeGreaterThan(0)
+    }
+
+    expect(readCallSiteKeys('prepareInputsForExport').get('DebtPayoff.tsx')).toContain('totalDebt')
+    expect(readCallSiteKeys('prepareResultsForExport').get('DeferredCompensation.tsx')).toContain(
+      'firstShortfallAge',
+    )
+  })
+
+  it('reads keys past a comment or a string holding an unbalanced brace', () => {
+    // The three ways the scanner used to give up early and silently report a shorter list.
+    const hostile = [
+      'const handleExport = () => {',
+      '  prepareInputsForExport(',
+      '    {',
+      '      currentAge,',
+      "      label: 'plan {A',  // capped at 64 (see #62) :)",
+      '      mortgageBalance,',
+      '    },',
+      '  )',
+      '}',
+    ].join('\n')
+
+    const original = PAGE_SOURCES['../../pages/StandardFIRE.tsx']
+    try {
+      PAGE_SOURCES['../../pages/StandardFIRE.tsx'] = hostile
+      expect(readCallSiteKeys('prepareInputsForExport').get('StandardFIRE.tsx')).toEqual([
+        'currentAge',
+        'label',
+        'mortgageBalance',
+      ])
+    } finally {
+      PAGE_SOURCES['../../pages/StandardFIRE.tsx'] = original
+    }
   })
 })
 
@@ -469,7 +565,12 @@ describe('substring collisions that used to mis-format live exports', () => {
     // payoff was written into the user's spreadsheet as "$25". Exact lookup makes that impossible.
     //
     // Declared 'number' (#,##0 -> "25") rather than 'years' (0.0 -> "25.0"): these are whole
-    // months. MAUI already writes the same field with its decimal style, so the platforms agree.
+    // months, and "25.0 months" is a smaller version of the same defect.
+    //
+    // This deliberately diverges from MAUI, which writes TotalMonths with DecimalStyleIndex
+    // (DebtPayoffWorkbook.cs:61 -> format code "0.0") and so renders "25.0". MAUI is immune to the
+    // name-inference class — it declares a style per cell at the call site — but it picked a
+    // decimal style for a whole-number field. Web is correct here; the C# side is worth a look.
     const debt = calculateSnowballPayoff(DEBTS, 500)
     expect(debt.totalMonths).toBe(25)
 
