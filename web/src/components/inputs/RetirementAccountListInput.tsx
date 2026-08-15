@@ -3,6 +3,7 @@ import type {
   RetirementAccount,
   RetirementAccountType,
 } from '../../utils/deferredCompensation'
+import { defaultWithdrawalTaxRate } from '../../utils/deferredCompensation'
 import { formatCurrency } from '../../utils/calculations'
 import AgeInput from './AgeInput'
 import CurrencyInput from './CurrencyInput'
@@ -26,6 +27,16 @@ const ACCOUNT_TYPES: { value: RetirementAccountType; label: string }[] = [
   { value: 'other', label: 'Other account' },
 ]
 
+const WITHDRAWAL_TAX_TOOLTIPS: Record<RetirementAccountType, string> = {
+  deferred: 'Deferred compensation pays out as ordinary income, so withdrawals default to a 25% flat estimate. This is an estimate, not a bracket calculation — set your own expected rate.',
+  traditional: 'Traditional 401(k) and IRA withdrawals are taxed as ordinary income, so they default to a 25% flat estimate. This is an estimate, not a bracket calculation — set your own expected rate.',
+  roth: 'Qualified Roth withdrawals are tax-free, so this defaults to 0%.',
+  hsa: 'Qualified HSA withdrawals for medical costs are tax-free, so this defaults to 0%.',
+  taxable: 'Defaults to 0% because only the gain is taxable and this calculator does not track your cost basis. Enter an effective rate on the full withdrawal if you want to approximate capital-gains tax.',
+  savings: 'Defaults to 0% because only the interest is taxable and this calculator does not separate interest from principal. Enter an effective rate on the full withdrawal if you want to approximate it.',
+  other: 'Set the flat rate you expect to pay on withdrawals from this account.',
+}
+
 export default function RetirementAccountListInput({
   accounts,
   onChange,
@@ -44,6 +55,19 @@ export default function RetirementAccountListInput({
     )))
   }
 
+  const updateAccountType = (id: string, type: RetirementAccountType) => {
+    onChange(accounts.map(account => {
+      if (account.id !== id) return account
+      // Only re-apply the type default when the user has not set their own rate.
+      const keepsDefaultRate = account.withdrawalTaxRate === defaultWithdrawalTaxRate(account.type)
+      return {
+        ...account,
+        type,
+        withdrawalTaxRate: keepsDefaultRate ? defaultWithdrawalTaxRate(type) : account.withdrawalTaxRate,
+      }
+    }))
+  }
+
   const addAccount = () => {
     const id = `account-${Date.now()}-${accounts.length}`
     const account: RetirementAccount = {
@@ -56,6 +80,7 @@ export default function RetirementAccountListInput({
       availableAge: 55,
       withdrawalRate: 0.04,
       payoutYears: 1,
+      withdrawalTaxRate: defaultWithdrawalTaxRate('taxable'),
     }
     setExpandedIds(new Set([id]))
     onChange([...accounts, account])
@@ -191,9 +216,8 @@ export default function RetirementAccountListInput({
                       <select
                         id={`account-type-${account.id}`}
                         value={account.type}
-                        onChange={event => updateAccount(
+                        onChange={event => updateAccountType(
                           account.id,
-                          'type',
                           event.target.value as RetirementAccountType,
                         )}
                         className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-fire-500 focus:border-fire-500"
@@ -210,10 +234,10 @@ export default function RetirementAccountListInput({
                       tooltip="The amount currently held in this account"
                     />
                     <CurrencyInput
-                      label="Contributions"
+                      label="Contributions (today’s dollars)"
                       value={account.annualContribution}
                       onChange={value => updateAccount(account.id, 'annualContribution', value)}
-                      tooltip="Contributions stop at your semi-retirement age."
+                      tooltip="Entered in today’s dollars and escalated with inflation each year, the same way your spending is. Contributions stop at your semi-retirement age."
                       periodic
                     />
                     <PercentageInput
@@ -222,7 +246,7 @@ export default function RetirementAccountListInput({
                       onChange={value => updateAccount(account.id, 'annualReturn', value)}
                       min={0}
                       max={0.2}
-                      tooltip="Average annual investment return before inflation"
+                      tooltip="Average annual investment return before inflation. Deferred compensation keeps earning this return on the undistributed balance throughout the payout period."
                     />
                     <div>
                       <AgeInput
@@ -245,7 +269,7 @@ export default function RetirementAccountListInput({
                         suffix="years"
                         min={1}
                         max={30}
-                        tooltip="The balance is distributed evenly over this many years."
+                        tooltip="Each year pays the remaining balance divided by the remaining payout years, so the balance keeps earning your expected return and is fully distributed by the end of this period."
                       />
                     ) : (
                       <PercentageInput
@@ -254,9 +278,17 @@ export default function RetirementAccountListInput({
                         onChange={value => updateAccount(account.id, 'withdrawalRate', value)}
                         min={0}
                         max={0.2}
-                        tooltip="The maximum percentage of the remaining balance available to cover that year’s gap."
+                        tooltip="A self-imposed policy limit, not a depletion model. At most this share of the remaining balance is available each year, so a gap can still show up while the balance is healthy. Raise it to let this account absorb a larger gap."
                       />
                     )}
+                    <PercentageInput
+                      label="Withdrawal tax rate"
+                      value={account.withdrawalTaxRate}
+                      onChange={value => updateAccount(account.id, 'withdrawalTaxRate', value)}
+                      min={0}
+                      max={0.6}
+                      tooltip={WITHDRAWAL_TAX_TOOLTIPS[account.type]}
+                    />
                   </div>
                 )}
               </div>

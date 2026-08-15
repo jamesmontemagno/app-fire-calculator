@@ -18,6 +18,7 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(UsesPayoutSchedule))]
     [NotifyPropertyChangedFor(nameof(UsesWithdrawalRate))]
+    [NotifyPropertyChangedFor(nameof(WithdrawalTaxHelpText))]
     private RetirementAccountType type = RetirementAccountType.Traditional;
 
     [ObservableProperty]
@@ -36,6 +37,9 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
     private string withdrawalRateText = "4";
 
     [ObservableProperty]
+    private string withdrawalTaxRateText = "0";
+
+    [ObservableProperty]
     private string payoutYearsText = "5";
 
     [ObservableProperty]
@@ -45,6 +49,21 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
     public bool UsesPayoutSchedule => Type == RetirementAccountType.Deferred;
     public bool UsesWithdrawalRate => !UsesPayoutSchedule;
+
+    public string WithdrawalTaxHelpText => Type switch
+    {
+        RetirementAccountType.Deferred =>
+            "Deferred compensation pays out as ordinary income. This is a flat estimate, not a bracket calculation.",
+        RetirementAccountType.Traditional =>
+            "Traditional 401(k) and IRA withdrawals are ordinary income. This is a flat estimate, not a bracket calculation.",
+        RetirementAccountType.Roth => "Qualified Roth withdrawals are tax-free, so this defaults to 0%.",
+        RetirementAccountType.Hsa => "Qualified HSA medical withdrawals are tax-free, so this defaults to 0%.",
+        RetirementAccountType.Taxable =>
+            "0% because only the gain is taxable and this calculator does not track your cost basis. Enter an effective rate on the full withdrawal to approximate capital-gains tax.",
+        RetirementAccountType.Savings =>
+            "0% because only the interest is taxable and this calculator does not separate interest from principal.",
+        _ => "Set the flat rate you expect to pay on withdrawals from this account."
+    };
 
     public event EventHandler? Changed;
 
@@ -58,12 +77,13 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
         AnnualReturnText = Format(account.AnnualReturn * 100),
         AvailableAgeText = account.AvailableAge.ToString(CultureInfo.CurrentCulture),
         WithdrawalRateText = Format(account.WithdrawalRate * 100),
+        WithdrawalTaxRateText = Format(account.EffectiveWithdrawalTaxRate * 100),
         PayoutYearsText = account.PayoutYears.ToString(CultureInfo.CurrentCulture)
     };
 
     public bool TryCreateAccount(out RetirementAccount account, out string validationError)
     {
-        account = new RetirementAccount(Id, Name.Trim(), Type, 0, 0, 0, 0, 0, 0);
+        account = new RetirementAccount(Id, Name.Trim(), Type, 0, 0, 0, 0, 0, 0, 0);
         validationError = string.Empty;
         var withdrawalRate = 0d;
         var payoutYears = 1;
@@ -112,6 +132,12 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
             return false;
         }
 
+        if (!TryPercentage(WithdrawalTaxRateText, 0, 60, out var withdrawalTaxRate))
+        {
+            validationError = "Withdrawal tax rate must be between 0% and 60%.";
+            return false;
+        }
+
         account = new RetirementAccount(
             Id,
             Name.Trim(),
@@ -121,17 +147,35 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
             annualReturn,
             availableAge,
             withdrawalRate,
-            payoutYears);
+            payoutYears,
+            withdrawalTaxRate);
         return true;
     }
 
     partial void OnNameChanged(string value) => RaiseChanged();
-    partial void OnTypeChanged(RetirementAccountType value) => RaiseChanged();
+
+    partial void OnTypeChanged(RetirementAccountType value)
+    {
+        // Only re-apply the type default when the user has not typed their own rate, so switching
+        // account types stays helpful without discarding a deliberate entry.
+        if (TryPercentage(WithdrawalTaxRateText, 0, 60, out var currentRate) && IsTypeDefaultRate(currentRate))
+        {
+            WithdrawalTaxRateText = Format(RetirementTaxDefaults.WithdrawalTaxRateFor(value) * 100);
+        }
+
+        RaiseChanged();
+    }
+
+    private static bool IsTypeDefaultRate(double rate) =>
+        Enum.GetValues<RetirementAccountType>()
+            .Any(candidate => Math.Abs(rate - RetirementTaxDefaults.WithdrawalTaxRateFor(candidate)) < 0.0001);
+
     partial void OnBalanceTextChanged(string value) => RaiseChanged();
     partial void OnAnnualContributionTextChanged(string value) => RaiseChanged();
     partial void OnAnnualReturnTextChanged(string value) => RaiseChanged();
     partial void OnAvailableAgeTextChanged(string value) => RaiseChanged();
     partial void OnWithdrawalRateTextChanged(string value) => RaiseChanged();
+    partial void OnWithdrawalTaxRateTextChanged(string value) => RaiseChanged();
     partial void OnPayoutYearsTextChanged(string value) => RaiseChanged();
 
     [RelayCommand]
@@ -178,7 +222,7 @@ public sealed partial class RetirementIncomeEditorItem : ObservableObject
     private bool isAfterTax = true;
 
     [ObservableProperty]
-    private string taxRateText = "0";
+    private string taxRateText = "25";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]

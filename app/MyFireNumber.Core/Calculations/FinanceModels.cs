@@ -221,6 +221,26 @@ public enum RetirementAccountType
     Other
 }
 
+public static class RetirementTaxDefaults
+{
+    /// <summary>
+    /// The flat rate this app already assumes for ordinary income. It matches the default tax rate
+    /// used for retirement income sources so the two sides of the ledger share one assumption.
+    /// </summary>
+    public const double OrdinaryIncomeTaxRate = 0.25;
+
+    /// <summary>
+    /// Withdrawals from tax-deferred accounts are ordinary income. Roth and HSA withdrawals are
+    /// genuinely tax-free. Taxable and savings accounts default to zero because only the gain or
+    /// interest portion is taxable and this model tracks no cost basis, so taxing the full
+    /// withdrawal would overstate it.
+    /// </summary>
+    public static double WithdrawalTaxRateFor(RetirementAccountType type) =>
+        type is RetirementAccountType.Deferred or RetirementAccountType.Traditional
+            ? OrdinaryIncomeTaxRate
+            : 0;
+}
+
 public sealed record RetirementAccount(
     string Id,
     string Name,
@@ -230,7 +250,16 @@ public sealed record RetirementAccount(
     double AnnualReturn,
     int AvailableAge,
     double WithdrawalRate,
-    int PayoutYears);
+    int PayoutYears,
+    double? WithdrawalTaxRate = null)
+{
+    /// <summary>
+    /// Drafts saved before withdrawal tax existed deserialize with no rate, so they resolve to the
+    /// type-driven default rather than silently becoming tax-free.
+    /// </summary>
+    public double EffectiveWithdrawalTaxRate =>
+        Math.Clamp(WithdrawalTaxRate ?? RetirementTaxDefaults.WithdrawalTaxRateFor(Type), 0, 1);
+}
 
 public sealed record RetirementIncomeSource(
     string Id,
@@ -272,7 +301,9 @@ public sealed record RetirementCashFlowPoint(
     IReadOnlyDictionary<string, double> IncomeBySource,
     double CoreExpenses,
     double AdditionalExpenses,
-    IReadOnlyDictionary<string, double> ExpensesByItem);
+    IReadOnlyDictionary<string, double> ExpensesByItem,
+    double WithdrawalTaxes,
+    double PolicyLimitedWithdrawals);
 
 public sealed record DeferredCompensationResult(
     IReadOnlyList<RetirementCashFlowPoint> Projections,
@@ -281,4 +312,7 @@ public sealed record DeferredCompensationResult(
     double FirstYearIncome,
     double FirstYearSurplus,
     double EndingBalance,
-    int FundedYears);
+    int FundedYears,
+    int YearsFullyCovered,
+    int? FirstShortfallAge,
+    int RetirementYears);

@@ -63,6 +63,11 @@ export default function DeferredCompensation() {
     () => new Map(params.additionalExpenses.map((expense, index) => [expense.id, { expense, index }])),
     [params.additionalExpenses],
   )
+  const firstShortfallPoint = useMemo(
+    () => results.projections.find(point => point.age === results.firstShortfallAge),
+    [results.firstShortfallAge, results.projections],
+  )
+  const firstShortfallIsPolicyLimited = (firstShortfallPoint?.policyLimitedWithdrawals ?? 0) > 0
 
   const toggleAnnualDetail = (age: number) => {
     setExpandedAges(previous => {
@@ -86,7 +91,19 @@ export default function DeferredCompensation() {
       accountCount: params.accounts.length,
       additionalExpenseCount: params.additionalExpenses.length,
     })
-    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
+    // prepareResultsForExport enumerates every scalar key, so a null firstShortfallAge would emit
+    // a blank row. Pass a curated shape instead of the raw result.
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport({
+      currentBalance: results.currentBalance,
+      balanceAtSemiRetirement: results.balanceAtSemiRetirement,
+      firstYearIncomeAfterTax: results.firstYearIncome,
+      firstYearSurplus: results.firstYearSurplus,
+      endingBalance: results.endingBalance,
+      consecutiveFundedYears: results.fundedYears,
+      retirementYears: results.retirementYears,
+      yearsFullyCovered: results.yearsFullyCovered,
+      firstShortfallAge: results.firstShortfallAge ?? 0,
+    })
 
     exportToExcel({
       calculatorName: 'Retirement Cash Flow',
@@ -111,6 +128,10 @@ export default function DeferredCompensation() {
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Retirement Cash Flow</h1>
           <p className="mt-1 text-gray-600 dark:text-gray-400">
             See how after-tax income offsets today-dollar retirement spending before your portfolio fills the remaining gap.
+          </p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Withdrawals are shown after an estimated flat tax you set per account. Results are shown in
+            future dollars for the age listed on each card.
           </p>
         </header>
 
@@ -239,12 +260,51 @@ export default function DeferredCompensation() {
             <h2 id="cash-flow-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
             <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Results update from the scenario, income sources, accounts, and additional spending above.</p>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <ResultCard label="At retirement" value={results.balanceAtSemiRetirement} format="currency" highlight />
-            <ResultCard label="First-year income" value={results.firstYearIncome} format="currency" subtext="After tax where configured" />
-            <ResultCard label="Funded years" value={results.fundedYears} format="years" subtext={`of ${results.projections.filter(point => point.age >= params.semiRetirementAge).length} projected`} />
-            <ResultCard label="Ending portfolio" value={results.endingBalance} format="currency" />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <ResultCard
+              label="At retirement"
+              value={results.balanceAtSemiRetirement}
+              format="currency"
+              highlight
+              subtext={`Future dollars at age ${params.semiRetirementAge}`}
+            />
+            <ResultCard
+              label="First-year income"
+              value={results.firstYearIncome}
+              format="currency"
+              subtext={`After tax · future dollars at age ${params.semiRetirementAge}`}
+            />
+            <ResultCard
+              label="Funded years"
+              value={results.fundedYears}
+              format="years"
+              subtext={`Consecutive from age ${params.semiRetirementAge} of ${results.retirementYears} projected`}
+            />
+            <ResultCard
+              label="First shortfall"
+              value={results.firstShortfallAge === null ? 'None' : `Age ${results.firstShortfallAge}`}
+              subtext={
+                results.firstShortfallAge === null
+                  ? `Every year through age ${params.planThroughAge} is covered`
+                  : firstShortfallIsPolicyLimited
+                    ? 'Caused by your withdrawal-rate limits, not by running out'
+                    : `${results.yearsFullyCovered} of ${results.retirementYears} years are covered in total`
+              }
+            />
+            <ResultCard
+              label="Ending portfolio"
+              value={results.endingBalance}
+              format="currency"
+              subtext={`Future dollars at age ${params.planThroughAge}`}
+            />
           </div>
+          {firstShortfallIsPolicyLimited && (
+            <p className="text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+              At age {results.firstShortfallAge} your accounts held {formatCurrency(firstShortfallPoint?.policyLimitedWithdrawals ?? 0)} more
+              than your annual withdrawal-rate limits allowed you to take. The withdrawal rate is a policy
+              limit you set, not a sign the money ran out — raise it on an account to close this gap.
+            </p>
+          )}
         </section>
 
         <div className="grid xl:grid-cols-2 gap-6">
@@ -281,10 +341,9 @@ export default function DeferredCompensation() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-gray-700">
-                    {['Age / year', 'Income & required payouts', 'Gap withdrawals', 'Expenses', 'Surplus / gap', 'Portfolio'].map(label => (
+                    {['Age / year', 'Income & required payouts (after tax)', 'Gap withdrawals (after tax)', 'Expenses', 'Surplus / gap', 'Portfolio'].map(label => (
                       <th key={label} className="text-left py-3 px-3 font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{label}</th>
-                    ))}
-                  </tr>
+                    ))}                  </tr>
                 </thead>
                 <tbody>
                   {results.projections.map(point => {
@@ -336,12 +395,20 @@ export default function DeferredCompensation() {
                                   return (
                                     <div key={id} className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
                                       <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
-                                        {accountName} withdrawal
+                                        {accountName} withdrawal (gross)
                                       </p>
                                       <p className="mt-1 font-semibold text-violet-600 dark:text-violet-400">{formatCurrency(amount)}</p>
                                     </div>
                                   )
                                 })}
+                                {point.withdrawalTaxes > 0 && (
+                                  <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
+                                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                      Estimated withdrawal tax
+                                    </p>
+                                    <p className="mt-1 font-semibold text-rose-600 dark:text-rose-400">−{formatCurrency(point.withdrawalTaxes)}</p>
+                                  </div>
+                                )}
                                 <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
                                   <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
                                     Core spending

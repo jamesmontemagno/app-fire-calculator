@@ -33,6 +33,23 @@ export interface RetirementAccount {
   availableAge: number
   withdrawalRate: number
   payoutYears: number
+  /**
+   * Flat estimated tax applied to withdrawals from this account. It is an estimate, not a
+   * bracket calculation, and it never models cost basis.
+   */
+  withdrawalTaxRate: number
+}
+
+/**
+ * Withdrawals from tax-deferred accounts are ordinary income, so they default to the same rate the
+ * app already uses for ordinary income sources. Roth and HSA withdrawals are genuinely tax-free.
+ * Taxable and savings accounts default to zero because only the gain or interest portion is
+ * taxable and this model tracks no cost basis; taxing the full withdrawal would overstate it.
+ */
+export const ORDINARY_INCOME_TAX_RATE = 0.25
+
+export function defaultWithdrawalTaxRate(type: RetirementAccountType): number {
+  return type === 'deferred' || type === 'traditional' ? ORDINARY_INCOME_TAX_RATE : 0
 }
 
 export interface RetirementIncomeSource {
@@ -60,17 +77,25 @@ export interface RetirementCashFlowPoint {
   year: number
   totalBalance: number
   outsideIncome: number
+  /** Deferred payouts after estimated withdrawal tax. */
   deferredIncome: number
+  /** Gap withdrawals after estimated withdrawal tax. */
   portfolioWithdrawals: number
+  /** Spendable income: outside income plus after-tax deferred payouts and gap withdrawals. */
   totalIncome: number
   expenses: number
   surplus: number
+  /** Gross amounts leaving each account, before withdrawal tax. */
   withdrawals: Record<string, number>
   balances: Record<string, number>
   incomeBySource: Record<string, number>
   coreExpenses: number
   additionalExpenses: number
   expensesByItem: Record<string, number>
+  /** Estimated tax on this year's deferred payouts and gap withdrawals. */
+  withdrawalTaxes: number
+  /** Gross balance the per-account withdrawal-rate limit held back while a gap was still unmet. */
+  policyLimitedWithdrawals: number
 }
 
 export interface DeferredCompensationInputs {
@@ -91,13 +116,23 @@ export interface DeferredCompensationResult {
   projections: RetirementCashFlowPoint[]
   currentBalance: number
   balanceAtSemiRetirement: number
+  /** Spendable first-year income, after estimated withdrawal tax. */
   firstYearIncome: number
   firstYearSurplus: number
   endingBalance: number
+  /** Consecutive covered years starting at retirement age, stopping at the first shortfall. */
   fundedYears: number
+  /** Every covered year at or after retirement age, including years after a shortfall. */
+  yearsFullyCovered: number
+  /** Age of the first shortfall at or after retirement, or null when the plan never falls short. */
+  firstShortfallAge: number | null
+  /** Projected years at or after retirement age. */
+  retirementYears: number
 }
 
 const round = (value: number) => Math.round(Math.max(0, value))
+
+const clampRate = (value: number) => Math.min(1, Math.max(0, value))
 
 const distributeSurplus = (
   balances: Map<string, number>,
@@ -132,11 +167,11 @@ export function calculateDeferredCompensation({
   const retirementAge = Math.max(startAge, Math.floor(semiRetirementAge))
   const endAge = Math.max(retirementAge, Math.floor(planThroughAge))
   const balances = new Map(accounts.map(account => [account.id, Math.max(0, account.balance)]))
-  const deferredAnnualPayouts = new Map<string, number>()
   const projections: RetirementCashFlowPoint[] = []
 
   for (let age = startAge; age <= endAge; age++) {
     const yearsFromNow = age - startAge
+    const inflationMultiplier = Math.pow(1 + Math.max(-1, inflationRate), yearsFromNow)
     const canWithdraw = !withdrawOnlyAfterRetirement || age >= retirementAge
     const accountWithdrawals: Record<string, number> = {}
     const accountBalances: Record<string, number> = {}
@@ -146,9 +181,12 @@ export function calculateDeferredCompensation({
     for (const account of accounts) {
       let balance = balances.get(account.id) ?? 0
       if (age > startAge) {
-        const payoutHasStarted = account.type === 'deferred' && age >= account.availableAge
-        if (!payoutHasStarted) balance *= 1 + Math.max(-1, account.annualReturn)
-        if (age < retirementAge) balance += Math.max(0, account.annualContribution)
+        balance *= 1 + Math.max(-1, account.annualReturn)
+        // Contributions are entered in today's dollars, so the nominal amount paid in year k is
+        // the entered amount escalated by inflation, matching how expenses are escalated.
+        if (age < retirementAge) {
+          balance += Math.max(0, account.annualContribution) * inflationMultiplier
+        }
       }
       balances.set(account.id, balance)
     }
@@ -161,12 +199,11 @@ export function calculateDeferredCompensation({
         : 0
       const netAmount = source.isAfterTax
         ? grossAmount
-        : grossAmount * (1 - Math.min(1, Math.max(0, source.taxRate)))
+        : grossAmount * (1 - clampRate(source.taxRate))
       incomeBySource[source.id] = round(netAmount)
       outsideIncome += netAmount
     }
 
-    const inflationMultiplier = Math.pow(1 + Math.max(-1, inflationRate), yearsFromNow)
     const coreExpenses = Math.max(0, annualExpenses) * inflationMultiplier
     let additionalExpenseTotal = 0
     for (const expense of additionalExpenses) {
@@ -178,6 +215,7 @@ export function calculateDeferredCompensation({
     }
     const expenses = coreExpenses + additionalExpenseTotal
     let deferredIncome = 0
+    let withdrawalTaxes = 0
 
     for (const account of accounts.filter(account => account.type === 'deferred')) {
       const payoutStartAge = account.availableAge
@@ -185,34 +223,41 @@ export function calculateDeferredCompensation({
       if (age < payoutStartAge || age > payoutEndAge) continue
 
       const balance = balances.get(account.id) ?? 0
-      let annualPayout = deferredAnnualPayouts.get(account.id)
-      if (annualPayout === undefined) {
-        annualPayout = balance / (payoutEndAge - age + 1)
-        deferredAnnualPayouts.set(account.id, annualPayout)
-      }
-      const withdrawal = Math.min(balance, annualPayout)
+      // The undistributed balance keeps earning, so each year distributes the remaining balance
+      // over the remaining payout years. That honors the payout period exactly and leaves nothing
+      // stranded in an account that gap withdrawals can never reach.
+      const withdrawal = Math.min(balance, balance / (payoutEndAge - age + 1))
+      const taxRate = clampRate(account.withdrawalTaxRate)
       balances.set(account.id, balance - withdrawal)
       accountWithdrawals[account.id] = withdrawal
-      deferredIncome += withdrawal
+      withdrawalTaxes += withdrawal * taxRate
+      deferredIncome += withdrawal * (1 - taxRate)
     }
 
     let remainingGap = Math.max(0, expenses - outsideIncome - deferredIncome)
     let portfolioWithdrawals = 0
+    let policyLimitedWithdrawals = 0
 
     if (canWithdraw) {
       for (const account of accounts.filter(
         account => account.type !== 'deferred' && age >= account.availableAge,
       )) {
         const balance = balances.get(account.id) ?? 0
-        const withdrawal = Math.min(
-          balance,
-          remainingGap,
-          balance * Math.min(1, Math.max(0, account.withdrawalRate)),
-        )
+        const taxRate = clampRate(account.withdrawalTaxRate)
+        const netFactor = 1 - taxRate
+        // Withdrawals are grossed up so the spendable remainder covers the gap.
+        const grossNeeded = netFactor > 0 ? remainingGap / netFactor : Number.POSITIVE_INFINITY
+        const policyLimit = balance * clampRate(account.withdrawalRate)
+        const withdrawal = Math.min(balance, grossNeeded, policyLimit)
+        if (policyLimit < Math.min(balance, grossNeeded)) {
+          policyLimitedWithdrawals += Math.min(balance, grossNeeded) - policyLimit
+        }
         balances.set(account.id, balance - withdrawal)
         accountWithdrawals[account.id] = withdrawal
-        portfolioWithdrawals += withdrawal
-        remainingGap -= withdrawal
+        withdrawalTaxes += withdrawal * taxRate
+        const spendable = withdrawal * netFactor
+        portfolioWithdrawals += spendable
+        remainingGap -= spendable
       }
     }
 
@@ -241,11 +286,17 @@ export function calculateDeferredCompensation({
       balances: accountBalances,
       incomeBySource,
       expensesByItem,
+      withdrawalTaxes: round(withdrawalTaxes),
+      policyLimitedWithdrawals: round(policyLimitedWithdrawals),
     })
   }
 
   const retirementProjection = projections.find(point => point.age === retirementAge) ?? projections[0]
   const retirementProjections = projections.filter(point => point.age >= retirementAge)
+  const firstShortfall = retirementProjections.find(point => point.surplus < 0)
+  const consecutiveFundedYears = firstShortfall
+    ? retirementProjections.findIndex(point => point.surplus < 0)
+    : retirementProjections.length
 
   return {
     projections,
@@ -254,6 +305,9 @@ export function calculateDeferredCompensation({
     firstYearIncome: retirementProjection?.totalIncome ?? 0,
     firstYearSurplus: retirementProjection?.surplus ?? 0,
     endingBalance: projections.at(-1)?.totalBalance ?? 0,
-    fundedYears: retirementProjections.filter(point => point.surplus >= 0).length,
+    fundedYears: consecutiveFundedYears,
+    yearsFullyCovered: retirementProjections.filter(point => point.surplus >= 0).length,
+    firstShortfallAge: firstShortfall?.age ?? null,
+    retirementYears: retirementProjections.length,
   }
 }
