@@ -259,13 +259,13 @@ export default function FIREQuiz() {
         <SEO {...calculatorSEO.quiz} />
         <main className="mx-auto max-w-3xl space-y-8">
           <header className="text-center">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Your best FIRE starting point</h1>
-            <p className="mx-auto mt-3 max-w-2xl text-gray-600 dark:text-gray-400">
+            <h1 className="text-3xl font-bold text-content">Your best FIRE starting point</h1>
+            <p className="mx-auto mt-3 max-w-2xl text-content-muted">
               This is an educational match based on your priorities—not a prediction or financial advice.
             </p>
           </header>
 
-          <Card className="border-2 border-fire-300 dark:border-fire-700">
+          <Card className="border-2 border-accent/40">
             <CardContent className="p-6 sm:p-8">
               <div className="text-center">
                 <PrimaryIcon
@@ -273,13 +273,13 @@ export default function FIREQuiz() {
                   aria-hidden="true"
                   strokeWidth={1.5}
                 />
-                <h2 className="mt-4 text-3xl font-bold text-gray-900 dark:text-gray-100">{recommendation.primary.title}</h2>
-                <p className="mt-3 text-lg font-medium text-fire-700 dark:text-fire-300">{recommendation.primary.reason}</p>
+                <h2 className="mt-4 text-3xl font-bold text-content">{recommendation.primary.title}</h2>
+                <p className="mt-3 text-lg font-medium text-accent">{recommendation.primary.reason}</p>
               </div>
-              <p className="mx-auto mt-6 max-w-2xl text-gray-700 dark:text-gray-300">{recommendation.primary.description}</p>
+              <p className="mx-auto mt-6 max-w-2xl text-content-muted">{recommendation.primary.description}</p>
               <ul className="mx-auto mt-5 max-w-2xl space-y-2">
                 {recommendation.primary.benefits.map(benefit => (
-                  <li key={benefit} className="flex gap-3 text-gray-700 dark:text-gray-300">
+                  <li key={benefit} className="flex gap-3 text-content-muted">
                     <Check className="mt-0.5 h-5 w-5 shrink-0 text-success" aria-hidden="true" strokeWidth={2} />
                     <span>{benefit}</span>
                   </li>
@@ -288,7 +288,7 @@ export default function FIREQuiz() {
               <button
                 type="button"
                 onClick={() => openCalculator(recommendation.primary)}
-                className="mt-7 w-full rounded-lg bg-fire-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-fire-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fire-600"
+                className="mt-7 w-full rounded-control bg-fire-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-fire-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
                 Start with {recommendation.primary.title}
               </button>
@@ -296,10 +296,10 @@ export default function FIREQuiz() {
           </Card>
 
           <section aria-labelledby="alternative-paths-heading">
-            <h2 id="alternative-paths-heading" className="text-2xl font-bold text-gray-900 dark:text-gray-100">
+            <h2 id="alternative-paths-heading" className="text-2xl font-bold text-content">
               Two paths worth comparing
             </h2>
-            <p className="mt-2 text-gray-600 dark:text-gray-400">
+            <p className="mt-2 text-content-muted">
               FIRE paths overlap. These alternatives emphasize different tradeoffs in your answers.
             </p>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -314,13 +314,13 @@ export default function FIREQuiz() {
                         aria-hidden="true"
                         strokeWidth={1.5}
                       />
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{match.title}</h3>
+                      <h3 className="text-lg font-bold text-content">{match.title}</h3>
                     </div>
-                    <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">{match.reason}</p>
+                    <p className="mt-3 text-sm text-content-muted">{match.reason}</p>
                     <button
                       type="button"
                       onClick={() => openCalculator(match)}
-                      className="mt-5 font-semibold text-fire-700 underline-offset-4 hover:underline dark:text-fire-300"
+                      className="mt-5 font-semibold text-accent underline-offset-4 hover:underline"
                     >
                       Explore {match.title}
                     </button>
@@ -333,7 +333,7 @@ export default function FIREQuiz() {
           <button
             type="button"
             onClick={startOver}
-            className="mx-auto block rounded-lg border border-gray-300 px-5 py-3 font-medium text-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="mx-auto block rounded-control border border-border-strong px-5 py-3 font-medium text-content transition-colors hover:bg-surface-sunken motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             Retake the quiz
           </button>
@@ -353,11 +353,11 @@ export default function FIREQuiz() {
       <main className="mx-auto max-w-2xl space-y-6">
         <header>
           <div className="flex items-center justify-between gap-4 text-sm">
-            <span className="font-semibold text-gray-700 dark:text-gray-300">{stageTitle} {stageStep} of 5</span>
-            <span className="text-gray-500 dark:text-gray-400">{isOptionalStage ? 'Skip anything you do not know' : 'About 2 minutes'}</span>
+            <span className="font-semibold text-content-muted">{stageTitle} {stageStep} of 5</span>
+            <span className="text-content-subtle">{isOptionalStage ? 'Skip anything you do not know' : 'About 2 minutes'}</span>
           </div>
           <div
-            className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700"
+            className="mt-2 h-2 overflow-hidden rounded-full bg-border-subtle"
             role="progressbar"
             aria-label={`${stageTitle} progress`}
             aria-valuemin={0}
@@ -370,8 +370,8 @@ export default function FIREQuiz() {
 
         <Card>
           <CardContent className="p-6 sm:p-8">
-            <h1 id="quiz-question" className="text-2xl font-bold text-gray-900 dark:text-gray-100">{currentQuestion.title}</h1>
-            <p id="quiz-question-help" className="mt-2 text-gray-600 dark:text-gray-400">{currentQuestion.subtitle}</p>
+            <h1 id="quiz-question" className="text-2xl font-bold text-content">{currentQuestion.title}</h1>
+            <p id="quiz-question-help" className="mt-2 text-content-muted">{currentQuestion.subtitle}</p>
 
             {currentQuestion.type === 'choice' ? (
               <fieldset className="mt-6 space-y-3">
@@ -381,10 +381,10 @@ export default function FIREQuiz() {
                   return (
                     <label
                       key={choice.value}
-                      className={`block cursor-pointer rounded-lg border-2 p-4 transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-fire-600 ${
+                      className={`block cursor-pointer rounded-control border-2 p-4 transition-colors focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-fire-600 ${
                         selected
-                          ? 'border-fire-500 bg-fire-50 dark:bg-fire-950/40'
-                          : 'border-gray-200 hover:border-gray-400 dark:border-gray-700 dark:hover:border-gray-500'
+                          ? 'border-accent bg-accent-subtle'
+                          : 'border-border-subtle hover:border-border-strong'
                       }`}
                     >
                       <input
@@ -395,8 +395,8 @@ export default function FIREQuiz() {
                         onChange={() => selectChoice(currentQuestion.id, choice.value)}
                         className="sr-only"
                       />
-                      <span className="block font-semibold text-gray-900 dark:text-gray-100">{choice.label}</span>
-                      <span className="mt-1 block text-sm text-gray-600 dark:text-gray-400">{choice.description}</span>
+                      <span className="block font-semibold text-content">{choice.label}</span>
+                      <span className="mt-1 block text-sm text-content-muted">{choice.description}</span>
                     </label>
                   )
                 })}
@@ -405,7 +405,7 @@ export default function FIREQuiz() {
               <div className="mt-6">
                 <div className="relative">
                   {currentQuestion.type === 'currency' && (
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-gray-500 dark:text-gray-400" aria-hidden="true">$</span>
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-content-subtle" aria-hidden="true">$</span>
                   )}
                   <input
                     id={`quiz-${currentQuestion.id}`}
@@ -419,20 +419,20 @@ export default function FIREQuiz() {
                     aria-labelledby="quiz-question"
                     aria-describedby={`quiz-question-help${validationMessage ? ' quiz-validation' : ''}`}
                     aria-invalid={Boolean(validationMessage)}
-                    className={`w-full rounded-lg border bg-white py-3 pr-4 text-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-fire-500 dark:bg-gray-800 dark:text-gray-100 ${
+                    className={`w-full rounded-control border bg-surface-raised py-3 pr-4 text-lg text-content focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                       currentQuestion.type === 'currency' ? 'pl-8' : 'pl-4'
-                    } ${validationMessage ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'}`}
+                    } ${validationMessage ? 'border-red-500' : 'border-border-strong'}`}
                   />
                 </div>
                 {validationMessage && (
-                  <p id="quiz-validation" role="alert" className="mt-2 text-sm font-medium text-red-700 dark:text-red-300">
+                  <p id="quiz-validation" role="alert" className="mt-2 text-sm font-medium text-danger">
                     {validationMessage}
                   </p>
                 )}
                 <button
                   type="button"
                   onClick={skipNumericQuestion}
-                  className="mt-3 font-medium text-gray-600 underline-offset-4 hover:underline dark:text-gray-300"
+                  className="mt-3 font-medium text-content-muted underline-offset-4 hover:underline"
                 >
                   I’m not sure
                 </button>
@@ -449,7 +449,7 @@ export default function FIREQuiz() {
               setValidationMessage('')
             }}
             disabled={step === 0}
-            className="rounded-lg border border-gray-300 px-5 py-3 font-medium text-gray-700 hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="rounded-control border border-border-strong px-5 py-3 font-medium text-content transition-colors hover:bg-surface-sunken disabled:cursor-not-allowed disabled:opacity-40 motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             Previous
           </button>
@@ -457,7 +457,7 @@ export default function FIREQuiz() {
             type="button"
             onClick={handleNext}
             disabled={currentQuestion.type === 'choice' && currentValue === undefined}
-            className="flex-1 rounded-lg bg-fire-600 px-6 py-3 font-semibold text-white hover:bg-fire-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex-1 rounded-control bg-fire-600 px-6 py-3 font-semibold text-white hover:bg-fire-700 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {currentQuestion.id === 'personalize' && personalize === false
               ? 'Show my matches'
@@ -466,7 +466,7 @@ export default function FIREQuiz() {
                 : 'Continue'}
           </button>
         </nav>
-        <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-center text-xs text-content-subtle">
           Estimates only—not financial advice. Your answers stay in this browser.
         </p>
       </main>

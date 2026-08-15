@@ -1,3 +1,4 @@
+import { Lightbulb } from 'lucide-react'
 import { Card, CardHeader, CardContent } from '../components/ui'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -34,22 +35,19 @@ export default function Apps() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <span className="text-3xl" role="img" aria-label="Apps emoji">📱</span>
-            Recommended FIRE Apps
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Recommended FIRE Apps</h1>
+          <p className="text-content-muted mt-1">
             Essential apps to accelerate your financial independence journey.
           </p>
         </div>
 
         {/* Info Banner */}
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+        <div className="bg-warning-subtle border border-warning/30 rounded-container p-4">
           <div className="flex gap-3">
-            <span className="text-2xl" role="img" aria-label="Light bulb emoji">💡</span>
+            <Lightbulb className="h-5 w-5 shrink-0 text-warning" aria-hidden="true" />
             <div>
-            <h3 className="font-semibold text-amber-900 dark:text-amber-100">Smart Tools for Your Journey</h3>
-            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+            <h3 className="font-semibold text-content">Smart Tools for Your Journey</h3>
+            <p className="text-sm text-warning mt-1">
               These apps complement your FIRE calculators with practical tools for budgeting, 
               tracking, and managing your finances. More recommendations coming soon!
             </p>
@@ -67,9 +65,9 @@ export default function Apps() {
             rel="noopener noreferrer"
             className="group"
           >
-            <Card className="h-full hover:shadow-lg transition-shadow duration-200 hover:border-fire-300 dark:hover:border-fire-700">
+            <Card className="h-full transition-colors duration-200 hover:border-border-strong motion-reduce:transition-none">
               <CardContent className="p-4">
-                <div className="aspect-video mb-4 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                <div className="aspect-video mb-4 overflow-hidden rounded-control bg-surface-sunken">
                   <img
                     src={app.imageUrl}
                     alt={`${app.title} app screenshot`}
@@ -78,17 +76,17 @@ export default function Apps() {
                   />
                 </div>
                 <div className="mb-2">
-                  <span className="inline-block px-2 py-1 text-xs font-medium text-fire-700 dark:text-fire-400 bg-fire-50 dark:bg-fire-900/30 rounded">
+                  <span className="inline-block px-2 py-1 text-xs font-medium text-accent bg-accent-subtle rounded">
                     {app.category}
                   </span>
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-fire-600 dark:group-hover:text-fire-400 transition-colors">
+                <h3 className="font-semibold text-content group-hover:text-accent transition-colors">
                   {app.title}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                <p className="text-sm text-content-muted mt-2">
                   {app.description}
                 </p>
-                <div className="mt-4 flex items-center gap-2 text-fire-600 dark:text-fire-400 text-sm font-medium">
+                <div className="mt-4 flex items-center gap-2 text-accent text-sm font-medium">
                   <span>Visit Website</span>
                   <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -101,12 +99,12 @@ export default function Apps() {
       </div>
 
       {/* Disclaimer */}
-      <Card className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
+      <Card className="bg-surface-sunken border-border-subtle">
         <CardHeader>
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Disclaimer</h2>
+          <h2 className="text-sm font-semibold text-content-muted">Disclaimer</h2>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-content-muted">
             We are not affiliated with or endorsed by any of the apps listed above. These recommendations are provided 
             for informational purposes only. We only recommend apps we genuinely believe will help you on your FIRE journey. 
             Please do your own research before using any third-party service.
