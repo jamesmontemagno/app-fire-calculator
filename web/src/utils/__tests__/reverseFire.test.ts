@@ -52,6 +52,47 @@ describe('calculateReverseFIRE', () => {
     expect(reverse().fireNumber).toBe(1_200_000)
   })
 
+  it('reports the FIRE number rounded to whole dollars, like every other calculator', () => {
+    // Issue #75: this was the one page returning the raw quotient. The default 48,000/0.04 is
+    // exactly 1,200,000 in IEEE 754, so the assertion above cannot see the difference. A 3.5% rate
+    // makes it observable, and 61,234/0.035 = 1,749,542.857... is not even close to an integer.
+    expect(48_000 / 0.04).toBe(1_200_000)
+    expect(70_000 / 0.035).not.toBe(2_000_000)
+
+    expect(reverse({ annualExpenses: 70_000, withdrawalRate: 0.035 }).fireNumber).toBe(2_000_000)
+    expect(reverse({ annualExpenses: 61_234, withdrawalRate: 0.035 }).fireNumber).toBe(1_749_543)
+  })
+
+  it('agrees with calculateStandardFIRE on the target for the same inputs', () => {
+    // The two solvers must aim at the same number; #75 was them disagreeing by a fraction.
+    for (const [annualExpenses, withdrawalRate] of [
+      [48_000, 0.04],
+      [70_000, 0.035],
+      [61_234, 0.035],
+    ] as const) {
+      const forward = calculateStandardFIRE({
+        currentAge: 30,
+        retirementAge: 55,
+        currentSavings: 100_000,
+        annualContribution: 24_000,
+        annualIncome: 72_000,
+        expectedReturn: 0.07,
+        inflationRate: 0.03,
+        withdrawalRate,
+        annualExpenses,
+        contributionGrowth: 'inflation',
+      })
+      expect(reverse({ annualExpenses, withdrawalRate }).fireNumber).toBe(forward.fireNumber)
+    }
+  })
+
+  it('rounds halves up, matching the away-from-zero rule the fixtures document', () => {
+    // 1.25/0.5 is exactly 2.5. Math.round gives 3; C#'s default banker's rounding would give 2,
+    // and MAUI uses MidpointRounding.AwayFromZero so the two platforms agree (issue #63).
+    expect(1.25 / 0.5).toBe(2.5)
+    expect(reverse({ annualExpenses: 1.25, withdrawalRate: 0.5 }).fireNumber).toBe(3)
+  })
+
   it('lands exactly on the target in today\u2019s dollars', () => {
     // The defining property: saving the reported amount for the reported horizon reaches the FIRE
     // number precisely. Checked against an independently written closed form, not the projections.

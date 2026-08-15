@@ -384,6 +384,38 @@ public class FinancialCalculatorTests
     }
 
     [Fact]
+    public void ReverseFire_RoundsFireNumberLikeEveryOtherCalculator()
+    {
+        // Issue #75: this was the one calculator returning the raw quotient. The default 48,000/0.04
+        // is exactly 1,200,000 in IEEE 754, so the assertions above cannot see the difference — the
+        // 3.5% rate is what makes it observable: 70,000/0.035 is 1999999.9999999998, not 2,000,000.
+        var inputs = DefaultInputs with { WithdrawalRate = 0.035, AnnualExpenses = 70_000 };
+
+        Assert.NotEqual(2_000_000, inputs.AnnualExpenses / inputs.WithdrawalRate);
+
+        var result = FinancialCalculator.CalculateReverseFire(inputs);
+
+        Assert.Equal(2_000_000, result.FireNumber);
+        // And it must be the same target the forward calculator reports for the same inputs.
+        Assert.Equal(FinancialCalculator.CalculateStandardFire(inputs).FireNumber, result.FireNumber);
+    }
+
+    [Fact]
+    public void ReverseFire_RoundsHalvesAwayFromZeroLikeJavaScript()
+    {
+        // Round(double) is MidpointRounding.AwayFromZero, not C#'s banker's default, so that the
+        // MAUI figure matches JS Math.round on web. 1.25/0.5 is exactly 2.5, a true midpoint:
+        // banker's rounding returns 2 where Math.round(2.5) is 3. Shipping the default is the #63
+        // class of divergence. fireNumber = expenses/rate is never negative, which is the only
+        // place AwayFromZero and Math.round disagree, so this pairing is safe here.
+        var midpoint = DefaultInputs with { WithdrawalRate = 0.5, AnnualExpenses = 1.25 };
+
+        Assert.Equal(2.5, midpoint.AnnualExpenses / midpoint.WithdrawalRate);
+        Assert.Equal(3, FinancialCalculator.CalculateReverseFire(midpoint).FireNumber);
+        Assert.Equal(2d, Math.Round(2.5, MidpointRounding.ToEven));
+    }
+
+    [Fact]
     public void InvestmentGrowth_MatchesWebAnnualContributionModel()
     {
         var result = FinancialCalculator.CalculateInvestmentGrowth(new InvestmentGrowthInputs(

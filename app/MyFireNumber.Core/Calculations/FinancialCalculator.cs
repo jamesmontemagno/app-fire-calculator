@@ -382,7 +382,7 @@ public static class FinancialCalculator
         var safeAnnualSavings = Math.Max(0, requiredAnnualSavings);
 
         return new ReverseFireResult(
-            fireNumber,
+            Round(fireNumber),
             yearsToFire,
             safeAnnualSavings,
             safeAnnualSavings / 12,

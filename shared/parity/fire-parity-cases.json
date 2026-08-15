@@ -60,6 +60,7 @@
           }
         ],
         "reverse": {
+          "fireNumber": 1200000,
           "requiredAnnualSavings": 22946.80026660227,
           "requiredMonthlySavings": 1912.2333555501891,
           "currentWillGrowTo": 259217,
@@ -127,6 +128,7 @@
           }
         ],
         "reverse": {
+          "fireNumber": 1200000,
           "requiredAnnualSavings": 31143.402693590488,
           "requiredMonthlySavings": 2595.2835577992073,
           "currentWillGrowTo": 259217,
@@ -194,6 +196,7 @@
           }
         ],
         "reverse": {
+          "fireNumber": 2000000,
           "requiredAnnualSavings": 63449.60980843576,
           "requiredMonthlySavings": 5287.467484036313,
           "currentWillGrowTo": 457526,
@@ -261,6 +264,7 @@
           }
         ],
         "reverse": {
+          "fireNumber": 2000000,
           "requiredAnnualSavings": 77841.18595800038,
           "requiredMonthlySavings": 6486.765496500032,
           "currentWillGrowTo": 457526,
@@ -328,6 +332,7 @@
           }
         ],
         "reverse": {
+          "fireNumber": 1250000,
           "requiredAnnualSavings": 40000.0,
           "requiredMonthlySavings": 3333.3333333333335,
           "currentWillGrowTo": 50000,
@@ -387,6 +392,7 @@
           }
         ],
         "reverse": {
+          "fireNumber": 1250000,
           "requiredAnnualSavings": 59420.4203852185,
           "requiredMonthlySavings": 4951.701698768208,
           "currentWillGrowTo": 41911,
@@ -438,6 +444,7 @@
           }
         ],
         "reverse": {
+          "fireNumber": 1200000,
           "requiredAnnualSavings": 0.0,
           "requiredMonthlySavings": 0.0,
           "currentWillGrowTo": 2927491,

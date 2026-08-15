@@ -84,6 +84,7 @@ export interface FireCase {
     projectionCount: number
     projectionSamples: ProjectionSample[]
     reverse: {
+      fireNumber: number
       requiredAnnualSavings: number
       requiredMonthlySavings: number
       currentWillGrowTo: number
