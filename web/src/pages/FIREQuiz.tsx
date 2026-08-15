@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Check, Flame } from 'lucide-react'
 import SEO from '../components/SEO'
 import { Card, CardContent } from '../components/ui'
 import { getCalculatorByPath } from '../config/calculators'
@@ -252,6 +253,7 @@ export default function FIREQuiz() {
 
   if (recommendation) {
     const primaryMetadata = getCalculatorByPath(recommendation.primary.path)
+    const PrimaryIcon = primaryMetadata?.icon ?? Flame
     return (
       <>
         <SEO {...calculatorSEO.quiz} />
@@ -266,7 +268,11 @@ export default function FIREQuiz() {
           <Card className="border-2 border-fire-300 dark:border-fire-700">
             <CardContent className="p-6 sm:p-8">
               <div className="text-center">
-                <span className="block text-5xl" aria-hidden="true">{primaryMetadata?.icon ?? '🎯'}</span>
+                <PrimaryIcon
+                  className={`mx-auto block h-12 w-12 ${primaryMetadata?.accent ?? 'text-calc-standard'}`}
+                  aria-hidden="true"
+                  strokeWidth={1.5}
+                />
                 <h2 className="mt-4 text-3xl font-bold text-gray-900 dark:text-gray-100">{recommendation.primary.title}</h2>
                 <p className="mt-3 text-lg font-medium text-fire-700 dark:text-fire-300">{recommendation.primary.reason}</p>
               </div>
@@ -274,7 +280,7 @@ export default function FIREQuiz() {
               <ul className="mx-auto mt-5 max-w-2xl space-y-2">
                 {recommendation.primary.benefits.map(benefit => (
                   <li key={benefit} className="flex gap-3 text-gray-700 dark:text-gray-300">
-                    <span className="font-bold text-green-600 dark:text-green-400" aria-hidden="true">✓</span>
+                    <Check className="mt-0.5 h-5 w-5 shrink-0 text-success" aria-hidden="true" strokeWidth={2} />
                     <span>{benefit}</span>
                   </li>
                 ))}
@@ -299,10 +305,15 @@ export default function FIREQuiz() {
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               {recommendation.alternatives.map(match => {
                 const metadata = getCalculatorByPath(match.path)
+                const AltIcon = metadata?.icon ?? Flame
                 return (
-                  <article key={match.path} className="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-900">
+                  <article key={match.path} className="rounded-container border border-border-subtle bg-surface-raised p-5">
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl" aria-hidden="true">{metadata?.icon ?? '🎯'}</span>
+                      <AltIcon
+                        className={`h-6 w-6 shrink-0 ${metadata?.accent ?? 'text-calc-standard'}`}
+                        aria-hidden="true"
+                        strokeWidth={1.5}
+                      />
                       <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">{match.title}</h3>
                     </div>
                     <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">{match.reason}</p>

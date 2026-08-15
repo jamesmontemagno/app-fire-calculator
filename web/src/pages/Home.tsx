@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { ArrowRight } from 'lucide-react'
 import { Card, CardContent } from '../components/ui'
 import { calculators } from '../config/calculators'
 import SEO from '../components/SEO'
@@ -87,13 +88,15 @@ export default function Home() {
           Choose Your Calculator
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {calculators.map((calc) => (
+          {calculators.map((calc) => {
+            const Icon = calc.icon
+            return (
             <Link key={calc.path} to={calc.path} className="group">
-              <Card className={`h-full transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${calc.borderColor} border-2`}>
+              <Card className="h-full border border-border-subtle transition-shadow duration-200 hover:shadow-lg motion-reduce:transition-none">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-xl ${calc.bgColor}`}>
-                      <span className="text-3xl">{calc.icon}</span>
+                    <div className="rounded-container bg-surface-sunken p-3">
+                      <Icon className={`h-6 w-6 ${calc.accent}`} aria-hidden="true" strokeWidth={1.5} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-fire-600 dark:group-hover:text-fire-400 transition-colors">
@@ -107,16 +110,15 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                  <div className="mt-4 flex items-center text-sm font-medium text-fire-600 dark:text-fire-400 group-hover:translate-x-1 transition-transform">
+                  <div className="mt-4 flex items-center text-sm font-medium text-accent transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">
                     Start calculating
-                    <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                    <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
                   </div>
                 </CardContent>
               </Card>
             </Link>
-          ))}
+            )
+          })}
         </div>
       </div>
 

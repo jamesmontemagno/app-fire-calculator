@@ -187,7 +187,9 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
         {isCollapsed && <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>}
 
         <div className="space-y-1">
-          {calculators.map(calc => (
+          {calculators.map(calc => {
+            const Icon = calc.icon
+            return (
             <NavLink
               key={calc.path}
               to={`${calc.path}${currentSearch}`}
@@ -202,11 +204,13 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
                 }
               `}
               title={isCollapsed ? calc.label : ''}
+              aria-label={isCollapsed ? calc.label : undefined}
             >
-              <span className="text-xl">{calc.icon}</span>
+              <Icon className={`h-5 w-5 shrink-0 ${calc.accent}`} aria-hidden="true" strokeWidth={1.5} />
               {!isCollapsed && <span>{calc.label}</span>}
             </NavLink>
-          ))}
+            )
+          })}
         </div>
       </nav>
 
