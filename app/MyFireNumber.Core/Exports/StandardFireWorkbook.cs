@@ -8,9 +8,11 @@ namespace MyFireNumber.Core.Exports;
 
 public static class StandardFireWorkbook
 {
-    private const uint CurrencyStyleIndex = 1;
-    private const uint PercentageStyleIndex = 2;
-    private const uint DecimalStyleIndex = 3;
+    private const uint CurrencyStyleIndex = WorkbookStyles.CurrencyStyleIndex;
+    private const uint PercentageStyleIndex = WorkbookStyles.PercentageStyleIndex;
+    private const uint DecimalStyleIndex = WorkbookStyles.DecimalStyleIndex;
+    private const uint IntegerStyleIndex = WorkbookStyles.IntegerStyleIndex;
+    private const uint PlainIntegerStyleIndex = WorkbookStyles.PlainIntegerStyleIndex;
 
     public static void Create(string filePath, StandardFireDraft draft, StandardFireResult result, DateTimeOffset generatedAt)
     {
@@ -148,7 +150,7 @@ public static class StandardFireWorkbook
             {
                 rows.Add(new Row(
                     CreateNumberCell($"A{rowNumber}", point.Age, DecimalStyleIndex),
-                    CreateNumberCell($"B{rowNumber}", point.Year, DecimalStyleIndex),
+                    CreateNumberCell($"B{rowNumber}", point.Year, PlainIntegerStyleIndex),
                     CreateNumberCell($"C{rowNumber}", point.Portfolio, CurrencyStyleIndex),
                     CreateNumberCell($"D{rowNumber}", point.Contributions, CurrencyStyleIndex),
                     CreateNumberCell($"E{rowNumber}", point.TotalContributions, CurrencyStyleIndex),
@@ -159,7 +161,7 @@ public static class StandardFireWorkbook
             var previousRowNumber = rowNumber - 1;
             rows.Add(new Row(
                 CreateNumberCell($"A{rowNumber}", point.Age, DecimalStyleIndex),
-                CreateNumberCell($"B{rowNumber}", point.Year, DecimalStyleIndex),
+                CreateNumberCell($"B{rowNumber}", point.Year, PlainIntegerStyleIndex),
                 CreateFormulaCell($"C{rowNumber}", $"C{previousRowNumber}*(1+Inputs!$B$11)+D{rowNumber}", CurrencyStyleIndex),
                 CreateNumberCell($"D{rowNumber}", point.Contributions, CurrencyStyleIndex),
                 CreateFormulaCell($"E{rowNumber}", $"E{previousRowNumber}+D{rowNumber}", CurrencyStyleIndex),
@@ -225,22 +227,5 @@ public static class StandardFireWorkbook
         };
     }
 
-    private static void AddStyles(WorkbookPart workbookPart)
-    {
-        var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
-        stylesPart.Stylesheet = new Stylesheet(
-            new NumberingFormats(
-                new NumberingFormat { NumberFormatId = 164U, FormatCode = "$#,##0" },
-                new NumberingFormat { NumberFormatId = 165U, FormatCode = "0.0%" },
-                new NumberingFormat { NumberFormatId = 166U, FormatCode = "0.0" }),
-            new Fonts(new Font()),
-            new Fills(new Fill(new PatternFill { PatternType = PatternValues.None }), new Fill(new PatternFill { PatternType = PatternValues.Gray125 })),
-            new Borders(new Border()),
-            new CellStyleFormats(new CellFormat()),
-            new CellFormats(
-                new CellFormat(),
-                new CellFormat { NumberFormatId = 164U, ApplyNumberFormat = true },
-                new CellFormat { NumberFormatId = 165U, ApplyNumberFormat = true },
-                new CellFormat { NumberFormatId = 166U, ApplyNumberFormat = true }));
-    }
+    private static void AddStyles(WorkbookPart workbookPart) => WorkbookStyles.Apply(workbookPart);
 }

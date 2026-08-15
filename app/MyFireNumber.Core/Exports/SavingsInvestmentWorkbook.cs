@@ -8,9 +8,11 @@ namespace MyFireNumber.Core.Exports;
 
 public static class SavingsInvestmentWorkbook
 {
-    private const uint CurrencyStyleIndex = 1;
-    private const uint PercentageStyleIndex = 2;
-    private const uint DecimalStyleIndex = 3;
+    private const uint CurrencyStyleIndex = WorkbookStyles.CurrencyStyleIndex;
+    private const uint PercentageStyleIndex = WorkbookStyles.PercentageStyleIndex;
+    private const uint DecimalStyleIndex = WorkbookStyles.DecimalStyleIndex;
+    private const uint IntegerStyleIndex = WorkbookStyles.IntegerStyleIndex;
+    private const uint PlainIntegerStyleIndex = WorkbookStyles.PlainIntegerStyleIndex;
 
     public static void Create(string filePath, SavingsInvestmentDraft draft, InvestmentGrowthResult result, DateTimeOffset generatedAt)
     {
@@ -45,11 +47,11 @@ public static class SavingsInvestmentWorkbook
             new(CreateTextCell("A5", "Starting amount"), CreateNumberCell("B5", draft.StartingAmount, CurrencyStyleIndex)),
             new(CreateTextCell("A6", "Contribution amount"), CreateNumberCell("B6", draft.ContributionAmount, CurrencyStyleIndex)),
             new(CreateTextCell("A7", "Contribution frequency"), CreateTextCell("B7", draft.ContributionFrequency.ToString())),
-            new(CreateTextCell("A8", "Years investing"), CreateNumberCell("B8", draft.YearsInvesting, DecimalStyleIndex)),
+            new(CreateTextCell("A8", "Years investing"), CreateNumberCell("B8", draft.YearsInvesting, IntegerStyleIndex)),
             new(CreateTextCell("A9", "Expected return"), CreateNumberCell("B9", draft.ExpectedReturn, PercentageStyleIndex)),
             new(CreateTextCell("A10", "Inflation rate"), CreateNumberCell("B10", draft.InflationRate, PercentageStyleIndex)),
             new(CreateTextCell("A11", "Annual take-home income (after tax)"), CreateNumberCell("B11", draft.AnnualIncome, CurrencyStyleIndex)),
-            new(CreateTextCell("A12", "Current age"), CreateNumberCell("B12", draft.CurrentAge, DecimalStyleIndex))
+            new(CreateTextCell("A12", "Current age"), CreateNumberCell("B12", draft.CurrentAge, PlainIntegerStyleIndex))
         };
         AddWorksheet(workbookPart, sheets, "Inputs", 1, rows, 32, 20);
     }
@@ -86,7 +88,7 @@ public static class SavingsInvestmentWorkbook
             {
                 rows.Add(new Row(
                     CreateNumberCell($"A{rowNumber}", point.Age, DecimalStyleIndex),
-                    CreateNumberCell($"B{rowNumber}", point.Year, DecimalStyleIndex),
+                    CreateNumberCell($"B{rowNumber}", point.Year, PlainIntegerStyleIndex),
                     CreateNumberCell($"C{rowNumber}", point.Portfolio, CurrencyStyleIndex),
                     CreateNumberCell($"D{rowNumber}", 0, CurrencyStyleIndex),
                     CreateNumberCell($"E{rowNumber}", point.TotalContributions, CurrencyStyleIndex),
@@ -97,7 +99,7 @@ public static class SavingsInvestmentWorkbook
             var previousRowNumber = rowNumber - 1;
             rows.Add(new Row(
                 CreateNumberCell($"A{rowNumber}", point.Age, DecimalStyleIndex),
-                CreateNumberCell($"B{rowNumber}", point.Year, DecimalStyleIndex),
+                CreateNumberCell($"B{rowNumber}", point.Year, PlainIntegerStyleIndex),
                 CreateFormulaCell($"C{rowNumber}", $"C{previousRowNumber}*(1+Inputs!$B$9)+D{rowNumber}", CurrencyStyleIndex),
                 CreateFormulaCell($"D{rowNumber}", "Results!B5", CurrencyStyleIndex),
                 CreateFormulaCell($"E{rowNumber}", $"E{previousRowNumber}+D{rowNumber}", CurrencyStyleIndex),
@@ -124,15 +126,5 @@ public static class SavingsInvestmentWorkbook
 
     private static Cell CreateFormulaCell(string reference, string formula, uint styleIndex) => new() { CellReference = reference, StyleIndex = styleIndex, CellFormula = new CellFormula(formula) };
 
-    private static void AddStyles(WorkbookPart workbookPart)
-    {
-        var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
-        stylesPart.Stylesheet = new Stylesheet(
-            new NumberingFormats(new NumberingFormat { NumberFormatId = 164U, FormatCode = "$#,##0" }, new NumberingFormat { NumberFormatId = 165U, FormatCode = "0.0%" }, new NumberingFormat { NumberFormatId = 166U, FormatCode = "0.0" }),
-            new Fonts(new Font()),
-            new Fills(new Fill(new PatternFill { PatternType = PatternValues.None }), new Fill(new PatternFill { PatternType = PatternValues.Gray125 })),
-            new Borders(new Border()),
-            new CellStyleFormats(new CellFormat()),
-            new CellFormats(new CellFormat(), new CellFormat { NumberFormatId = 164U, ApplyNumberFormat = true }, new CellFormat { NumberFormatId = 165U, ApplyNumberFormat = true }, new CellFormat { NumberFormatId = 166U, ApplyNumberFormat = true }));
-    }
+    private static void AddStyles(WorkbookPart workbookPart) => WorkbookStyles.Apply(workbookPart);
 }

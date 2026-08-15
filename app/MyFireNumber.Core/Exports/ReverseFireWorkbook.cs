@@ -8,9 +8,11 @@ namespace MyFireNumber.Core.Exports;
 
 public static class ReverseFireWorkbook
 {
-    private const uint CurrencyStyleIndex = 1;
-    private const uint PercentageStyleIndex = 2;
-    private const uint DecimalStyleIndex = 3;
+    private const uint CurrencyStyleIndex = WorkbookStyles.CurrencyStyleIndex;
+    private const uint PercentageStyleIndex = WorkbookStyles.PercentageStyleIndex;
+    private const uint DecimalStyleIndex = WorkbookStyles.DecimalStyleIndex;
+    private const uint IntegerStyleIndex = WorkbookStyles.IntegerStyleIndex;
+    private const uint PlainIntegerStyleIndex = WorkbookStyles.PlainIntegerStyleIndex;
 
     public static void Create(string filePath, ReverseFireDraft draft, ReverseFireResult result, DateTimeOffset generatedAt)
     {
@@ -46,8 +48,8 @@ public static class ReverseFireWorkbook
         };
         var inputs = new (string Label, double Value, uint Style)[]
         {
-            ("Current age", draft.CurrentAge, DecimalStyleIndex),
-            ("Target FIRE age", draft.TargetRetirementAge, DecimalStyleIndex),
+            ("Current age", draft.CurrentAge, PlainIntegerStyleIndex),
+            ("Target FIRE age", draft.TargetRetirementAge, PlainIntegerStyleIndex),
             ("Current savings", draft.CurrentSavings, CurrencyStyleIndex),
             ("Annual retirement spending (today's dollars)", draft.AnnualExpenses, CurrencyStyleIndex),
             ("Expected return", draft.ExpectedReturn, PercentageStyleIndex),
@@ -72,7 +74,7 @@ public static class ReverseFireWorkbook
             new(CreateTextCell("A2", "Generated UTC"), CreateTextCell("B2", generatedAt.UtcDateTime.ToString("O", CultureInfo.InvariantCulture))),
             new(CreateTextCell("A4", "Result"), CreateTextCell("B4", "Value")),
             new(CreateTextCell("A5", "FIRE Number"), CreateFormulaCell("B5", "Inputs!B8/Inputs!B11", CurrencyStyleIndex)),
-            new(CreateTextCell("A6", "Years to FIRE"), CreateFormulaCell("B6", "Inputs!B6-Inputs!B5", DecimalStyleIndex)),
+            new(CreateTextCell("A6", "Years to FIRE"), CreateFormulaCell("B6", "Inputs!B6-Inputs!B5", IntegerStyleIndex)),
             new(CreateTextCell("A7", "Required annual savings"), CreateNumberCell("B7", result.RequiredAnnualSavings, CurrencyStyleIndex)),
             new(CreateTextCell("A8", "Required monthly savings"), CreateNumberCell("B8", result.RequiredMonthlySavings, CurrencyStyleIndex)),
             new(CreateTextCell("A9", "Current savings will grow to"), CreateNumberCell("B9", result.CurrentWillGrowTo, CurrencyStyleIndex))
@@ -95,7 +97,7 @@ public static class ReverseFireWorkbook
             {
                 rows.Add(new Row(
                     CreateNumberCell($"A{rowNumber}", point.Age, DecimalStyleIndex),
-                    CreateNumberCell($"B{rowNumber}", point.Year, DecimalStyleIndex),
+                    CreateNumberCell($"B{rowNumber}", point.Year, PlainIntegerStyleIndex),
                     CreateNumberCell($"C{rowNumber}", point.Portfolio, CurrencyStyleIndex),
                     CreateNumberCell($"D{rowNumber}", 0, CurrencyStyleIndex),
                     CreateNumberCell($"E{rowNumber}", point.InflationAdjusted, CurrencyStyleIndex)));
@@ -105,7 +107,7 @@ public static class ReverseFireWorkbook
             var previousRowNumber = rowNumber - 1;
             rows.Add(new Row(
                 CreateNumberCell($"A{rowNumber}", point.Age, DecimalStyleIndex),
-                CreateNumberCell($"B{rowNumber}", point.Year, DecimalStyleIndex),
+                CreateNumberCell($"B{rowNumber}", point.Year, PlainIntegerStyleIndex),
                 CreateFormulaCell($"C{rowNumber}", $"C{previousRowNumber}*(1+Inputs!$B$9)+D{rowNumber}", CurrencyStyleIndex),
                 CreateNumberCell($"D{rowNumber}", point.Contributions, CurrencyStyleIndex),
                 CreateFormulaCell($"E{rowNumber}", $"C{rowNumber}/((1+Inputs!$B$10)^(A{rowNumber}-$A$2))", CurrencyStyleIndex)));
@@ -132,15 +134,5 @@ public static class ReverseFireWorkbook
 
     private static Cell CreateFormulaCell(string reference, string formula, uint styleIndex) => new() { CellReference = reference, StyleIndex = styleIndex, CellFormula = new CellFormula(formula) };
 
-    private static void AddStyles(WorkbookPart workbookPart)
-    {
-        var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
-        stylesPart.Stylesheet = new Stylesheet(
-            new NumberingFormats(new NumberingFormat { NumberFormatId = 164U, FormatCode = "$#,##0" }, new NumberingFormat { NumberFormatId = 165U, FormatCode = "0.0%" }, new NumberingFormat { NumberFormatId = 166U, FormatCode = "0.0" }),
-            new Fonts(new Font()),
-            new Fills(new Fill(new PatternFill { PatternType = PatternValues.None }), new Fill(new PatternFill { PatternType = PatternValues.Gray125 })),
-            new Borders(new Border()),
-            new CellStyleFormats(new CellFormat()),
-            new CellFormats(new CellFormat(), new CellFormat { NumberFormatId = 164U, ApplyNumberFormat = true }, new CellFormat { NumberFormatId = 165U, ApplyNumberFormat = true }, new CellFormat { NumberFormatId = 166U, ApplyNumberFormat = true }));
-    }
+    private static void AddStyles(WorkbookPart workbookPart) => WorkbookStyles.Apply(workbookPart);
 }

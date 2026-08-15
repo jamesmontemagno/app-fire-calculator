@@ -8,9 +8,11 @@ namespace MyFireNumber.Core.Exports;
 
 public static class DebtPayoffWorkbook
 {
-    private const uint CurrencyStyleIndex = 1;
-    private const uint PercentageStyleIndex = 2;
-    private const uint DecimalStyleIndex = 3;
+    private const uint CurrencyStyleIndex = WorkbookStyles.CurrencyStyleIndex;
+    private const uint PercentageStyleIndex = WorkbookStyles.PercentageStyleIndex;
+    private const uint DecimalStyleIndex = WorkbookStyles.DecimalStyleIndex;
+    private const uint IntegerStyleIndex = WorkbookStyles.IntegerStyleIndex;
+    private const uint PlainIntegerStyleIndex = WorkbookStyles.PlainIntegerStyleIndex;
 
     public static void Create(string filePath, DebtPayoffDraft draft, DebtPayoffResult result, DateTimeOffset generatedAt)
     {
@@ -47,7 +49,7 @@ public static class DebtPayoffWorkbook
             new Row(CreateTextCell("A6", "Strategy"), CreateTextCell("B6", draft.Strategy.ToString())),
             new Row(CreateTextCell("A7", "Monthly budget"), CreateNumberCell("B7", draft.MonthlyBudget, CurrencyStyleIndex)),
             new Row(CreateTextCell("A8", "Extra payment"), CreateNumberCell("B8", draft.ExtraPayment, CurrencyStyleIndex)),
-            new Row(CreateTextCell("A9", "Target months"), CreateNumberCell("B9", draft.TargetMonths, DecimalStyleIndex))
+            new Row(CreateTextCell("A9", "Target months"), CreateNumberCell("B9", draft.TargetMonths, IntegerStyleIndex))
         ], 28, 20);
     }
 
@@ -58,7 +60,7 @@ public static class DebtPayoffWorkbook
             new Row(CreateTextCell("A1", "Debt Payoff Results")),
             new Row(CreateTextCell("A2", "Generated UTC"), CreateTextCell("B2", generatedAt.UtcDateTime.ToString("O", CultureInfo.InvariantCulture))),
             new Row(CreateTextCell("A4", "Result"), CreateTextCell("B4", "Value")),
-            new Row(CreateTextCell("A5", "Total months"), CreateNumberCell("B5", result.TotalMonths, DecimalStyleIndex)),
+            new Row(CreateTextCell("A5", "Total months"), CreateNumberCell("B5", result.TotalMonths, IntegerStyleIndex)),
             new Row(CreateTextCell("A6", "Total interest"), CreateNumberCell("B6", result.TotalInterest, CurrencyStyleIndex)),
             new Row(CreateTextCell("A7", "Total principal"), CreateNumberCell("B7", result.TotalPrincipal, CurrencyStyleIndex)),
             new Row(CreateTextCell("A8", "Monthly payment"), CreateNumberCell("B8", result.MonthlyPayment, CurrencyStyleIndex)),
@@ -90,7 +92,7 @@ public static class DebtPayoffWorkbook
         foreach (var point in projections)
         {
             var row = point.Month + 1;
-            rows.Add(new Row(CreateNumberCell($"A{row}", point.Month, DecimalStyleIndex), CreateNumberCell($"B{row}", point.TotalBalance, CurrencyStyleIndex), CreateNumberCell($"C{row}", point.PrincipalPaid, CurrencyStyleIndex), CreateNumberCell($"D{row}", point.InterestPaid, CurrencyStyleIndex), CreateNumberCell($"E{row}", point.CumulativeInterest, CurrencyStyleIndex)));
+            rows.Add(new Row(CreateNumberCell($"A{row}", point.Month, IntegerStyleIndex), CreateNumberCell($"B{row}", point.TotalBalance, CurrencyStyleIndex), CreateNumberCell($"C{row}", point.PrincipalPaid, CurrencyStyleIndex), CreateNumberCell($"D{row}", point.InterestPaid, CurrencyStyleIndex), CreateNumberCell($"E{row}", point.CumulativeInterest, CurrencyStyleIndex)));
         }
         AddWorksheet(workbookPart, sheets, "Payoff Projection", 4, rows, 12, 20, 20, 20, 22);
     }
@@ -110,9 +112,5 @@ public static class DebtPayoffWorkbook
         ? new() { CellReference = reference, StyleIndex = styleIndex, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) }
         : CreateTextCell(reference, WorkbookValues.Unreachable);
 
-    private static void AddStyles(WorkbookPart workbookPart)
-    {
-        var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
-        stylesPart.Stylesheet = new Stylesheet(new NumberingFormats(new NumberingFormat { NumberFormatId = 164U, FormatCode = "$#,##0" }, new NumberingFormat { NumberFormatId = 165U, FormatCode = "0.0%" }, new NumberingFormat { NumberFormatId = 166U, FormatCode = "0.0" }), new Fonts(new Font()), new Fills(new Fill(new PatternFill { PatternType = PatternValues.None }), new Fill(new PatternFill { PatternType = PatternValues.Gray125 })), new Borders(new Border()), new CellStyleFormats(new CellFormat()), new CellFormats(new CellFormat(), new CellFormat { NumberFormatId = 164U, ApplyNumberFormat = true }, new CellFormat { NumberFormatId = 165U, ApplyNumberFormat = true }, new CellFormat { NumberFormatId = 166U, ApplyNumberFormat = true }));
-    }
+    private static void AddStyles(WorkbookPart workbookPart) => WorkbookStyles.Apply(workbookPart);
 }
