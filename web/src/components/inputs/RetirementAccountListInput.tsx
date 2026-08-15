@@ -278,7 +278,7 @@ export default function RetirementAccountListInput({
                         onChange={value => updateAccount(account.id, 'withdrawalRate', value)}
                         min={0}
                         max={0.2}
-                        tooltip="A self-imposed policy limit, not a depletion model. At most this share of the remaining balance is available each year, so a gap can still show up while the balance is healthy. Raise it to let this account absorb a larger gap."
+                        tooltip="A spending policy, not a hard limit. This share of the remaining balance is taken each year, and the plan only goes above it in a year that would otherwise fall short. Raise it to draw this account down at your stated pace instead."
                       />
                     )}
                     <PercentageInput

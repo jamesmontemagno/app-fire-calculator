@@ -340,21 +340,35 @@ describe('healthcare cases match the geometric sum', () => {
 })
 
 /**
- * The deferred cases exist to pin issue #63, so the thing that most needs independent checking is
- * the surplus and the funded/shortfall verdict derived from it — the two values that disagreed
- * across platforms.
+ * The deferred cases come in two constructions, and each gets its own oracle below.
  *
- * Each case is a deliberately flat plan, so the arithmetic is exact and can be done by hand. The
- * first test asserts that the case really is that construction rather than trusting the prose in its
- * `derivation`; a case that quietly grew an account or a non-zero inflation rate would make the
- * closed form below wrong while still looking plausible.
+ * The issue #63 cases are account-less single-pension plans, where the thing that most needs
+ * independent checking is the surplus and the funded/shortfall verdict derived from it — the two
+ * values that disagreed across platforms. The issue #56 cases have accounts and no income at all,
+ * because what they pin is how far a withdrawal may exceed the stated rate policy.
+ *
+ * Both are deliberately flat plans, so the arithmetic is exact and can be done by hand. Each family's
+ * first test asserts that the case really is the construction its `derivation` claims rather than
+ * trusting the prose; a case that quietly grew an account or a non-zero inflation rate would make the
+ * closed form wrong while still looking plausible.
  */
+const pensionCases = deferredCases.filter((c) => c.inputs.accounts.length === 0)
+const capFlexCases = deferredCases.filter((c) => c.inputs.accounts.length > 0)
+
 describe('deferred cases match hand arithmetic', () => {
   /** Half the whole-dollar display unit. Stated here, not imported, so a change to the shipped
    *  constant has to be made deliberately in two places. */
   const SHORTFALL_TOLERANCE = 0.5
 
-  it.each(deferredCases.map((c) => [c.id, c] as const))(
+  it('every deferred case belongs to exactly one construction, and both are populated', () => {
+    // The split is on account count, so it is total by construction; these assertions catch the
+    // real hazard, which is a whole family silently emptying and its oracle then vacuously passing.
+    expect(pensionCases.length + capFlexCases.length).toBe(deferredCases.length)
+    expect(pensionCases.length).toBeGreaterThan(0)
+    expect(capFlexCases.length).toBeGreaterThan(0)
+  })
+
+  it.each(pensionCases.map((c) => [c.id, c] as const))(
     '%s really is the flat single-pension construction its derivation claims',
     (_id, testCase) => {
       const i = testCase.inputs
@@ -373,7 +387,7 @@ describe('deferred cases match hand arithmetic', () => {
     },
   )
 
-  it.each(deferredCases.map((c) => [c.id, c] as const))(
+  it.each(pensionCases.map((c) => [c.id, c] as const))(
     '%s surplus is income minus expenses, rounded away from zero',
     (_id, testCase) => {
       const i = testCase.inputs
@@ -403,7 +417,7 @@ describe('deferred cases match hand arithmetic', () => {
     },
   )
 
-  it.each(deferredCases.map((c) => [c.id, c] as const))(
+  it.each(pensionCases.map((c) => [c.id, c] as const))(
     '%s verdict follows from the unrounded surplus, not the displayed one',
     (_id, testCase) => {
       const i = testCase.inputs
@@ -418,6 +432,126 @@ describe('deferred cases match hand arithmetic', () => {
       expect(testCase.expected.fundedYears).toBe(short ? 0 : years)
       expect(testCase.expected.yearsFullyCovered).toBe(short ? 0 : years)
       expect(testCase.expected.firstShortfallAge).toBe(short ? i.semiRetirementAge : null)
+    },
+  )
+})
+
+/**
+ * Independent oracle for the issue #56 cap-flex cases.
+ *
+ * It deliberately does **not** replay the engine's two passes. Re-walking "cap first, then flex the
+ * remainder" in a second language would only prove the fixture was transcribed from the same
+ * procedure, which is the failure mode `shared/parity/README.md` exists to prevent. Instead it
+ * re-derives each year from the *policy statement* the change is supposed to implement:
+ *
+ *   1. A year is affordable when the spendable capacity of the reachable accounts covers the need.
+ *   2. An affordable year takes exactly the need, net — no more, so surplus is 0.
+ *   3. Gross withdrawals prorate by balance, so the gross total is the net need scaled by
+ *      `reachableBalance / netCapacity`. This is the assertion that pins the ordering policy: a
+ *      taxable-first rule satisfies (1) and (2) but produces a different gross total whenever the
+ *      reachable accounts are taxed differently.
+ *   4. An unaffordable year takes everything reachable and falls short by the remainder.
+ *
+ * Those four statements are checkable against the prose in each `derivation` without running
+ * anything, which is the point.
+ */
+describe('cap-flex cases match the stated withdrawal policy', () => {
+  const reachableAt = (testCase: (typeof capFlexCases)[number], age: number) =>
+    testCase.inputs.accounts.filter((account) => age >= account.availableAge)
+
+  it.each(capFlexCases.map((c) => [c.id, c] as const))(
+    '%s really is the flat account-only construction its derivation claims',
+    (_id, testCase) => {
+      const i = testCase.inputs
+      expect(i.inflationRate).toBe(0)
+      expect(i.incomeSources).toEqual([])
+      expect(i.additionalExpenses).toEqual([])
+      expect(i.reinvestSurplus).toBe(false)
+      // Retirement starts today, so every projected year is a retirement year and withdrawals are
+      // permitted in all of them.
+      expect(i.semiRetirementAge).toBe(i.currentAge)
+      expect(i.accounts.length).toBeGreaterThan(0)
+
+      for (const account of i.accounts) {
+        expect(account.annualReturn).toBe(0)
+        expect(account.annualContribution).toBe(0)
+        // No deferred account: those follow a payout schedule gap withdrawals never touch, which
+        // would invalidate the closed form below.
+        expect(account.type).not.toBe('deferred')
+      }
+
+      // The closed form treats the gross total as purely balance-proportional, which is only exact
+      // when the capped first pass cannot skew the per-account split: either there is one account,
+      // or no account releases anything under its own rate. Asserting the precondition is also what
+      // stops a reader assuming the shipped 4% default in the multi-account case and concluding the
+      // fixture is wrong — the rates really are 0 there, on purpose.
+      expect(i.accounts.length === 1 || i.accounts.every((a) => a.withdrawalRate === 0)).toBe(true)
+    },
+  )
+
+  it.each(capFlexCases.map((c) => [c.id, c] as const))(
+    '%s spends to the need, prorates gross by balance, and stops at the money that exists',
+    (_id, testCase) => {
+      const i = testCase.inputs
+      const need = i.annualExpenses
+      const balances = new Map(i.accounts.map((a) => [a.id, a.balance]))
+
+      for (let age = i.currentAge; age <= i.planThroughAge; age++) {
+        const reachable = reachableAt(testCase, age)
+        const reachableBalance = reachable.reduce((sum, a) => sum + balances.get(a.id)!, 0)
+        // Spendable capacity: a dollar in a 25%-taxed account only buys 75 cents of expenses.
+        const netCapacity = reachable.reduce(
+          (sum, a) => sum + balances.get(a.id)! * (1 - a.withdrawalTaxRate),
+          0,
+        )
+        const affordable = need <= netCapacity
+        const netTaken = affordable ? need : netCapacity
+        const grossTaken = affordable ? need * (reachableBalance / netCapacity) : reachableBalance
+
+        const sample = testCase.expected.annualSamples.find((s) => s.age === age)
+        expect(sample).toBeDefined()
+        expect(sample!.totalIncome).toBe(roundHalfAwayFromZero(netTaken))
+        expect(sample!.expenses).toBe(roundHalfAwayFromZero(need))
+        expect(sample!.surplus).toBe(affordable ? 0 : roundHalfAwayFromZero(netTaken - need))
+        expect(Object.is(sample!.surplus, -0)).toBe(false)
+
+        // Excess over policy. The stated rates release `balance * rate` gross, worth
+        // `balance * rate * netFactor` of spending; if that already covers the need the policy is
+        // never exceeded, and otherwise every capped dollar is used and the rest is the excess.
+        const policyGross = reachable.reduce((sum, a) => sum + balances.get(a.id)! * a.withdrawalRate, 0)
+        const policyNet = reachable.reduce(
+          (sum, a) => sum + balances.get(a.id)! * a.withdrawalRate * (1 - a.withdrawalTaxRate),
+          0,
+        )
+        expect(sample!.policyExcessWithdrawals).toBe(
+          need <= policyNet ? 0 : roundHalfAwayFromZero(grossTaken - policyGross),
+        )
+
+        // Zero return and zero contribution, so next year's balance is this year's less what left.
+        for (const account of reachable) {
+          const share = reachableBalance > 0 ? balances.get(account.id)! / reachableBalance : 0
+          balances.set(account.id, balances.get(account.id)! - grossTaken * share)
+        }
+
+        const totalBalance = i.accounts.reduce((sum, a) => sum + balances.get(a.id)!, 0)
+        if (age === i.semiRetirementAge) {
+          expect(testCase.expected.balanceAtSemiRetirement).toBe(roundHalfAwayFromZero(totalBalance))
+          expect(testCase.expected.firstYearIncome).toBe(roundHalfAwayFromZero(netTaken))
+          expect(testCase.expected.firstYearSurplus).toBe(
+            affordable ? 0 : roundHalfAwayFromZero(netTaken - need),
+          )
+        }
+        if (age === i.planThroughAge) {
+          expect(testCase.expected.endingBalance).toBe(roundHalfAwayFromZero(totalBalance))
+        }
+      }
+
+      const years = i.planThroughAge - i.semiRetirementAge + 1
+      expect(testCase.expected.projectionCount).toBe(years)
+      expect(testCase.expected.retirementYears).toBe(years)
+      expect(testCase.expected.currentBalance).toBe(
+        roundHalfAwayFromZero(i.accounts.reduce((sum, a) => sum + a.balance, 0)),
+      )
     },
   )
 })

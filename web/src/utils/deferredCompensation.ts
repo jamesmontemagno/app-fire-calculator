@@ -99,8 +99,13 @@ export interface RetirementCashFlowPoint {
   expensesByItem: Record<string, number>
   /** Estimated tax on this year's deferred payouts and gap withdrawals. */
   withdrawalTaxes: number
-  /** Gross balance the per-account withdrawal-rate limit held back while a gap was still unmet. */
-  policyLimitedWithdrawals: number
+  /**
+   * Gross withdrawn *beyond* the per-account withdrawal-rate limits to keep this year funded.
+   *
+   * Zero in a year the stated rates already covered. Non-zero means the plan only stays funded by
+   * spending faster than the policy the user entered — see issue #56.
+   */
+  policyExcessWithdrawals: number
 }
 
 export interface DeferredCompensationInputs {
@@ -287,12 +292,16 @@ export function calculateDeferredCompensation({
 
     let remainingGap = Math.max(0, expenses - outsideIncome - deferredIncome)
     let portfolioWithdrawals = 0
-    let policyLimitedWithdrawals = 0
+    let policyExcessWithdrawals = 0
 
     if (canWithdraw) {
-      for (const account of accounts.filter(
+      // Materialized once so both passes see the same accounts in the same order, and so the MAUI
+      // mirror's `.ToArray()` has something exact to correspond to.
+      const reachable = accounts.filter(
         account => account.type !== 'deferred' && age >= account.availableAge,
-      )) {
+      )
+
+      for (const account of reachable) {
         const balance = balances.get(account.id) ?? 0
         const taxRate = clampRate(account.withdrawalTaxRate)
         const netFactor = 1 - taxRate
@@ -300,15 +309,56 @@ export function calculateDeferredCompensation({
         const grossNeeded = netFactor > 0 ? remainingGap / netFactor : Number.POSITIVE_INFINITY
         const policyLimit = balance * clampRate(account.withdrawalRate)
         const withdrawal = Math.min(balance, grossNeeded, policyLimit)
-        if (policyLimit < Math.min(balance, grossNeeded)) {
-          policyLimitedWithdrawals += Math.min(balance, grossNeeded) - policyLimit
-        }
         balances.set(account.id, balance - withdrawal)
         accountWithdrawals[account.id] = withdrawal
         withdrawalTaxes += withdrawal * taxRate
         const spendable = withdrawal * netFactor
         portfolioWithdrawals += spendable
         remainingGap -= spendable
+      }
+
+      // The withdrawal rate is a spending *policy*, not the amount of money that exists, so a year
+      // the policy cannot fund is allowed to exceed it rather than report a shortfall next to an
+      // untouched balance. That contradiction was issue #56, and the throttle had a worse
+      // consequence: while the cap bound, the withdrawal was `min(cap, need)` = `cap`, so the whole
+      // balance path stopped depending on `annualExpenses` and the spending input silently did
+      // nothing.
+      //
+      // The gate reads the UNFLEXED gap through the same predicate the headline verdict uses, so
+      // "would this year have been short" and "is this year short" can never drift apart. It runs
+      // as a second pass rather than inline above because an early account must not blow past its
+      // cap while a later one still has capped headroom left.
+      if (isShortfall(-remainingGap)) {
+        // Each account's *spendable* capacity, which is what the gap is denominated in.
+        let netCapacity = 0
+        for (const account of reachable) {
+          netCapacity += (balances.get(account.id) ?? 0) * (1 - clampRate(account.withdrawalTaxRate))
+        }
+
+        if (netCapacity > 0) {
+          // Prorating the net need by net capacity makes the gross withdrawal exactly proportional
+          // to the remaining balance — `gross = need * balance / netCapacity` — which is the same
+          // convention `distributeSurplus` uses in the other direction: a surplus prorates in by
+          // balance, a shortfall prorates out by balance.
+          //
+          // Taking the scale from `min(need, capacity)` bounds it at 1, which is what guarantees
+          // `gross <= balance` for every account in a single pass: no iteration, no clamping, and
+          // no way to overdraw. When capacity is exhausted the scale is exactly 1 and every
+          // reachable balance lands on exactly 0.
+          const flexScale = Math.min(remainingGap, netCapacity) / netCapacity
+          for (const account of reachable) {
+            const balance = balances.get(account.id) ?? 0
+            const taxRate = clampRate(account.withdrawalTaxRate)
+            const withdrawal = balance * flexScale
+            balances.set(account.id, balance - withdrawal)
+            accountWithdrawals[account.id] = (accountWithdrawals[account.id] ?? 0) + withdrawal
+            withdrawalTaxes += withdrawal * taxRate
+            const spendable = withdrawal * (1 - taxRate)
+            portfolioWithdrawals += spendable
+            remainingGap -= spendable
+            policyExcessWithdrawals += withdrawal
+          }
+        }
       }
     }
 
@@ -339,7 +389,7 @@ export function calculateDeferredCompensation({
       incomeBySource,
       expensesByItem,
       withdrawalTaxes: round(withdrawalTaxes),
-      policyLimitedWithdrawals: round(policyLimitedWithdrawals),
+      policyExcessWithdrawals: round(policyExcessWithdrawals),
     })
   }
 

@@ -55,8 +55,8 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     [ObservableProperty] private string retirementFirstShortfallText = string.Empty;
     [ObservableProperty] private string retirementBalanceBasisText = string.Empty;
     [ObservableProperty] private string retirementEndingBasisText = string.Empty;
-    [ObservableProperty] private string retirementPolicyLimitText = string.Empty;
-    [ObservableProperty] private bool hasRetirementPolicyLimit;
+    [ObservableProperty] private string retirementPolicyExcessText = string.Empty;
+    [ObservableProperty] private bool hasRetirementPolicyExcess;
 
     [ObservableProperty]
     private bool withdrawOnlyAfterRetirement = true;
@@ -298,18 +298,23 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
         RetirementBalanceBasisText = $"Future dollars at age {draft.SemiRetirementAge}";
         RetirementEndingBasisText = $"Future dollars at age {draft.PlanThroughAge}";
 
-        var firstPolicyLimitedPoint = result.Projections
-            .FirstOrDefault(point => point.Age >= draft.SemiRetirementAge
-                // Reads the rounded Surplus rather than the calculator's IsShortfall predicate, which
-                // is safe only because the two are exactly equivalent: RoundSigned rounds away from
-                // zero, so Surplus < 0 holds for precisely the values where exact <= -0.5. Keep them
-                // in step — a tighter tolerance in the calculator would desynchronise this. See #63.
-                && point.Surplus < 0
-                && point.PolicyLimitedWithdrawals > 0);
-        HasRetirementPolicyLimit = firstPolicyLimitedPoint is not null;
-        RetirementPolicyLimitText = firstPolicyLimitedPoint is null
+        // Reports the years the plan had to spend past the stated withdrawal policy to stay funded,
+        // which is the opposite of what this disclosure said before issue #56: the rate is no longer
+        // a hard limit, so it can never be "what's binding" on a shortfall.
+        //
+        // No longer branches on the rounded Surplus. Policy excess is decided in the engine from the
+        // unrounded gap, and a policy-exceeding year is usually a *funded* year — that is the whole
+        // point of the fix — so pairing it with a shortfall test would have hidden every case it
+        // exists to report. That also removes the last rounded-field branch outside the engine, which
+        // is the rule issue #63 established.
+        var policyExcessPoints = result.Projections
+            .Where(point => point.Age >= draft.SemiRetirementAge && point.PolicyExcessWithdrawals > 0)
+            .ToArray();
+        var firstPolicyExcessPoint = policyExcessPoints.FirstOrDefault();
+        HasRetirementPolicyExcess = firstPolicyExcessPoint is not null;
+        RetirementPolicyExcessText = firstPolicyExcessPoint is null
             ? string.Empty
-            : $"At age {firstPolicyLimitedPoint.Age} the per-account withdrawal rate held back {FormatCurrency(firstPolicyLimitedPoint.PolicyLimitedWithdrawals)} that the balance could have covered. The withdrawal rate is a self-imposed policy limit, not a depletion model, so some shortfalls reflect that cap rather than running out of money. See issue #56.";
+            : $"To stay funded, this plan withdraws more than your withdrawal-rate limits allow in {policyExcessPoints.Length} of {result.RetirementYears} retirement years, starting at age {firstPolicyExcessPoint.Age} — {FormatCurrency(firstPolicyExcessPoint.PolicyExcessWithdrawals)} above your limits that year. The withdrawal rate is a spending policy you set, not the amount of money available, so the plan spends past it rather than reporting a shortfall next to an untouched balance. See issue #56.";
         ProjectionSeries =
         [
             CreateProjectionSeries("Portfolio balance", result.Projections.Select(point => point.TotalBalance), new SKColor(43, 111, 83)),

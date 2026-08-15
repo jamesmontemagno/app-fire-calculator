@@ -35,7 +35,7 @@ public class DeferredCompensationCalculatorTests
     }
 
     [Fact]
-    public void PortfolioWithdrawal_RespectsAccountWithdrawalRateAndTracksFundingGap()
+    public void PortfolioWithdrawal_ExceedsTheAccountWithdrawalRateRatherThanReportingAShortfall()
     {
         var account = new RetirementAccount(
             "taxable",
@@ -50,17 +50,25 @@ public class DeferredCompensationCalculatorTests
             0);
         var result = DeferredCompensationCalculator.Calculate(Inputs(account, annualExpenses: 1_000, planThroughAge: 51));
 
+        // Year one: a 10% rate on 10,000 releases exactly the 1,000 needed, so the policy is not
+        // exceeded and nothing about this year changes.
         Assert.Equal(9_000, result.Projections[0].TotalBalance);
         Assert.Equal(1_000, result.Projections[0].PortfolioWithdrawals);
         Assert.Equal(0, result.Projections[0].Surplus);
-        Assert.Equal(8_100, result.Projections[1].TotalBalance);
-        Assert.Equal(900, result.Projections[1].PortfolioWithdrawals);
-        Assert.Equal(-100, result.Projections[1].Surplus);
-        Assert.Equal(1, result.FundedYears);
+        Assert.Equal(0, result.Projections[0].PolicyExcessWithdrawals);
 
-        // The balance could have covered the whole 1,000; the self-imposed rate blocked 100 of it.
-        Assert.Equal(100, result.Projections[1].PolicyLimitedWithdrawals);
-        Assert.Equal(0, result.Projections[0].PolicyLimitedWithdrawals);
+        // Year two flipped for issue #56. 10% of the reduced 9,000 balance is only 900, and the plan
+        // used to stop there: withdraw 900, report a 100 shortfall, and carry 8,100 forward. It now
+        // takes the remaining 100 as well, so the year is funded and the 100 is disclosed as having
+        // been taken above the stated rate.
+        //   TotalBalance 8,100 -> 8,000; PortfolioWithdrawals 900 -> 1,000; Surplus -100 -> 0;
+        //   FundedYears 1 -> 2. The 100 figure itself is unchanged, but it now means the opposite:
+        //   it was the amount the rate held back, and it is now the amount the rate was exceeded by.
+        Assert.Equal(8_000, result.Projections[1].TotalBalance);
+        Assert.Equal(1_000, result.Projections[1].PortfolioWithdrawals);
+        Assert.Equal(0, result.Projections[1].Surplus);
+        Assert.Equal(2, result.FundedYears);
+        Assert.Equal(100, result.Projections[1].PolicyExcessWithdrawals);
     }
 
     [Fact]
@@ -180,6 +188,117 @@ public class DeferredCompensationCalculatorTests
         Assert.Equal(36, result.RetirementYears);
         Assert.Equal(36, result.FundedYears);
         Assert.Null(result.FirstShortfallAge);
+    }
+
+    /// <summary>
+    /// Issue #56. The per-account withdrawal rate is a spending policy, not a hard limit: a year the
+    /// policy alone cannot cover withdraws beyond it, bounded by what the reachable accounts hold.
+    /// These mirror the TypeScript cases in
+    /// <c>web/src/utils/__tests__/deferredCompensation.test.ts</c> one for one, because the two
+    /// engines have to agree on this to the dollar.
+    /// </summary>
+    [Fact]
+    public void CapFlex_CountsAYearAsFundedWhenExceedingThePolicyIsWhatCoveredIt()
+    {
+        // The distinction the whole change turns on: whether to exceed the policy is decided against
+        // the shortfall *before* flexing, but the funded/short verdict is read from the surplus
+        // *after*. A 4% rate releases 4,000 against a 10,000 need, so this year is short on the
+        // first pass and covered on the second, and the disclosure records that it took a breach.
+        var account = new RetirementAccount(
+            "taxable", "Taxable brokerage", RetirementAccountType.Taxable, 100_000, 0, 0, 50, 0.04, 1, 0);
+        var result = DeferredCompensationCalculator.Calculate(
+            Inputs(account, annualExpenses: 10_000, planThroughAge: 59));
+
+        Assert.Equal(10_000, result.Projections[0].Withdrawals["taxable"]);
+        Assert.Equal(0, result.Projections[0].Surplus);
+        Assert.Equal(6_000, result.Projections[0].PolicyExcessWithdrawals);
+
+        // 100,000 covers ten 10,000 years, so 50-59 are all funded. Under the old hard cap none were.
+        Assert.Equal(10, result.FundedYears);
+        Assert.Null(result.FirstShortfallAge);
+        Assert.Equal(0, result.EndingBalance);
+    }
+
+    [Fact]
+    public void CapFlex_LeavesThePolicyAloneWhenItAlreadyCoversTheYear()
+    {
+        // 4% of 100,000 is 4,000 against a 1,000 need, so the need binds, not the cap. The gate asks
+        // the same shortfall question the headline verdict asks, and gets "no", so nothing flexes.
+        var account = new RetirementAccount(
+            "taxable", "Taxable brokerage", RetirementAccountType.Taxable, 100_000, 0, 0, 50, 0.04, 1, 0);
+        var result = DeferredCompensationCalculator.Calculate(
+            Inputs(account, annualExpenses: 1_000, planThroughAge: 50));
+
+        Assert.Equal(1_000, result.Projections[0].Withdrawals["taxable"]);
+        Assert.Equal(0, result.Projections[0].PolicyExcessWithdrawals);
+        Assert.Equal(99_000, result.EndingBalance);
+    }
+
+    [Fact]
+    public void CapFlex_WillNotReachAnAccountBeforeItsAvailabilityAge()
+    {
+        // Exceeding a spending policy is a choice the plan gets to make; opening a locked account is
+        // not. Only the 20,000 account is reachable at 50, so the year is short by 30,000 even
+        // though 1,020,000 exists on paper, and the locked balance is untouched afterwards.
+        var open = new RetirementAccount(
+            "open", "Brokerage", RetirementAccountType.Taxable, 20_000, 0, 0, 50, 0.04, 1, 0);
+        var locked = new RetirementAccount(
+            "locked", "401(k)", RetirementAccountType.Traditional, 1_000_000, 0, 0, 60, 0.04, 1, 0);
+        var inputs = Inputs(open, annualExpenses: 50_000, planThroughAge: 51) with
+        {
+            Accounts = [open, locked],
+        };
+        var result = DeferredCompensationCalculator.Calculate(inputs);
+
+        Assert.Equal(20_000, result.Projections[0].Withdrawals["open"]);
+        Assert.Equal(0, result.Projections[0].Withdrawals.GetValueOrDefault("locked"));
+        Assert.Equal(-30_000, result.Projections[0].Surplus);
+        Assert.Equal(1_000_000, result.Projections[1].Balances["locked"]);
+    }
+
+    [Fact]
+    public void CapFlex_StopsAtTheBalanceRatherThanOverdrawingIt()
+    {
+        var account = new RetirementAccount(
+            "taxable", "Taxable brokerage", RetirementAccountType.Taxable, 30_000, 0, 0, 50, 0.04, 1, 0);
+        var result = DeferredCompensationCalculator.Calculate(
+            Inputs(account, annualExpenses: 100_000, planThroughAge: 52));
+
+        Assert.Equal(30_000, result.Projections[0].Withdrawals["taxable"]);
+        Assert.Equal(-70_000, result.Projections[0].Surplus);
+
+        // Exactly zero, not a floating-point residue, and never negative in a later year.
+        Assert.Equal(0, result.Projections[1].TotalBalance);
+        Assert.Equal(0, result.Projections[2].TotalBalance);
+        Assert.Equal(0, result.EndingBalance);
+    }
+
+    [Fact]
+    public void CapFlex_ProratesAcrossReachableAccountsByBalance()
+    {
+        // Both accounts give up the same fraction of their balance, which is what keeps the result
+        // independent of the order the accounts happen to sit in. Net capacity is
+        // 50,000 + 40,000 * 0.75 = 80,000, so a 10,000 need scales every balance by 0.125: 6,250
+        // gross from the untaxed account and 5,000 from the taxed one, of which 1,250 is tax.
+        // Both rates are 0 so the policy pass contributes nothing and this isolates the flex.
+        var taxFree = new RetirementAccount(
+            "taxfree", "Roth", RetirementAccountType.Roth, 50_000, 0, 0, 50, 0, 1, 0);
+        var taxed = new RetirementAccount(
+            "taxed", "401(k)", RetirementAccountType.Traditional, 40_000, 0, 0, 50, 0, 1, 0.25);
+        var inputs = Inputs(taxFree, annualExpenses: 10_000, planThroughAge: 50) with
+        {
+            Accounts = [taxFree, taxed],
+        };
+        var result = DeferredCompensationCalculator.Calculate(inputs);
+
+        Assert.Equal(6_250, result.Projections[0].Withdrawals["taxfree"]);
+        Assert.Equal(5_000, result.Projections[0].Withdrawals["taxed"]);
+        Assert.Equal(1_250, result.Projections[0].WithdrawalTaxes);
+        Assert.Equal(0, result.Projections[0].Surplus);
+
+        // Taxable-first would have taken the whole 10,000 from the untaxed account and ended on
+        // 80,000. Proration ends on 78,750, which is what makes the ordering choice testable.
+        Assert.Equal(78_750, result.EndingBalance);
     }
 
     private static DeferredCompensationInputs Inputs(RetirementAccount account, double annualExpenses, int planThroughAge) => new(
