@@ -1,0 +1,95 @@
+{
+  "policy": "Which currency inputs are recurring amounts, and which period each one is stored in.",
+  "why": [
+    "A recurring amount is stored in exactly one canonical period and every calculation runs on that canonical value; showing it in the other period divides or multiplies by 12 at the display edge only.",
+    "Almost every field is canonically annual, but the healthcare premium is canonically monthly. A mechanism that assumed all fields were annual would read a $600 premium as $50 a month and a $7,200 one as $600 -- wrong by 144x, silently, on both platforms.",
+    "That is why this file lists a per-field storedPeriod rather than a flat list of field names: the policy has to be distinguishable from its plausible alternative to be worth pinning.",
+    "No conversion arithmetic is pinned here. '50000 / 12 = 4166.67' is not an independent oracle, it is the implementation restated, which is the screenshot test this directory's README forbids. Behaviour is pinned in each platform's own suite instead."
+  ],
+  "storedPeriodValues": ["annual", "monthly"],
+  "calculators": [
+    {
+      "id": "standard-fire",
+      "webPage": "StandardFIRE.tsx",
+      "fields": [
+        { "key": "annualContribution", "storedPeriod": "annual" },
+        { "key": "annualIncome", "storedPeriod": "annual" },
+        { "key": "annualExpenses", "storedPeriod": "annual" }
+      ]
+    },
+    {
+      "id": "lean-fire",
+      "webPage": "LeanFIRE.tsx",
+      "fields": [
+        { "key": "annualContribution", "storedPeriod": "annual" },
+        { "key": "annualIncome", "storedPeriod": "annual" },
+        { "key": "annualExpenses", "storedPeriod": "annual" }
+      ]
+    },
+    {
+      "id": "fat-fire",
+      "webPage": "FatFIRE.tsx",
+      "fields": [
+        { "key": "annualContribution", "storedPeriod": "annual" },
+        { "key": "annualIncome", "storedPeriod": "annual" },
+        { "key": "annualExpenses", "storedPeriod": "annual" }
+      ]
+    },
+    {
+      "id": "coast-fire",
+      "webPage": "CoastFIRE.tsx",
+      "fields": [
+        { "key": "annualContribution", "storedPeriod": "annual" },
+        { "key": "annualExpenses", "storedPeriod": "annual" }
+      ]
+    },
+    {
+      "id": "barista-fire",
+      "webPage": "BaristaFIRE.tsx",
+      "fields": [
+        { "key": "annualContribution", "storedPeriod": "annual" },
+        { "key": "annualExpenses", "storedPeriod": "annual" },
+        { "key": "partTimeIncome", "storedPeriod": "annual" }
+      ]
+    },
+    {
+      "id": "reverse-fire",
+      "webPage": "ReverseFIRE.tsx",
+      "fields": [{ "key": "annualExpenses", "storedPeriod": "annual" }]
+    },
+    {
+      "id": "savings-rate",
+      "webPage": "SavingsRate.tsx",
+      "note": "savingsContribution is deliberately absent. Its monthly/yearly control is an input frequency that selects between two different formulas, not a display period, so it must not be routed through this mechanism.",
+      "fields": [{ "key": "annualIncome", "storedPeriod": "annual" }]
+    },
+    {
+      "id": "healthcare-gap",
+      "webPage": "HealthcareGap.tsx",
+      "note": "A 'monthly deductible' is semantically odd, since a deductible is an annual cap. Web makes it periodic anyway and this is display-only arithmetic, so both platforms mirror it deliberately: silent divergence between the platforms would be worse than a slightly odd unit.",
+      "fields": [
+        { "key": "healthcareMonthlyPremium", "storedPeriod": "monthly" },
+        { "key": "healthcareAnnualDeductible", "storedPeriod": "annual" },
+        { "key": "healthcareAnnualOutOfPocket", "storedPeriod": "annual" }
+      ]
+    },
+    {
+      "id": "retirement-cash-flow",
+      "webPage": "DeferredCompensation.tsx",
+      "note": "Named retirement-cash-flow on MAUI and DeferredCompensation on web. Per-account contributions are not periodic on either platform.",
+      "fields": [{ "key": "annualExpenses", "storedPeriod": "annual" }]
+    },
+    {
+      "id": "withdrawal-rate",
+      "webPage": "WithdrawalRate.tsx",
+      "note": "Declared with no periodic fields rather than omitted. Absence would be indistinguishable from an oversight, and the monthly withdrawal it displays is a derived result, which neither platform makes switchable.",
+      "fields": []
+    },
+    {
+      "id": "debt-payoff",
+      "webPage": "DebtPayoff.tsx",
+      "note": "Declared with no periodic fields rather than omitted. Its budget and payment inputs are genuinely monthly because the amortization steps monthly, so they are fixed units and not a display choice.",
+      "fields": []
+    }
+  ]
+}

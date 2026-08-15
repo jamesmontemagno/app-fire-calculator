@@ -103,3 +103,50 @@ so a missing one throws, rather than defaulting and quietly testing a different 
 
 Editing this file triggers both CI jobs in `.github/workflows/tests.yml`; the path filters are there
 so a fixture change cannot land without re-running both suites.
+
+---
+
+# `periodic-fields.json`
+
+A second artifact in this directory, pinning a **policy** rather than a set of numbers: which currency
+inputs are recurring amounts, and which period each one is canonically stored in.
+
+- Web reads it from `web/src/utils/__tests__/periodicFieldInventory.test.ts`.
+- MAUI reads it from `app/MyFireNumber.Tests/Presentation/SharedPeriodicFieldInventoryTests.cs`.
+
+## Why a policy belongs here when conversion arithmetic does not
+
+The monthly/annual toggle is display-only: a recurring amount is stored in one canonical period, every
+calculation runs on the canonical value, and the other period is produced at the display edge. So
+there is no cross-platform *number* to pin — and a case asserting `50000 / 12 = 4166.67` would be the
+screenshot test this README forbids, because that identity is the implementation restated rather than
+an independent oracle. Conversion behaviour is pinned per platform instead, against a
+lossless-round-trip invariant the implementation can actually fail.
+
+What *is* shared, and what review alone was previously holding, is the inventory. Almost every field is
+canonically annual, but the healthcare premium is canonically monthly. A mechanism that assumed all
+fields were annual would read a $600 premium as $50 a month — wrong by 144x, silently, and identically
+plausible on screen. That makes the policy distinguishable from its alternative, which is the bar this
+directory sets for being worth pinning.
+
+It also covers a gap neither suite can reach on its own: `MyFireNumber.Tests` cannot reference the MAUI
+single-project, so no unit test can prove a XAML `Entry` is bound to a period-aware field. A field made
+periodic on one platform and forgotten on the other is invisible to both suites unless something
+outside both of them holds the list.
+
+## Shape
+
+Every shipped calculator appears, including those with **no** periodic fields, which declare an empty
+list rather than being omitted — absence is indistinguishable from an oversight. `webPage` names the
+`.tsx` the web scan reads, since MAUI's three FIRE variants share one page while web gives each its own.
+
+Both consumers additionally assert the inventory is not silently empty, so an artifact that failed to
+load cannot make an empty list agree with an empty list and report success.
+
+## Adding a field
+
+1. Add it to the calculator's `fields`, with the period the value is actually stored in.
+2. Web: pass `periodic` (and `storedPeriod="monthly"` when it is not annual) to that `CurrencyInput`.
+3. MAUI: declare it in `PeriodicFieldCatalog`, route the view model's text property through
+   `PeriodicText`/`SetPeriodicText`, and bind `PeriodQualifier`/`PeriodSuffix` on the page.
+4. Run `npm test` in `web/` **and** `dotnet test app/MyFireNumber.Tests`. Both must pass.

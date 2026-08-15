@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.Services;
 using SkiaSharp;
 using System.Globalization;
@@ -28,14 +29,26 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
     [ObservableProperty]
     private string currentSavingsText = string.Empty;
 
-    [ObservableProperty]
-    private string annualContributionText = string.Empty;
+    // Recurring amounts. These delegate to Core periodic fields instead of holding their own text, so
+    // the canonical amount is the single source of truth and the monthly/annual toggle only changes
+    // how it is rendered.
+    public string AnnualContributionText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.AnnualContribution);
+        set => SetPeriodicText(PeriodicFieldCatalog.AnnualContribution, value);
+    }
 
-    [ObservableProperty]
-    private string annualIncomeText = string.Empty;
+    public string AnnualIncomeText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.AnnualIncome);
+        set => SetPeriodicText(PeriodicFieldCatalog.AnnualIncome, value);
+    }
 
-    [ObservableProperty]
-    private string annualExpensesText = string.Empty;
+    public string AnnualExpensesText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.AnnualExpenses);
+        set => SetPeriodicText(PeriodicFieldCatalog.AnnualExpenses, value);
+    }
 
     [ObservableProperty]
     private string expectedReturnText = string.Empty;
@@ -113,9 +126,6 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
     partial void OnCurrentAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnCurrentSavingsTextChanged(string value) => OnDraftInputChanged();
-    partial void OnAnnualContributionTextChanged(string value) => OnDraftInputChanged();
-    partial void OnAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnAnnualExpensesTextChanged(string value) => OnDraftInputChanged();
     partial void OnExpectedReturnTextChanged(string value) => OnDraftInputChanged();
     partial void OnInflationRateTextChanged(string value) => OnDraftInputChanged();
     partial void OnWithdrawalRateTextChanged(string value) => OnDraftInputChanged();
@@ -154,9 +164,9 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
         CurrentAgeText = standard.CurrentAge.ToString(CultureInfo.CurrentCulture);
         RetirementAgeText = standard.RetirementAge.ToString(CultureInfo.CurrentCulture);
         CurrentSavingsText = FormatNumber(standard.CurrentSavings);
-        AnnualContributionText = FormatNumber(standard.AnnualContribution);
-        AnnualIncomeText = FormatNumber(standard.AnnualIncome);
-        AnnualExpensesText = FormatNumber(standard.AnnualExpenses);
+        LoadPeriodicValue(PeriodicFieldCatalog.AnnualContribution, standard.AnnualContribution, nameof(AnnualContributionText));
+        LoadPeriodicValue(PeriodicFieldCatalog.AnnualIncome, standard.AnnualIncome, nameof(AnnualIncomeText));
+        LoadPeriodicValue(PeriodicFieldCatalog.AnnualExpenses, standard.AnnualExpenses, nameof(AnnualExpensesText));
         ExpectedReturnText = FormatNumber(standard.ExpectedReturn * 100);
         InflationRateText = FormatNumber(standard.InflationRate * 100);
         WithdrawalRateText = FormatNumber(standard.WithdrawalRate * 100);
@@ -217,9 +227,9 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
         }
 
         if (!TryParseNonNegative(CurrentSavingsText, out var currentSavings)
-            || !TryParseNonNegative(AnnualContributionText, out var annualContribution)
-            || !TryParseNonNegative(AnnualIncomeText, out var annualIncome)
-            || !TryParseNonNegative(AnnualExpensesText, out var annualExpenses))
+            || !TryGetPeriodicValue(PeriodicFieldCatalog.AnnualContribution, out var annualContribution)
+            || !TryGetPeriodicValue(PeriodicFieldCatalog.AnnualIncome, out var annualIncome)
+            || !TryGetPeriodicValue(PeriodicFieldCatalog.AnnualExpenses, out var annualExpenses))
         {
             ValidationMessage = "Enter zero or a positive amount for each dollar value.";
             return false;

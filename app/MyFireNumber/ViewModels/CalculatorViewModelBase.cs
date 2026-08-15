@@ -4,10 +4,12 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using MyFireNumber.Core.Calculators;
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
 using SkiaSharp;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace MyFireNumber.ViewModels;
@@ -25,6 +27,8 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     private readonly ICalculatorCatalog catalog;
     private readonly ICorruptPayloadRepository corruptPayloadRepository;
     private readonly ICurrencyPreferencesService currencyPreferences;
+    private readonly IDisplayPeriodPreferencesService displayPeriodPreferences;
+    private readonly Dictionary<string, PeriodicAmountField> periodicFields = new(StringComparer.Ordinal);
     private readonly IDraftRepository draftRepository;
     private readonly INavigationService navigation;
     private readonly IPlanRepository planRepository;
@@ -43,6 +47,7 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
         CalculatorDefaults = services.CalculatorDefaults;
         corruptPayloadRepository = services.CorruptPayloadRepository;
         currencyPreferences = services.CurrencyPreferences;
+        displayPeriodPreferences = services.DisplayPeriodPreferences;
         draftRepository = services.DraftRepository;
         navigation = services.Navigation;
         planRepository = services.PlanRepository;
@@ -88,6 +93,139 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
 
     /// <summary>Suppresses recalculation while inputs are being populated from a draft.</summary>
     protected bool IsApplyingDraft { get; private set; }
+
+    #region Display period
+
+    // Presentation only. Nothing below reaches a draft, a saved plan, an exported workbook, or a
+    // FinancialCalculator call — recurring amounts stay canonical and every calculation keeps running
+    // on the canonical value. This is deliberately not ContributionFrequency, which is an input
+    // frequency that does change the math and does belong in a draft.
+
+    private CurrencyPeriod? displayPeriod;
+
+    /// <summary>The period recurring amounts are currently shown in.</summary>
+    public CurrencyPeriod DisplayPeriod
+    {
+        get
+        {
+            EnsurePeriodicFields();
+            return displayPeriod!.Value;
+        }
+    }
+
+    public bool IsMonthlyDisplay => DisplayPeriod == CurrencyPeriod.Monthly;
+
+    public bool IsAnnualDisplay => DisplayPeriod == CurrencyPeriod.Annual;
+
+    /// <summary>Appended to a periodic field's label, e.g. <c>per month</c>.</summary>
+    public string DisplayPeriodQualifier => CurrencyPeriodMath.Qualifier(DisplayPeriod);
+
+    /// <summary>Shown inside a periodic field's entry, e.g. <c>/mo</c>.</summary>
+    public string DisplayPeriodSuffix => CurrencyPeriodMath.Suffix(DisplayPeriod);
+
+    /// <summary>Whether this calculator has any recurring amounts to toggle.</summary>
+    public bool HasPeriodicFields
+    {
+        get
+        {
+            EnsurePeriodicFields();
+            return periodicFields.Count > 0;
+        }
+    }
+
+    [RelayCommand]
+    private void SetDisplayPeriod(string period)
+    {
+        if (!Enum.TryParse(period, out CurrencyPeriod requested) || !Enum.IsDefined(requested))
+        {
+            return;
+        }
+
+        EnsurePeriodicFields();
+        if (requested == displayPeriod)
+        {
+            return;
+        }
+
+        displayPeriod = requested;
+        foreach (var field in periodicFields.Values)
+        {
+            field.SetDisplayPeriod(requested);
+        }
+
+        displayPeriodPreferences.Save(CalculatorId, requested);
+
+        // Raising "everything changed" rather than naming each bound text property. A hand-kept list
+        // would silently stop refreshing a field the day one was added, which is precisely the class
+        // of miss this feature is meant to avoid; the derived view models declare their periodic
+        // fields in one place already (PeriodicFieldCatalog) and nowhere else needs to repeat it.
+        OnPropertyChanged(string.Empty);
+    }
+
+    private void EnsurePeriodicFields()
+    {
+        if (displayPeriod.HasValue)
+        {
+            return;
+        }
+
+        var period = displayPeriodPreferences.Get(CalculatorId);
+        displayPeriod = period;
+        foreach (var definition in PeriodicFieldCatalog.For(CalculatorId))
+        {
+            periodicFields[definition.Key] = new PeriodicAmountField(definition.StoredPeriod, period);
+        }
+    }
+
+    /// <summary>
+    /// The field behind a periodic input. Throws for a key this calculator did not declare, so a typo
+    /// fails at first use instead of quietly creating a field nothing toggles.
+    /// </summary>
+    private PeriodicAmountField PeriodicField(string key)
+    {
+        EnsurePeriodicFields();
+        return periodicFields.TryGetValue(key, out var field)
+            ? field
+            : throw new KeyNotFoundException(
+                $"'{key}' is not a periodic field of '{CalculatorId}'. Declare it in {nameof(PeriodicFieldCatalog)}.");
+    }
+
+    /// <summary>What a periodic entry should display, in the current display period.</summary>
+    protected string PeriodicText(string key) => PeriodicField(key).Text;
+
+    /// <summary>Accept text from a periodic entry, typed by the user or echoed by the two-way binding.</summary>
+    protected void SetPeriodicText(string key, string? value, [CallerMemberName] string? propertyName = null)
+    {
+        var field = PeriodicField(key);
+        if (string.Equals(field.Text, value, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        field.TrySetText(value);
+        OnPropertyChanged(propertyName);
+        OnDraftInputChanged();
+    }
+
+    /// <summary>Load a canonical amount into a periodic field when a draft or plan is applied.</summary>
+    protected void LoadPeriodicValue(string key, double value, [CallerMemberName] string? propertyName = null)
+    {
+        PeriodicField(key).SetStoredValue(value);
+        OnPropertyChanged(propertyName);
+    }
+
+    /// <summary>
+    /// Read a periodic field's canonical amount for a draft. Always the stored period, never what is
+    /// on screen, so switching the display cannot change a result.
+    /// </summary>
+    protected bool TryGetPeriodicValue(string key, out double value)
+    {
+        var field = PeriodicField(key);
+        value = field.StoredValue;
+        return field.HasValidText;
+    }
+
+    #endregion
 
     protected ICalculatorDefaultsService CalculatorDefaults { get; }
 

@@ -88,6 +88,7 @@
                                 FontSize="12"
                                 SemanticProperties.Description="Reset this calculator to its defaults." />
                     </Grid>
+                    <controls:PeriodToggleView />
                     <VerticalStackLayout IsVisible="{Binding IsStandardFire}" Spacing="4">
                         <controls:FieldHelpView Header="Quick preset"
                                                 HelpText="A preset replaces all assumptions with a common starting point. You can still edit every value below." />
@@ -112,22 +113,22 @@
                                                    Placeholder="100000"
                                                    Text="{Binding CurrentSavingsText}" />
                         <controls:NumericInputView Grid.Row="1"
-                                                   Header="Annual contribution"
-                                                   HelpText="How much you add to investments each year, in dollars."
+                                                   Header="Contribution"
+                                                   HelpText="How much you add to investments, in dollars."
                                                    Placeholder="24000"
-                                                   Text="{Binding AnnualContributionText}" />
+                                                   Text="{Binding AnnualContributionText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                         <controls:NumericInputView Grid.Row="1"
                                                    Grid.Column="1"
-                                                   Header="Annual after-tax take-home income"
-                                                   HelpText="Annual income after taxes, used to calculate your savings rate."
+                                                   Header="After-tax take-home income"
+                                                   HelpText="Income after taxes, used to calculate your savings rate."
                                                    Placeholder="72000"
-                                                   Text="{Binding AnnualIncomeText}" />
+                                                   Text="{Binding AnnualIncomeText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                         <controls:NumericInputView Grid.Row="2"
                                                    Grid.ColumnSpan="2"
-                                                   Header="Annual retirement expenses"
-                                                   HelpText="Estimated annual spending after leaving full-time work, in today’s dollars."
+                                                   Header="Retirement expenses"
+                                                   HelpText="Estimated spending after leaving full-time work, in today’s dollars."
                                                    Placeholder="48000"
-                                                   Text="{Binding AnnualExpensesText}" />
+                                                   Text="{Binding AnnualExpensesText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                     </Grid>
                     <controls:AdvancedAssumptionsExpander>
                         <VerticalStackLayout Margin="0,12,0,0" Spacing="12">

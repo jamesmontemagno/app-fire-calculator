@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.Services;
 using SkiaSharp;
 using System.Globalization;
@@ -9,6 +10,28 @@ namespace MyFireNumber.ViewModels;
 public sealed partial class BaristaFireViewModel : CalculatorViewModelBase<BaristaFireDraft>
 {
     private readonly IBaristaFireExportService exportService;
+
+    // Recurring amounts. These delegate to Core periodic fields instead of holding their own text, so
+    // the canonical amount is the single source of truth and the monthly/annual toggle only changes
+    // how it is rendered.
+
+    public string AnnualContributionText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.AnnualContribution);
+        set => SetPeriodicText(PeriodicFieldCatalog.AnnualContribution, value);
+    }
+
+    public string AnnualExpensesText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.AnnualExpenses);
+        set => SetPeriodicText(PeriodicFieldCatalog.AnnualExpenses, value);
+    }
+
+    public string PartTimeAnnualIncomeText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.PartTimeIncome);
+        set => SetPeriodicText(PeriodicFieldCatalog.PartTimeIncome, value);
+    }
 
     public BaristaFireViewModel(
         CalculatorViewModelServices services,
@@ -23,15 +46,6 @@ public sealed partial class BaristaFireViewModel : CalculatorViewModelBase<Baris
 
     [ObservableProperty]
     private string currentSavingsText = string.Empty;
-
-    [ObservableProperty]
-    private string annualContributionText = string.Empty;
-
-    [ObservableProperty]
-    private string annualExpensesText = string.Empty;
-
-    [ObservableProperty]
-    private string partTimeAnnualIncomeText = string.Empty;
 
     [ObservableProperty]
     private string expectedReturnText = string.Empty;
@@ -74,9 +88,6 @@ public sealed partial class BaristaFireViewModel : CalculatorViewModelBase<Baris
 
     partial void OnCurrentAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnCurrentSavingsTextChanged(string value) => OnDraftInputChanged();
-    partial void OnAnnualContributionTextChanged(string value) => OnDraftInputChanged();
-    partial void OnAnnualExpensesTextChanged(string value) => OnDraftInputChanged();
-    partial void OnPartTimeAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
     partial void OnExpectedReturnTextChanged(string value) => OnDraftInputChanged();
     partial void OnInflationRateTextChanged(string value) => OnDraftInputChanged();
     partial void OnWithdrawalRateTextChanged(string value) => OnDraftInputChanged();
@@ -85,9 +96,9 @@ public sealed partial class BaristaFireViewModel : CalculatorViewModelBase<Baris
     {
         CurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
         CurrentSavingsText = FormatNumber(draft.CurrentSavings);
-        AnnualContributionText = FormatNumber(draft.AnnualContribution);
-        AnnualExpensesText = FormatNumber(draft.AnnualExpenses);
-        PartTimeAnnualIncomeText = FormatNumber(draft.PartTimeAnnualIncome);
+        LoadPeriodicValue(PeriodicFieldCatalog.AnnualContribution, draft.AnnualContribution, nameof(AnnualContributionText));
+        LoadPeriodicValue(PeriodicFieldCatalog.AnnualExpenses, draft.AnnualExpenses, nameof(AnnualExpensesText));
+        LoadPeriodicValue(PeriodicFieldCatalog.PartTimeIncome, draft.PartTimeAnnualIncome, nameof(PartTimeAnnualIncomeText));
         ExpectedReturnText = FormatNumber(draft.ExpectedReturn * 100);
         InflationRateText = FormatNumber(draft.InflationRate * 100);
         WithdrawalRateText = FormatNumber(draft.WithdrawalRate * 100);
@@ -103,9 +114,9 @@ public sealed partial class BaristaFireViewModel : CalculatorViewModelBase<Baris
         }
 
         if (!TryParseNonNegative(CurrentSavingsText, out var currentSavings)
-            || !TryParseNonNegative(AnnualContributionText, out var annualContribution)
-            || !TryParseNonNegative(AnnualExpensesText, out var annualExpenses)
-            || !TryParseNonNegative(PartTimeAnnualIncomeText, out var partTimeIncome))
+            || !TryGetPeriodicValue(PeriodicFieldCatalog.AnnualContribution, out var annualContribution)
+            || !TryGetPeriodicValue(PeriodicFieldCatalog.AnnualExpenses, out var annualExpenses)
+            || !TryGetPeriodicValue(PeriodicFieldCatalog.PartTimeIncome, out var partTimeIncome))
         {
             ValidationMessage = "Enter zero or a positive amount for each dollar value.";
             return false;

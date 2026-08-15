@@ -14,6 +14,7 @@ public sealed class CalculatorViewModelServices(
     ICalculatorDefaultsService calculatorDefaults,
     ICorruptPayloadRepository corruptPayloadRepository,
     ICurrencyPreferencesService currencyPreferences,
+    IDisplayPeriodPreferencesService displayPeriodPreferences,
     IDraftRepository draftRepository,
     INavigationService navigation,
     IPlanRepository planRepository)
@@ -27,6 +28,8 @@ public sealed class CalculatorViewModelServices(
     public ICorruptPayloadRepository CorruptPayloadRepository { get; } = corruptPayloadRepository;
 
     public ICurrencyPreferencesService CurrencyPreferences { get; } = currencyPreferences;
+
+    public IDisplayPeriodPreferencesService DisplayPeriodPreferences { get; } = displayPeriodPreferences;
 
     public IDraftRepository DraftRepository { get; } = draftRepository;
 

@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.Services;
 using SkiaSharp;
 using System.Collections.ObjectModel;
@@ -26,6 +27,15 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
 
     private readonly IDeferredCompensationExportService exportService;
 
+    // Recurring amount. Delegates to a Core periodic field instead of holding its own text, so the
+    // canonical amount is the single source of truth and the monthly/annual toggle only changes how
+    // it is rendered.
+    public string RetirementExpensesText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.AnnualExpenses);
+        set => SetPeriodicText(PeriodicFieldCatalog.AnnualExpenses, value);
+    }
+
     public RetirementCashFlowViewModel(
         CalculatorViewModelServices services,
         IDeferredCompensationExportService exportService)
@@ -46,7 +56,6 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     [ObservableProperty] private string retirementCurrentAgeText = "45";
     [ObservableProperty] private string retirementSemiAgeText = "55";
     [ObservableProperty] private string retirementPlanThroughAgeText = "90";
-    [ObservableProperty] private string retirementExpensesText = "80000";
     [ObservableProperty] private string retirementInflationText = "3";
     [ObservableProperty] private string retirementCurrentBalanceText = string.Empty;
     [ObservableProperty] private string retirementBalanceAtSemiText = string.Empty;
@@ -88,7 +97,6 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     partial void OnRetirementCurrentAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementSemiAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementPlanThroughAgeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnRetirementExpensesTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementInflationTextChanged(string value) => OnDraftInputChanged();
     partial void OnWithdrawOnlyAfterRetirementChanged(bool value) => OnDraftInputChanged();
     partial void OnReinvestRetirementSurplusChanged(bool value) => OnDraftInputChanged();
@@ -176,7 +184,7 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
         RetirementCurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
         RetirementSemiAgeText = draft.SemiRetirementAge.ToString(CultureInfo.CurrentCulture);
         RetirementPlanThroughAgeText = draft.PlanThroughAge.ToString(CultureInfo.CurrentCulture);
-        RetirementExpensesText = draft.AnnualExpenses.ToString("0.##", CultureInfo.CurrentCulture);
+        LoadPeriodicValue(PeriodicFieldCatalog.AnnualExpenses, draft.AnnualExpenses, nameof(RetirementExpensesText));
         RetirementInflationText = (draft.InflationRate * 100).ToString("0.##", CultureInfo.CurrentCulture);
         WithdrawOnlyAfterRetirement = draft.WithdrawOnlyAfterRetirement;
         ReinvestRetirementSurplus = draft.ReinvestSurplus;
@@ -206,7 +214,7 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
             return false;
         }
 
-        if (!TryParseNonNegative(RetirementExpensesText, out var annualExpenses))
+        if (!TryGetPeriodicValue(PeriodicFieldCatalog.AnnualExpenses, out var annualExpenses))
         {
             ValidationMessage = "Scenario: Annual retirement spending in today's dollars must be a number of zero or more.";
             return false;
