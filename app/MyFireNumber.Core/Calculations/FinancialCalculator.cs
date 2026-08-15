@@ -5,6 +5,9 @@ public static class FinancialCalculator
     public const double LeanFireThreshold = 40_000;
     public const double FatFireThreshold = 100_000;
 
+    /// <summary>Horizon used by the withdrawal-rate comparison before a plan is treated as open-ended.</summary>
+    private const int RateAnalysisMaxYears = 50;
+
     private const int MaxProjectionYears = 100;
 
     /// <summary>
@@ -258,6 +261,13 @@ public static class FinancialCalculator
             Round(fullFireNumber - baristaNumber));
     }
 
+    /// <summary>
+    /// Projects a single deterministic drawdown path at a fixed return with inflation-adjusted
+    /// withdrawals. This is not a historical or Monte Carlo simulation, so it cannot produce a
+    /// probability of success. <see cref="WithdrawalResult.PortfolioLongevity"/> and every
+    /// <see cref="WithdrawalRateAnalysis.Years"/> use the same convention: full years funded while
+    /// a positive balance remained, so the headline and the comparison table always agree.
+    /// </summary>
     public static WithdrawalResult CalculateWithdrawal(double portfolioValue, double withdrawalRate, double expectedReturn, double inflationRate, int retirementYears)
     {
         var annualWithdrawal = portfolioValue * withdrawalRate;
@@ -273,14 +283,14 @@ public static class FinancialCalculator
             year++;
         }
 
-        var portfolioLongevity = year - 1;
+        var portfolioLongevity = Math.Max(0, year - 1);
         var rateAnalysis = new[] { 0.03, 0.035, 0.04, 0.045, 0.05 }
             .Select(rate => CalculateRateAnalysis(portfolioValue, rate, expectedReturn, inflationRate))
             .ToArray();
 
         return new WithdrawalResult(
             portfolioLongevity,
-            portfolioLongevity >= retirementYears ? 1 : (double)portfolioLongevity / retirementYears,
+            retirementYears <= 0 || portfolioLongevity >= retirementYears ? 1 : (double)portfolioLongevity / retirementYears,
             Round(annualWithdrawal),
             Round(annualWithdrawal / 12),
             Math.Max(0, projections.LastOrDefault()?.Balance ?? 0),
@@ -448,12 +458,19 @@ public static class FinancialCalculator
             annualCost,
             Round(totalCost),
             gapYears > 0 ? Round(totalCost / gapYears) : 0,
-            yearlyBreakdown,
-            Round(CalculateHealthcareSubsidy(30_000, annualCost)),
-            Round(CalculateHealthcareSubsidy(50_000, annualCost)),
-            Round(CalculateHealthcareSubsidy(75_000, annualCost)));
+            yearlyBreakdown);
     }
 
+    /// <summary>
+    /// Core debt payoff calculation logic.
+    /// </summary>
+    /// <remarks>
+    /// Each month interest accrues exactly once per debt before any payment is applied, then the
+    /// available budget pays minimums in priority order and any remainder goes to the highest
+    /// priority debt as pure principal. Payments never exceed the available budget, so a budget
+    /// that cannot cover the minimums results in growing balances instead of silent overpayment.
+    /// This mirrors <c>calculateDebtPayoff</c> in the web app's <c>calculations.ts</c>.
+    /// </remarks>
     private static DebtPayoffResult CalculateDebtPayoff(IEnumerable<DebtItem> debts, double totalMonthlyPayment, double extraPayment)
     {
         var remainingDebts = debts.Select(debt => new MutableDebt(debt)).ToList();
@@ -469,32 +486,50 @@ public static class FinancialCalculator
         {
             month++;
             var monthlyBudget = totalMonthlyPayment + extraPayment;
-            var monthPrincipal = 0d;
+            var monthPayments = 0d;
             var monthInterest = 0d;
             var paidOffThisMonth = new List<string>();
 
-            foreach (var debt in remainingDebts.Where(debt => debt.CurrentBalance > 0))
+            // 1. Accrue interest exactly once per debt, before any payment is applied.
+            foreach (var debt in remainingDebts)
             {
+                if (debt.CurrentBalance <= 0)
+                {
+                    continue;
+                }
+
                 var interestCharge = debt.CurrentBalance * (debt.Rate / 12);
-                var minimumPayment = Math.Min(debt.MinimumPayment, debt.CurrentBalance + interestCharge);
-                var principalPayment = Math.Max(0, minimumPayment - interestCharge);
-                debt.CurrentBalance -= principalPayment;
-                monthlyBudget -= minimumPayment;
-                monthPrincipal += principalPayment;
+                debt.CurrentBalance += interestCharge;
                 monthInterest += interestCharge;
+            }
+
+            // 2. Pay minimums in priority order, never spending more than the available budget.
+            foreach (var debt in remainingDebts)
+            {
+                if (debt.CurrentBalance <= 0 || monthlyBudget <= 0)
+                {
+                    continue;
+                }
+
+                var payment = Math.Min(debt.MinimumPayment, Math.Min(debt.CurrentBalance, monthlyBudget));
+                debt.CurrentBalance -= payment;
+                monthlyBudget -= payment;
+                monthPayments += payment;
                 MarkPaidOff(debt, month, paidOffThisMonth, payoffOrder, debtMilestones);
             }
 
-            if (monthlyBudget > 0 && remainingDebts.FirstOrDefault(debt => debt.CurrentBalance > 0) is { } targetDebt)
+            // 3. Apply any remaining budget to the highest priority debt as pure principal.
+            while (monthlyBudget > 0 && remainingDebts.FirstOrDefault(debt => debt.CurrentBalance > 0) is { } targetDebt)
             {
-                var additionalInterest = targetDebt.CurrentBalance * (targetDebt.Rate / 12);
-                var actualPayment = Math.Min(monthlyBudget, targetDebt.CurrentBalance + additionalInterest);
-                var additionalPrincipal = Math.Max(0, actualPayment - additionalInterest);
-                targetDebt.CurrentBalance -= additionalPrincipal;
-                monthPrincipal += additionalPrincipal;
-                monthInterest += additionalInterest;
+                var payment = Math.Min(monthlyBudget, targetDebt.CurrentBalance);
+                targetDebt.CurrentBalance -= payment;
+                monthlyBudget -= payment;
+                monthPayments += payment;
                 MarkPaidOff(targetDebt, month, paidOffThisMonth, payoffOrder, debtMilestones);
             }
+
+            // Balances already include this month's interest, so principal is what is left of the payments.
+            var monthPrincipal = monthPayments - monthInterest;
 
             cumulativePrincipal += monthPrincipal;
             cumulativeInterest += monthInterest;
@@ -523,14 +558,16 @@ public static class FinancialCalculator
         var balance = portfolioValue;
         var year = 0;
         var withdrawal = portfolioValue * rate;
-        while (balance > 0 && year < 50)
+        while (balance > 0 && year < RateAnalysisMaxYears)
         {
             balance = (balance * (1 + expectedReturn)) - withdrawal;
             withdrawal *= 1 + inflationRate;
             year++;
         }
 
-        return new WithdrawalRateAnalysis(rate, year, Math.Max(0, Round(balance)));
+        // Match PortfolioLongevity: count the full years funded while a positive balance remained.
+        var yearsFunded = Math.Max(0, balance > 0 ? year : year - 1);
+        return new WithdrawalRateAnalysis(rate, yearsFunded, Math.Max(0, Round(balance)));
     }
 
     private static void MarkPaidOff(MutableDebt debt, int month, ICollection<string> paidOffThisMonth, ICollection<string> payoffOrder, ICollection<DebtMilestone> debtMilestones)
@@ -554,15 +591,6 @@ public static class FinancialCalculator
     private static double RealReturn(double expectedReturn, double inflationRate)
     {
         return ((1 + expectedReturn) / (1 + inflationRate)) - 1;
-    }
-
-    private static double CalculateHealthcareSubsidy(double income, double annualCost)
-    {
-        return income < 30_000 ? annualCost * 0.7
-            : income < 50_000 ? annualCost * 0.5
-            : income < 75_000 ? annualCost * 0.3
-            : income < 100_000 ? annualCost * 0.15
-            : 0;
     }
 
     private static string SavingsCategory(double savingsRate)

@@ -65,7 +65,7 @@ export default function WithdrawalRate() {
             <ResultCard label="Annual withdrawal" value={results.annualWithdrawal} format="currency" highlight subtext="First year" />
             <ResultCard label="Monthly withdrawal" value={results.monthlyWithdrawal} format="currency" subtext="First year" />
             <ResultCard label="Portfolio lasts" value={results.portfolioLongevity} format="years" subtext={results.portfolioLongevity >= params.retirementYears ? 'Meets your selected duration' : 'Below your selected duration'} />
-            <ResultCard label="Modeled success rate" value={results.successRate} format="percent" subtext="Scenario-based estimate" />
+            <ResultCard label="Share of horizon funded" value={results.horizonFundedRatio} format="percent" subtext="Single fixed-return scenario, not a success probability" />
           </div>
         </section>
 

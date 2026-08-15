@@ -248,7 +248,7 @@
                                 <Slider AutomationId="ExpectedReturnDefaultSlider"
                                         Grid.Row="1"
                                         Grid.ColumnSpan="2"
-                                        Minimum="1"
+                                        Minimum="0"
                                         Maximum="15"
                                         Value="{Binding ExpectedReturnSlider}"
                                         MinimumTrackColor="#2F6B57"
@@ -296,8 +296,8 @@
                                 <Slider AutomationId="WithdrawalDefaultSlider"
                                         Grid.Row="1"
                                         Grid.ColumnSpan="2"
-                                        Minimum="1"
-                                        Maximum="10"
+                                        Minimum="2"
+                                        Maximum="6"
                                         Value="{Binding WithdrawalRateSlider}"
                                         MinimumTrackColor="#2F6B57"
                                         MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
@@ -332,7 +332,7 @@
                             </Grid>
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                                     <VerticalStackLayout Spacing="4">
-                                     <Label Text="Annual pre-tax income"
+                                     <Label Text="After-tax take-home income"
                                          TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                                          FontSize="13" />
                                      <Entry AutomationId="AnnualIncomeDefaultEntry"
@@ -341,7 +341,7 @@
                                          Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
                                          TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                                          PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
-                                         SemanticProperties.Description="Default annual pre-tax income" />
+                                         SemanticProperties.Description="Default annual after-tax take-home income" />
                                     </VerticalStackLayout>
                                     <VerticalStackLayout Grid.Column="1" Spacing="4">
                                      <Label Text="Annual expenses"

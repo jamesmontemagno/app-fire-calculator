@@ -60,7 +60,7 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
         calculatorDefaultsService.Save(defaults with
         {
             CurrentAge = (int)CurrentAge,
-            RetirementAge = Math.Max(defaults.RetirementAge, (int)CurrentAge + 1),
+            RetirementAge = Math.Max(defaults.RetirementAge, (int)CurrentAge),
             AnnualIncome = AnnualIncome,
             AnnualExpenses = AnnualExpenses
         });

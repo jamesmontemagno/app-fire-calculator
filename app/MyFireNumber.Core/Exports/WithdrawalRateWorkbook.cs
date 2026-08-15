@@ -64,7 +64,7 @@ public static class WithdrawalRateWorkbook
             new(CreateTextCell("A5", "Annual withdrawal"), CreateFormulaCell("B5", "Inputs!B5*Inputs!B6", CurrencyStyleIndex)),
             new(CreateTextCell("A6", "Monthly withdrawal"), CreateFormulaCell("B6", "B5/12", CurrencyStyleIndex)),
             new(CreateTextCell("A7", "Portfolio longevity"), CreateNumberCell("B7", result.PortfolioLongevity, DecimalStyleIndex)),
-            new(CreateTextCell("A8", "Success rate"), CreateNumberCell("B8", result.SuccessRate, PercentageStyleIndex)),
+            new(CreateTextCell("A8", "Share of horizon funded"), CreateNumberCell("B8", result.HorizonFundedRatio, PercentageStyleIndex)),
             new(CreateTextCell("A9", "Ending balance"), CreateNumberCell("B9", result.EndingBalance, CurrencyStyleIndex))
         };
 

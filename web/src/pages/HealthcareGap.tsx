@@ -47,7 +47,7 @@ export default function HealthcareGap() {
           <Card>
             <CardHeader>
               <h2 id="healthcare-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your coverage plan</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Enter the costs you expect to pay before Medicare begins. These values are saved with this calculator.</p>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Enter the costs you expect to pay before Medicare begins. The premium is a monthly amount; the deductible and out-of-pocket costs are annual amounts. These values are saved with this calculator.</p>
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Used to label the cost timeline." min={18} max={64} showSlider />

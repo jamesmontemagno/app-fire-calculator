@@ -63,10 +63,7 @@ public static class HealthcareGapWorkbook
             new(CreateTextCell("A5", "Coverage gap years"), CreateFormulaCell("B5", "MAX(0,Inputs!B7-Inputs!B6)", DecimalStyleIndex)),
             new(CreateTextCell("A6", "First-year annual cost"), CreateFormulaCell("B6", "Inputs!B8*12+Inputs!B9+Inputs!B10", CurrencyStyleIndex)),
             new(CreateTextCell("A7", "Total projected cost"), CreateNumberCell("B7", result.TotalCost, CurrencyStyleIndex)),
-            new(CreateTextCell("A8", "Average annual cost"), CreateNumberCell("B8", result.AverageAnnualCost, CurrencyStyleIndex)),
-            new(CreateTextCell("A9", "Estimated subsidy at $30k income"), CreateNumberCell("B9", result.EstimatedSubsidy30k, CurrencyStyleIndex)),
-            new(CreateTextCell("A10", "Estimated subsidy at $50k income"), CreateNumberCell("B10", result.EstimatedSubsidy50k, CurrencyStyleIndex)),
-            new(CreateTextCell("A11", "Estimated subsidy at $75k income"), CreateNumberCell("B11", result.EstimatedSubsidy75k, CurrencyStyleIndex))
+            new(CreateTextCell("A8", "Average annual cost"), CreateNumberCell("B8", result.AverageAnnualCost, CurrencyStyleIndex))
         };
         AddWorksheet(workbookPart, sheets, "Results", 2, rows, 34, 22);
     }
