@@ -47,30 +47,30 @@ export default function SavingsRate() {
       <SEO {...calculatorSEO['savings-rate']} />
       <div className="space-y-8">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Savings &amp; Investment Rate Calculator</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">See how a repeatable contribution plan can grow over time.</p>
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Savings &amp; Investment Rate Calculator</h1>
+          <p className="mt-1 text-content-muted">See how a repeatable contribution plan can grow over time.</p>
         </header>
 
         <section aria-labelledby="savings-plan-heading">
           <Card>
             <CardHeader>
-              <h2 id="savings-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Use after-tax take-home income to see the share of income you are investing.</p>
+              <h2 id="savings-plan-heading" className="text-lg font-semibold text-content">Start with your plan</h2>
+              <p className="mt-1 text-sm text-content-muted">Use after-tax take-home income to see the share of income you are investing.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Used to label the projection timeline." min={18} max={80} showSlider />
               <CurrencyInput label="Starting amount" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments already in the account." />
               <div className="space-y-2">
-                <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">Contribution frequency</span>
-                <div className="inline-flex rounded-lg border border-gray-200 p-1 dark:border-gray-700" role="group" aria-label="Contribution frequency">
+                <span className="block text-sm font-medium text-content-muted">Contribution frequency</span>
+                <div className="inline-flex rounded-control border border-border-subtle p-1" role="group" aria-label="Contribution frequency">
                   {(['monthly', 'yearly'] as const).map(frequency => (
                     <button
                       key={frequency}
                       type="button"
                       onClick={() => setParam('savingsFrequency', frequency)}
                       aria-pressed={params.savingsFrequency === frequency}
-                      className={`rounded-md px-3 py-2 text-sm font-medium ${params.savingsFrequency === frequency ? 'bg-fire-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}
+                      className={`rounded-control px-3 py-2 text-sm font-medium ${params.savingsFrequency === frequency ? 'bg-accent text-accent-contrast' : 'text-content-muted hover:bg-surface-sunken hover:text-content'}`}
                     >
                       {frequency === 'monthly' ? 'Monthly' : 'Yearly'}
                     </button>
@@ -86,8 +86,8 @@ export default function SavingsRate() {
 
         <section aria-labelledby="savings-outlook-heading" className="space-y-4">
           <div>
-            <h2 id="savings-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">The inflation-adjusted result reports purchasing power in today&apos;s dollars.</p>
+            <h2 id="savings-outlook-heading" className="text-xl font-semibold text-content">Your outlook</h2>
+            <p className="mt-1 text-sm text-content-muted">The inflation-adjusted result reports purchasing power in today&apos;s dollars.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <ResultCard label="Investment rate" value={results.savingsRate} format="percent" highlight subtext={`${formatCurrency(results.annualContribution)} invested yearly`} />
@@ -112,20 +112,20 @@ export default function SavingsRate() {
         <section aria-labelledby="savings-projection-heading">
           <Card>
             <CardHeader>
-              <h2 id="savings-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Investment growth projection</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">The dashed series shows the same plan in today&apos;s dollars.</p>
+              <h2 id="savings-projection-heading" className="text-lg font-semibold text-content">Investment growth projection</h2>
+              <p className="mt-1 text-sm text-content-muted">The dashed series shows the same plan in today&apos;s dollars.</p>
             </CardHeader>
             <CardContent><ProjectionChart data={results.projections} showMilestones={false} colorScheme="purple" height={380} /></CardContent>
           </Card>
         </section>
 
         <section aria-labelledby="savings-breakdown-heading">
-          <h2 id="savings-breakdown-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Supporting analysis</h2>
+          <h2 id="savings-breakdown-heading" className="text-lg font-semibold text-content">Supporting analysis</h2>
           <dl className="mt-3 grid gap-3 text-sm sm:grid-cols-2 xl:grid-cols-4">
-            <div><dt className="text-gray-600 dark:text-gray-400">Starting amount</dt><dd className="mt-1 font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(params.currentSavings)}</dd></div>
-            <div><dt className="text-gray-600 dark:text-gray-400">Total contributions</dt><dd className="mt-1 font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(results.totalInvested)}</dd></div>
-            <div><dt className="text-gray-600 dark:text-gray-400">Inflation impact</dt><dd className="mt-1 font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(results.inflationImpact)}</dd></div>
-            <div><dt className="text-gray-600 dark:text-gray-400">Monthly contribution</dt><dd className="mt-1 font-semibold text-gray-900 dark:text-gray-100">{formatCurrency(results.monthlyContribution)}</dd></div>
+            <div><dt className="text-content-muted">Starting amount</dt><dd className="mt-1 font-semibold text-content">{formatCurrency(params.currentSavings)}</dd></div>
+            <div><dt className="text-content-muted">Total contributions</dt><dd className="mt-1 font-semibold text-content">{formatCurrency(results.totalInvested)}</dd></div>
+            <div><dt className="text-content-muted">Inflation impact</dt><dd className="mt-1 font-semibold text-content">{formatCurrency(results.inflationImpact)}</dd></div>
+            <div><dt className="text-content-muted">Monthly contribution</dt><dd className="mt-1 font-semibold text-content">{formatCurrency(results.monthlyContribution)}</dd></div>
           </dl>
         </section>
 

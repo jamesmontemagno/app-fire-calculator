@@ -11,6 +11,7 @@ import {
 import type { RetirementCashFlowPoint } from '../../utils/deferredCompensation'
 import { formatCurrency } from '../../utils/calculations'
 import { useTheme } from '../../context/ThemeContext'
+import { chartTheme } from './chartTheme'
 
 interface RetirementCashFlowChartProps {
   data: RetirementCashFlowPoint[]
@@ -25,40 +26,41 @@ const compactCurrency = (value: number) => {
 export default function RetirementCashFlowChart({ data }: RetirementCashFlowChartProps) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
-  const axisColor = isDark ? '#9ca3af' : '#6b7280'
-  const gridColor = isDark ? '#374151' : '#e5e7eb'
+  const c = chartTheme(isDark)
+  const axisColor = c.axisText
+  const gridColor = c.grid
 
   const ChartTooltip = ({ active, payload }: any) => {
     if (!active || !payload?.length) return null
     const point = payload[0].payload as RetirementCashFlowPoint
     return (
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
-        <p className="font-semibold text-gray-900 dark:text-gray-100">
+      <div className="rounded-container border border-border-subtle bg-surface-raised p-3 shadow-lg">
+        <p className="font-semibold text-content">
           Age {point.age} · {point.year}
         </p>
         <div className="space-y-1 text-sm mt-2">
-          <p className="text-gray-600 dark:text-gray-400">
-            Outside income: <strong className="text-green-600 dark:text-green-400">{formatCurrency(point.outsideIncome)}</strong>
+          <p className="text-content-muted">
+            Outside income: <strong className="tabular text-success">{formatCurrency(point.outsideIncome)}</strong>
           </p>
-          <p className="text-gray-600 dark:text-gray-400">
-            Deferred compensation: <strong className="text-indigo-600 dark:text-indigo-400">{formatCurrency(point.deferredIncome)}</strong>
+          <p className="text-content-muted">
+            Deferred compensation: <strong className="tabular text-info">{formatCurrency(point.deferredIncome)}</strong>
           </p>
-          <p className="text-gray-600 dark:text-gray-400">
-            Core expenses: <strong className="text-amber-600 dark:text-amber-400">{formatCurrency(point.coreExpenses)}</strong>
+          <p className="text-content-muted">
+            Core expenses: <strong className="tabular text-warning">{formatCurrency(point.coreExpenses)}</strong>
           </p>
           {point.additionalExpenses > 0 && (
-            <p className="text-gray-600 dark:text-gray-400">
-              Additional expenses: <strong className="text-orange-600 dark:text-orange-400">{formatCurrency(point.additionalExpenses)}</strong>
+            <p className="text-content-muted">
+              Additional expenses: <strong className="tabular text-accent">{formatCurrency(point.additionalExpenses)}</strong>
             </p>
           )}
-          <p className="text-gray-600 dark:text-gray-400">
-            Total expenses: <strong className="text-amber-600 dark:text-amber-400">{formatCurrency(point.expenses)}</strong>
+          <p className="text-content-muted">
+            Total expenses: <strong className="tabular text-warning">{formatCurrency(point.expenses)}</strong>
           </p>
-          <p className="text-gray-600 dark:text-gray-400">
-            Portfolio withdrawal: <strong className="text-violet-600 dark:text-violet-400">{formatCurrency(point.portfolioWithdrawals)}</strong>
+          <p className="text-content-muted">
+            Portfolio withdrawal: <strong className="tabular text-content">{formatCurrency(point.portfolioWithdrawals)}</strong>
           </p>
-          <p className="text-gray-600 dark:text-gray-400">
-            Portfolio value: <strong className="text-sky-600 dark:text-sky-400">{formatCurrency(point.totalBalance)}</strong>
+          <p className="text-content-muted">
+            Portfolio value: <strong className="tabular text-info">{formatCurrency(point.totalBalance)}</strong>
           </p>
         </div>
       </div>

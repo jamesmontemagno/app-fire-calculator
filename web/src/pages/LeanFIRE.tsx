@@ -48,15 +48,15 @@ export default function LeanFIRE() {
       <SEO {...calculatorSEO.lean} />
       <div className="space-y-8">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Lean FIRE Calculator</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">Plan for financial independence with a deliberately low-cost retirement.</p>
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Lean FIRE Calculator</h1>
+          <p className="mt-1 text-content-muted">Plan for financial independence with a deliberately low-cost retirement.</p>
         </header>
 
         <section aria-labelledby="lean-plan-heading">
           <Card>
             <CardHeader>
-              <h2 id="lean-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Lean FIRE is typically based on spending of {formatCurrency(LEAN_THRESHOLD)} a year or less in today&apos;s dollars.</p>
+              <h2 id="lean-plan-heading" className="text-lg font-semibold text-content">Start with your plan</h2>
+              <p className="mt-1 text-sm text-content-muted">Lean FIRE is typically based on spending of {formatCurrency(LEAN_THRESHOLD)} a year or less in today&apos;s dollars.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -72,8 +72,8 @@ export default function LeanFIRE() {
 
         <section aria-labelledby="lean-outlook-heading" className="space-y-4">
           <div>
-            <h2 id="lean-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
-            {!isLean && <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">Your spending of {formatCurrency(params.annualExpenses)} is above the typical Lean FIRE range of {formatCurrency(LEAN_THRESHOLD)} a year. These results use the spending you entered.</p>}
+            <h2 id="lean-outlook-heading" className="text-xl font-semibold text-content">Your outlook</h2>
+            {!isLean && <p className="mt-1 text-sm text-warning">Your spending of {formatCurrency(params.annualExpenses)} is above the typical Lean FIRE range of {formatCurrency(LEAN_THRESHOLD)} a year. These results use the spending you entered.</p>}
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <ResultCard label="Lean FIRE number" value={results.fireNumber} format="currency" highlight subtext="Target portfolio in today’s dollars" />
@@ -99,12 +99,12 @@ export default function LeanFIRE() {
 
         <section aria-labelledby="lean-projection-heading">
           <Card>
-            <CardHeader><h2 id="lean-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2></CardHeader>
+            <CardHeader><h2 id="lean-projection-heading" className="text-lg font-semibold text-content">Portfolio projection</h2></CardHeader>
             <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="green" height={350} /></CardContent>
           </Card>
         </section>
 
-        <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">Lean FIRE asks your portfolio to support a lower spending level. Review housing, healthcare, and other flexible costs before relying on this estimate.</p>
+        <p className="max-w-3xl text-sm text-content-muted">Lean FIRE asks your portfolio to support a lower spending level. Review housing, healthcare, and other flexible costs before relying on this estimate.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
     </CurrencyPeriodProvider>

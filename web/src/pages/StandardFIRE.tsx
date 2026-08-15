@@ -77,15 +77,15 @@ export default function StandardFIRE() {
       <SEO {...calculatorSEO.standard} />
       <div className="space-y-8">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Standard FIRE Calculator</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">Estimate a practical path to financial independence using your spending and savings plan.</p>
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Standard FIRE Calculator</h1>
+          <p className="mt-1 text-content-muted">Estimate a practical path to financial independence using your spending and savings plan.</p>
         </header>
 
         <section aria-labelledby="standard-plan-heading">
           <Card>
             <CardHeader>
-              <h2 id="standard-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Use today&apos;s spending and after-tax income to make the estimate meaningful.</p>
+              <h2 id="standard-plan-heading" className="text-lg font-semibold text-content">Start with your plan</h2>
+              <p className="mt-1 text-sm text-content-muted">Use today&apos;s spending and after-tax income to make the estimate meaningful.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -101,8 +101,8 @@ export default function StandardFIRE() {
 
         <section aria-labelledby="standard-outlook-heading" className="space-y-4">
           <div>
-            <h2 id="standard-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Updates immediately as you change the plan above.</p>
+            <h2 id="standard-outlook-heading" className="text-xl font-semibold text-content">Your outlook</h2>
+            <p className="mt-1 text-sm text-content-muted">Updates immediately as you change the plan above.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <ResultCard label="FIRE number" value={results.fireNumber} format="currency" highlight subtext="Target portfolio in today’s dollars" />
@@ -133,14 +133,14 @@ export default function StandardFIRE() {
         <section aria-labelledby="standard-projection-heading">
           <Card>
             <CardHeader>
-              <h2 id="standard-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Compare the projected portfolio with your FIRE number; the dashed line shows purchasing power in today&apos;s dollars.</p>
+              <h2 id="standard-projection-heading" className="text-lg font-semibold text-content">Portfolio projection</h2>
+              <p className="mt-1 text-sm text-content-muted">Compare the projected portfolio with your FIRE number; the dashed line shows purchasing power in today&apos;s dollars.</p>
             </CardHeader>
             <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="orange" height={350} /></CardContent>
           </Card>
         </section>
 
-        <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">
+        <p className="max-w-3xl text-sm text-content-muted">
           Your target portfolio equals annual retirement spending divided by your withdrawal rate. The target-age result compares the estimated FIRE age with your retirement-age goal; it does not change the FIRE calculation.
         </p>
 

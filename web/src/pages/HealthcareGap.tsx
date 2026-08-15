@@ -39,15 +39,15 @@ export default function HealthcareGap() {
       <SEO {...calculatorSEO.healthcare} />
       <div className="space-y-8">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Healthcare Gap Calculator</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">Estimate healthcare costs between early retirement and Medicare eligibility at age {MEDICARE_AGE}.</p>
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Healthcare Gap Calculator</h1>
+          <p className="mt-1 text-content-muted">Estimate healthcare costs between early retirement and Medicare eligibility at age {MEDICARE_AGE}.</p>
         </header>
 
         <section aria-labelledby="healthcare-plan-heading">
           <Card>
             <CardHeader>
-              <h2 id="healthcare-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your coverage plan</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Enter the costs you expect to pay before Medicare begins. Every amount below uses the same period, so switch them all to monthly or annual with one control. These values are saved with this calculator.</p>
+              <h2 id="healthcare-plan-heading" className="text-lg font-semibold text-content">Start with your coverage plan</h2>
+              <p className="mt-1 text-sm text-content-muted">Enter the costs you expect to pay before Medicare begins. Every amount below uses the same period, so switch them all to monthly or annual with one control. These values are saved with this calculator.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -62,8 +62,8 @@ export default function HealthcareGap() {
 
         <section aria-labelledby="healthcare-outlook-heading" className="space-y-4">
           <div>
-            <h2 id="healthcare-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your healthcare gap</h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">This plan covers {results.gapYears} years between retirement and Medicare eligibility.</p>
+            <h2 id="healthcare-outlook-heading" className="text-xl font-semibold text-content">Your healthcare gap</h2>
+            <p className="mt-1 text-sm text-content-muted">This plan covers {results.gapYears} years between retirement and Medicare eligibility.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <ResultCard label="Total healthcare gap cost" value={results.totalCost} format="currency" highlight subtext={`Across ${results.gapYears} years`} />
@@ -79,29 +79,29 @@ export default function HealthcareGap() {
         <section aria-labelledby="healthcare-detail-heading">
           <Card>
             <CardHeader>
-              <h2 id="healthcare-detail-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Cost timeline</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">A year-by-year estimate of premium, deductible, and out-of-pocket costs.</p>
+              <h2 id="healthcare-detail-heading" className="text-lg font-semibold text-content">Cost timeline</h2>
+              <p className="mt-1 text-sm text-content-muted">A year-by-year estimate of premium, deductible, and out-of-pocket costs.</p>
             </CardHeader>
             <CardContent>
               {results.yearlyBreakdown.length === 0 ? (
-                <p className="text-sm text-gray-600 dark:text-gray-400">Retiring at or after Medicare eligibility leaves no coverage gap in this estimate.</p>
+                <p className="text-sm text-content-muted">Retiring at or after Medicare eligibility leaves no coverage gap in this estimate.</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-200 dark:border-gray-700">
-                        {['Age', 'Year', 'Premium', 'Deductible', 'Out-of-pocket', 'Total'].map(label => <th key={label} className="whitespace-nowrap px-3 py-3 text-left font-semibold text-gray-900 dark:text-gray-100">{label}</th>)}
+                      <tr className="border-b border-border-subtle">
+                        {['Age', 'Year', 'Premium', 'Deductible', 'Out-of-pocket', 'Total'].map(label => <th key={label} className="whitespace-nowrap px-3 py-3 text-left font-semibold text-content">{label}</th>)}
                       </tr>
                     </thead>
                     <tbody>
                       {results.yearlyBreakdown.map(row => (
-                        <tr key={row.age} className="border-b border-gray-100 dark:border-gray-800">
-                          <td className="px-3 py-3 text-gray-900 dark:text-gray-100">{row.age}</td>
-                          <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{row.year}</td>
-                          <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatCurrency(row.premium)}</td>
-                          <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatCurrency(row.deductible)}</td>
-                          <td className="px-3 py-3 text-gray-700 dark:text-gray-300">{formatCurrency(row.outOfPocket)}</td>
-                          <td className="px-3 py-3 font-medium text-gray-900 dark:text-gray-100">{formatCurrency(row.cost)}</td>
+                        <tr key={row.age} className="border-b border-border-subtle">
+                          <td className="px-3 py-3 text-content">{row.age}</td>
+                          <td className="px-3 py-3 text-content-muted">{row.year}</td>
+                          <td className="px-3 py-3 text-content-muted">{formatCurrency(row.premium)}</td>
+                          <td className="px-3 py-3 text-content-muted">{formatCurrency(row.deductible)}</td>
+                          <td className="px-3 py-3 text-content-muted">{formatCurrency(row.outOfPocket)}</td>
+                          <td className="px-3 py-3 font-medium text-content">{formatCurrency(row.cost)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -112,7 +112,7 @@ export default function HealthcareGap() {
           </Card>
         </section>
 
-        <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">Actual insurance options, subsidies, medical needs, and eligibility rules vary by location and household. Use this as a planning estimate, not a coverage quote.</p>
+        <p className="max-w-3xl text-sm text-content-muted">Actual insurance options, subsidies, medical needs, and eligibility rules vary by location and household. Use this as a planning estimate, not a coverage quote.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
     </CurrencyPeriodProvider>

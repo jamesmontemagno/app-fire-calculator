@@ -42,15 +42,15 @@ export default function FatFIRE() {
       <SEO {...calculatorSEO.fat} />
       <div className="space-y-8">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Fat FIRE Calculator</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">Estimate the portfolio required to support a higher-spending retirement.</p>
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Fat FIRE Calculator</h1>
+          <p className="mt-1 text-content-muted">Estimate the portfolio required to support a higher-spending retirement.</p>
         </header>
 
         <section aria-labelledby="fat-plan-heading">
           <Card>
             <CardHeader>
-              <h2 id="fat-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Fat FIRE is commonly associated with annual spending of {formatCurrency(FAT_THRESHOLD)} or more in today&apos;s dollars.</p>
+              <h2 id="fat-plan-heading" className="text-lg font-semibold text-content">Start with your plan</h2>
+              <p className="mt-1 text-sm text-content-muted">Fat FIRE is commonly associated with annual spending of {formatCurrency(FAT_THRESHOLD)} or more in today&apos;s dollars.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -66,8 +66,8 @@ export default function FatFIRE() {
 
         <section aria-labelledby="fat-outlook-heading" className="space-y-4">
           <div>
-            <h2 id="fat-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
-            {!isFat && <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Your spending is below the common Fat FIRE threshold; the calculation still uses your stated plan.</p>}
+            <h2 id="fat-outlook-heading" className="text-xl font-semibold text-content">Your outlook</h2>
+            {!isFat && <p className="mt-1 text-sm text-content-muted">Your spending is below the common Fat FIRE threshold; the calculation still uses your stated plan.</p>}
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <ResultCard label="Fat FIRE number" value={results.fireNumber} format="currency" highlight subtext="Target portfolio in today’s dollars" />
@@ -93,12 +93,12 @@ export default function FatFIRE() {
 
         <section aria-labelledby="fat-projection-heading">
           <Card>
-            <CardHeader><h2 id="fat-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2></CardHeader>
+            <CardHeader><h2 id="fat-projection-heading" className="text-lg font-semibold text-content">Portfolio projection</h2></CardHeader>
             <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="purple" height={350} /></CardContent>
           </Card>
         </section>
 
-        <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">A higher-spending plan needs a larger portfolio and often benefits from a more conservative withdrawal rate. Test the assumptions before relying on this estimate.</p>
+        <p className="max-w-3xl text-sm text-content-muted">A higher-spending plan needs a larger portfolio and often benefits from a more conservative withdrawal rate. Test the assumptions before relying on this estimate.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
     </CurrencyPeriodProvider>

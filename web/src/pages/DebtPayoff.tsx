@@ -90,29 +90,29 @@ export default function DebtPayoff() {
       <SEO {...calculatorSEO['debt-payoff']} />
       <div className="space-y-8">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Debt Payoff Calculator</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">Compare a Snowball or Avalanche payoff plan using the money you can send each month.</p>
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Debt Payoff Calculator</h1>
+          <p className="mt-1 text-content-muted">Compare a Snowball or Avalanche payoff plan using the money you can send each month.</p>
         </header>
 
         <section aria-labelledby="debt-plan-heading">
           <Card>
             <CardHeader>
-              <h2 id="debt-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your debt plan</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Add each balance and minimum payment, then choose how to direct your available monthly budget.</p>
+              <h2 id="debt-plan-heading" className="text-lg font-semibold text-content">Start with your debt plan</h2>
+              <p className="mt-1 text-sm text-content-muted">Add each balance and minimum payment, then choose how to direct your available monthly budget.</p>
             </CardHeader>
             <CardContent className="space-y-5">
               <DebtListInput debts={debts} onChange={value => setParam('debts', value)} />
-              <div className="grid gap-4 border-t border-gray-200 pt-5 sm:grid-cols-2 xl:grid-cols-3 dark:border-gray-700">
+              <div className="grid gap-4 border-t border-border-subtle pt-5 sm:grid-cols-2 xl:grid-cols-3">
                 <div>
-                  <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">Planning mode</span>
-                  <div className="mt-1 inline-flex rounded-lg border border-gray-200 p-1 dark:border-gray-700" role="group" aria-label="Debt payoff planning mode">
+                  <span className="block text-sm font-medium text-content-muted">Planning mode</span>
+                  <div className="mt-1 inline-flex rounded-control border border-border-subtle p-1" role="group" aria-label="Debt payoff planning mode">
                     {(['fixed', 'target'] as const).map(mode => (
                       <button
                         key={mode}
                         type="button"
                         onClick={() => setParam('debtMode', mode)}
                         aria-pressed={params.debtMode === mode}
-                        className={`rounded-md px-3 py-2 text-sm font-medium ${params.debtMode === mode ? 'bg-fire-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}
+                        className={`rounded-control px-3 py-2 text-sm font-medium ${params.debtMode === mode ? 'bg-accent text-accent-contrast' : 'text-content-muted hover:bg-surface-sunken hover:text-content'}`}
                       >
                         {mode === 'fixed' ? 'Fixed budget' : 'Target date'}
                       </button>
@@ -120,15 +120,15 @@ export default function DebtPayoff() {
                   </div>
                 </div>
                 <div>
-                  <span className="block text-sm font-medium text-gray-700 dark:text-gray-300">Payoff method</span>
-                  <div className="mt-1 inline-flex rounded-lg border border-gray-200 p-1 dark:border-gray-700" role="group" aria-label="Debt payoff strategy">
+                  <span className="block text-sm font-medium text-content-muted">Payoff method</span>
+                  <div className="mt-1 inline-flex rounded-control border border-border-subtle p-1" role="group" aria-label="Debt payoff strategy">
                     {(['snowball', 'avalanche'] as const).map(strategy => (
                       <button
                         key={strategy}
                         type="button"
                         onClick={() => setParam('debtStrategy', strategy)}
                         aria-pressed={params.debtStrategy === strategy}
-                        className={`rounded-md px-3 py-2 text-sm font-medium ${params.debtStrategy === strategy ? 'bg-fire-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'}`}
+                        className={`rounded-control px-3 py-2 text-sm font-medium ${params.debtStrategy === strategy ? 'bg-accent text-accent-contrast' : 'text-content-muted hover:bg-surface-sunken hover:text-content'}`}
                       >
                         {strategy === 'snowball' ? 'Snowball' : 'Avalanche'}
                       </button>
@@ -142,15 +142,15 @@ export default function DebtPayoff() {
                 )}
                 <CurrencyInput label="Extra monthly payment" value={params.debtExtra} onChange={value => setParam('debtExtra', value)} tooltip="Additional money to apply after the regular monthly budget." />
               </div>
-              {params.debtMode === 'fixed' && params.debtBudget < totalMinPayments && totalMinPayments > 0 && <p className="text-sm text-red-700 dark:text-red-300">Your monthly budget must cover at least {formatCurrency(totalMinPayments)} in minimum payments.</p>}
+              {params.debtMode === 'fixed' && params.debtBudget < totalMinPayments && totalMinPayments > 0 && <p className="text-sm text-danger">Your monthly budget must cover at least {formatCurrency(totalMinPayments)} in minimum payments.</p>}
             </CardContent>
           </Card>
         </section>
 
         <section aria-labelledby="debt-outlook-heading" className="space-y-4">
           <div>
-            <h2 id="debt-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your payoff outlook</h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <h2 id="debt-outlook-heading" className="text-xl font-semibold text-content">Your payoff outlook</h2>
+            <p className="mt-1 text-sm text-content-muted">
               {canCalculate
                 ? `${params.debtStrategy === 'snowball' ? 'Snowball' : 'Avalanche'} directs extra money toward ${params.debtStrategy === 'snowball' ? 'the smallest balance' : 'the highest interest rate'} first.`
                 : 'Add at least one debt and a monthly budget that covers minimum payments to see the payoff plan.'}
@@ -164,7 +164,7 @@ export default function DebtPayoff() {
               <ResultCard label="Extra payment impact" value={results.withExtra ? results.base.totalMonths - results.withExtra.totalMonths : 0} format="none" subtext={results.withExtra ? 'Months saved' : 'Add an extra payment to compare'} />
             </div>
           ) : (
-            <div className="border-y border-gray-200 py-5 text-sm text-gray-600 dark:border-gray-800 dark:text-gray-400">No payoff projection is available yet.</div>
+            <div className="border-y border-border-subtle py-5 text-sm text-content-muted">No payoff projection is available yet.</div>
           )}
         </section>
 
@@ -172,24 +172,24 @@ export default function DebtPayoff() {
           <>
             <section aria-labelledby="debt-timeline-heading">
               <Card>
-                <CardHeader><h2 id="debt-timeline-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Debt balance timeline</h2></CardHeader>
+                <CardHeader><h2 id="debt-timeline-heading" className="text-lg font-semibold text-content">Debt balance timeline</h2></CardHeader>
                 <CardContent><DebtBalanceChart data={results.base.projections} milestones={results.base.debtMilestones} comparisonData={results.withExtra?.projections} height={350} /></CardContent>
               </Card>
             </section>
 
             <section aria-labelledby="debt-analysis-heading" className="grid gap-6 xl:grid-cols-2">
               <Card>
-                <CardHeader><h2 id="debt-analysis-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Payment breakdown</h2></CardHeader>
+                <CardHeader><h2 id="debt-analysis-heading" className="text-lg font-semibold text-content">Payment breakdown</h2></CardHeader>
                 <CardContent><DebtBreakdownChart data={results.base.projections} height={330} /></CardContent>
               </Card>
               <Card>
-                <CardHeader><h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Payoff order</h2></CardHeader>
+                <CardHeader><h2 className="text-lg font-semibold text-content">Payoff order</h2></CardHeader>
                 <CardContent>
                   <ol className="space-y-3">
                     {results.base.payoffOrder.map((debtName, index) => (
-                      <li key={debtName} className="flex justify-between gap-4 border-b border-gray-100 pb-3 last:border-0 last:pb-0 dark:border-gray-800">
-                        <span className="font-medium text-gray-900 dark:text-gray-100">{index + 1}. {debtName}</span>
-                        <span className="text-sm text-gray-600 dark:text-gray-400">Month {results.base.debtMilestones.find(milestone => milestone.debtName === debtName)?.month}</span>
+                      <li key={debtName} className="flex justify-between gap-4 border-b border-border-subtle pb-3 last:border-0 last:pb-0">
+                        <span className="font-medium text-content">{index + 1}. {debtName}</span>
+                        <span className="text-sm text-content-muted">Month {results.base.debtMilestones.find(milestone => milestone.debtName === debtName)?.month}</span>
                       </li>
                     ))}
                   </ol>
@@ -199,15 +199,15 @@ export default function DebtPayoff() {
 
             {comparisonResults && (
               <section aria-labelledby="debt-comparison-heading">
-                <h2 id="debt-comparison-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Method comparison</h2>
+                <h2 id="debt-comparison-heading" className="text-lg font-semibold text-content">Method comparison</h2>
                 <dl className="mt-3 grid gap-4 sm:grid-cols-2">
-                  <div className="border-y border-gray-200 py-4 dark:border-gray-800">
-                    <dt className="font-medium text-gray-900 dark:text-gray-100">Snowball</dt>
-                    <dd className="mt-1 text-sm text-gray-600 dark:text-gray-400">{comparisonResults.snowball.totalMonths} months · {formatCurrency(comparisonResults.snowball.totalInterest)} interest</dd>
+                  <div className="border-y border-border-subtle py-4">
+                    <dt className="font-medium text-content">Snowball</dt>
+                    <dd className="mt-1 text-sm text-content-muted">{comparisonResults.snowball.totalMonths} months · {formatCurrency(comparisonResults.snowball.totalInterest)} interest</dd>
                   </div>
-                  <div className="border-y border-gray-200 py-4 dark:border-gray-800">
-                    <dt className="font-medium text-gray-900 dark:text-gray-100">Avalanche</dt>
-                    <dd className="mt-1 text-sm text-gray-600 dark:text-gray-400">{comparisonResults.avalanche.totalMonths} months · {formatCurrency(comparisonResults.avalanche.totalInterest)} interest</dd>
+                  <div className="border-y border-border-subtle py-4">
+                    <dt className="font-medium text-content">Avalanche</dt>
+                    <dd className="mt-1 text-sm text-content-muted">{comparisonResults.avalanche.totalMonths} months · {formatCurrency(comparisonResults.avalanche.totalInterest)} interest</dd>
                   </div>
                 </dl>
               </section>

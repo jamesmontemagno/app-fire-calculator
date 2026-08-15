@@ -10,6 +10,7 @@ import {
 } from 'recharts'
 import { formatCurrency } from '../../utils/calculations'
 import { useTheme } from '../../context/ThemeContext'
+import { chartTheme } from './chartTheme'
 
 interface WithdrawalChartProps {
   data: { year: number; balance: number; withdrawal: number }[]
@@ -22,6 +23,7 @@ export default function WithdrawalChart({
 }: WithdrawalChartProps) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
+  const c = chartTheme(isDark)
 
   const formatYAxis = (value: number) => {
     if (value >= 1000000) {
@@ -37,16 +39,16 @@ export default function WithdrawalChart({
     if (active && payload && payload.length) {
       const point = payload[0].payload
       return (
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
-          <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <div className="rounded-container border border-border-subtle bg-surface-raised p-3 shadow-lg">
+          <p className="mb-2 font-semibold text-content">
             Year {point.year}
           </p>
           <div className="space-y-1 text-sm">
-            <p className="text-gray-600 dark:text-gray-400">
-              Balance: <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(point.balance)}</span>
+            <p className="text-content-muted">
+              Balance: <span className="tabular font-medium text-content">{formatCurrency(point.balance)}</span>
             </p>
-            <p className="text-gray-600 dark:text-gray-400">
-              Withdrawal: <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(point.withdrawal)}</span>
+            <p className="text-content-muted">
+              Withdrawal: <span className="tabular font-medium text-content">{formatCurrency(point.withdrawal)}</span>
             </p>
           </div>
         </div>
@@ -66,20 +68,20 @@ export default function WithdrawalChart({
         </defs>
         <CartesianGrid 
           strokeDasharray="3 3" 
-          stroke={isDark ? '#374151' : '#e5e7eb'} 
+          stroke={c.grid} 
           vertical={false}
         />
         <XAxis 
           dataKey="year" 
-          tick={{ fill: isDark ? '#9ca3af' : '#6b7280', fontSize: 12 }}
-          tickLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
-          axisLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
+          tick={{ fill: c.axisText, fontSize: 12 }}
+          tickLine={{ stroke: c.axisLine }}
+          axisLine={{ stroke: c.axisLine }}
           tickFormatter={(value) => `Yr ${value}`}
         />
         <YAxis 
-          tick={{ fill: isDark ? '#9ca3af' : '#6b7280', fontSize: 12 }}
-          tickLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
-          axisLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
+          tick={{ fill: c.axisText, fontSize: 12 }}
+          tickLine={{ stroke: c.axisLine }}
+          axisLine={{ stroke: c.axisLine }}
           tickFormatter={formatYAxis}
           width={65}
         />
@@ -96,7 +98,7 @@ export default function WithdrawalChart({
         
         <ReferenceLine
           y={0}
-          stroke={isDark ? '#ef4444' : '#dc2626'}
+          stroke={c.negative}
           strokeWidth={1}
         />
       </AreaChart>

@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react'
 import {
   AreaChart,
   Area,
@@ -13,6 +14,7 @@ import {
 import type { ProjectionPoint } from '../../utils/calculations'
 import { formatCurrency } from '../../utils/calculations'
 import { useTheme } from '../../context/ThemeContext'
+import { chartTheme } from './chartTheme'
 import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 
 interface ProjectionChartProps {
@@ -29,38 +31,6 @@ interface ProjectionChartProps {
   colorScheme?: 'orange' | 'green' | 'purple' | 'blue' | 'amber'
 }
 
-const colorSchemes = {
-  orange: {
-    primary: '#f97316',
-    primaryLight: '#fed7aa',
-    secondary: '#6366f1',
-    secondaryLight: '#c7d2fe',
-  },
-  green: {
-    primary: '#22c55e',
-    primaryLight: '#bbf7d0',
-    secondary: '#6366f1',
-    secondaryLight: '#c7d2fe',
-  },
-  purple: {
-    primary: '#a855f7',
-    primaryLight: '#e9d5ff',
-    secondary: '#6366f1',
-    secondaryLight: '#c7d2fe',
-  },
-  blue: {
-    primary: '#0ea5e9',
-    primaryLight: '#bae6fd',
-    secondary: '#6366f1',
-    secondaryLight: '#c7d2fe',
-  },
-  amber: {
-    primary: '#d97706',
-    primaryLight: '#fde68a',
-    secondary: '#6366f1',
-    secondaryLight: '#c7d2fe',
-  },
-}
 
 export default function ProjectionChart({
   data,
@@ -73,7 +43,8 @@ export default function ProjectionChart({
 }: ProjectionChartProps) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
-  const colors = colorSchemes[colorScheme]
+  const c = chartTheme(isDark)
+  const colors = { primary: c.primary, secondary: c.secondary }
   const prefersReducedMotion = usePrefersReducedMotion()
   const animate = !prefersReducedMotion
 
@@ -117,29 +88,31 @@ export default function ProjectionChart({
       const targetForYear = point.fireTarget ?? fireNumber
       const reachedFire = targetForYear !== undefined && point.portfolio >= targetForYear
       return (
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
-          <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <div className="rounded-container border border-border-subtle bg-surface-raised p-3 shadow-lg">
+          <p className="mb-2 font-semibold text-content">
             Age {point.age} ({point.year})
           </p>
           <div className="space-y-1 text-sm">
-            <p className="text-gray-600 dark:text-gray-400">
+            <p className="text-content-muted">
               Portfolio (future $): <span className="font-medium" style={{ color: colors.primary }}>{formatCurrency(point.portfolio)}</span>
             </p>
             {showInflationAdjusted && (
-              <p className="text-gray-600 dark:text-gray-400">
+              <p className="text-content-muted">
                 In today&apos;s dollars: <span className="font-medium" style={{ color: colors.secondary }}>{formatCurrency(point.inflationAdjusted)}</span>
               </p>
             )}
-            <p className="text-gray-600 dark:text-gray-400">
-              Total Contributed: <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(point.totalContributions)}</span>
+            <p className="text-content-muted">
+              Total Contributed: <span className="tabular font-medium text-content">{formatCurrency(point.totalContributions)}</span>
             </p>
             {fireNumber !== undefined && (
-              <p className={`${reachedFire ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}>
-                FIRE Number: <span className="font-medium">{formatCurrency(fireNumber)}</span>
+              <p className={reachedFire ? 'font-medium text-success' : 'text-content-muted'}>
+                FIRE Number: <span className="tabular font-medium">{formatCurrency(fireNumber)}</span>
                 {showFutureTarget && (
-                  <span className="ml-1">({formatCurrency(point.fireTarget ?? fireNumber)} in future $)</span>
+                  <span className="tabular ml-1">({formatCurrency(point.fireTarget ?? fireNumber)} in future $)</span>
                 )}
-                {reachedFire && <span className="ml-1">✓</span>}
+                {reachedFire && (
+                  <Check className="ml-1 inline h-4 w-4 align-text-bottom" aria-label="Reached" strokeWidth={2} />
+                )}
               </p>
             )}
           </div>
@@ -162,22 +135,18 @@ export default function ProjectionChart({
             <stop offset="95%" stopColor={colors.secondary} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid 
-          strokeDasharray="3 3" 
-          stroke={isDark ? '#374151' : '#e5e7eb'} 
-          vertical={false}
-        />
+        <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
         <XAxis 
           dataKey="age" 
-          tick={{ fill: isDark ? '#9ca3af' : '#6b7280', fontSize: 12 }}
-          tickLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
-          axisLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
+          tick={{ fill: c.axisText, fontSize: 12 }}
+          tickLine={{ stroke: c.axisLine }}
+          axisLine={{ stroke: c.axisLine }}
           tickFormatter={(value) => `${value}`}
         />
         <YAxis 
-          tick={{ fill: isDark ? '#9ca3af' : '#6b7280', fontSize: 12 }}
-          tickLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
-          axisLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
+          tick={{ fill: c.axisText, fontSize: 12 }}
+          tickLine={{ stroke: c.axisLine }}
+          axisLine={{ stroke: c.axisLine }}
           tickFormatter={formatYAxis}
           width={65}
           domain={[0, yAxisMax]}
@@ -185,7 +154,7 @@ export default function ProjectionChart({
         <Tooltip content={<CustomTooltip />} />
         <Legend 
           wrapperStyle={{ paddingTop: 16 }}
-          formatter={(value) => <span className="text-sm text-gray-600 dark:text-gray-400">{value}</span>}
+          formatter={(value) => <span className="text-sm text-content-muted">{value}</span>}
         />
         
         {showInflationAdjusted && (
@@ -216,7 +185,7 @@ export default function ProjectionChart({
             type="monotone"
             dataKey="fireTarget"
             name="FIRE Target (Future Dollars)"
-            stroke={isDark ? '#fca5a5' : '#b91c1c'}
+            stroke={c.negative}
             strokeWidth={2}
             strokeDasharray="8 4"
             dot={false}
@@ -230,12 +199,12 @@ export default function ProjectionChart({
           <ReferenceLine
             key={milestone.percent}
             y={milestone.value}
-            stroke={isDark ? '#6b7280' : '#9ca3af'}
+            stroke={c.neutral}
             strokeWidth={1}
             strokeDasharray="4 4"
             label={{
               value: milestone.label,
-              fill: isDark ? '#6b7280' : '#9ca3af',
+              fill: c.neutral,
               fontSize: 10,
               position: 'left',
             }}
@@ -245,12 +214,12 @@ export default function ProjectionChart({
         {fireNumber && (
           <ReferenceLine
             y={fireNumber}
-            stroke={isDark ? '#ef4444' : '#dc2626'}
+            stroke={c.negative}
             strokeWidth={2}
             strokeDasharray="8 4"
             label={{
               value: showFutureTarget ? "FIRE (today's $)" : 'FIRE',
-              fill: isDark ? '#ef4444' : '#dc2626',
+              fill: c.negative,
               fontSize: 11,
               fontWeight: 600,
               position: 'insideBottomLeft',

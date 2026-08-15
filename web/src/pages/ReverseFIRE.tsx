@@ -36,15 +36,15 @@ export default function ReverseFIRE() {
       <SEO {...calculatorSEO.reverse} />
       <div className="space-y-8">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Reverse FIRE Calculator</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">Work backward from a retirement age to estimate the savings required each month.</p>
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Reverse FIRE Calculator</h1>
+          <p className="mt-1 text-content-muted">Work backward from a retirement age to estimate the savings required each month.</p>
         </header>
 
         <section aria-labelledby="reverse-plan-heading">
           <Card>
             <CardHeader>
-              <h2 id="reverse-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your goal</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Set a target age, then state the portfolio and spending you expect to need.</p>
+              <h2 id="reverse-plan-heading" className="text-lg font-semibold text-content">Start with your goal</h2>
+              <p className="mt-1 text-sm text-content-muted">Set a target age, then state the portfolio and spending you expect to need.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -58,8 +58,8 @@ export default function ReverseFIRE() {
 
         <section aria-labelledby="reverse-outlook-heading" className="space-y-4">
           <div>
-            <h2 id="reverse-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">{results.alreadyAchievable ? 'You are already on track' : 'Your savings requirement'}</h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <h2 id="reverse-outlook-heading" className="text-xl font-semibold text-content">{results.alreadyAchievable ? 'You are already on track' : 'Your savings requirement'}</h2>
+            <p className="mt-1 text-sm text-content-muted">
               {results.alreadyAchievable
                 ? `Your current investments are projected to grow to ${formatCurrency(results.currentWillGrowTo)} by age ${params.retirementAge}.`
                 : `To reach the target by age ${params.retirementAge}, invest the amount below in addition to existing savings.`}
@@ -88,12 +88,12 @@ export default function ReverseFIRE() {
 
         <section aria-labelledby="reverse-projection-heading">
           <Card>
-            <CardHeader><h2 id="reverse-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2></CardHeader>
+            <CardHeader><h2 id="reverse-projection-heading" className="text-lg font-semibold text-content">Portfolio projection</h2></CardHeader>
             <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="blue" height={350} /></CardContent>
           </Card>
         </section>
 
-        <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">This calculation uses a steady, inflation-adjusted return and does not account for taxes, contribution limits, or a changing savings pattern.</p>
+        <p className="max-w-3xl text-sm text-content-muted">This calculation uses a steady, inflation-adjusted return and does not account for taxes, contribution limits, or a changing savings pattern.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
     </CurrencyPeriodProvider>
