@@ -7,7 +7,7 @@
              x:Class="MyFireNumber.Views.CalculatorsPage"
              x:DataType="viewModels:CalculatorCatalogViewModel"
              Title="Calculators"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
              SafeAreaEdges="Container">
 
     <Grid Padding="{StaticResource PagePaddingCompact}">
@@ -20,26 +20,26 @@
                         <Label Text="&#xf1ec;"
                                FontFamily="FontAwesomeSolid"
                                VerticalTextAlignment="Center"
-                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                FontSize="24"
                                SemanticProperties.Description="Calculators" />
                         <VerticalStackLayout Grid.Column="1" Spacing="2">
                             <Label Text="All calculators"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                    FontAttributes="Bold"
                                    FontSize="24"
                                    SemanticProperties.HeadingLevel="Level1" />
                             <Label Text="Explore FIRE, finance, and cash flow tools."
-                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                    FontSize="13" />
                         </VerticalStackLayout>
                     </Grid>
                     <SearchBar AutomationId="CalculatorSearch"
                                Placeholder="Search calculators"
                                Text="{Binding SearchText, Mode=TwoWay}"
-                               Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                               PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                               Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                               PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                SemanticProperties.Description="Search available calculators" />
                 </VerticalStackLayout>
             </CollectionView.Header>
@@ -52,13 +52,13 @@
                                FontFamily="FontAwesomeSolid"
                                FontSize="17"
                                VerticalTextAlignment="Center"
-                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                SemanticProperties.Description="{Binding Name, StringFormat='{0} calculators'}" />
                         <Label Grid.Column="1"
                                Text="{Binding Name}"
                                FontSize="20"
                                FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                SemanticProperties.HeadingLevel="Level2" />
                     </Grid>
                 </DataTemplate>
@@ -67,8 +67,8 @@
                 <DataTemplate x:DataType="catalog:CalculatorDefinition">
                     <Border Margin="0,0,0,10"
                             Padding="{StaticResource CardPadding}"
-                            Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                            Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                            Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                            Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                             StrokeShape="RoundRectangle 12"
                             SemanticProperties.Description="{Binding Title, StringFormat='Open {0} calculator'}">
                         <Border.GestureRecognizers>
@@ -79,7 +79,7 @@
                             <Border WidthRequest="44"
                                     HeightRequest="44"
                                     Padding="0"
-                                    Background="{AppThemeBinding Light=#E6F0EA, Dark=#29483A}"
+                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftWarmLight}, Dark={StaticResource SurfaceAccentSoftWarmDark}}"
                                     StrokeThickness="0"
                                     StrokeShape="RoundRectangle 12">
                                 <Label Text="{Binding IconGlyph}"
@@ -87,16 +87,16 @@
                                        FontSize="19"
                                        HorizontalTextAlignment="Center"
                                        VerticalTextAlignment="Center"
-                                       TextColor="{AppThemeBinding Light=#2F6B57, Dark=#9ACCB3}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}"
                                        SemanticProperties.Description="{Binding Title, StringFormat='{0} icon'}" />
                             </Border>
                             <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
                                 <Label Text="{Binding Title}"
-                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                        FontAttributes="Bold"
                                        FontSize="18" />
                                 <Label Text="{Binding Summary}"
-                                       TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                       TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                        FontSize="13" />
                             </VerticalStackLayout>
                             <Label Grid.Column="2"
@@ -104,7 +104,7 @@
                                    FontFamily="FontAwesomeSolid"
                                    FontSize="14"
                                    VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                   TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                    SemanticProperties.Description="Open" />
                         </Grid>
                     </Border>
@@ -115,7 +115,7 @@
                       <Label Text="&#xf002;"
                               FontFamily="FontAwesomeSolid"
                               VerticalTextAlignment="Center"
-                          TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                          TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                           FontSize="28"
                            SemanticProperties.Description="Search" />
                       <Label Text="No calculators match that search."

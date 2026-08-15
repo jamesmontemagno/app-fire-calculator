@@ -8,7 +8,7 @@
              Title="Withdrawal rate"
              Shell.NavBarIsVisible="True"
              Shell.TabBarIsVisible="False"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
              SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Skip"
@@ -24,76 +24,76 @@
                            FontSize="28"
                            FontAttributes="Bold"
                            LineHeight="1.1"
-                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                            SemanticProperties.HeadingLevel="Level1" />
                     <Label Text="This is the percentage of your invested portfolio you plan to withdraw during your first year of retirement."
                            LineHeight="1.35"
-                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                 </VerticalStackLayout>
 
                 <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Label Text="Your comfort level"
                                FontSize="18"
                                FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                         <Label Text="A lower rate generally means a larger savings target and less risk of depleting your portfolio. A higher rate creates a smaller target and more retirement income, but leaves less room for long retirements or difficult markets."
                                LineHeight="1.4"
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <Grid ColumnDefinitions="*,Auto">
                             <Label Text="Planned withdrawal rate"
                                    FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                             <Label Grid.Column="1"
                                    Text="{Binding WithdrawalRateText}"
                                    FontSize="18"
                                    FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
+                                   TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                         </Grid>
                         <Slider AutomationId="OnboardingWithdrawalRateSlider"
                                 Minimum="1"
                                 Maximum="10"
                                 Value="{Binding WithdrawalRatePercent}"
-                                MinimumTrackColor="#2F6B57"
-                                MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                                ThumbColor="#2F6B57"
+                                MinimumTrackColor="{StaticResource FixedAccent}"
+                                MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                ThumbColor="{StaticResource FixedAccent}"
                                 SemanticProperties.Description="Planned annual withdrawal rate percentage" />
                     </VerticalStackLayout>
                 </Border>
 
                 <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftLight}, Dark={StaticResource SurfaceAccentSoftDark}}"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                         <Label Text="Common starting points"
                                FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                         <Label Text="3%–3.5%: More conservative, often considered for longer retirements."
                                LineHeight="1.35"
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#D8E8DE}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryAltLight}, Dark={StaticResource TextSecondaryAltDark}}" />
                         <Label Text="4%: A widely used planning guideline based on historical market research."
                                LineHeight="1.35"
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#D8E8DE}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryAltLight}, Dark={StaticResource TextSecondaryAltDark}}" />
                         <Label Text="Above 4%: Supports more spending, with a greater chance that withdrawals may need to change."
                                LineHeight="1.35"
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#D8E8DE}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryAltLight}, Dark={StaticResource TextSecondaryAltDark}}" />
                     </VerticalStackLayout>
                 </Border>
 
                 <Label Text="No rate guarantees success. Taxes, fees, investment mix, market returns, retirement length, and flexible spending all affect how long a portfolio may last. Revisit this assumption as your plan changes."
                        FontSize="13"
                        LineHeight="1.35"
-                       TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}" />
+                       TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
 
                 <Button AutomationId="SaveOnboardingWithdrawalRateButton"
                         Text="Save and continue"
                         Command="{Binding SaveAndContinueCommand}"
-                        Background="#2F6B57"
-                        TextColor="#FFFFFF"
+                        Background="{StaticResource FixedAccent}"
+                        TextColor="{StaticResource FixedWhite}"
                         SemanticProperties.Description="Save this withdrawal rate and choose a starting point." />
 
                 <controls:EducationalDisclaimerView />

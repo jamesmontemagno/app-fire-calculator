@@ -9,7 +9,7 @@
                           x:DataType="viewModels:IFireNumberViewModel"
                           Title="{Binding Title}"
                           Shell.NavBarIsVisible="True"
-                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                          Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                           SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding SavePlanCommand}"
@@ -28,11 +28,11 @@
                                SemanticProperties.Description="Restoring your local calculator draft." />
             <Border IsVisible="{Binding HasValidationMessage}"
                     Padding="14"
-                    Background="{AppThemeBinding Light=#FFF4E8, Dark=#4A3323}"
-                    Stroke="{AppThemeBinding Light=#C97727, Dark=#F2B56D}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceWarningLight}, Dark={StaticResource SurfaceWarningDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderWarningLight}, Dark={StaticResource BorderWarningDark}}"
                     StrokeShape="RoundRectangle 8">
                 <Label Text="{Binding ValidationMessage}"
-                       TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}"
+                       TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}"
                        LineHeight="1.3" />
             </Border>
 
@@ -54,8 +54,8 @@
                                              IconGlyph="&#xf219;" />
                 <Border IsVisible="{Binding IsLeanFire}"
                         Padding="{StaticResource CardPaddingCompact}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 8">
                     <VerticalStackLayout Spacing="4">
                         <Label Text="{Binding LeanStatusText}" FontAttributes="Bold" />
@@ -64,8 +64,8 @@
                 </Border>
                 <Border IsVisible="{Binding IsFatFire}"
                         Padding="{StaticResource CardPaddingCompact}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 8">
                     <VerticalStackLayout Spacing="4">
                         <Label Text="{Binding FatStatusText}" FontAttributes="Bold" />
@@ -75,8 +75,8 @@
             </VerticalStackLayout>
 
             <Border Padding="{StaticResource CardPadding}"
-                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                    Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                     StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
@@ -97,7 +97,7 @@
                                 ItemsSource="{Binding StandardFirePresets}"
                                 ItemDisplayBinding="{Binding Name}"
                                 SelectedItem="{Binding SelectedPreset}"
-                                Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                                Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                                 SemanticProperties.Description="Choose a complete Standard FIRE preset." />
                     </VerticalStackLayout>
                     <Grid ColumnDefinitions="*,*"
@@ -174,11 +174,11 @@
                       RowDefinitions="Auto,Auto,Auto"
                       ColumnSpacing="{StaticResource SpaceSm}"
                       RowSpacing="{StaticResource SpaceSm}">
-                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="{Binding FireNumberLabel}" FontSize="12" /><Label Text="{Binding FireNumberText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
-                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="{Binding YearsToFireLabel}" FontSize="12" /><Label Text="{Binding YearsToFireText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="FIRE age" FontSize="12" /><Label Text="{Binding FireAgeText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Savings rate" FontSize="12" /><Label Text="{Binding SavingsRateText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="2" Grid.ColumnSpan="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Monthly contribution" FontSize="12" /><Label Text="{Binding MonthlyContributionText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftLight}, Dark={StaticResource SurfaceAccentSoftDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="{Binding FireNumberLabel}" FontSize="12" /><Label Text="{Binding FireNumberText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="{Binding YearsToFireLabel}" FontSize="12" /><Label Text="{Binding YearsToFireText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="FIRE age" FontSize="12" /><Label Text="{Binding FireAgeText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Savings rate" FontSize="12" /><Label Text="{Binding SavingsRateText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="2" Grid.ColumnSpan="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Monthly contribution" FontSize="12" /><Label Text="{Binding MonthlyContributionText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
                 </Grid>
                 <VerticalStackLayout Spacing="2">
                     <Label Text="Target-age check"
@@ -203,14 +203,14 @@
             </VerticalStackLayout>
 
             <Border Padding="{StaticResource CardPadding}"
-                    Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                    Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                     StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
                     <Entry Text="{Binding PlanNameText}"
                            Placeholder="{Binding PlanNamePlaceholder}"
-                           Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                           Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                            SemanticProperties.Description="{Binding PlanNameDescription}" />
                     <Button Text="{Binding SavePlanActionText}"
                             Command="{Binding SavePlanCommand}"

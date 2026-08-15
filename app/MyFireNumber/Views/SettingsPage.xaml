@@ -7,7 +7,7 @@
              x:Class="MyFireNumber.Views.SettingsPage"
              x:DataType="viewModels:SettingsViewModel"
              Title="Settings"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
              SafeAreaEdges="Container">
 
     <Grid>
@@ -17,38 +17,38 @@
                       <Label Text="&#xf013;"
                               FontFamily="FontAwesomeSolid"
                               VerticalTextAlignment="Center"
-                          TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                          TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                           FontSize="28"
                            SemanticProperties.Description="Settings" />
                       <Label Grid.Column="1"
                           Text="Settings"
-                          TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                          TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                           FontAttributes="Bold"
                           FontSize="30"
                           SemanticProperties.HeadingLevel="Level1" />
                   </Grid>
                 <Border Padding="{StaticResource CardPadding}"
-                       Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                       Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                       Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                       Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                        StrokeShape="RoundRectangle 12">
                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                            <Label Text="&#xf53f;"
                                   FontFamily="FontAwesomeSolid"
                                   VerticalTextAlignment="Center"
-                                  TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                  TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                   SemanticProperties.Description="Appearance" />
                            <Label Grid.Column="1"
                                   Text="Appearance"
-                                  TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                  TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                   FontAttributes="Bold"
                                   FontSize="18" />
                        </Grid>
                        <Label Text="Choose whether the app follows your device or stays light or dark."
-                              TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                              TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                               LineHeight="1.3" />
                        <Border Padding="4"
-                               Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                               Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
                                StrokeThickness="0"
                                StrokeShape="RoundRectangle 12">
                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="{StaticResource SpaceXs}">
@@ -59,13 +59,13 @@
                                        Command="{Binding SetThemeCommand}"
                                        CommandParameter="{x:Static services:ThemePreference.System}"
                                        Background="Transparent"
-                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                        CornerRadius="9"
                                        SemanticProperties.Description="Use the device appearance.">
                                    <Button.Triggers>
                                        <DataTrigger TargetType="Button" Binding="{Binding SelectedTheme}" Value="System">
-                                           <Setter Property="Background" Value="#2F6B57" />
-                                           <Setter Property="TextColor" Value="#FFFFFF" />
+                                           <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                           <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
                                        </DataTrigger>
                                    </Button.Triggers>
                                </Button>
@@ -77,13 +77,13 @@
                                        Command="{Binding SetThemeCommand}"
                                        CommandParameter="{x:Static services:ThemePreference.Light}"
                                        Background="Transparent"
-                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                        CornerRadius="9"
                                        SemanticProperties.Description="Always use the light appearance.">
                                    <Button.Triggers>
                                        <DataTrigger TargetType="Button" Binding="{Binding SelectedTheme}" Value="Light">
-                                           <Setter Property="Background" Value="#2F6B57" />
-                                           <Setter Property="TextColor" Value="#FFFFFF" />
+                                           <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                           <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
                                        </DataTrigger>
                                    </Button.Triggers>
                                </Button>
@@ -95,13 +95,13 @@
                                        Command="{Binding SetThemeCommand}"
                                        CommandParameter="{x:Static services:ThemePreference.Dark}"
                                        Background="Transparent"
-                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                        CornerRadius="9"
                                        SemanticProperties.Description="Always use the dark appearance.">
                                    <Button.Triggers>
                                        <DataTrigger TargetType="Button" Binding="{Binding SelectedTheme}" Value="Dark">
-                                           <Setter Property="Background" Value="#2F6B57" />
-                                           <Setter Property="TextColor" Value="#FFFFFF" />
+                                           <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                           <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
                                        </DataTrigger>
                                    </Button.Triggers>
                                </Button>
@@ -110,26 +110,26 @@
                    </VerticalStackLayout>
                 </Border>
                 <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf085;"
                                    FontFamily="FontAwesomeSolid"
                                    VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                    SemanticProperties.Description="App behavior and accessibility" />
                             <Label Grid.Column="1"
                                    Text="Behavior &amp; accessibility"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                    FontAttributes="Bold"
                                    FontSize="18" />
                         </Grid>
                         <Label Text="Choose the tab My Fire # opens after onboarding."
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <Border Padding="4"
-                                Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
+                                Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
                                 StrokeThickness="0"
                                 StrokeShape="RoundRectangle 12">
                             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="{StaticResource SpaceXs}">
@@ -139,11 +139,11 @@
                                         Command="{Binding SetLaunchDestinationCommand}"
                                         CommandParameter="{x:Static services:LaunchDestination.Home}"
                                         Background="Transparent"
-                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
+                                        TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
                                     <Button.Triggers>
                                         <DataTrigger TargetType="Button" Binding="{Binding SelectedLaunchDestination}" Value="Home">
-                                            <Setter Property="Background" Value="#2F6B57" />
-                                            <Setter Property="TextColor" Value="#FFFFFF" />
+                                            <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                            <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
                                         </DataTrigger>
                                     </Button.Triggers>
                                 </Button>
@@ -154,11 +154,11 @@
                                         Command="{Binding SetLaunchDestinationCommand}"
                                         CommandParameter="{x:Static services:LaunchDestination.Calculators}"
                                         Background="Transparent"
-                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
+                                        TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
                                     <Button.Triggers>
                                         <DataTrigger TargetType="Button" Binding="{Binding SelectedLaunchDestination}" Value="Calculators">
-                                            <Setter Property="Background" Value="#2F6B57" />
-                                            <Setter Property="TextColor" Value="#FFFFFF" />
+                                            <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                            <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
                                         </DataTrigger>
                                     </Button.Triggers>
                                 </Button>
@@ -169,11 +169,11 @@
                                         Command="{Binding SetLaunchDestinationCommand}"
                                         CommandParameter="{x:Static services:LaunchDestination.Plans}"
                                         Background="Transparent"
-                                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}">
+                                        TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
                                     <Button.Triggers>
                                         <DataTrigger TargetType="Button" Binding="{Binding SelectedLaunchDestination}" Value="Plans">
-                                            <Setter Property="Background" Value="#2F6B57" />
-                                            <Setter Property="TextColor" Value="#FFFFFF" />
+                                            <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                            <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
                                         </DataTrigger>
                                     </Button.Triggers>
                                 </Button>
@@ -182,69 +182,69 @@
                         <Label AutomationId="LaunchDestinationStatus"
                                Text="{Binding LaunchDestinationDescription}"
                                FontSize="12"
-                               TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                               TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                SemanticProperties.Description="{Binding LaunchDestinationDescription}" />
                         <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}" RowSpacing="{StaticResource SpaceSm}">
-                            <Label Text="Restore latest calculator drafts" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Label Text="Restore latest calculator drafts" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                             <Switch AutomationId="RestoreDraftsSwitch" Grid.Column="1" IsToggled="{Binding RestoreDrafts}" />
-                            <Label Grid.Row="1" Text="Confirm before deleting plans" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Label Grid.Row="1" Text="Confirm before deleting plans" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                             <Switch AutomationId="ConfirmPlanDeletionSwitch" Grid.Row="1" Grid.Column="1" IsToggled="{Binding ConfirmPlanDeletion}" />
-                            <Label Grid.Row="2" Text="Interaction haptics" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Label Grid.Row="2" Text="Interaction haptics" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                             <Switch AutomationId="HapticsSwitch" Grid.Row="2" Grid.Column="1" IsToggled="{Binding HapticsEnabled}" />
-                            <Label Grid.Row="3" Text="Reduce chart motion" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Label Grid.Row="3" Text="Reduce chart motion" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                             <Switch AutomationId="ReduceMotionSwitch" Grid.Row="3" Grid.Column="1" IsToggled="{Binding ReduceMotion}" />
-                            <Label Grid.Row="4" Text="High contrast dark palette" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Label Grid.Row="4" Text="High contrast dark palette" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                             <Switch AutomationId="HighContrastSwitch" Grid.Row="4" Grid.Column="1" IsToggled="{Binding HighContrast}" />
-                            <Label Grid.Row="5" Text="Show recommended books on Home" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                            <Label Grid.Row="5" Text="Show recommended books on Home" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                             <Switch AutomationId="RecommendedBooksSwitch" Grid.Row="5" Grid.Column="1" IsToggled="{Binding ShowRecommendedBooks}" />
                         </Grid>
                     </VerticalStackLayout>
                 </Border>
                 <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf1ec;"
                                    FontFamily="FontAwesomeSolid"
                                    VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                    SemanticProperties.Description="Calculator defaults" />
                             <Label Grid.Column="1"
                                    Text="Calculator defaults"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                    FontAttributes="Bold"
                                    FontSize="18" />
                         </Grid>
                         <Label Text="Set starting assumptions for new calculators. Existing drafts and saved plans never change."
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                LineHeight="1.3" />
                         <VerticalStackLayout Spacing="4">
                             <Label Text="Currency"
-                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                    FontSize="13" />
                             <Picker AutomationId="CurrencyPicker"
                                     ItemsSource="{Binding CurrencyOptions}"
                                     SelectedItem="{Binding SelectedCurrencyOption}"
-                                    Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                                    TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                    TitleColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                    Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                    TitleColor="{AppThemeBinding Light={StaticResource TextMutedAltLight}, Dark={StaticResource TextMutedAltDark}}"
                                     SemanticProperties.Description="Currency used to display calculator results" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,96" ColumnSpacing="{StaticResource SpaceSm}">
                                 <Label Text="Expected return"
                                        VerticalTextAlignment="Center"
-                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                        FontSize="13" />
                                 <Entry AutomationId="ExpectedReturnDefaultEntry"
                                        Grid.Column="1"
                                        Text="{Binding ExpectedReturnPercent}"
                                        Keyboard="Numeric"
-                                       Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                       Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                       PlaceholderColor="{AppThemeBinding Light={StaticResource TextMutedAltLight}, Dark={StaticResource TextMutedAltDark}}"
                                        SemanticProperties.Description="Default expected annual return percentage" />
                                 <Slider AutomationId="ExpectedReturnDefaultSlider"
                                         Grid.Row="1"
@@ -252,23 +252,23 @@
                                         Minimum="0"
                                         Maximum="15"
                                         Value="{Binding ExpectedReturnSlider}"
-                                        MinimumTrackColor="#2F6B57"
-                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                                        ThumbColor="#2F6B57"
+                                        MinimumTrackColor="{StaticResource FixedAccent}"
+                                        MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                        ThumbColor="{StaticResource FixedAccent}"
                                         SemanticProperties.Description="Adjust default expected annual return percentage" />
                             </Grid>
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,96" ColumnSpacing="{StaticResource SpaceSm}">
                                 <Label Text="Inflation"
                                        VerticalTextAlignment="Center"
-                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                        FontSize="13" />
                                 <Entry AutomationId="InflationDefaultEntry"
                                        Grid.Column="1"
                                        Text="{Binding InflationRatePercent}"
                                        Keyboard="Numeric"
-                                       Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                       Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                       PlaceholderColor="{AppThemeBinding Light={StaticResource TextMutedAltLight}, Dark={StaticResource TextMutedAltDark}}"
                                        SemanticProperties.Description="Default annual inflation percentage" />
                                 <Slider AutomationId="InflationDefaultSlider"
                                         Grid.Row="1"
@@ -276,23 +276,23 @@
                                         Minimum="0"
                                         Maximum="10"
                                         Value="{Binding InflationRateSlider}"
-                                        MinimumTrackColor="#2F6B57"
-                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                                        ThumbColor="#2F6B57"
+                                        MinimumTrackColor="{StaticResource FixedAccent}"
+                                        MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                        ThumbColor="{StaticResource FixedAccent}"
                                         SemanticProperties.Description="Adjust default annual inflation percentage" />
                             </Grid>
                             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,96" ColumnSpacing="{StaticResource SpaceSm}">
                                 <Label Text="Withdrawal rate"
                                        VerticalTextAlignment="Center"
-                                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                        FontSize="13" />
                                 <Entry AutomationId="WithdrawalDefaultEntry"
                                        Grid.Column="1"
                                        Text="{Binding WithdrawalRatePercent}"
                                        Keyboard="Numeric"
-                                       Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                       Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                       PlaceholderColor="{AppThemeBinding Light={StaticResource TextMutedAltLight}, Dark={StaticResource TextMutedAltDark}}"
                                        SemanticProperties.Description="Default safe withdrawal percentage" />
                                 <Slider AutomationId="WithdrawalDefaultSlider"
                                         Grid.Row="1"
@@ -300,86 +300,86 @@
                                         Minimum="2"
                                         Maximum="6"
                                         Value="{Binding WithdrawalRateSlider}"
-                                        MinimumTrackColor="#2F6B57"
-                                        MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                                        ThumbColor="#2F6B57"
+                                        MinimumTrackColor="{StaticResource FixedAccent}"
+                                        MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                        ThumbColor="{StaticResource FixedAccent}"
                                         SemanticProperties.Description="Adjust default safe withdrawal percentage" />
                             </Grid>
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                                 <VerticalStackLayout Spacing="4">
                                     <Label Text="Current age"
-                                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                            FontSize="13" />
                                     <Entry AutomationId="CurrentAgeDefaultEntry"
                                            Text="{Binding DefaultCurrentAge}"
                                            Keyboard="Numeric"
-                                           Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                           PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                           Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                           PlaceholderColor="{AppThemeBinding Light={StaticResource TextMutedAltLight}, Dark={StaticResource TextMutedAltDark}}"
                                            SemanticProperties.Description="Default current age" />
                                 </VerticalStackLayout>
                                 <VerticalStackLayout Grid.Column="1" Spacing="4">
                                     <Label Text="Retirement age"
-                                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                            FontSize="13" />
                                     <Entry AutomationId="RetirementAgeDefaultEntry"
                                            Text="{Binding DefaultRetirementAge}"
                                            Keyboard="Numeric"
-                                           Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                           PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                           Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                           PlaceholderColor="{AppThemeBinding Light={StaticResource TextMutedAltLight}, Dark={StaticResource TextMutedAltDark}}"
                                            SemanticProperties.Description="Default retirement age" />
                                 </VerticalStackLayout>
                             </Grid>
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                                     <VerticalStackLayout Spacing="4">
                                      <Label Text="After-tax take-home income"
-                                         TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                         TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                          FontSize="13" />
                                      <Entry AutomationId="AnnualIncomeDefaultEntry"
                                          Text="{Binding DefaultAnnualIncome}"
                                          Keyboard="Numeric"
-                                         Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                                         TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                         PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                         Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                         TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                         PlaceholderColor="{AppThemeBinding Light={StaticResource TextMutedAltLight}, Dark={StaticResource TextMutedAltDark}}"
                                          SemanticProperties.Description="Default annual after-tax take-home income" />
                                     </VerticalStackLayout>
                                     <VerticalStackLayout Grid.Column="1" Spacing="4">
                                      <Label Text="Annual expenses"
-                                         TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                         TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                          FontSize="13" />
                                      <Entry AutomationId="AnnualExpensesDefaultEntry"
                                          Text="{Binding DefaultAnnualExpenses}"
                                          Keyboard="Numeric"
-                                         Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                                         TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                                         PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
+                                         Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                         TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                         PlaceholderColor="{AppThemeBinding Light={StaticResource TextMutedAltLight}, Dark={StaticResource TextMutedAltDark}}"
                                          SemanticProperties.Description="Default annual expenses" />
                                     </VerticalStackLayout>
                                 </Grid>
                             <Button Text="Save defaults"
                                     Command="{Binding SaveCalculatorDefaultsCommand}"
-                                    Background="#2F6B57"
-                                    TextColor="#FFFFFF"
+                                    Background="{StaticResource FixedAccent}"
+                                    TextColor="{StaticResource FixedWhite}"
                                     SemanticProperties.Description="Save calculator defaults for new calculators." />
                         </VerticalStackLayout>
                         <Label Text="{Binding DefaultsStatus}"
-                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                FontSize="13" />
                     </VerticalStackLayout>
                 </Border>
                 <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                         <VerticalStackLayout Spacing="4">
                             <Label Text="Home calculators"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                    FontAttributes="Bold"
                                    FontSize="18" />
                             <Label Text="Choose the calculators shown on Home and arrange their order."
-                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                    LineHeight="1.3" />
                         </VerticalStackLayout>
                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}"
@@ -389,14 +389,14 @@
                                 <Grid ColumnDefinitions="*,44,44,44" ColumnSpacing="6">
                                     <Label Text="{Binding Title}"
                                            VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                                     <Button Grid.Column="1"
                                             Text="&#xf062;"
                                             FontFamily="FontAwesomeSolid"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=MoveCalculatorUpCommand}"
                                             CommandParameter="{Binding .}"
-                                            Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
-                                            TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                            Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftAltLight}, Dark={StaticResource SurfaceAccentSoftAltDark}}"
+                                            TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}"
                                             FontSize="14"
                                             Padding="0"
                                             SemanticProperties.Description="{Binding Title, StringFormat='Move {0} earlier on Home.'}" />
@@ -405,8 +405,8 @@
                                             FontFamily="FontAwesomeSolid"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=MoveCalculatorDownCommand}"
                                             CommandParameter="{Binding .}"
-                                            Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
-                                            TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                            Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftAltLight}, Dark={StaticResource SurfaceAccentSoftAltDark}}"
+                                            TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}"
                                             FontSize="14"
                                             Padding="0"
                                             SemanticProperties.Description="{Binding Title, StringFormat='Move {0} later on Home.'}" />
@@ -415,8 +415,8 @@
                                             FontFamily="FontAwesomeSolid"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=ToggleCalculatorVisibilityCommand}"
                                             CommandParameter="{Binding .}"
-                                            Background="#2F6B57"
-                                            TextColor="#FFFFFF"
+                                            Background="{StaticResource FixedAccent}"
+                                            TextColor="{StaticResource FixedWhite}"
                                             FontSize="14"
                                             Padding="0"
                                             SemanticProperties.Description="{Binding VisibilityDescription}" />
@@ -426,91 +426,91 @@
                         </VerticalStackLayout>
                         <Button Text="Reset Home calculators"
                                 Command="{Binding ResetCalculatorPreferencesCommand}"
-                                Background="#E4F0E9"
-                                TextColor="#245744"
+                                Background="{StaticResource FixedAccentSurface}"
+                                TextColor="{StaticResource FixedAccentStrong}"
                                 SemanticProperties.Description="Show all calculators and restore the default Home order after confirmation." />
                     </VerticalStackLayout>
                 </Border>
                 <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf1c0;"
                                    FontFamily="FontAwesomeSolid"
                                    VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                    SemanticProperties.Description="Your data" />
                             <Label Grid.Column="1"
                                    Text="Your data"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                    FontAttributes="Bold"
                                    FontSize="18" />
                         </Grid>
                         <Label Text="Create a private backup or restore one you exported earlier. Nothing is uploaded automatically."
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                LineHeight="1.3" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Button Text="Export backup"
                                     Command="{Binding ExportDataCommand}"
-                                    Background="#2F6B57"
-                                    TextColor="#FFFFFF"
+                                    Background="{StaticResource FixedAccent}"
+                                    TextColor="{StaticResource FixedWhite}"
                                     SemanticProperties.Description="Create and share a local backup of all app data." />
                             <Button Grid.Column="1"
                                     Text="Import backup"
                                     Command="{Binding ImportDataCommand}"
-                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
-                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftAltLight}, Dark={StaticResource SurfaceAccentSoftAltDark}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}"
                                     SemanticProperties.Description="Choose a backup file to replace local app data after confirmation." />
                         </Grid>
                     </VerticalStackLayout>
                 </Border>
                 <Button Text="Retake FIRE Quiz"
                         Command="{Binding RetakeQuizCommand}"
-                        Background="#2F6B57"
-                        TextColor="#FFFFFF">
+                        Background="{StaticResource FixedAccent}"
+                        TextColor="{StaticResource FixedWhite}">
                     <Button.ImageSource>
-                        <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf01e;" Color="#FFFFFF" Size="14" />
+                        <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf01e;" Color="{StaticResource FixedWhite}" Size="14" />
                     </Button.ImageSource>
                 </Button>
                 <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf023;"
                                    FontFamily="FontAwesomeSolid"
                                    VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                    SemanticProperties.Description="Privacy" />
                             <Label Grid.Column="1"
                                    Text="Privacy first"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                    FontAttributes="Bold"
                                    FontSize="18" />
                         </Grid>
                         <Label Text="Your financial inputs stay in local app storage. My Fire Number does not use analytics or transmit them. Your operating system may include app data in an encrypted device backup when backups are enabled."
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                LineHeight="1.3" />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Button Text="Terms"
                                     Command="{Binding OpenTermsCommand}"
-                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
-                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftAltLight}, Dark={StaticResource SurfaceAccentSoftAltDark}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}"
                                     SemanticProperties.Description="Open the My Fire Number terms on the website." />
                             <Button Grid.Column="1"
                                     Text="Privacy policy"
                                     Command="{Binding OpenPrivacyCommand}"
-                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483A}"
-                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}"
+                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftAltLight}, Dark={StaticResource SurfaceAccentSoftAltDark}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}"
                                     SemanticProperties.Description="Open the My Fire Number privacy policy on the website." />
                         </Grid>
                         <Button Text="Delete all app data"
                                 Command="{Binding ResetAppCommand}"
-                                Background="#9A4335"
-                                TextColor="#FFFFFF"
+                                Background="{StaticResource FixedDangerAlt}"
+                                TextColor="{StaticResource FixedWhite}"
                                 SemanticProperties.Description="Permanently delete all local app data after confirmation and restart with the FIRE Quiz." />
                     </VerticalStackLayout>
                 </Border>

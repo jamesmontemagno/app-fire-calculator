@@ -5,7 +5,7 @@
              x:Class="MyFireNumber.Views.PlansPage"
              x:DataType="viewModels:PlansViewModel"
              Title="Plans"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
              SafeAreaEdges="Container">
 
     <Grid Padding="{StaticResource PagePaddingCompact}" RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
@@ -17,31 +17,31 @@
                                HeightRequest="32"
                                HorizontalTextAlignment="Center"
                                VerticalTextAlignment="Center"
-                               TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                FontSize="24"
                                SemanticProperties.Description="Saved plans" />
                         <VerticalStackLayout Grid.Column="1" Spacing="2">
                             <Label Text="Saved plans"
-                                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                    FontAttributes="Bold"
                                    FontSize="24"
                                    SemanticProperties.HeadingLevel="Level1" />
                             <Label Text="Your scenarios stay on this device."
-                                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                    FontSize="13" />
                         </VerticalStackLayout>
                     </Grid>
             <SearchBar AutomationId="PlanSearch"
                        Placeholder="Search saved plans"
                        Text="{Binding SearchText, Mode=TwoWay}"
-                       Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                       PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                       Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                       PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                        SemanticProperties.Description="Search saved plans by name." />
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                 <Label Text="Sort"
                        VerticalTextAlignment="Center"
-                       TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                        FontAttributes="Bold"
                        FontSize="13" />
                 <Picker AutomationId="PlanSort"
@@ -50,8 +50,8 @@
                         ItemDisplayBinding="{Binding Name}"
                         SelectedItem="{Binding SelectedSortOption, Mode=TwoWay}"
                         Background="Transparent"
-                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                        TitleColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                        TitleColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                         SemanticProperties.Description="Sort saved plans." />
             </Grid>
         </VerticalStackLayout>
@@ -68,7 +68,7 @@
                                               SemanticProperties.Description="Rename this saved plan.">
                                    <Border WidthRequest="84"
                                            Padding="8,6"
-                                           Background="#326B57"
+                                           Background="{StaticResource FixedAccentAlt}"
                                            StrokeThickness="0"
                                            StrokeShape="RoundRectangle 12">
                                        <VerticalStackLayout Spacing="3"
@@ -78,12 +78,12 @@
                                                   FontFamily="FontAwesomeSolid"
                                                   FontSize="17"
                                                   HorizontalTextAlignment="Center"
-                                                  TextColor="#FFFFFF" />
+                                                  TextColor="{StaticResource FixedWhite}" />
                                            <Label Text="Rename"
                                                   FontAttributes="Bold"
                                                   FontSize="12"
                                                   HorizontalTextAlignment="Center"
-                                                  TextColor="#FFFFFF" />
+                                                  TextColor="{StaticResource FixedWhite}" />
                                        </VerticalStackLayout>
                                    </Border>
                                </SwipeItemView>
@@ -92,7 +92,7 @@
                                               SemanticProperties.Description="Duplicate this saved plan.">
                                    <Border WidthRequest="84"
                                            Padding="8,6"
-                                           Background="#426B9D"
+                                           Background="{StaticResource FixedInfo}"
                                            StrokeThickness="0"
                                            StrokeShape="RoundRectangle 12">
                                        <VerticalStackLayout Spacing="3"
@@ -102,12 +102,12 @@
                                                   FontFamily="FontAwesomeSolid"
                                                   FontSize="17"
                                                   HorizontalTextAlignment="Center"
-                                                  TextColor="#FFFFFF" />
+                                                  TextColor="{StaticResource FixedWhite}" />
                                            <Label Text="Copy"
                                                   FontAttributes="Bold"
                                                   FontSize="12"
                                                   HorizontalTextAlignment="Center"
-                                                  TextColor="#FFFFFF" />
+                                                  TextColor="{StaticResource FixedWhite}" />
                                        </VerticalStackLayout>
                                    </Border>
                                </SwipeItemView>
@@ -116,7 +116,7 @@
                                               SemanticProperties.Description="Delete this saved plan after confirmation.">
                                    <Border WidthRequest="84"
                                            Padding="8,6"
-                                           Background="#A33A31"
+                                           Background="{StaticResource FixedDangerStrong}"
                                            StrokeThickness="0"
                                            StrokeShape="RoundRectangle 12">
                                        <VerticalStackLayout Spacing="3"
@@ -126,20 +126,20 @@
                                                   FontFamily="FontAwesomeSolid"
                                                   FontSize="17"
                                                   HorizontalTextAlignment="Center"
-                                                  TextColor="#FFFFFF" />
+                                                  TextColor="{StaticResource FixedWhite}" />
                                            <Label Text="Delete"
                                                   FontAttributes="Bold"
                                                   FontSize="12"
                                                   HorizontalTextAlignment="Center"
-                                                  TextColor="#FFFFFF" />
+                                                  TextColor="{StaticResource FixedWhite}" />
                                        </VerticalStackLayout>
                                    </Border>
                                </SwipeItemView>
                            </SwipeItems>
                        </SwipeView.RightItems>
                        <Border Padding="{StaticResource CardPadding}"
-                               Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                               Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                               Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                               Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                                StrokeShape="RoundRectangle 12"
                                SemanticProperties.Description="{Binding Name, StringFormat='Saved plan {0}.'}">
                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
@@ -149,14 +149,14 @@
                                </Grid.GestureRecognizers>
                                <VerticalStackLayout Spacing="3">
                                    <Label Text="{Binding Name}"
-                                          TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                          TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                           FontAttributes="Bold"
                                           FontSize="18" />
                                    <Label Text="{Binding CalculatorTitle}"
-                                          TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                          TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                           FontSize="13" />
                                    <Label Text="{Binding UpdatedDescription}"
-                                          TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                          TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                           FontSize="12" />
                                </VerticalStackLayout>
                                <Label Grid.Column="1"
@@ -164,7 +164,7 @@
                                       FontFamily="FontAwesomeSolid"
                                       FontSize="14"
                                       VerticalTextAlignment="Center"
-                                      TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                      TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                       SemanticProperties.Description="Open" />
                            </Grid>
                        </Border>
@@ -176,7 +176,7 @@
                     <Label Text="&#xf15c;"
                            FontFamily="FontAwesomeSolid"
                            HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                            FontSize="34"
                            SemanticProperties.Description="No saved plans" />
                     <Label Text="No saved plans yet."
@@ -185,7 +185,7 @@
                            FontSize="18" />
                     <Label Text="Save a calculator scenario to compare it here."
                            HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                            LineHeight="1.3" />
                 </VerticalStackLayout>
             </CollectionView.EmptyView>

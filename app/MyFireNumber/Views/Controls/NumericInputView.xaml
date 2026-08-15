@@ -22,16 +22,16 @@
             <Entry Text="{Binding Text, Source={x:Reference Root}, Mode=TwoWay}"
                    Placeholder="{Binding Placeholder, Source={x:Reference Root}}"
                    Keyboard="Numeric"
-                   Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                   TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
-                   PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                   Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                   PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                    SemanticProperties.Description="{Binding HelpText, Source={x:Reference Root}}" />
             <Label Grid.Column="1"
                    Text="{Binding PeriodSuffix, Source={x:Reference Root}}"
                    IsVisible="{Binding HasPeriodSuffix, Source={x:Reference Root}}"
                    VerticalTextAlignment="Center"
                    FontAttributes="Bold"
-                   TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                   TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                    SemanticProperties.Description="{Binding PeriodSuffixDescription, Source={x:Reference Root}}" />
         </Grid>
     </Grid>

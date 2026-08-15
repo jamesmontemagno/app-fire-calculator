@@ -44,6 +44,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check view XAML uses named theme colours
+        run: python3 tools/check_no_raw_hex.py
+
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:

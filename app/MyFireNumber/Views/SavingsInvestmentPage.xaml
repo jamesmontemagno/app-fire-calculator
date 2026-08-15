@@ -9,7 +9,7 @@
                           x:DataType="viewModels:SavingsInvestmentViewModel"
                           Title="{Binding Title}"
                           Shell.NavBarIsVisible="True"
-                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                          Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                           SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding SavePlanCommand}"
@@ -22,14 +22,14 @@
     <ScrollView>
         <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" SemanticProperties.Description="Restoring your local calculator draft." />
-            <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light=#FFF4E8, Dark=#4A3323}" Stroke="{AppThemeBinding Light=#C97727, Dark=#F2B56D}" StrokeShape="RoundRectangle 8"><Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}" LineHeight="1.3" /></Border>
+            <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light={StaticResource SurfaceWarningLight}, Dark={StaticResource SurfaceWarningDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderWarningLight}, Dark={StaticResource BorderWarningDark}}" StrokeShape="RoundRectangle 8"><Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" LineHeight="1.3" /></Border>
 
             <controls:CalculatorInfoView Title="What is the savings and investment rate calculator?"
                                          Summary="See how regular contributions and compound growth could build wealth over time."
                                          Details="This estimate shows how a starting balance, recurring contributions, and a time horizon can affect a future portfolio."
                                          IconGlyph="&#xf0eb;" />
 
-            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}" StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}"><Label Text="Your investment details" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Savings and Investment Rate values to their defaults." /></Grid>
                     <controls:PeriodToggleView />
@@ -64,11 +64,11 @@
                 <Label Text="Your investment outlook" Style="{StaticResource CalculatorSectionHeading}" />
                 <Label Text="{Binding InvestmentCategoryText}" Style="{StaticResource CalculatorStatusHeadline}" SemanticProperties.Description="{Binding InvestmentCategoryText}" />
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
-                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#EEF0FA, Dark=#2A2E4C}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Savings rate" FontSize="12" /><Label Text="{Binding InvestmentSavingsRateText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
-                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Annual contribution" FontSize="12" /><Label Text="{Binding InvestmentAnnualContributionText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Grid.ColumnSpan="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Projected portfolio" FontSize="12" /><Label Text="{Binding InvestmentFinalBalanceText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Today's dollars" FontSize="12" /><Label Text="{Binding InvestmentInflationAdjustedText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="2" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Total growth" FontSize="12" /><Label Text="{Binding InvestmentGrowthText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInfoVioletLight}, Dark={StaticResource SurfaceInfoVioletDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Savings rate" FontSize="12" /><Label Text="{Binding InvestmentSavingsRateText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Annual contribution" FontSize="12" /><Label Text="{Binding InvestmentAnnualContributionText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Grid.ColumnSpan="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Projected portfolio" FontSize="12" /><Label Text="{Binding InvestmentFinalBalanceText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Today's dollars" FontSize="12" /><Label Text="{Binding InvestmentInflationAdjustedText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="2" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Total growth" FontSize="12" /><Label Text="{Binding InvestmentGrowthText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
                 </Grid>
             </VerticalStackLayout>
 
@@ -78,10 +78,10 @@
                 <Label Text="{Binding InvestmentProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>
 
-            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}" StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
-                    <Entry Text="{Binding PlanNameText}" Placeholder="My Investment Plan" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" SemanticProperties.Description="Name for this saved Savings and Investment Rate plan" />
+                    <Entry Text="{Binding PlanNameText}" Placeholder="My Investment Plan" Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}" SemanticProperties.Description="Name for this saved Savings and Investment Rate plan" />
                     <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />
                     <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Create a Savings and Investment Rate workbook on this device and open the native share sheet." />
                     <Label IsVisible="{Binding HasPlanStatusMessage}" Text="{Binding PlanStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />

@@ -4,25 +4,25 @@
              x:Class="MyFireNumber.Views.Controls.CalculatorInfoView"
              x:Name="Root">
     <Border Padding="{StaticResource CardPadding}"
-            Background="{AppThemeBinding Light=#EAF4EC, Dark=#1B3B2D}"
-            Stroke="{AppThemeBinding Light=#A8D4B2, Dark=#43805B}"
+            Background="{AppThemeBinding Light={StaticResource SurfaceAccentTintDeepLight}, Dark={StaticResource SurfaceAccentTintDeepDark}}"
+            Stroke="{AppThemeBinding Light={StaticResource BorderAccentSoftLight}, Dark={StaticResource BorderAccentSoftDark}}"
             StrokeShape="RoundRectangle 8">
         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
             <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                 <Label Text="{Binding IconGlyph, Source={x:Reference Root}}"
                        FontFamily="FontAwesomeSolid"
                        VerticalTextAlignment="Center"
-                       TextColor="{AppThemeBinding Light=#2F6B57, Dark=#9ACCB3}"
+                       TextColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}"
                        SemanticProperties.Description="Calculator information" />
                 <Label Grid.Column="1"
                        Text="{Binding Title, Source={x:Reference Root}}"
-                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                        FontAttributes="Bold"
                        FontSize="20"
                        SemanticProperties.HeadingLevel="Level2" />
             </Grid>
             <Label Text="{Binding Summary, Source={x:Reference Root}}"
-                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                    LineHeight="1.3" />
             <Button x:Name="DetailsButton"
                     Text="Learn more"
@@ -30,13 +30,13 @@
                     HorizontalOptions="Start"
                     Padding="0,6"
                     Background="Transparent"
-                    TextColor="{AppThemeBinding Light=#2F6B57, Dark=#9ACCB3}"
+                    TextColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}"
                     FontAttributes="Bold"
                     SemanticProperties.Description="Show more information about this calculator" />
             <Label x:Name="DetailsLabel"
                    IsVisible="False"
                    Text="{Binding Details, Source={x:Reference Root}}"
-                   TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                    FontSize="13"
                    LineHeight="1.35" />
         </VerticalStackLayout>
