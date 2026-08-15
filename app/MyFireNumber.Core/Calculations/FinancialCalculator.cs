@@ -326,6 +326,16 @@ public static class FinancialCalculator
             Round(CalculateHealthcareSubsidy(75_000, annualCost)));
     }
 
+    /// <summary>
+    /// Core debt payoff calculation logic.
+    /// </summary>
+    /// <remarks>
+    /// Each month interest accrues exactly once per debt before any payment is applied, then the
+    /// available budget pays minimums in priority order and any remainder goes to the highest
+    /// priority debt as pure principal. Payments never exceed the available budget, so a budget
+    /// that cannot cover the minimums results in growing balances instead of silent overpayment.
+    /// This mirrors <c>calculateDebtPayoff</c> in the web app's <c>calculations.ts</c>.
+    /// </remarks>
     private static DebtPayoffResult CalculateDebtPayoff(IEnumerable<DebtItem> debts, double totalMonthlyPayment, double extraPayment)
     {
         var remainingDebts = debts.Select(debt => new MutableDebt(debt)).ToList();
@@ -341,32 +351,50 @@ public static class FinancialCalculator
         {
             month++;
             var monthlyBudget = totalMonthlyPayment + extraPayment;
-            var monthPrincipal = 0d;
+            var monthPayments = 0d;
             var monthInterest = 0d;
             var paidOffThisMonth = new List<string>();
 
-            foreach (var debt in remainingDebts.Where(debt => debt.CurrentBalance > 0))
+            // 1. Accrue interest exactly once per debt, before any payment is applied.
+            foreach (var debt in remainingDebts)
             {
+                if (debt.CurrentBalance <= 0)
+                {
+                    continue;
+                }
+
                 var interestCharge = debt.CurrentBalance * (debt.Rate / 12);
-                var minimumPayment = Math.Min(debt.MinimumPayment, debt.CurrentBalance + interestCharge);
-                var principalPayment = Math.Max(0, minimumPayment - interestCharge);
-                debt.CurrentBalance -= principalPayment;
-                monthlyBudget -= minimumPayment;
-                monthPrincipal += principalPayment;
+                debt.CurrentBalance += interestCharge;
                 monthInterest += interestCharge;
+            }
+
+            // 2. Pay minimums in priority order, never spending more than the available budget.
+            foreach (var debt in remainingDebts)
+            {
+                if (debt.CurrentBalance <= 0 || monthlyBudget <= 0)
+                {
+                    continue;
+                }
+
+                var payment = Math.Min(debt.MinimumPayment, Math.Min(debt.CurrentBalance, monthlyBudget));
+                debt.CurrentBalance -= payment;
+                monthlyBudget -= payment;
+                monthPayments += payment;
                 MarkPaidOff(debt, month, paidOffThisMonth, payoffOrder, debtMilestones);
             }
 
-            if (monthlyBudget > 0 && remainingDebts.FirstOrDefault(debt => debt.CurrentBalance > 0) is { } targetDebt)
+            // 3. Apply any remaining budget to the highest priority debt as pure principal.
+            while (monthlyBudget > 0 && remainingDebts.FirstOrDefault(debt => debt.CurrentBalance > 0) is { } targetDebt)
             {
-                var additionalInterest = targetDebt.CurrentBalance * (targetDebt.Rate / 12);
-                var actualPayment = Math.Min(monthlyBudget, targetDebt.CurrentBalance + additionalInterest);
-                var additionalPrincipal = Math.Max(0, actualPayment - additionalInterest);
-                targetDebt.CurrentBalance -= additionalPrincipal;
-                monthPrincipal += additionalPrincipal;
-                monthInterest += additionalInterest;
+                var payment = Math.Min(monthlyBudget, targetDebt.CurrentBalance);
+                targetDebt.CurrentBalance -= payment;
+                monthlyBudget -= payment;
+                monthPayments += payment;
                 MarkPaidOff(targetDebt, month, paidOffThisMonth, payoffOrder, debtMilestones);
             }
+
+            // Balances already include this month's interest, so principal is what is left of the payments.
+            var monthPrincipal = monthPayments - monthInterest;
 
             cumulativePrincipal += monthPrincipal;
             cumulativeInterest += monthInterest;

@@ -659,7 +659,12 @@ export function calculateAvalanchePayoff(
 }
 
 /**
- * Core debt payoff calculation logic
+ * Core debt payoff calculation logic.
+ *
+ * Each month interest accrues exactly once per debt before any payment is applied, then the
+ * available budget pays minimums in priority order and any remainder goes to the highest
+ * priority debt as pure principal. Payments never exceed the available budget, so a budget
+ * that cannot cover the minimums results in growing balances instead of silent overpayment.
  */
 function calculateDebtPayoff(
   sortedDebts: DebtItem[],
@@ -684,56 +689,53 @@ function calculateDebtPayoff(
     month++
     
     let monthlyBudget = availablePayment
-    let monthPrincipal = 0
+    let monthPayments = 0
     let monthInterest = 0
     const paidOffThisMonth: string[] = []
     
-    // First, pay minimum payments on all debts
+    const markPaidOff = (debt: { name: string; currentBalance: number }) => {
+      if (debt.currentBalance > 0) return
+      debt.currentBalance = 0
+      if (paidOffThisMonth.includes(debt.name)) return
+      paidOffThisMonth.push(debt.name)
+      payoffOrder.push(debt.name)
+      debtMilestones.push({ month, debtName: debt.name })
+    }
+    
+    // 1. Accrue interest exactly once per debt, before any payment is applied
     for (const debt of remainingDebts) {
       if (debt.currentBalance <= 0) continue
       
-      const monthlyRate = debt.rate / 12
-      const interestCharge = debt.currentBalance * monthlyRate
-      const minPaymentNeeded = Math.min(debt.minPayment, debt.currentBalance + interestCharge)
-      const principalPayment = Math.max(0, minPaymentNeeded - interestCharge)
-      
-      debt.currentBalance -= principalPayment
-      monthlyBudget -= minPaymentNeeded
-      monthPrincipal += principalPayment
+      const interestCharge = debt.currentBalance * (debt.rate / 12)
+      debt.currentBalance += interestCharge
       monthInterest += interestCharge
-      
-      if (debt.currentBalance <= 0) {
-        debt.currentBalance = 0
-        paidOffThisMonth.push(debt.name)
-        payoffOrder.push(debt.name)
-        debtMilestones.push({ month, debtName: debt.name })
-      }
     }
     
-    // Apply remaining budget to highest priority debt
-    if (monthlyBudget > 0) {
-      const targetDebt = remainingDebts.find(d => d.currentBalance > 0)
-      if (targetDebt) {
-        const monthlyRate = targetDebt.rate / 12
-        const additionalInterest = targetDebt.currentBalance * monthlyRate
-        const maxPayment = targetDebt.currentBalance + additionalInterest
-        const actualPayment = Math.min(monthlyBudget, maxPayment)
-        const additionalPrincipal = Math.max(0, actualPayment - additionalInterest)
-        
-        targetDebt.currentBalance -= additionalPrincipal
-        monthPrincipal += additionalPrincipal
-        monthInterest += additionalInterest
-        
-        if (targetDebt.currentBalance <= 0) {
-          targetDebt.currentBalance = 0
-          if (!paidOffThisMonth.includes(targetDebt.name)) {
-            paidOffThisMonth.push(targetDebt.name)
-            payoffOrder.push(targetDebt.name)
-            debtMilestones.push({ month, debtName: targetDebt.name })
-          }
-        }
-      }
+    // 2. Pay minimums in priority order, never spending more than the available budget
+    for (const debt of remainingDebts) {
+      if (debt.currentBalance <= 0 || monthlyBudget <= 0) continue
+      
+      const payment = Math.min(debt.minPayment, debt.currentBalance, monthlyBudget)
+      debt.currentBalance -= payment
+      monthlyBudget -= payment
+      monthPayments += payment
+      markPaidOff(debt)
     }
+    
+    // 3. Apply any remaining budget to the highest priority debt as pure principal
+    while (monthlyBudget > 0) {
+      const targetDebt = remainingDebts.find(d => d.currentBalance > 0)
+      if (!targetDebt) break
+      
+      const payment = Math.min(monthlyBudget, targetDebt.currentBalance)
+      targetDebt.currentBalance -= payment
+      monthlyBudget -= payment
+      monthPayments += payment
+      markPaidOff(targetDebt)
+    }
+    
+    // Balances already include this month's interest, so principal is what is left of the payments
+    const monthPrincipal = monthPayments - monthInterest
     
     cumulativePrincipal += monthPrincipal
     cumulativeInterest += monthInterest
