@@ -25,7 +25,7 @@
 
             <controls:CalculatorInfoView Title="What is the healthcare gap?"
                                          Summary="Estimate health insurance costs between early retirement and Medicare eligibility."
-                                         Details="Leaving employer coverage before Medicare can create a major retirement expense. This estimate includes premiums, deductibles, out-of-pocket costs, inflation, and illustrative subsidies."
+                                         Details="Leaving employer coverage before Medicare can create a major retirement expense. This estimate includes premiums, deductibles, out-of-pocket costs, and medical inflation. Premiums are entered monthly; deductibles and out-of-pocket costs are entered annually. It does not estimate ACA premium tax credits, which depend on household size and the federal poverty level."
                                          IconGlyph="&#xf0f9;" />
 
             <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
@@ -40,7 +40,7 @@
                         <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                             <controls:NumericInputView Header="Medicare age" HelpText="The expected age when Medicare coverage begins." Placeholder="65" Text="{Binding MedicareAgeText}" />
                             <controls:NumericInputView Grid.Column="1" Header="Annual deductible" HelpText="Expected annual deductible, in dollars." Placeholder="2500" Text="{Binding AnnualDeductibleText}" />
-                            <controls:NumericInputView Grid.Row="1" Header="Out-of-pocket costs" HelpText="Expected annual medical costs beyond premiums and deductibles, in dollars." Placeholder="2000" Text="{Binding AnnualOutOfPocketText}" />
+                            <controls:NumericInputView Grid.Row="1" Header="Annual out-of-pocket costs" HelpText="Expected annual medical costs beyond premiums and deductibles, in dollars." Placeholder="2000" Text="{Binding AnnualOutOfPocketText}" />
                             <controls:PercentageInputView Grid.Row="1" Grid.Column="1" Header="Medical inflation (%)" HelpText="Expected annual increase in medical costs." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding InflationRateText}" />
                         </Grid>
                     </controls:AdvancedAssumptionsExpander>
@@ -55,8 +55,6 @@
                     <Border Grid.Row="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Total projected cost" FontSize="12" /><Label Text="{Binding HealthcareTotalCostText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
                     <Border Grid.Row="1" Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Average annual cost" FontSize="12" /><Label Text="{Binding HealthcareAverageAnnualCostText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
                 </Grid>
-                <Label Text="Estimated annual subsidies" FontAttributes="Bold" />
-                <Label Text="{Binding HealthcareSubsidyEstimateText}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Spacing="10">

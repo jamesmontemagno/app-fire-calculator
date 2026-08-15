@@ -97,11 +97,13 @@ public sealed partial class ReverseFireViewModel : CalculatorViewModelBase<Rever
             return false;
         }
 
+        // Retiring at your current age is a valid scenario to model, so equality is allowed
+        // here and on every other calculator across both platforms.
         if (!TryParseWholeNumber(RetirementAgeText, out var targetRetirementAge)
-            || targetRetirementAge <= currentAge
+            || targetRetirementAge < currentAge
             || targetRetirementAge > 100)
         {
-            ValidationMessage = "Enter a target FIRE age after your current age through 100.";
+            ValidationMessage = "Enter a target FIRE age from your current age through 100.";
             return false;
         }
 

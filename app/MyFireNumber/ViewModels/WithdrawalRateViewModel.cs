@@ -43,7 +43,7 @@ public sealed partial class WithdrawalRateViewModel : CalculatorViewModelBase<Wi
     private string withdrawalLongevityText = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalSuccessText = string.Empty;
+    private string withdrawalHorizonFundedText = string.Empty;
 
     [ObservableProperty]
     private string withdrawalStatusText = string.Empty;
@@ -113,7 +113,7 @@ public sealed partial class WithdrawalRateViewModel : CalculatorViewModelBase<Wi
         WithdrawalLongevityText = result.PortfolioLongevity >= draft.RetirementYears
             ? $"{draft.RetirementYears}+ years"
             : $"{result.PortfolioLongevity:0} years";
-        WithdrawalSuccessText = result.SuccessRate.ToString("P0", CultureInfo.CurrentCulture);
+        WithdrawalHorizonFundedText = result.HorizonFundedRatio.ToString("P0", CultureInfo.CurrentCulture);
         WithdrawalStatusText = result.PortfolioLongevity >= draft.RetirementYears
             ? "Your withdrawal rate is sustainable for this goal."
             : "Your portfolio may run out before this goal.";

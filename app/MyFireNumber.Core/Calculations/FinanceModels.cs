@@ -86,7 +86,9 @@ public sealed record WithdrawalRateAnalysis(double Rate, double Years, double En
 
 public sealed record WithdrawalResult(
     double PortfolioLongevity,
-    double SuccessRate,
+    // Share of the retirement horizon funded by this single deterministic projection
+    // (PortfolioLongevity / RetirementYears, capped at 1). Not a probability of success.
+    double HorizonFundedRatio,
     double AnnualWithdrawal,
     double MonthlyWithdrawal,
     double EndingBalance,
@@ -190,10 +192,7 @@ public sealed record HealthcareGapResult(
     double AnnualCost,
     double TotalCost,
     double AverageAnnualCost,
-    IReadOnlyList<HealthcareYear> YearlyBreakdown,
-    double EstimatedSubsidy30k,
-    double EstimatedSubsidy50k,
-    double EstimatedSubsidy75k);
+    IReadOnlyList<HealthcareYear> YearlyBreakdown);
 
 public enum RetirementAccountType
 {

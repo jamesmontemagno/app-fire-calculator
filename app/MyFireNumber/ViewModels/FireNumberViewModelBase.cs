@@ -222,11 +222,11 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
             return false;
         }
 
-        if (!TryParsePercentage(ExpectedReturnText, 0, 20, out var expectedReturn)
+        if (!TryParsePercentage(ExpectedReturnText, 0, 15, out var expectedReturn)
             || !TryParsePercentage(InflationRateText, 0, 10, out var inflationRate)
             || !TryParsePercentage(WithdrawalRateText, 2, 6, out var withdrawalRate))
         {
-            ValidationMessage = "Expected return must be 0% to 20%, inflation 0% to 10%, and withdrawal rate 2% to 6%.";
+            ValidationMessage = "Expected return must be 0% to 15%, inflation 0% to 10%, and withdrawal rate 2% to 6%.";
             return false;
         }
 
