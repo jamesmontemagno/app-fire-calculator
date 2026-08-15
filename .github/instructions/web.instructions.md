@@ -68,7 +68,7 @@ For a new calculator:
 ## Styling and Accessibility
 
 - Use Tailwind CSS v4 utilities and existing design tokens; do not add CSS modules or styled-components.
-- Include appropriate `dark:` variants for new UI.
+- Use semantic tokens that resolve per theme (for example `bg-surface-raised`, `text-content-muted`); do not hand-place `dark:` variants, raw hex colors, emoji, inline `<svg>`, or gradient utilities. These are enforced by `web/src/utils/__tests__/designInvariants.test.ts`, so code that ignores this fails CI.
 - Follow the existing mobile-first breakpoints and navigation behavior.
 - Use the accessible Tooltip and InputGroup patterns for contextual help.
 - Provide semantic headings, labels, ARIA descriptions, and keyboard access.

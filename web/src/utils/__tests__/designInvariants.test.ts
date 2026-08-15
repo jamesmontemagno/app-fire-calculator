@@ -1,5 +1,18 @@
 /**
- * Guards the five invariants the web UI redesign established.
+ * Guards the five invariants the web UI redesign established, plus one the label-wrap fix added.
+ *
+ * The sixth guard is a different shape from the other five and worth reading separately. Those ban a
+ * visible thing; this one REQUIRES an invisible thing, because the period qualifier on a periodic
+ * input renders nothing at all — it exists solely to reach the accessible name. That makes it look
+ * exactly like dead markup to anyone tidying up, and deleting it costs a screen reader the period on
+ * the one field whose entire ambiguity is monthly-vs-annual. Measured, not assumed:
+ *
+ *   as shipped         "Retirement spending (today's dollars) (per year) More information"
+ *   qualifier deleted  "Retirement spending (today's dollars) More information"
+ *
+ * The in-field `/yr` adornment does not rescue it: that span is `pointer-events-none` and sits
+ * OUTSIDE the `<label>`, so it contributes nothing to the name. Hence the guard is scoped to label
+ * content specifically, not to the file as a whole.
  *
  * The redesign removed 57 emoji, 743 hand-placed `dark:` utilities, 44 inline `<svg>` elements,
  * 13 stray hex colours and 7 gradient panels. Nothing in the suite noticed any of that, which meant
@@ -141,6 +154,53 @@ const GRADIENT = /\bbg-(?:gradient|linear|radial|conic)-/g
  */
 const HEX_ALLOWED = ['index.css', 'components/charts/chartTheme.ts']
 
+/**
+ * A `<label>…</label>` element.
+ *
+ * Scoping to the label is the whole point rather than an optimisation. A periodic input renders the
+ * period twice: once as this qualifier inside the label, and once as a `/yr` adornment outside it.
+ * Only the first reaches the accessible name, so a file-wide search for `periodQualifier` would be
+ * satisfied by markup that announces nothing.
+ */
+const LABEL_BLOCK = /<label[\s>][\s\S]*?<\/label>/g
+
+/** Any call to the qualifier helper. The `(` excludes the bare identifier on the import line. */
+const QUALIFIER_CALL = /periodQualifier\(/g
+
+/**
+ * The qualifier wrapped in a screen-reader-only span.
+ *
+ * `[^<]*` spans the newline and the literal `(` that sit between the tag and the call, while
+ * stopping at the next tag so a distant sr-only span elsewhere in the label cannot vouch for a
+ * qualifier it does not contain.
+ */
+const SR_ONLY_QUALIFIER = /<span\s+className="sr-only"[^>]*>[^<]*periodQualifier\(/g
+
+/**
+ * The file that must carry a hidden qualifier, named rather than discovered — the one deliberate
+ * exception to this file's discover-never-enumerate rule, and it exists because of that rule.
+ *
+ * A guard that only inspects files calling `periodQualifier` evaporates the moment someone deletes
+ * the call, which is precisely the deletion it is here to catch: the file drops out of the scan and
+ * the suite goes green on the regression. Naming the file makes its absence a failure. The sweep
+ * below still covers anything new that adopts the helper.
+ */
+const QUALIFIER_REQUIRED = 'components/inputs/CurrencyInput.tsx'
+
+function findQualifierViolations(source: string): string[] {
+  const labels = (source.match(LABEL_BLOCK) ?? []).join('\n')
+  const calls = (labels.match(QUALIFIER_CALL) ?? []).length
+  const hidden = (labels.match(SR_ONLY_QUALIFIER) ?? []).length
+
+  if (calls === 0) {
+    return ['no period qualifier inside <label> (the /yr adornment is outside it and does not count)']
+  }
+  if (hidden < calls) {
+    return [`${calls - hidden} qualifier(s) rendered as visible label text instead of sr-only`]
+  }
+  return []
+}
+
 function report(hits: Array<[string, string[]]>): string {
   return hits.map(([path, found]) => `  ${path}: ${found.join(' ')}`).join('\n')
 }
@@ -187,6 +247,68 @@ describe('design invariant detectors', () => {
     expect('className="bg-gradient-to-r"'.match(GRADIENT)).toHaveLength(1)
     expect('className="bg-linear-to-br"'.match(GRADIENT)).toHaveLength(1)
     expect('<linearGradient id="g">'.match(GRADIENT)).toBeNull()
+  })
+
+  // This detector guards markup that renders nothing, so both ways of losing it have to be caught:
+  // rendering the qualifier visibly, and deleting it outright. Each is exercised here before the
+  // detector is believed about real source.
+  it('accepts a qualifier hidden inside the label', () => {
+    const shipped = `
+      <label htmlFor={id} className="flex items-center gap-1.5">
+        {label}
+        {periodic && (
+          <span className="sr-only">
+            ({periodQualifier(displayPeriod)})
+          </span>
+        )}
+        {tooltip && <Tooltip content={tooltip} />}
+      </label>
+      <span className="absolute right-3 pointer-events-none">{periodSuffix(displayPeriod)}</span>`
+    expect(findQualifierViolations(shipped)).toEqual([])
+  })
+
+  it('flags a qualifier rendered as visible label text', () => {
+    const visible = `
+      <label htmlFor={id}>
+        {label}
+        <span className="text-xs font-normal text-content-subtle">
+          ({periodQualifier(displayPeriod)})
+        </span>
+      </label>`
+    expect(findQualifierViolations(visible)).toHaveLength(1)
+    expect(findQualifierViolations(visible)[0]).toContain('visible label text')
+  })
+
+  it('flags a deleted qualifier, and is not fooled by the adornment outside the label', () => {
+    // The exact shape of the regression: the span looks like dead markup, so it goes, and the `/yr`
+    // adornment below is mistaken for the period surviving. It is outside the label and does not.
+    const deleted = `
+      <label htmlFor={id}>
+        {label}
+        {tooltip && <Tooltip content={tooltip} />}
+      </label>
+      <span className="absolute right-3 pointer-events-none">{periodQualifier(displayPeriod)}</span>`
+    expect(findQualifierViolations(deleted)).toHaveLength(1)
+    expect(findQualifierViolations(deleted)[0]).toContain('no period qualifier inside <label>')
+  })
+
+  it('flags a qualifier that is hidden once but also printed visibly', () => {
+    const both = `
+      <label htmlFor={id}>
+        {label}
+        <span className="sr-only">({periodQualifier(displayPeriod)})</span>
+        <span className="text-xs">({periodQualifier(displayPeriod)})</span>
+      </label>`
+    expect(findQualifierViolations(both)).toHaveLength(1)
+  })
+
+  it('does not let a distant sr-only span vouch for a visible qualifier', () => {
+    const decoy = `
+      <label htmlFor={id}>
+        <span className="sr-only">Required</span>
+        <span className="text-xs">({periodQualifier(displayPeriod)})</span>
+      </label>`
+    expect(findQualifierViolations(decoy)).toHaveLength(1)
   })
 
   it('strips comments without blanking the strings utilities live in', () => {
@@ -264,5 +386,44 @@ describe('web UI design invariants', () => {
   it('ships no gradient backgrounds', () => {
     const hits = scan(source => source.match(GRADIENT) ?? [])
     expect(hits.length, `Use a flat surface token:\n${report(hits)}`).toBe(0)
+  })
+})
+
+describe('accessible name invariants', () => {
+  /**
+   * The period must survive in the accessible name of every periodic input.
+   *
+   * Unlike the five bans above, this asserts the PRESENCE of markup that renders nothing. The span
+   * is invisible by design and therefore looks removable; removing it silently drops "(per month)"
+   * from what a screen reader announces, on a field whose whole ambiguity is the period. Nothing
+   * else in the repo notices, because the visible output is byte-identical either way.
+   */
+  it('keeps the period qualifier inside the label, hidden rather than deleted', () => {
+    const source = SHIPPED.find(([path]) => shortPath(path) === QUALIFIER_REQUIRED)?.[1]
+
+    // Absence is a failure, not a skip. If this file is renamed, the guard must be moved with it.
+    expect(source, `${QUALIFIER_REQUIRED} not found; move this guard to its new path`).toBeDefined()
+
+    const violations = findQualifierViolations(stripComments(source ?? '', QUALIFIER_REQUIRED))
+    expect(
+      violations,
+      `${QUALIFIER_REQUIRED}: ${violations.join('; ')}\n` +
+        'The qualifier renders nothing on screen but carries the period into the accessible name. ' +
+        'The /yr adornment sits outside the <label> and does not replace it.',
+    ).toEqual([])
+  })
+
+  // The named file above catches deletion; this catches anything new that adopts the helper and
+  // prints it visibly, which would reintroduce the label wrap the fix removed.
+  //
+  // `includes`, not `QUALIFIER_CALL.test`: that regex carries the `g` flag, so `.test` advances
+  // `lastIndex` and returns false on every second call against the same input. A stateful filter
+  // would skip half the files and still report clean.
+  it('renders no period qualifier as visible label text anywhere', () => {
+    const hits = scan((source, path) =>
+      path.endsWith('.tsx') && source.includes('periodQualifier(') ? findQualifierViolations(source) : [],
+    ).filter(([, found]) => found.some(problem => problem.includes('visible label text')))
+
+    expect(hits.length, `Wrap it in <span className="sr-only">:\n${report(hits)}`).toBe(0)
   })
 })
