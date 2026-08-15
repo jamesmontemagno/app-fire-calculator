@@ -27,6 +27,10 @@
     <!-- Same file the web Vitest suite reads, so both platforms are pinned to one set of numbers. -->
     <None Include="..\..\shared\parity\fire-parity-cases.json" Link="SharedParity\fire-parity-cases.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\..\shared\parity\periodic-fields.json" Link="SharedParity\periodic-fields.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Read as text, never compiled: this project cannot reference the MAUI single-project, but the
+         Shell route table is the only place a calculator becomes reachable natively, so it is the
+         oracle CalculatorCatalogTests discovers its expected set from. -->
+    <None Include="..\MyFireNumber\AppShell.xaml.cs" Link="NativeRoutes\AppShell.xaml.cs" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
