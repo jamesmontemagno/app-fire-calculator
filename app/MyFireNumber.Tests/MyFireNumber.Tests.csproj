@@ -31,6 +31,11 @@
          Shell route table is the only place a calculator becomes reachable natively, so it is the
          oracle CalculatorCatalogTests discovers its expected set from. -->
     <None Include="..\MyFireNumber\AppShell.xaml.cs" Link="NativeRoutes\AppShell.xaml.cs" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Same reason, different file: the advanced assumptions store is unit-tested directly, but the
+         call site that decides WHICH key it is asked about lives in the MAUI single-project and is
+         therefore never compiled by this suite. Read as text by
+         AdvancedAssumptionsCallSiteGuardTests. -->
+    <None Include="..\MyFireNumber\Views\CalculatorPageBase.cs" Link="NativeCallSites\CalculatorPageBase.cs" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
