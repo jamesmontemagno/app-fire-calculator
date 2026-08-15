@@ -126,8 +126,8 @@ const questions: Question[] = [
   {
     id: 'annualIncome',
     type: 'currency',
-    title: 'What is your annual household income?',
-    subtitle: 'Optional · Use income before taxes.',
+    title: 'What is your annual household take-home pay?',
+    subtitle: 'Optional · Use after-tax income — what actually lands in your account.',
     placeholder: '80,000',
     min: 0,
   },

@@ -332,7 +332,7 @@
                             </Grid>
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
                                     <VerticalStackLayout Spacing="4">
-                                     <Label Text="Annual pre-tax income"
+                                     <Label Text="After-tax take-home income"
                                          TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
                                          FontSize="13" />
                                      <Entry AutomationId="AnnualIncomeDefaultEntry"
@@ -341,7 +341,7 @@
                                          Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
                                          TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                                          PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#8EAA9B}"
-                                         SemanticProperties.Description="Default annual pre-tax income" />
+                                         SemanticProperties.Description="Default annual after-tax take-home income" />
                                     </VerticalStackLayout>
                                     <VerticalStackLayout Grid.Column="1" Spacing="4">
                                      <Label Text="Annual expenses"
