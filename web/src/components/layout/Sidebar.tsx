@@ -1,3 +1,19 @@
+import type { LucideIcon } from 'lucide-react'
+import {
+  ChevronsLeft,
+  ChevronsRight,
+  Compass,
+  Flame,
+  Library,
+  Monitor,
+  Moon,
+  House,
+  Settings,
+  ShieldCheck,
+  Smartphone,
+  Sun,
+  X,
+} from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTheme } from '../../context/ThemeContext'
 import { calculators } from '../../config/calculators'
@@ -9,22 +25,46 @@ interface SidebarProps {
   onToggleCollapse: () => void
 }
 
+const PRIMARY_LINKS: { to: string; label: string; icon: LucideIcon }[] = [
+  { to: '/', label: 'Home', icon: House },
+  { to: '/books', label: 'Recommended Books', icon: Library },
+  { to: '/apps', label: 'Recommended Apps', icon: Smartphone },
+  { to: '/quiz', label: 'Find Your Path', icon: Compass },
+  { to: '/settings', label: 'Settings', icon: Settings },
+]
+
+const THEMES: { value: 'light' | 'dark' | 'system'; label: string; icon: LucideIcon }[] = [
+  { value: 'light', label: 'Light', icon: Sun },
+  { value: 'dark', label: 'Dark', icon: Moon },
+  { value: 'system', label: 'System', icon: Monitor },
+]
+
+function navClass(isActive: boolean, isCollapsed: boolean) {
+  return [
+    'flex items-center gap-3 rounded-control px-3 py-2 text-sm font-medium',
+    'transition-colors motion-reduce:transition-none',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface-raised',
+    isCollapsed ? 'justify-center' : '',
+    isActive
+      ? 'bg-accent-subtle text-accent'
+      : 'text-content-muted hover:bg-surface-sunken hover:text-content',
+  ].join(' ')
+}
+
 export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse }: SidebarProps) {
   const location = useLocation()
   const { theme, setTheme } = useTheme()
 
-  const isHome = location.pathname === '/'
-  
   // Preserve query parameters when navigating between calculators
   const currentSearch = location.search
+  const CollapseIcon = isCollapsed ? ChevronsRight : ChevronsLeft
 
   return (
-    <aside 
+    <aside
       id="sidebar-navigation"
       className={`
         fixed lg:sticky top-0 left-0 z-50 h-screen
-        bg-white dark:bg-gray-900 
-        border-r border-gray-200 dark:border-gray-800
+        bg-surface-raised border-r border-border-subtle
         flex flex-col
         transform transition-all duration-200 ease-in-out
         motion-reduce:transition-none
@@ -32,298 +72,126 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
         ${isCollapsed ? 'lg:w-20' : 'w-72'}
       `}
     >
-      {/* Logo */}
-      <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-800">
-        {!isCollapsed ? (
-          <NavLink 
-            to="/" 
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
-            onClick={onClose}
-          >
-            <span className="text-3xl">🔥</span>
-            <div>
-              <div className="font-bold text-lg text-gray-900 dark:text-gray-100">FIRE Calculators</div>
-              <div className="text-xs text-gray-500 dark:text-gray-400">Financial Independence</div>
-            </div>
-          </NavLink>
-        ) : (
-          <NavLink 
-            to="/" 
-            className="flex items-center justify-center w-full hover:opacity-80 transition-opacity"
-            onClick={onClose}
-          >
-            <span className="text-3xl">🔥</span>
-          </NavLink>
-        )}
-        <button
-          onClick={onClose}
-          className="lg:hidden p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-          aria-label="Close menu"
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-        <button
-          onClick={onToggleCollapse}
-          className="hidden lg:block p-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          aria-expanded={!isCollapsed}
-          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            {isCollapsed ? (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-            ) : (
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            )}
-          </svg>
-        </button>
-      </div>
-
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4">
-        {/* Home link */}
+      <div className="flex h-16 items-center justify-between gap-2 border-b border-border-subtle px-4">
         <NavLink
           to="/"
           onClick={onClose}
-          className={`
-            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1
-            font-medium transition-colors
-            ${isCollapsed ? 'justify-center' : ''}
-            ${isHome 
-              ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-            }
-          `}
-          title={isCollapsed ? 'Home' : ''}
+          className={`flex min-w-0 items-center gap-2.5 rounded-control focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+            isCollapsed ? 'w-full justify-center' : ''
+          }`}
         >
-          <span className="text-xl">🏠</span>
-          {!isCollapsed && <span>Home</span>}
+          <Flame className="h-6 w-6 shrink-0 text-accent" aria-hidden="true" strokeWidth={1.5} />
+          {!isCollapsed && (
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold text-content">FIRE Calculators</span>
+              <span className="block truncate text-xs text-content-subtle">Financial Independence</span>
+            </span>
+          )}
         </NavLink>
 
-        {/* Recommended Books link */}
-        <NavLink
-          to="/books"
+        <button
           onClick={onClose}
-          className={({ isActive }) => `
-            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1
-            font-medium transition-colors
-            ${isCollapsed ? 'justify-center' : ''}
-            ${isActive 
-              ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-            }
-          `}
-          title={isCollapsed ? 'Recommended Books' : ''}
+          className="lg:hidden rounded-control p-2 text-content-muted transition-colors hover:bg-surface-sunken hover:text-content motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label="Close menu"
         >
-          <span className="text-xl">📚</span>
-          {!isCollapsed && <span>Recommended Books</span>}
-        </NavLink>
-
-        {/* Recommended Apps link */}
-        <NavLink
-          to="/apps"
-          onClick={onClose}
-          className={({ isActive }) => `
-            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1
-            font-medium transition-colors
-            ${isCollapsed ? 'justify-center' : ''}
-            ${isActive 
-              ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-            }
-          `}
-          title={isCollapsed ? 'Recommended Apps' : ''}
+          <X className="h-5 w-5" aria-hidden="true" strokeWidth={1.5} />
+        </button>
+        <button
+          onClick={onToggleCollapse}
+          className="hidden lg:block rounded-control p-2 text-content-muted transition-colors hover:bg-surface-sunken hover:text-content motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-expanded={!isCollapsed}
         >
-          <span className="text-xl">📱</span>
-          {!isCollapsed && <span>Recommended Apps</span>}
-        </NavLink>
+          <CollapseIcon className="h-5 w-5" aria-hidden="true" strokeWidth={1.5} />
+        </button>
+      </div>
 
-        {/* Quiz link */}
-        <NavLink
-          to="/quiz"
-          onClick={onClose}
-          className={({ isActive }) => `
-            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-2
-            font-medium transition-colors
-            ${isCollapsed ? 'justify-center' : ''}
-            ${isActive 
-              ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-            }
-          `}
-          title={isCollapsed ? 'Find Your Path' : ''}
-        >
-          <span className="text-xl">🧭</span>
-          {!isCollapsed && <span>Find Your Path</span>}
-        </NavLink>
+      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
+        {PRIMARY_LINKS.map(({ to, label, icon: Icon }) => (
+          <NavLink
+            key={to}
+            to={to}
+            end={to === '/'}
+            onClick={onClose}
+            className={({ isActive }) => navClass(isActive, isCollapsed)}
+            title={isCollapsed ? label : undefined}
+            aria-label={isCollapsed ? label : undefined}
+          >
+            <Icon className="h-5 w-5 shrink-0" aria-hidden="true" strokeWidth={1.5} />
+            {!isCollapsed && <span className="truncate">{label}</span>}
+          </NavLink>
+        ))}
 
-        <NavLink
-          to="/settings"
-          onClick={onClose}
-          className={({ isActive }) => `
-            flex items-center gap-3 px-3 py-2.5 rounded-lg mb-2
-            font-medium transition-colors
-            ${isCollapsed ? 'justify-center' : ''}
-            ${isActive
-              ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400'
-              : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-            }
-          `}
-          title={isCollapsed ? 'Settings' : ''}
-        >
-          <span className="text-xl">⚙️</span>
-          {!isCollapsed && <span>Settings</span>}
-        </NavLink>
-
-        {!isCollapsed && (
-          <div className="mt-4 mb-3 px-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-              Calculators
-            </h3>
-          </div>
+        {!isCollapsed ? (
+          <h2 className="px-3 pt-5 pb-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-content-subtle">
+            Calculators
+          </h2>
+        ) : (
+          <div className="mx-2 my-3 border-t border-border-subtle" />
         )}
-        {isCollapsed && <div className="border-t border-gray-200 dark:border-gray-700 my-2"></div>}
 
-        <div className="space-y-1">
-          {calculators.map(calc => {
-            const Icon = calc.icon
-            return (
+        {calculators.map(calc => {
+          const Icon = calc.icon
+          return (
             <NavLink
               key={calc.path}
               to={`${calc.path}${currentSearch}`}
               onClick={onClose}
-              className={({ isActive }) => `
-                flex items-center gap-3 px-3 py-2.5 rounded-lg
-                font-medium transition-colors
-                ${isCollapsed ? 'justify-center' : ''}
-                ${isActive 
-                  ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
-                  : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                }
-              `}
-              title={isCollapsed ? calc.label : ''}
+              className={({ isActive }) => navClass(isActive, isCollapsed)}
+              title={isCollapsed ? calc.label : undefined}
               aria-label={isCollapsed ? calc.label : undefined}
             >
               <Icon className={`h-5 w-5 shrink-0 ${calc.accent}`} aria-hidden="true" strokeWidth={1.5} />
-              {!isCollapsed && <span>{calc.label}</span>}
+              {!isCollapsed && <span className="truncate">{calc.label}</span>}
             </NavLink>
+          )
+        })}
+      </nav>
+
+      <div className="space-y-3 border-t border-border-subtle p-3">
+        <div
+          role="radiogroup"
+          aria-label="Colour theme"
+          className={`flex gap-1 rounded-control bg-surface-sunken p-1 ${
+            isCollapsed ? 'flex-col items-center' : ''
+          }`}
+        >
+          {THEMES.map(({ value, label, icon: Icon }) => {
+            const selected = theme === value
+            return (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => setTheme(value)}
+                title={label}
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-[calc(var(--radius-control)-0.25rem)] px-2 py-1.5 text-xs font-medium transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
+                  selected
+                    ? 'bg-surface-raised text-content shadow-[0_1px_2px_rgb(0_0_0/0.06)]'
+                    : 'text-content-subtle hover:text-content'
+                }`}
+              >
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" strokeWidth={1.5} />
+                {!isCollapsed && <span>{label}</span>}
+                {isCollapsed && <span className="sr-only">{label}</span>}
+              </button>
             )
           })}
         </div>
-      </nav>
 
-      {/* Footer */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800">
-        {/* Theme toggle */}
-        {!isCollapsed ? (
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm text-gray-600 dark:text-gray-400">Theme</span>
-            <div className="flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-              <button
-                onClick={() => setTheme('light')}
-                className={`p-1.5 rounded-md transition-colors ${
-                  theme === 'light' 
-                    ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                    : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-                aria-label="Light mode"
-              >
-                <svg className="w-4 h-4 text-yellow-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setTheme('dark')}
-                className={`p-1.5 rounded-md transition-colors ${
-                  theme === 'dark' 
-                    ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                    : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-                aria-label="Dark mode"
-              >
-                <svg className="w-4 h-4 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-              </button>
-              <button
-                onClick={() => setTheme('system')}
-                className={`p-1.5 rounded-md transition-colors ${
-                  theme === 'system' 
-                    ? 'bg-white dark:bg-gray-700 shadow-sm' 
-                    : 'hover:bg-gray-200 dark:hover:bg-gray-700'
-                }`}
-                aria-label="System theme"
-              >
-                <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center gap-2 mb-4">
-            <button
-              onClick={() => setTheme('light')}
-              className={`p-2 rounded-md transition-colors ${
-                theme === 'light' 
-                  ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-              }`}
-              aria-label="Light mode"
-              title="Light mode"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setTheme('dark')}
-              className={`p-2 rounded-md transition-colors ${
-                theme === 'dark' 
-                  ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-              }`}
-              aria-label="Dark mode"
-              title="Dark mode"
-            >
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setTheme('system')}
-              className={`p-2 rounded-md transition-colors ${
-                theme === 'system' 
-                  ? 'bg-fire-100 dark:bg-fire-900/30 text-fire-700 dark:text-fire-400' 
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400'
-              }`}
-              aria-label="System theme"
-              title="System theme"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </button>
-          </div>
-        )}
-
-        {/* Privacy badge */}
-        {!isCollapsed ? (
-          <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            <span className="text-xs font-medium text-green-700 dark:text-green-300">100% Private & Offline</span>
-          </div>
-        ) : (
-          <div className="flex justify-center p-2" title="100% Private & Offline">
-            <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-          </div>
-        )}
+        <p
+          className={`flex items-center gap-2 rounded-control px-2.5 py-2 text-xs font-medium text-content-muted ${
+            isCollapsed ? 'justify-center' : ''
+          }`}
+        >
+          <ShieldCheck className="h-4 w-4 shrink-0 text-success" aria-hidden="true" strokeWidth={1.5} />
+          {isCollapsed ? (
+            <span className="sr-only">100% private and offline</span>
+          ) : (
+            <span>100% private and offline</span>
+          )}
+        </p>
       </div>
     </aside>
   )
