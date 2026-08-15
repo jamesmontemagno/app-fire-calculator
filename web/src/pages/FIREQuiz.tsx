@@ -12,7 +12,7 @@ import {
 } from '../utils/quizRecommendations'
 
 type ChoiceId = 'lifestyle' | 'workPreference' | 'timeline' | 'primaryGoal' | 'personalize'
-type NumericId = 'currentAge' | 'retirementAge' | 'currentSavings' | 'annualIncome' | 'annualExpenses'
+type NumericId = 'currentAge' | 'retirementAge' | 'currentSavings' | 'annualIncome' | 'currentAnnualExpenses' | 'annualExpenses'
 
 interface ChoiceQuestion {
   id: ChoiceId
@@ -93,7 +93,7 @@ const questions: Question[] = [
     title: 'Would you like to personalize the calculator you open?',
     subtitle: 'These optional details stay in your browser and do not change the core path recommendation.',
     choices: [
-      { value: 'yes', label: 'Add my starting numbers', description: 'Answer five optional questions to prefill the calculator.' },
+      { value: 'yes', label: 'Add my starting numbers', description: 'Answer six optional questions to prefill the calculator.' },
       { value: 'no', label: 'Show my matches now', description: 'Use calculator defaults and adjust them later.' },
     ],
   },
@@ -132,10 +132,18 @@ const questions: Question[] = [
     min: 0,
   },
   {
+    id: 'currentAnnualExpenses',
+    type: 'currency',
+    title: 'How much do you spend per year today?',
+    subtitle: 'Optional · Your current living costs. Income minus this is the amount we assume you can invest.',
+    placeholder: '60,000',
+    min: 0,
+  },
+  {
     id: 'annualExpenses',
     type: 'currency',
-    title: 'What are your expected annual retirement expenses?',
-    subtitle: 'Optional · This can fine-tune Lean and Fat FIRE matches.',
+    title: 'How much do you expect to spend per year in retirement?',
+    subtitle: 'Optional · In today’s dollars, and often not the same as what you spend now. This sets your FIRE target.',
     placeholder: '50,000',
     min: 0,
   },
@@ -225,8 +233,11 @@ export default function FIREQuiz() {
     if (answers.currentSavings !== undefined) params.set('savings', answers.currentSavings.toString())
     if (answers.annualIncome !== undefined) params.set('income', answers.annualIncome.toString())
     if (answers.annualExpenses !== undefined) params.set('expenses', answers.annualExpenses.toString())
-    if (answers.annualIncome !== undefined && answers.annualExpenses !== undefined) {
-      params.set('contrib', Math.max(0, answers.annualIncome - answers.annualExpenses).toString())
+    // Contributions come from today's cash flow, so they need today's spending. The retirement
+    // spending answer sets the FIRE target instead and is deliberately not reused here: for most
+    // people the two differ, and substituting one for the other silently invents a savings rate.
+    if (answers.annualIncome !== undefined && answers.currentAnnualExpenses !== undefined) {
+      params.set('contrib', Math.max(0, answers.annualIncome - answers.currentAnnualExpenses).toString())
     }
     navigate(`${match.path}${params.size > 0 ? `?${params}` : ''}`)
   }

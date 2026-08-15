@@ -2,6 +2,8 @@ import { Fragment, useMemo, useState } from 'react'
 import {
   AgeInput,
   CurrencyInput,
+  CurrencyPeriodProvider,
+  PeriodToggle,
   PercentageInput,
   RetirementExpenseListInput,
   RetirementIncomeListInput,
@@ -119,7 +121,7 @@ export default function DeferredCompensation() {
   }
 
   return (
-    <>
+    <CurrencyPeriodProvider period={params.currencyPeriod} onChange={value => setParam('currencyPeriod', value)}>
       <SEO {...calculatorSEO['retirement-cash-flow']} />
       <div className="space-y-6">
         <header>
@@ -136,6 +138,7 @@ export default function DeferredCompensation() {
         <Card>
           <CardHeader>
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your retirement scenario</h2>
+            <PeriodToggle className="mt-3" />
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput
@@ -165,11 +168,11 @@ export default function DeferredCompensation() {
                 showSlider
               />
               <CurrencyInput
-                label="Annual retirement spending (today's dollars)"
+                label="Retirement spending (today's dollars)"
                 value={params.annualExpenses}
                 onChange={value => setParam('annualExpenses', value)}
                 tooltip="Your after-tax annual spending target in today’s dollars."
-                allowMonthlyToggle
+                periodic
               />
           </CardContent>
         </Card>
@@ -453,6 +456,6 @@ export default function DeferredCompensation() {
           savedAt={savedAt}
         />
       </div>
-    </>
+    </CurrencyPeriodProvider>
   )
 }

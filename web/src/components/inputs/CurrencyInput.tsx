@@ -1,5 +1,15 @@
-import { useId, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
 import Tooltip from '../ui/Tooltip'
+import { useCurrencyPeriodContext } from './CurrencyPeriodProvider'
+import {
+  convertPeriod,
+  formatPeriodAmount,
+  formatTypedAmount,
+  periodQualifier,
+  periodSuffix,
+  resolveEditedAmount,
+  type CurrencyPeriod,
+} from '../../utils/currencyPeriod'
 
 interface CurrencyInputProps {
   label: string
@@ -9,7 +19,13 @@ interface CurrencyInputProps {
   min?: number
   max?: number
   className?: string
-  allowMonthlyToggle?: boolean
+  /**
+   * Marks the field as a recurring amount, so it follows the calculator's shared monthly/annual
+   * preference and always states its period. Leave it off for balances and other one-off amounts.
+   */
+  periodic?: boolean
+  /** Period the stored `value` is expressed in. Bounds and `onChange` always use this period. */
+  storedPeriod?: CurrencyPeriod
   showInvalidState?: boolean // When true, shows red border if value is below min instead of clamping
 }
 
@@ -21,14 +37,21 @@ export default function CurrencyInput({
   min = 0,
   max,
   className = '',
-  allowMonthlyToggle = false,
+  periodic = false,
+  storedPeriod = 'annual',
   showInvalidState = false,
 }: CurrencyInputProps) {
   const id = useId()
-  const [isMonthly, setIsMonthly] = useState(false)
+  const { period } = useCurrencyPeriodContext()
+  // Text the user is part-way through typing. Rendering it verbatim is what stops the field
+  // rewriting "4166.6" to "4,167" between keystrokes.
+  const [draft, setDraft] = useState<string | null>(null)
 
-  // When in monthly mode, display and edit monthly values, but store annual
-  const displayValue = isMonthly ? value / 12 : value
+  const displayPeriod = periodic ? period : storedPeriod
+  const displayValue = convertPeriod(value, storedPeriod, displayPeriod)
+
+  // A draft written in one period must not be reinterpreted in another.
+  useEffect(() => setDraft(null), [displayPeriod])
 
   // Check if current value is invalid (below min)
   const isInvalid = showInvalidState && value < min
@@ -36,51 +59,45 @@ export default function CurrencyInput({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove non-numeric characters except decimal point
     const raw = e.target.value.replace(/[^0-9.]/g, '')
-    
+    setDraft(raw)
+
     // Handle empty input or invalid numbers
     if (raw === '' || raw === '.') {
       onChange(0)
       return
     }
-    
-    let newValue = parseFloat(raw)
-    
+
+    const typed = parseFloat(raw)
+
     // Guard against NaN
-    if (isNaN(newValue)) {
+    if (isNaN(typed)) {
       onChange(0)
       return
     }
-    
+
     // Ensure non-negative if min is 0 or positive
-    if (min >= 0 && newValue < 0) {
-      newValue = 0
+    const typedDisplayAmount = min >= 0 && typed < 0 ? 0 : typed
+
+    // Convert back to the stored period. Re-entering the figure already on screen is a no-op, so
+    // switching periods and back never nudges the value the user entered.
+    const newValue = resolveEditedAmount(typedDisplayAmount, value, displayPeriod, storedPeriod)
+
+    // Bounds are always expressed in the stored period, so clamping happens after conversion.
+    // `showInvalidState` fields flag a too-low value in the UI instead of clamping it.
+    let finalValue = newValue
+    if (max !== undefined && newValue > max) {
+      finalValue = max
+    } else if (!showInvalidState && newValue < min) {
+      finalValue = min
     }
-    
-    // Convert monthly to annual if in monthly mode
-    if (isMonthly) {
-      newValue = newValue * 12
-    }
-    
-    // If showInvalidState is enabled, don't clamp the min value - just let it through
-    if (showInvalidState) {
-      if (max !== undefined && newValue > max) {
-        onChange(max)
-      } else {
-        onChange(newValue)
-      }
-    } else {
-      // Original behavior: clamp to min/max
-      if (max !== undefined && newValue > max) {
-        onChange(max)
-      } else if (newValue < min) {
-        onChange(min)
-      } else {
-        onChange(newValue)
-      }
-    }
+
+    // Keep the draft only while it still describes the stored value; otherwise the clamp would be
+    // invisible until blur.
+    setDraft(finalValue === newValue ? raw : null)
+    onChange(finalValue)
   }
 
-  const formattedValue = new Intl.NumberFormat('en-US').format(Math.round(displayValue))
+  const formattedValue = draft !== null ? formatTypedAmount(draft) : formatPeriodAmount(displayValue)
 
   return (
     <div className={className}>
@@ -90,19 +107,13 @@ export default function CurrencyInput({
           className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300"
         >
           {label}
-          {isMonthly && <span className="text-xs text-gray-500">(monthly)</span>}
+          {periodic && (
+            <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
+              ({periodQualifier(displayPeriod)})
+            </span>
+          )}
           {tooltip && <Tooltip content={tooltip} />}
         </label>
-        
-        {allowMonthlyToggle && (
-          <button
-            type="button"
-            onClick={() => setIsMonthly(!isMonthly)}
-            className="text-xs px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          >
-            {isMonthly ? 'Annual ↔' : 'Monthly ↔'}
-          </button>
-        )}
       </div>
       <div className="relative">
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none font-medium">
@@ -111,11 +122,13 @@ export default function CurrencyInput({
         <input
           id={id}
           type="text"
-          inputMode="numeric"
+          inputMode="decimal"
           value={formattedValue}
           onChange={handleChange}
+          onBlur={() => setDraft(null)}
+          aria-invalid={isInvalid || undefined}
           className={`
-            w-full pl-8 pr-3 py-2.5 
+            w-full pl-8 ${periodic ? 'pr-12' : 'pr-3'} py-2.5 
             bg-white dark:bg-gray-800 
             border rounded-lg 
             text-gray-900 dark:text-gray-100
@@ -127,9 +140,9 @@ export default function CurrencyInput({
             }
           `}
         />
-        {allowMonthlyToggle && (
+        {periodic && (
           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
-            {isMonthly ? '/mo' : '/yr'}
+            {periodSuffix(displayPeriod)}
           </span>
         )}
       </div>

@@ -66,6 +66,10 @@ public static class DeferredCompensationWorkbook
     }
 
     private static Cell Text(string reference, string value) => new() { CellReference = reference, DataType = CellValues.InlineString, InlineString = new InlineString(new Text(value)) };
-    private static Cell Number(string reference, double value, uint style) => new() { CellReference = reference, StyleIndex = style, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) };
+    // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
+    // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
+    private static Cell Number(string reference, double value, uint style) => double.IsFinite(value)
+        ? new() { CellReference = reference, StyleIndex = style, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) }
+        : Text(reference, WorkbookValues.Unreachable);
     private static void AddStyles(WorkbookPart workbookPart) => workbookPart.AddNewPart<WorkbookStylesPart>().Stylesheet = new Stylesheet(new NumberingFormats(new NumberingFormat { NumberFormatId = 164U, FormatCode = "$#,##0" }, new NumberingFormat { NumberFormatId = 165U, FormatCode = "0.0%" }, new NumberingFormat { NumberFormatId = 166U, FormatCode = "0.0" }), new Fonts(new Font()), new Fills(new Fill(new PatternFill { PatternType = PatternValues.None }), new Fill(new PatternFill { PatternType = PatternValues.Gray125 })), new Borders(new Border()), new CellStyleFormats(new CellFormat()), new CellFormats(new CellFormat(), new CellFormat { NumberFormatId = 164U, ApplyNumberFormat = true }, new CellFormat { NumberFormatId = 165U, ApplyNumberFormat = true }, new CellFormat { NumberFormatId = 166U, ApplyNumberFormat = true }));
 }

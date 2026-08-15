@@ -234,10 +234,11 @@ export default function RetirementAccountListInput({
                       tooltip="The amount currently held in this account"
                     />
                     <CurrencyInput
-                      label="Annual Contributions (today's dollars)"
+                      label="Contributions (today’s dollars)"
                       value={account.annualContribution}
                       onChange={value => updateAccount(account.id, 'annualContribution', value)}
-                      tooltip="Entered in today’s dollars and escalated with inflation each year, the same way your spending is. Contributions stop at your retirement age."
+                      tooltip="Entered in today’s dollars and escalated with inflation each year, the same way your spending is. Contributions stop at your semi-retirement age."
+                      periodic
                     />
                     <PercentageInput
                       label="Expected Annual Return"

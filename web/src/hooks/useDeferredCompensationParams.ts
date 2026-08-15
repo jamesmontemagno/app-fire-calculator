@@ -10,6 +10,8 @@ import type {
 } from '../utils/deferredCompensation'
 import { defaultWithdrawalTaxRate } from '../utils/deferredCompensation'
 import { DEFERRED_STORAGE_KEY_PREFIX } from '../utils/savedCalculationStorage'
+import type { CurrencyPeriod } from '../utils/currencyPeriod'
+import { DEFAULT_CURRENCY_PERIOD, parseCurrencyPeriod } from '../utils/currencyPeriod'
 
 export interface DeferredCompensationParams {
   currentAge: number
@@ -22,6 +24,7 @@ export interface DeferredCompensationParams {
   additionalExpenses: RetirementExpense[]
   withdrawOnlyAfterRetirement: boolean
   reinvestSurplus: boolean
+  currencyPeriod: CurrencyPeriod
 }
 
 const ACCOUNT_TYPES: RetirementAccountType[] = [
@@ -100,6 +103,7 @@ const DEFAULTS: DeferredCompensationParams = {
   additionalExpenses: [],
   withdrawOnlyAfterRetirement: true,
   reinvestSurplus: true,
+  currencyPeriod: DEFAULT_CURRENCY_PERIOD,
 }
 
 const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
@@ -113,6 +117,7 @@ const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
   additionalExpenses: 'dcAdditionalExpenses',
   withdrawOnlyAfterRetirement: 'dcRetireOnly',
   reinvestSurplus: 'dcReinvest',
+  currencyPeriod: 'dcPeriod',
 }
 
 interface SavedDeferredCompensationParams {
@@ -363,6 +368,9 @@ export function useDeferredCompensationParams() {
       reinvestSurplus: searchParams.get(PARAM_KEYS.reinvestSurplus)
         ? searchParams.get(PARAM_KEYS.reinvestSurplus) === 'true'
         : savedParams?.reinvestSurplus ?? DEFAULTS.reinvestSurplus,
+      currencyPeriod: searchParams.get(PARAM_KEYS.currencyPeriod)
+        ? parseCurrencyPeriod(searchParams.get(PARAM_KEYS.currencyPeriod))
+        : savedParams?.currencyPeriod ?? DEFAULTS.currencyPeriod,
     }
   }, [savedParams, searchParams])
   const params = useMemo(() => ({ ...resolvedParams, ...pendingParams }), [pendingParams, resolvedParams])

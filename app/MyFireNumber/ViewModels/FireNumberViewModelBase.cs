@@ -195,7 +195,10 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
 
     protected virtual string BuildProjectionSummary(StandardFireResult result)
     {
-        return $"At the current assumptions, your portfolio is projected to reach {FormatCurrency(result.FireNumber)} in approximately {result.YearsToFire:N1} years.";
+        // An unreachable target is a valid result, so guard here rather than in each derived view model.
+        return double.IsPositiveInfinity(result.YearsToFire)
+            ? "The current contribution and return assumptions do not reach the FIRE Number."
+            : $"At the current assumptions, your portfolio is projected to reach {FormatCurrency(result.FireNumber)} in approximately {result.YearsToFire:N1} years.";
     }
 
     private bool TryBuildStandardDraft(out StandardFireDraft draft)

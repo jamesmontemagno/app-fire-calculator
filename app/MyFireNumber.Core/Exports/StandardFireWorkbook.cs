@@ -200,6 +200,13 @@ public static class StandardFireWorkbook
 
     private static Cell CreateNumberCell(string reference, double value, uint styleIndex)
     {
+        // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
+        // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
+        if (!double.IsFinite(value))
+        {
+            return CreateTextCell(reference, WorkbookValues.Unreachable);
+        }
+
         return new Cell
         {
             CellReference = reference,

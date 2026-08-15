@@ -50,13 +50,6 @@ public sealed class StandardFireViewModel : FireNumberViewModelBase<StandardFire
         return FinancialCalculator.CalculateStandardFire(draft.ToFireInputs());
     }
 
-    protected override string BuildProjectionSummary(StandardFireResult result)
-    {
-        return double.IsPositiveInfinity(result.YearsToFire)
-            ? "The current contribution and return assumptions do not reach the FIRE Number."
-            : base.BuildProjectionSummary(result);
-    }
-
     protected override async Task ShareAsync(StandardFireDraft draft)
     {
         await exportService.ShareAsync(draft, FinancialCalculator.CalculateStandardFire(draft.ToFireInputs()));

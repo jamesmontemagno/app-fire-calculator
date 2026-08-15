@@ -3,6 +3,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { ContributionGrowth, DebtItem } from '../utils/calculations'
 import { DEFAULT_CONTRIBUTION_GROWTH } from '../utils/calculations'
+import type { CurrencyPeriod } from '../utils/currencyPeriod'
+import { DEFAULT_CURRENCY_PERIOD, isCurrencyPeriod } from '../utils/currencyPeriod'
 import { STANDARD_STORAGE_KEY_PREFIX } from '../utils/savedCalculationStorage'
 
 interface SavedCalculatorParams {
@@ -37,6 +39,7 @@ interface CalculatorParams {
   healthcareAnnualDeductible: number
   healthcareAnnualOutOfPocket: number
   contributionGrowth: ContributionGrowth
+  currencyPeriod: CurrencyPeriod
 }
 
 const DEFAULTS: CalculatorParams = {
@@ -65,6 +68,7 @@ const DEFAULTS: CalculatorParams = {
   healthcareAnnualDeductible: 2500,
   healthcareAnnualOutOfPocket: 2000,
   contributionGrowth: DEFAULT_CONTRIBUTION_GROWTH,
+  currencyPeriod: DEFAULT_CURRENCY_PERIOD,
 }
 
 const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
@@ -93,6 +97,7 @@ const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
   healthcareAnnualDeductible: 'healthcareDeductible',
   healthcareAnnualOutOfPocket: 'healthcareOop',
   contributionGrowth: 'contribGrowth',
+  currencyPeriod: 'period',
 }
 
 interface NumericBounds {
@@ -274,6 +279,9 @@ export function useCalculatorParams() {
         if (key === 'contributionGrowth') {
           return urlValue === 'inflation' || urlValue === 'flat' ? urlValue : DEFAULTS[key]
         }
+        if (key === 'currencyPeriod') {
+          return isCurrencyPeriod(urlValue) ? urlValue : DEFAULTS[key]
+        }
         
         return parseNumericParam(
           urlValue,
@@ -330,6 +338,7 @@ export function useCalculatorParams() {
       healthcareAnnualDeductible: getParam('healthcareAnnualDeductible'),
       healthcareAnnualOutOfPocket: getParam('healthcareAnnualOutOfPocket'),
       contributionGrowth: getParam('contributionGrowth'),
+      currencyPeriod: getParam('currencyPeriod'),
     }
   }, [location.pathname, savedParams, searchParams])
   const params = useMemo(() => ({ ...resolvedParams, ...pendingParams }), [pendingParams, resolvedParams])

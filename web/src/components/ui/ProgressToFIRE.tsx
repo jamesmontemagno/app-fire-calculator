@@ -59,7 +59,7 @@ export default function ProgressToFIRE({
           <p className="text-2xl font-bold text-gray-900 dark:text-gray-100">
             {displayProgress}%
           </p>
-          {yearsToFIRE !== undefined && yearsToFIRE !== Infinity && yearsToFIRE > 0 && (
+          {yearsToFIRE !== undefined && Number.isFinite(yearsToFIRE) && yearsToFIRE > 0 && (
             <p className="text-xs text-gray-500 dark:text-gray-400">
               ~{yearsToFIRE.toFixed(1)} years to go
             </p>

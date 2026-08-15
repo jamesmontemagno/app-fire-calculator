@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateInvestmentGrowth, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, InputGroup, PercentageInput, ToggleInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, CurrencyPeriodProvider, InputGroup, PercentageInput, PeriodToggle, ToggleInput } from '../components/inputs'
 import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
@@ -43,7 +43,7 @@ export default function SavingsRate() {
   }
 
   return (
-    <>
+    <CurrencyPeriodProvider period={params.currencyPeriod} onChange={value => setParam('currencyPeriod', value)}>
       <SEO {...calculatorSEO['savings-rate']} />
       <div className="space-y-8">
         <header>
@@ -56,6 +56,7 @@ export default function SavingsRate() {
             <CardHeader>
               <h2 id="savings-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Use after-tax take-home income to see the share of income you are investing.</p>
+              <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Used to label the projection timeline." min={18} max={80} showSlider />
@@ -78,7 +79,7 @@ export default function SavingsRate() {
               </div>
               <CurrencyInput label={`${params.savingsFrequency === 'monthly' ? 'Monthly' : 'Annual'} contribution`} value={params.savingsContribution} onChange={value => setParam('savingsContribution', value)} tooltip={`Amount you invest each ${params.savingsFrequency === 'monthly' ? 'month' : 'year'}.`} />
               <InputGroup label="Years investing" value={params.savingsYears} onChange={value => setParam('savingsYears', value)} onSliderChange={value => setParamDebounced('savingsYears', value)} tooltip="How long contributions and investment growth continue." suffix="years" min={1} max={50} showSlider />
-              <CurrencyInput label="After-tax take-home income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Annual income after taxes, used to calculate the savings rate." allowMonthlyToggle />
+              <CurrencyInput label="After-tax take-home income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Income after taxes, used to calculate the savings rate." periodic />
             </CardContent>
           </Card>
         </section>
@@ -130,6 +131,6 @@ export default function SavingsRate() {
 
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
-    </>
+    </CurrencyPeriodProvider>
   )
 }
