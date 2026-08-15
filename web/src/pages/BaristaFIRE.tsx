@@ -31,7 +31,7 @@ export default function BaristaFIRE() {
       calculatorName: 'Barista FIRE', inputs, results: resultValues, projections: results.projections, inputFormats, resultFormats,
       resultFormulas: {
         fullFireNumber: '{annualExpenses}/{withdrawalRate}',
-        baristaNumber: '({annualExpenses}-{partTimeIncome})/{withdrawalRate}',
+        baristaNumber: 'MAX(0,{annualExpenses}-{partTimeIncome})/{withdrawalRate}',
       },
     })
   }

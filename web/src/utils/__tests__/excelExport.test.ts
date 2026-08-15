@@ -196,6 +196,41 @@ function topLevelKeys(body: string): string[] {
   return keys
 }
 
+/**
+ * Like `topLevelKeys`, but pairs each top-level property name with the RAW text of its value.
+ *
+ * Comma and colon positions are found in the length-preserved blanked body (so a brace or colon
+ * inside a string never splits a segment), then the same offsets index into the raw body to recover
+ * the untouched formula string that blanking would otherwise have emptied.
+ */
+function topLevelEntries(blanked: string, raw: string): Array<[string, string]> {
+  const entries: Array<[string, string]> = []
+  let depth = 0
+  let start = 0
+
+  const take = (from: number, to: number) => {
+    const blankedSegment = blanked.slice(from, to)
+    const colon = blankedSegment.indexOf(':')
+    if (colon === -1) return
+    const name = blankedSegment.slice(0, colon).trim()
+    if (!/^[A-Za-z_$][\w$]*$/.test(name)) return
+    entries.push([name, raw.slice(from + colon + 1, to)])
+  }
+
+  for (let i = 0; i < blanked.length; i += 1) {
+    const char = blanked[i]
+    if (char === '{' || char === '[' || char === '(') depth += 1
+    else if (char === '}' || char === ']' || char === ')') depth -= 1
+    else if (char === ',' && depth === 0) {
+      take(start, i)
+      start = i + 1
+    }
+  }
+  take(start, blanked.length)
+
+  return entries
+}
+
 function undeclared(keys: Iterable<string>): string[] {
   return [...new Set(keys)].filter(key => !isExportFieldDeclared(key)).sort()
 }
@@ -652,6 +687,153 @@ describe('substring collisions that used to mis-format live exports', () => {
 
     // A real age is still correct, which is why the collision was easy to miss.
     expect(prepareInputsForExport({ currentAge: 30 }).formats.currentAge).toBe('age')
+  })
+})
+
+// ================================================================================================
+// Coverage: every declared result formula attaches to a real cell
+// ================================================================================================
+
+/**
+ * `resultFormulas` turns a Results cell into a live Excel formula instead of a frozen value, but
+ * only when two things line up, and nothing warns when they don't:
+ *
+ *   - the formula's KEY must match a field in the `results:` object (the output of
+ *     `prepareResultsForExport(...)`). A key that matches nothing is silently inert — no error, no
+ *     console warning, no visual difference — so the cell just keeps its plain value. That is how
+ *     HealthcareGap shipped `yearsInGap`/`annualBaseCost` against a result exposing
+ *     `gapYears`/`annualCost` (#66), and why it went unnoticed until someone opened the formula bar.
+ *   - every `{inputKey}` INSIDE the formula must match a field passed to `prepareInputsForExport`,
+ *     or the `{inputKey}`→cell-reference substitution leaves the literal `{inputKey}` in the cell.
+ *
+ * This suite derives both truth sets from real invocation — the calculator output and the page's
+ * own input call site — rather than a hand-kept list, and refuses to pass while checking nothing.
+ * It deliberately does not try to prove the formula's arithmetic equals `calculations.ts`; a clamp
+ * or guard dropped from an otherwise valid formula (BaristaFIRE's `MAX`, savingsRate's divide-by-
+ * zero guard) is a human read, not a mechanical one.
+ */
+
+/** Page file (as it appears in PAGE_SOURCES) → the RESULT_BUILDERS entry whose fields it exports. */
+const PAGE_RESULT_BUILDER: Record<string, keyof typeof RESULT_BUILDERS> = {
+  'BaristaFIRE.tsx': 'BaristaFIRE',
+  'CoastFIRE.tsx': 'CoastFIRE',
+  'FatFIRE.tsx': 'FatFIRE',
+  'HealthcareGap.tsx': 'HealthcareGap',
+  'LeanFIRE.tsx': 'LeanFIRE',
+  'ReverseFIRE.tsx': 'ReverseFIRE',
+  'SavingsRate.tsx': 'InvestmentGrowth',
+  'StandardFIRE.tsx': 'StandardFIRE',
+  'WithdrawalRate.tsx': 'Withdrawal',
+}
+
+/**
+ * Read each page's `resultFormulas` object literal as key → formula string.
+ *
+ * Built on the same hardened scan as `readCallSiteKeys`: comments and strings are blanked
+ * length-preservingly before any brace is counted, and an unbalanced literal throws rather than
+ * returning a short list, so this can never quietly report fewer formulas than a page declares.
+ */
+function readResultFormulas(): Map<string, Map<string, string>> {
+  const byFile = new Map<string, Map<string, string>>()
+
+  for (const [path, raw] of Object.entries(PAGE_SOURCES)) {
+    const source = blankOutCommentsAndStrings(raw)
+    const marker = /\bresultFormulas\s*:\s*\{/g
+    const formulas = new Map<string, string>()
+
+    for (const match of source.matchAll(marker)) {
+      const open = match.index + match[0].length - 1
+      let depth = 0
+      let close = -1
+
+      for (let i = open; i < source.length; i += 1) {
+        const char = source[i]
+        if (char === '{' || char === '[' || char === '(') depth += 1
+        else if (char === '}' || char === ']' || char === ')') {
+          depth -= 1
+          if (depth === 0) {
+            close = i
+            break
+          }
+        }
+      }
+      if (close === -1) throw new Error(`Could not find the end of resultFormulas in ${path}`)
+
+      // Keys are read from blanked source so nesting counts correctly; each key's formula refs are
+      // read from the RAW slice (blanking emptied every string literal). Attribute refs per key by
+      // walking the same top-level segments the key extraction used.
+      const blankedBody = source.slice(open + 1, close)
+      const rawBody = raw.slice(open + 1, close)
+      for (const [key, rawSegment] of topLevelEntries(blankedBody, rawBody)) {
+        const formulaRefs = [...rawSegment.matchAll(/\{([A-Za-z_$][\w$]*)\}/g)].map(m => m[1])
+        formulas.set(key, formulaRefs.join(' '))
+      }
+    }
+
+    if (formulas.size > 0) byFile.set(path.split('/').pop() ?? path, formulas)
+  }
+
+  return byFile
+}
+
+describe('declared result formulas attach to real cells', () => {
+  const formulasByFile = readResultFormulas()
+  const inputKeysByFile = readCallSiteKeys('prepareInputsForExport')
+
+  it.each([...formulasByFile])('%s keys all name a real result field', (file, formulas) => {
+    const builder = PAGE_RESULT_BUILDER[file]
+    expect(
+      builder,
+      `${file} declares resultFormulas but has no PAGE_RESULT_BUILDER entry, so this test cannot ` +
+        'check its keys against real calculator output. Add the mapping — do not skip the page.',
+    ).toBeDefined()
+
+    const fields = new Set(Object.keys(prepareResultsForExport(RESULT_BUILDERS[builder]()).values))
+    const dead = [...formulas.keys()].filter(key => !fields.has(key)).sort()
+    expect(
+      dead,
+      `${file} declares resultFormulas key(s) that no field in its exported results provides: ` +
+        `${dead.join(', ')}. A formula keyed to a nonexistent field never attaches — the cell ` +
+        `silently keeps a plain value. Real fields are: ${[...fields].sort().join(', ')}.`,
+    ).toEqual([])
+  })
+
+  it.each([...formulasByFile])('%s formulas reference only declared input fields', (file, formulas) => {
+    const inputs = new Set(inputKeysByFile.get(file) ?? [])
+    const unresolved = [...new Set([...formulas.values()].flatMap(refs => refs.split(' ').filter(Boolean)))]
+      .filter(ref => !inputs.has(ref))
+      .sort()
+    expect(
+      unresolved,
+      `${file} has resultFormulas referencing {input} key(s) not passed to prepareInputsForExport: ` +
+        `${unresolved.join(', ')}. The {key}->cell substitution would leave the literal text in the ` +
+        `cell. Declared inputs are: ${[...inputs].sort().join(', ')}.`,
+    ).toEqual([])
+  })
+
+  it('actually reads the resultFormulas it claims to check', () => {
+    // The vacuity guard, in the spirit of #68: if the marker or the scan silently matched nothing,
+    // the two suites above would pass over zero formulas. Rather than hard-code a page count (which
+    // passes when a tenth page is missed), locate every `resultFormulas:` literal independently and
+    // require that each one was read into a non-empty map.
+    let literalSites = 0
+    for (const [path, raw] of Object.entries(PAGE_SOURCES)) {
+      const file = path.split('/').pop() ?? path
+      const source = blankOutCommentsAndStrings(raw)
+      for (const _ of source.matchAll(/\bresultFormulas\s*:\s*\{/g)) {
+        literalSites += 1
+        expect(
+          formulasByFile.get(file)?.size,
+          `${file} declares a resultFormulas literal, but readResultFormulas read no keys from it. ` +
+            'Fix the scanner — do not delete this assertion or relax it to go green.',
+        ).toBeGreaterThan(0)
+      }
+    }
+    expect(literalSites).toBeGreaterThan(0)
+
+    // A known-good pair, so the scan cannot pass by reading keys but losing their formula refs.
+    expect(formulasByFile.get('HealthcareGap.tsx')?.get('gapYears')).toContain('medicareAge')
+    expect(formulasByFile.get('HealthcareGap.tsx')?.has('annualCost')).toBe(true)
   })
 })
 
