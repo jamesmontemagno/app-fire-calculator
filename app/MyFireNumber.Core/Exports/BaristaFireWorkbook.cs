@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 using System.Globalization;
 
 namespace MyFireNumber.Core.Exports;
@@ -15,7 +16,7 @@ public static class BaristaFireWorkbook
     private const uint IntegerStyleIndex = WorkbookStyles.IntegerStyleIndex;
     private const uint PlainIntegerStyleIndex = WorkbookStyles.PlainIntegerStyleIndex;
 
-    public static void Create(string filePath, BaristaFireDraft draft, BaristaFireResult result, DateTimeOffset generatedAt)
+    public static void Create(string filePath, BaristaFireDraft draft, BaristaFireResult result, CurrencyPeriod displayPeriod, DateTimeOffset generatedAt)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
         ArgumentNullException.ThrowIfNull(draft);
@@ -33,13 +34,13 @@ public static class BaristaFireWorkbook
         AddStyles(workbookPart);
 
         var sheets = workbookPart.Workbook.AppendChild(new Sheets());
-        AddInputsSheet(workbookPart, sheets, draft, generatedAt);
+        AddInputsSheet(workbookPart, sheets, draft, displayPeriod, generatedAt);
         AddResultsSheet(workbookPart, sheets, result, generatedAt);
         AddProjectionSheet(workbookPart, sheets, result.Projections);
         workbookPart.Workbook.Save();
     }
 
-    private static void AddInputsSheet(WorkbookPart workbookPart, Sheets sheets, BaristaFireDraft draft, DateTimeOffset generatedAt)
+    private static void AddInputsSheet(WorkbookPart workbookPart, Sheets sheets, BaristaFireDraft draft, CurrencyPeriod displayPeriod, DateTimeOffset generatedAt)
     {
         var rows = new List<Row>
         {
@@ -52,7 +53,7 @@ public static class BaristaFireWorkbook
             ("Current age", CreateNumberCell("", draft.CurrentAge, IntegerFormat.Plain)),
             ("Current savings", CreateNumberCell("", draft.CurrentSavings, CurrencyStyleIndex)),
             ("Annual contribution", CreateNumberCell("", draft.AnnualContribution, CurrencyStyleIndex)),
-            ("Annual retirement spending (today's dollars)", CreateNumberCell("", draft.AnnualExpenses, CurrencyStyleIndex)),
+            (RecurringAmountLabels.RetirementSpendingFor(displayPeriod), CreateNumberCell("", CurrencyPeriodMath.Convert(draft.AnnualExpenses, CurrencyPeriod.Annual, displayPeriod), CurrencyStyleIndex)),
             ("Part-time take-home income (after tax)", CreateNumberCell("", draft.PartTimeAnnualIncome, CurrencyStyleIndex)),
             ("Expected return", CreateNumberCell("", draft.ExpectedReturn, PercentageStyleIndex)),
             ("Inflation rate", CreateNumberCell("", draft.InflationRate, PercentageStyleIndex)),

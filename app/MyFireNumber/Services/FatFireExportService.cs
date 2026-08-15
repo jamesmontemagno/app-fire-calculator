@@ -10,6 +10,13 @@ public interface IFatFireExportService
 
 public sealed class FatFireExportService : IFatFireExportService
 {
+    private readonly IDisplayPeriodPreferencesService displayPeriodPreferences;
+
+    public FatFireExportService(IDisplayPeriodPreferencesService displayPeriodPreferences)
+    {
+        this.displayPeriodPreferences = displayPeriodPreferences;
+    }
+
     public async Task ShareAsync(FatFireDraft draft, StandardFireResult result, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -17,7 +24,7 @@ public sealed class FatFireExportService : IFatFireExportService
         var filePath = Path.Combine(
             FileSystem.CacheDirectory,
             $"fat-fire-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}.xlsx");
-        StandardFireWorkbook.CreateFat(filePath, draft, result, DateTimeOffset.UtcNow);
+        StandardFireWorkbook.CreateFat(filePath, draft, result, displayPeriodPreferences.Get("fat-fire"), DateTimeOffset.UtcNow);
 
         await Share.Default.RequestAsync(new ShareFileRequest
         {

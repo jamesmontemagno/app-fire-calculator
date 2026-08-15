@@ -31,6 +31,7 @@ interface SharedCalculator {
 }
 
 const CALCULATORS = inventory.calculators as SharedCalculator[]
+const FIELD_LABELS = inventory.fieldLabels as Record<string, string>
 
 /**
  * The `<CurrencyInput …/>` elements on one page, as raw source text.
@@ -105,6 +106,23 @@ function sourceFor(webPage: string): string {
   return PAGE_SOURCES[path]
 }
 
+function labelForField(fileName: string, source: string, key: string): string {
+  const element = currencyInputElements(fileName, source).find(
+    candidate => new RegExp(`value=\\{params\\.${key}\\}`).test(candidate.blanked),
+  )
+
+  if (!element) {
+    throw new Error(`${fileName}: no <CurrencyInput> binds params.${key}; refusing to skip its shared label.`)
+  }
+
+  const label = /label="([^"]+)"/.exec(element.raw)?.[1]
+  if (!label) {
+    throw new Error(`${fileName}: the ${key} input has no literal label; refusing to skip its shared label.`)
+  }
+
+  return label
+}
+
 describe('shared periodic field inventory', () => {
   it.each(CALCULATORS.map(calculator => [calculator.webPage, calculator] as const))(
     '%s declares the shared periodic fields in the shared periods',
@@ -136,6 +154,21 @@ describe('shared periodic field inventory', () => {
     expect(
       CALCULATORS.flatMap(calculator => calculator.fields).filter(field => field.storedPeriod === 'monthly'),
     ).not.toHaveLength(0)
+  })
+
+  it('pins the retirement-spending wording before comparing source', () => {
+    expect(FIELD_LABELS.annualExpenses).toBe('Retirement spending (today’s dollars)')
+  })
+
+  it.each(
+    CALCULATORS.filter(calculator => calculator.fields.some(field => field.key in FIELD_LABELS)).map(calculator => [
+      calculator.webPage,
+      calculator,
+    ] as const),
+  )('%s keeps shared labels on its periodic inputs', (webPage, calculator) => {
+    for (const field of calculator.fields.filter(field => field.key in FIELD_LABELS)) {
+      expect(labelForField(webPage, sourceFor(webPage), field.key)).toBe(FIELD_LABELS[field.key])
+    }
   })
 
   it('reads fields past a comment or a string holding an unbalanced brace', () => {

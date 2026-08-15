@@ -10,6 +10,13 @@ public interface ILeanFireExportService
 
 public sealed class LeanFireExportService : ILeanFireExportService
 {
+    private readonly IDisplayPeriodPreferencesService displayPeriodPreferences;
+
+    public LeanFireExportService(IDisplayPeriodPreferencesService displayPeriodPreferences)
+    {
+        this.displayPeriodPreferences = displayPeriodPreferences;
+    }
+
     public async Task ShareAsync(LeanFireDraft draft, StandardFireResult result, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -17,7 +24,7 @@ public sealed class LeanFireExportService : ILeanFireExportService
         var filePath = Path.Combine(
             FileSystem.CacheDirectory,
             $"lean-fire-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}.xlsx");
-        StandardFireWorkbook.CreateLean(filePath, draft, result, DateTimeOffset.UtcNow);
+        StandardFireWorkbook.CreateLean(filePath, draft, result, displayPeriodPreferences.Get("lean-fire"), DateTimeOffset.UtcNow);
 
         await Share.Default.RequestAsync(new ShareFileRequest
         {

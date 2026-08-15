@@ -25,6 +25,7 @@ public class SharedPeriodicFieldInventoryTests
 {
     private static readonly ICalculatorCatalog Calculators = new CalculatorCatalog();
     private static readonly IReadOnlyList<SharedCalculator> Shared = LoadShared();
+    private const string RetirementSpendingLabel = "Retirement spending (today’s dollars)";
 
     [Fact]
     public void The_shared_inventory_covers_exactly_the_shipped_calculators()
@@ -76,6 +77,32 @@ public class SharedPeriodicFieldInventoryTests
         }
     }
 
+    [Fact]
+    public void Retirement_spending_label_stays_shared_across_core_and_native_pages()
+    {
+        var label = LoadFieldLabel(PeriodicFieldCatalog.AnnualExpenses);
+
+        Assert.Equal(RetirementSpendingLabel, label);
+        Assert.Equal(RecurringAmountLabels.RetirementSpending, label);
+
+        foreach (var calculator in Shared.Where(calculator =>
+                     calculator.Fields.Any(field => field.Key == PeriodicFieldCatalog.AnnualExpenses)))
+        {
+            Assert.False(
+                string.IsNullOrWhiteSpace(calculator.NativePage),
+                $"{calculator.Id} has retirement spending but no nativePage in shared/parity/periodic-fields.json.");
+
+            var path = Path.Combine(AppContext.BaseDirectory, "NativeViews", calculator.NativePage!);
+            Assert.True(
+                File.Exists(path),
+                $"Native page '{calculator.NativePage}' for {calculator.Id} was not copied to the test output.");
+
+            var source = File.ReadAllText(path);
+            Assert.Contains($"Header=\"{label}\"", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("Header=\"Retirement expenses\"", source, StringComparison.Ordinal);
+        }
+    }
+
     private static string Serialize(CurrencyPeriod period) =>
         period.Validated(nameof(period)) == CurrencyPeriod.Monthly ? "monthly" : "annual";
 
@@ -94,6 +121,7 @@ public class SharedPeriodicFieldInventoryTests
         return document.RootElement.GetProperty("calculators").EnumerateArray()
             .Select(calculator => new SharedCalculator(
                 calculator.GetProperty("id").GetString()!,
+                calculator.TryGetProperty("nativePage", out var nativePage) ? nativePage.GetString() : null,
                 calculator.GetProperty("fields").EnumerateArray()
                     .Select(field => new SharedField(
                         field.GetProperty("key").GetString()!,
@@ -102,7 +130,15 @@ public class SharedPeriodicFieldInventoryTests
             .ToList();
     }
 
-    private sealed record SharedCalculator(string Id, IReadOnlyList<SharedField> Fields);
+    private static string LoadFieldLabel(string key)
+    {
+        var path = Path.Combine(AppContext.BaseDirectory, "SharedParity", "periodic-fields.json");
+        using var document = JsonDocument.Parse(File.ReadAllText(path));
+        return document.RootElement.GetProperty("fieldLabels").GetProperty(key).GetString()
+            ?? throw new InvalidOperationException($"Shared field label '{key}' is empty.");
+    }
+
+    private sealed record SharedCalculator(string Id, string? NativePage, IReadOnlyList<SharedField> Fields);
 
     private sealed record SharedField(string Key, string StoredPeriod);
 }

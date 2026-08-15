@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MyFireNumber.Core.Calculations;
 using MyFireNumber.Core.Exports;
+using MyFireNumber.Core.Presentation;
 
 namespace MyFireNumber.Tests.Exports;
 
@@ -34,6 +35,7 @@ public sealed class DeferredCompensationWorkbookTests : IDisposable
             workbookPath,
             draft,
             result,
+            CurrencyPeriod.Annual,
             new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
 
         using var document = SpreadsheetDocument.Open(workbookPath, false);
@@ -45,7 +47,7 @@ public sealed class DeferredCompensationWorkbookTests : IDisposable
         Assert.Equal(
             ["Inputs", "Results", "Annual Cash Flow", "Accounts", "Income Sources", "Additional Expenses"],
             sheets.Select(sheet => sheet.Name!.Value));
-        Assert.Equal("Annual retirement spending (today's dollars)", GetCellText(workbookPart, sheets[0], "A8"));
+        Assert.Equal("Retirement spending (today’s dollars) (per year)", GetCellText(workbookPart, sheets[0], "A8"));
         Assert.Equal("Custom Deferred", GetCell(workbookPart, sheets[3], "A2").InlineString!.Text!.Text);
         Assert.Equal("Equal annual payouts", GetCell(workbookPart, sheets[3], "G2").InlineString!.Text!.Text);
         Assert.Equal("5", GetCell(workbookPart, sheets[3], "H2").CellValue!.Text);

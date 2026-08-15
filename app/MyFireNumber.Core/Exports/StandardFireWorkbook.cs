@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 using System.Globalization;
 
 namespace MyFireNumber.Core.Exports;
@@ -15,12 +16,12 @@ public static class StandardFireWorkbook
     private const uint IntegerStyleIndex = WorkbookStyles.IntegerStyleIndex;
     private const uint PlainIntegerStyleIndex = WorkbookStyles.PlainIntegerStyleIndex;
 
-    public static void Create(string filePath, StandardFireDraft draft, StandardFireResult result, DateTimeOffset generatedAt)
+    public static void Create(string filePath, StandardFireDraft draft, StandardFireResult result, CurrencyPeriod displayPeriod, DateTimeOffset generatedAt)
     {
-        CreateWorkbook(filePath, "Standard FIRE", draft, result, generatedAt);
+        CreateWorkbook(filePath, "Standard FIRE", draft, result, displayPeriod, generatedAt);
     }
 
-    public static void CreateLean(string filePath, LeanFireDraft draft, StandardFireResult result, DateTimeOffset generatedAt)
+    public static void CreateLean(string filePath, LeanFireDraft draft, StandardFireResult result, CurrencyPeriod displayPeriod, DateTimeOffset generatedAt)
     {
         ArgumentNullException.ThrowIfNull(draft);
         var calculationDraft = new StandardFireDraft(
@@ -33,10 +34,10 @@ public static class StandardFireWorkbook
             draft.InflationRate,
             draft.WithdrawalRate,
             Math.Min(draft.AnnualExpenses, FinancialCalculator.LeanFireThreshold));
-        CreateWorkbook(filePath, "Lean FIRE", calculationDraft, result, generatedAt);
+        CreateWorkbook(filePath, "Lean FIRE", calculationDraft, result, displayPeriod, generatedAt);
     }
 
-    public static void CreateFat(string filePath, FatFireDraft draft, StandardFireResult result, DateTimeOffset generatedAt)
+    public static void CreateFat(string filePath, FatFireDraft draft, StandardFireResult result, CurrencyPeriod displayPeriod, DateTimeOffset generatedAt)
     {
         ArgumentNullException.ThrowIfNull(draft);
         var calculationDraft = new StandardFireDraft(
@@ -49,10 +50,10 @@ public static class StandardFireWorkbook
             draft.InflationRate,
             draft.WithdrawalRate,
             draft.AnnualExpenses);
-        CreateWorkbook(filePath, "Fat FIRE", calculationDraft, result, generatedAt);
+        CreateWorkbook(filePath, "Fat FIRE", calculationDraft, result, displayPeriod, generatedAt);
     }
 
-    private static void CreateWorkbook(string filePath, string calculatorTitle, StandardFireDraft draft, StandardFireResult result, DateTimeOffset generatedAt)
+    private static void CreateWorkbook(string filePath, string calculatorTitle, StandardFireDraft draft, StandardFireResult result, CurrencyPeriod displayPeriod, DateTimeOffset generatedAt)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(filePath);
         ArgumentNullException.ThrowIfNull(draft);
@@ -70,13 +71,13 @@ public static class StandardFireWorkbook
         AddStyles(workbookPart);
 
         var sheets = workbookPart.Workbook.AppendChild(new Sheets());
-        AddInputsSheet(workbookPart, sheets, calculatorTitle, draft, generatedAt);
+        AddInputsSheet(workbookPart, sheets, calculatorTitle, draft, displayPeriod, generatedAt);
         AddResultsSheet(workbookPart, sheets, calculatorTitle, result, generatedAt);
         AddProjectionsSheet(workbookPart, sheets, result.Projections);
         workbookPart.Workbook.Save();
     }
 
-    private static void AddInputsSheet(WorkbookPart workbookPart, Sheets sheets, string calculatorTitle, StandardFireDraft draft, DateTimeOffset generatedAt)
+    private static void AddInputsSheet(WorkbookPart workbookPart, Sheets sheets, string calculatorTitle, StandardFireDraft draft, CurrencyPeriod displayPeriod, DateTimeOffset generatedAt)
     {
         var rows = new List<Row>
         {
@@ -92,7 +93,7 @@ public static class StandardFireWorkbook
             ("Current savings", CreateNumberCell("", draft.CurrentSavings, CurrencyStyleIndex)),
             ("Annual contribution", CreateNumberCell("", draft.AnnualContribution, CurrencyStyleIndex)),
             ("Annual take-home income (after tax)", CreateNumberCell("", draft.AnnualIncome, CurrencyStyleIndex)),
-            ("Annual retirement spending (today's dollars)", CreateNumberCell("", draft.AnnualExpenses, CurrencyStyleIndex)),
+            (RecurringAmountLabels.RetirementSpendingFor(displayPeriod), CreateNumberCell("", CurrencyPeriodMath.Convert(draft.AnnualExpenses, CurrencyPeriod.Annual, displayPeriod), CurrencyStyleIndex)),
             ("Expected return", CreateNumberCell("", draft.ExpectedReturn, PercentageStyleIndex)),
             ("Inflation rate", CreateNumberCell("", draft.InflationRate, PercentageStyleIndex)),
             ("Safe withdrawal rate", CreateNumberCell("", draft.WithdrawalRate, PercentageStyleIndex))

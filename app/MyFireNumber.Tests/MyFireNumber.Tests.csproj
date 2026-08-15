@@ -36,6 +36,13 @@
          therefore never compiled by this suite. Read as text by
          AdvancedAssumptionsCallSiteGuardTests. -->
     <None Include="..\MyFireNumber\Views\CalculatorPageBase.cs" Link="NativeCallSites\CalculatorPageBase.cs" CopyToOutputDirectory="PreserveNewest" />
+    <!-- The MAUI project cannot be referenced here, so copied XAML lets parity tests prove its static
+         retirement-spending labels still match the shared artifact. -->
+    <None Include="..\MyFireNumber\Views\FireNumberPage.xaml" Link="NativeViews\FireNumberPage.xaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\MyFireNumber\Views\BaristaFirePage.xaml" Link="NativeViews\BaristaFirePage.xaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\MyFireNumber\Views\CoastFirePage.xaml" Link="NativeViews\CoastFirePage.xaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\MyFireNumber\Views\ReverseFirePage.xaml" Link="NativeViews\ReverseFirePage.xaml" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\MyFireNumber\Views\RetirementCashFlowPage.xaml" Link="NativeViews\RetirementCashFlowPage.xaml" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

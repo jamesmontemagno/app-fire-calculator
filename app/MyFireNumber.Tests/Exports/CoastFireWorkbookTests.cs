@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MyFireNumber.Core.Calculations;
 using MyFireNumber.Core.Exports;
+using MyFireNumber.Core.Presentation;
 
 namespace MyFireNumber.Tests.Exports;
 
@@ -15,7 +16,7 @@ public sealed class CoastFireWorkbookTests : IDisposable
         var draft = CoastFireDraft.Default;
         var result = FinancialCalculator.CalculateCoastFire(draft.ToFireInputs(2026));
 
-        CoastFireWorkbook.Create(workbookPath, draft, result, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
+        CoastFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
 
         using var document = SpreadsheetDocument.Open(workbookPath, false);
         var workbookPart = document.WorkbookPart ?? throw new InvalidOperationException("Workbook part was not created.");
@@ -23,7 +24,7 @@ public sealed class CoastFireWorkbookTests : IDisposable
         var sheets = (workbook.Sheets ?? throw new InvalidOperationException("Workbook sheets were not created.")).Elements<Sheet>().ToArray();
 
         Assert.Equal(["Inputs", "Results", "Coast Projection", "Contributions Projection"], sheets.Select(sheet => sheet.Name!.Value));
-        Assert.Equal("Annual retirement spending (today's dollars)", GetCellText(workbookPart, sheets[0], "A9"));
+        Assert.Equal("Retirement spending (today’s dollars) (per year)", GetCellText(workbookPart, sheets[0], "A9"));
         Assert.Equal("48000", GetCell(workbookPart, sheets[0], "B9").CellValue!.Text);
         Assert.Equal("Inputs!B9/Inputs!B12", GetCell(workbookPart, sheets[1], "B5").CellFormula!.Text);
         Assert.Equal("C2*(1+Inputs!$B$10)+D3", GetCell(workbookPart, sheets[2], "C3").CellFormula!.Text);
