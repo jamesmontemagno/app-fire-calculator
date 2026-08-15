@@ -108,7 +108,7 @@ export default function CurrencyInput({
         >
           {label}
           {periodic && (
-            <span className="text-xs font-normal text-content-subtle">
+            <span className="sr-only">
               ({periodQualifier(displayPeriod)})
             </span>
           )}

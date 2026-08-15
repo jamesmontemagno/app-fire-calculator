@@ -149,7 +149,7 @@ export default function DeferredCompensation() {
             <h2 className="text-lg font-semibold text-content">Start with your retirement scenario</h2>
             <PeriodToggle className="mt-3" />
           </CardHeader>
-          <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <CardContent className="field-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput
                 label="Current Age"
                 value={params.currentAge}
@@ -177,7 +177,7 @@ export default function DeferredCompensation() {
                 showSlider
               />
               <CurrencyInput
-                label="Retirement spending (today's dollars)"
+                label="Retirement spending (today’s dollars)"
                 value={params.annualExpenses}
                 onChange={value => setParam('annualExpenses', value)}
                 tooltip="Your after-tax annual spending target in today’s dollars."

@@ -220,3 +220,35 @@ input[type="number"] {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Alignment backstop for the calculator input grids.
+ *
+ * Each cell is `label track` + `control track`. Opting the grid into subgrid makes the
+ * label track a shared row, so one long label that wraps to two lines lifts the whole
+ * row instead of pushing its own input below its neighbours. Sliders live inside the
+ * control track, so a cell with a slider grows downward into its own space and cannot
+ * disturb the row -- which is why this does not need, and must not use, bottom-pinning.
+ *
+ * `row-gap: 0` is required, not cosmetic: a subgrid inherits the parent's `gap`, which
+ * would space the label 16px off its input instead of the 6px the label's own margin
+ * gives it. Measured: without this the gap becomes 22px and each card grows 32px.
+ *
+ * Gated on @supports because `grid-row: span 2` without `grid-template-rows: subgrid`
+ * would leave an empty second row. Where subgrid is unsupported this rule is skipped
+ * entirely and the layout is exactly what it is today.
+ *
+ * `align-items: start` is also load-bearing. The control track is as tall as the tallest
+ * control in the row, so in a row containing a slider a plain input's wrapper would
+ * stretch to slider height, and the absolutely positioned `$` and `/mo` adornments --
+ * which centre on that wrapper -- would sink below their own input.
+ */
+@supports (grid-template-rows: subgrid) {
+  .field-grid > * {
+    display: grid;
+    grid-template-rows: subgrid;
+    grid-row: span 2;
+    row-gap: 0;
+    align-items: start;
+  }
+}

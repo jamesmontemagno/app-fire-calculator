@@ -58,11 +58,11 @@ export default function SavingsRate() {
               <p className="mt-1 text-sm text-content-muted">Use after-tax take-home income to see the share of income you are investing.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <CardContent className="field-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Used to label the projection timeline." min={18} max={80} showSlider />
               <CurrencyInput label="Starting amount" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments already in the account." />
-              <div className="space-y-2">
-                <span className="block text-sm font-medium text-content-muted">Contribution frequency</span>
+              <div>
+                <span className="mb-1.5 block text-sm font-medium text-content-muted">Contribution frequency</span>
                 <div className="inline-flex rounded-control border border-border-subtle p-1" role="group" aria-label="Contribution frequency">
                   {(['monthly', 'yearly'] as const).map(frequency => (
                     <button

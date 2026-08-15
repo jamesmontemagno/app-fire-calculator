@@ -63,47 +63,49 @@ export default function AgeInput({
         {label}
         {tooltip && <Tooltip content={tooltip} />}
       </label>
-      <div className="relative">
-        <input
-          id={id}
-          type="number"
-          value={inputValue}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          min={min}
-          max={max}
-          className="
-            w-full px-3 py-2.5 pr-16
-            bg-surface-raised 
-            border border-border-strong 
-            rounded-control 
-            text-content
-            placeholder-content-subtle
-            focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-accent
-            transition-colors
-          "
-        />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none text-sm">
-          years old
-        </span>
+      <div>
+        <div className="relative">
+          <input
+            id={id}
+            type="number"
+            value={inputValue}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            min={min}
+            max={max}
+            className="
+              w-full px-3 py-2.5 pr-16
+              bg-surface-raised 
+              border border-border-strong 
+              rounded-control 
+              text-content
+              placeholder-content-subtle
+              focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-accent
+              transition-colors
+            "
+          />
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none text-sm">
+            years old
+          </span>
+        </div>
+        {showSlider && (
+          <input
+            type="range"
+            value={value}
+            onChange={(event) => (onSliderChange ?? onChange)(parseInt(event.target.value, 10))}
+            min={min}
+            max={max}
+            step={1}
+            aria-label={`${label} slider`}
+            className="
+              mt-3 w-full h-2
+              bg-border-subtle
+              rounded-control appearance-none cursor-pointer
+              accent-accent
+            "
+          />
+        )}
       </div>
-      {showSlider && (
-        <input
-          type="range"
-          value={value}
-          onChange={(event) => (onSliderChange ?? onChange)(parseInt(event.target.value, 10))}
-          min={min}
-          max={max}
-          step={1}
-          aria-label={`${label} slider`}
-          className="
-            mt-3 w-full h-2
-            bg-border-subtle
-            rounded-control appearance-none cursor-pointer
-            accent-accent
-          "
-        />
-      )}
     </div>
   )
 }
