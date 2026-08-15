@@ -120,7 +120,7 @@
                         StrokeShape="RoundRectangle 8">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                            <Label Text="&#xf0d6;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}" SemanticProperties.Description="Retirement income" />
+                            <Label Text="&#xf0d6;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" SemanticProperties.Description="Retirement income" />
                             <Label Grid.Column="1" Text="Income sources" Style="{StaticResource CalculatorSectionHeading}" />
                             <Button Grid.Column="2" Text="Add" Command="{Binding AddRetirementIncomeCommand}" Background="{StaticResource FixedAccentSurface}" TextColor="{StaticResource FixedAccentStrong}" FontSize="12" SemanticProperties.Description="Add a retirement income source.">
                                 <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedAccentStrong}" Size="12" /></Button.ImageSource>
@@ -134,7 +134,7 @@
                                             <Grid ColumnDefinitions="*,32,44" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <Grid.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" /></Grid.GestureRecognizers>
                                                 <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} income source.'}" />
-                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}" />
+                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                                                 <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveRetirementIncomeCommand}" CommandParameter="{Binding .}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Padding="0" SemanticProperties.Description="Remove this retirement income source." />
                                             </Grid>
                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">

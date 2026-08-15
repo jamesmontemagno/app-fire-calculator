@@ -37,15 +37,12 @@
 
 
     <!--
-    App theme tokens. Each entry is keyed on the exact (light, dark) pair it
-    replaced in the view XAML, so two colours that differ by even one channel
-    keep two tokens. Names ending in Alt mark near-duplicates that are
-    preserved deliberately rather than collapsed.
+    App theme tokens. Each entry carries an explicit light/dark pair. Names
+    ending in Alt identify distinct near-duplicate variants that remain
+    intentionally separate.
     -->
-    <Color x:Key="TextAccentLight">#326B57</Color>
+    <Color x:Key="TextAccentLight">#2F6B57</Color>
     <Color x:Key="TextAccentDark">#9ACCB3</Color>
-    <Color x:Key="TextAccentAltLight">#2F6B57</Color>
-    <Color x:Key="TextAccentAltDark">#9ACCB3</Color>
     <Color x:Key="TextAccentStrongLight">#245744</Color>
     <Color x:Key="TextAccentStrongDark">#C8E7D5</Color>
     <Color x:Key="TextDangerLight">#7C352E</Color>
@@ -64,8 +61,6 @@
     <Color x:Key="TextSecondaryDark">#B9D1C2</Color>
     <Color x:Key="TextSecondaryAltLight">#425D54</Color>
     <Color x:Key="TextSecondaryAltDark">#D8E8DE</Color>
-    <Color x:Key="TextSecondaryAltMutedLight">#425D54</Color>
-    <Color x:Key="TextSecondaryAltMutedDark">#D6E5DC</Color>
     <Color x:Key="TextWarningLight">#6B3B12</Color>
     <Color x:Key="TextWarningDark">#FFE0BC</Color>
     <Color x:Key="TextWarningAltLight">#9A5C17</Color>
@@ -73,8 +68,6 @@
 
     <Color x:Key="SurfaceAccentSoftLight">#E4F0E9</Color>
     <Color x:Key="SurfaceAccentSoftDark">#29483B</Color>
-    <Color x:Key="SurfaceAccentSoftAltLight">#E4F0E9</Color>
-    <Color x:Key="SurfaceAccentSoftAltDark">#29483A</Color>
     <Color x:Key="SurfaceAccentSoftWarmLight">#E6F0EA</Color>
     <Color x:Key="SurfaceAccentSoftWarmDark">#29483A</Color>
     <Color x:Key="SurfaceAccentTintDeepLight">#EAF4EC</Color>
@@ -139,7 +132,6 @@
     today; giving them a dark variant would change what the app looks like.
     -->
     <Color x:Key="FixedAccent">#2F6B57</Color>
-    <Color x:Key="FixedAccentAlt">#326B57</Color>
     <Color x:Key="FixedAccentLight">#9ACCB3</Color>
     <Color x:Key="FixedAccentStrong">#245744</Color>
     <Color x:Key="FixedAccentSurface">#E4F0E9</Color>

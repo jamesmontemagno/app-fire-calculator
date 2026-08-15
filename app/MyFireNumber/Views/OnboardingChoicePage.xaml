@@ -51,7 +51,7 @@
                         Background="Transparent"
                         BorderColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                         BorderWidth="1"
-                        TextColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}"
+                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                         SemanticProperties.Description="Open the Standard FIRE calculator with your saved defaults." />
                 <Button AutomationId="OnboardingExploreOnMyOwnButton"
                         Text="Explore on my own"

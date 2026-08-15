@@ -68,7 +68,7 @@
                                               SemanticProperties.Description="Rename this saved plan.">
                                    <Border WidthRequest="84"
                                            Padding="8,6"
-                                           Background="{StaticResource FixedAccentAlt}"
+                                           Background="{StaticResource FixedAccent}"
                                            StrokeThickness="0"
                                            StrokeShape="RoundRectangle 12">
                                        <VerticalStackLayout Spacing="3"
