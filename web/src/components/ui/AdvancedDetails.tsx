@@ -1,4 +1,5 @@
 import { type ReactNode, useId } from 'react'
+import { ChevronDown } from 'lucide-react'
 
 interface AdvancedDetailsProps {
   children: ReactNode
@@ -16,28 +17,24 @@ export default function AdvancedDetails({
   const descriptionId = useId()
 
   return (
-    <details className={`group border-y border-gray-200 dark:border-gray-800 ${className}`}>
+    <details className={`group border-y border-border-subtle ${className}`}>
       <summary
-        className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left font-semibold text-gray-900 marker:hidden dark:text-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-fire-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-950"
+        className="flex cursor-pointer list-none items-center justify-between gap-4 py-4 text-left font-semibold text-content marker:hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         aria-describedby={descriptionId}
       >
         <span>
           {summary}
-          <span id={descriptionId} className="mt-0.5 block text-sm font-normal text-gray-600 dark:text-gray-400">
+          <span id={descriptionId} className="mt-0.5 block text-sm font-normal text-content-muted">
             {description}
           </span>
         </span>
-        <svg
-          className="h-5 w-5 shrink-0 text-gray-500 transition-transform duration-200 motion-reduce:transition-none group-open:rotate-180 dark:text-gray-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+        <ChevronDown
+          className="h-5 w-5 shrink-0 text-content-subtle transition-transform duration-200 motion-reduce:transition-none group-open:rotate-180"
           aria-hidden="true"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m6 9 6 6 6-6" />
-        </svg>
+          strokeWidth={1.5}
+        />
       </summary>
-      <div className="grid gap-4 border-t border-gray-200 py-5 sm:grid-cols-2 dark:border-gray-800">
+      <div className="grid gap-4 border-t border-border-subtle py-5 sm:grid-cols-2">
         {children}
       </div>
     </details>

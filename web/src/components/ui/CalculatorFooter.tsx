@@ -33,8 +33,8 @@ export default function CalculatorFooter({
       <CardContent className="space-y-5">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
-            <h2 className="font-semibold text-gray-900 dark:text-gray-100">Keep this calculation</h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <h2 className="font-semibold text-content">Keep this calculation</h2>
+            <p className="mt-1 text-sm text-content-muted">
               Save locally in this browser, share a link with the current values, or export a workbook.
             </p>
           </div>

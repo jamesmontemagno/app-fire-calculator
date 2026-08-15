@@ -6,6 +6,7 @@ import type {
 import { formatCurrency } from '../../utils/calculations'
 import AgeInput from './AgeInput'
 import CurrencyInput from './CurrencyInput'
+import { ChevronRight, X } from 'lucide-react'
 
 interface RetirementExpenseListInputProps {
   expenses: RetirementExpense[]
@@ -76,17 +77,17 @@ export default function RetirementExpenseListInput({
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <h3 className="text-sm font-semibold text-content-muted">
             Future spending
           </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs text-content-subtle mt-0.5">
             Add annual costs that begin later and stack on top of core spending.
           </p>
         </div>
         <button
           type="button"
           onClick={addExpense}
-          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-fire-700 dark:text-fire-400 bg-fire-50 dark:bg-fire-900/30 hover:bg-fire-100 dark:hover:bg-fire-900/50 rounded-lg transition-colors"
+          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-accent bg-accent-subtle hover:bg-accent-subtle-hover rounded-control transition-colors"
         >
           <span aria-hidden="true">+</span>
           Add expense
@@ -94,11 +95,11 @@ export default function RetirementExpenseListInput({
       </div>
 
       {expenses.length === 0 ? (
-        <div className="text-center py-8 bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700">
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <div className="text-center py-8 bg-surface-sunken rounded-container border-2 border-dashed border-border-strong">
+          <p className="text-sm font-medium text-content">
             No additional expenses
           </p>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-xs text-content-subtle mt-1">
             The projection currently uses core annual spending only.
           </p>
         </div>
@@ -111,34 +112,26 @@ export default function RetirementExpenseListInput({
             return (
               <div
                 key={expense.id}
-                className="bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                className="bg-surface-sunken rounded-control border border-border-subtle overflow-hidden"
               >
                 <div className="flex items-center">
                   <button
                     type="button"
                     onClick={() => toggleExpanded(expense.id)}
-                    className="min-w-0 flex-1 px-4 py-3 flex items-center justify-between gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                    className="min-w-0 flex-1 px-4 py-3 flex items-center justify-between gap-3 text-left hover:bg-surface-sunken/50 transition-colors"
                     aria-expanded={expanded}
                   >
                     <span className="flex items-center gap-3 min-w-0">
-                      <svg
-                        className={`w-4 h-4 shrink-0 text-gray-500 transition-transform ${expanded ? 'rotate-90' : ''}`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                      <span className="truncate font-medium text-gray-900 dark:text-gray-100">
+                      <ChevronRight className={`w-4 h-4 shrink-0 text-content-subtle transition-transform ${expanded ? 'rotate-90' : ''}`} aria-hidden="true" strokeWidth={1.5} />
+                      <span className="truncate font-medium text-content">
                         {expense.name || `${typeLabel} ${index + 1}`}
                       </span>
                     </span>
                     <span className="text-right shrink-0">
-                      <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      <span className="block text-sm font-semibold text-content">
                         {formatCurrency(expense.annualAmount)}/yr
                       </span>
-                      <span className="block text-xs text-gray-500 dark:text-gray-400">
+                      <span className="block text-xs text-content-subtle">
                         {typeLabel} · starts at age {expense.startAge}
                       </span>
                     </span>
@@ -146,21 +139,19 @@ export default function RetirementExpenseListInput({
                   <button
                     type="button"
                     onClick={() => removeExpense(expense.id)}
-                    className="p-3 mr-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    className="p-3 mr-1 text-content-subtle hover:text-danger transition-colors"
                     aria-label={`Remove ${expense.name || `expense ${index + 1}`}`}
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="w-4 h-4" aria-hidden="true" strokeWidth={1.5} />
                   </button>
                 </div>
 
                 {expanded && (
-                  <div className="px-4 pb-4 pt-3 border-t border-gray-200 dark:border-gray-700 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="px-4 pb-4 pt-3 border-t border-border-subtle grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
                       <label
                         htmlFor={`expense-name-${expense.id}`}
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                        className="block text-sm font-medium text-content-muted mb-1.5"
                       >
                         Expense name
                       </label>
@@ -171,13 +162,13 @@ export default function RetirementExpenseListInput({
                         value={expense.name}
                         onChange={event => updateExpense(expense.id, 'name', event.target.value)}
                         placeholder="e.g., Medicare premiums"
-                        className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-fire-500 focus:border-fire-500"
+                        className="w-full px-3 py-2.5 bg-surface-raised border border-border-strong rounded-control text-content focus:ring-2 focus-visible:ring-ring focus-visible:border-accent"
                       />
                     </div>
                     <div>
                       <label
                         htmlFor={`expense-type-${expense.id}`}
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                        className="block text-sm font-medium text-content-muted mb-1.5"
                       >
                         Expense type
                       </label>
@@ -189,7 +180,7 @@ export default function RetirementExpenseListInput({
                           'type',
                           event.target.value as RetirementExpenseType,
                         )}
-                        className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-fire-500 focus:border-fire-500"
+                        className="w-full px-3 py-2.5 bg-surface-raised border border-border-strong rounded-control text-content focus:ring-2 focus-visible:ring-ring focus-visible:border-accent"
                       >
                         {EXPENSE_TYPES.map(type => (
                           <option key={type.value} value={type.value}>{type.label}</option>
@@ -218,9 +209,9 @@ export default function RetirementExpenseListInput({
       )}
 
       {expenses.length > 0 && (
-        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-          <span className="text-sm text-gray-600 dark:text-gray-400">Additional annual spending</span>
-          <span className="font-bold text-gray-900 dark:text-gray-100">
+        <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
+          <span className="text-sm text-content-muted">Additional annual spending</span>
+          <span className="font-bold text-content">
             {formatCurrency(totalAnnualAmount)}
           </span>
         </div>

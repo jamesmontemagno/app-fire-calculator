@@ -1,12 +1,17 @@
+import { TriangleAlert } from 'lucide-react'
+
 interface DisclaimerProps {
   embedded?: boolean
 }
 
 export default function Disclaimer({ embedded = false }: DisclaimerProps) {
   return (
-    <div className={embedded ? 'border-t border-gray-200 pt-5 dark:border-gray-800' : 'mt-8 border-t border-gray-200 pt-6 dark:border-gray-800'}>
-      <div className={`${embedded ? '' : 'rounded-lg bg-gray-50 p-4 dark:bg-gray-800/50'} text-xs text-gray-500 dark:text-gray-400`}>
-        <p className="font-semibold text-gray-600 dark:text-gray-300 mb-2">⚠️ Disclaimer</p>
+    <div className={embedded ? 'border-t border-border-subtle pt-5' : 'mt-8 border-t border-border-subtle pt-6'}>
+      <div className={`${embedded ? '' : 'rounded-container bg-surface-sunken p-4'} text-xs text-content-muted`}>
+        <p className="mb-2 flex items-center gap-2 font-semibold text-content">
+          <TriangleAlert className="h-4 w-4 shrink-0 text-warning" aria-hidden="true" strokeWidth={1.5} />
+          Disclaimer
+        </p>
         <p className="mb-2">
           This calculator is provided for <strong>educational and informational purposes only</strong>. 
           It is not intended to be, and should not be construed as, financial, investment, tax, or legal advice.

@@ -1,22 +1,23 @@
 import { type ButtonHTMLAttributes, type ReactNode } from 'react'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger'
   size?: 'sm' | 'md' | 'lg'
   children: ReactNode
 }
 
 const variants = {
-  primary: 'bg-fire-500 hover:bg-fire-600 text-white shadow-sm',
-  secondary: 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100',
-  outline: 'border border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300',
-  ghost: 'hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300',
+  primary: 'bg-accent text-accent-contrast hover:bg-accent-hover active:bg-accent-hover',
+  secondary: 'bg-surface-sunken text-content hover:bg-border-subtle active:bg-border-subtle',
+  outline: 'border border-border-strong text-content hover:bg-surface-sunken active:bg-surface-sunken',
+  ghost: 'text-content-muted hover:bg-surface-sunken hover:text-content active:bg-surface-sunken',
+  danger: 'border border-danger text-danger hover:bg-danger hover:text-surface-raised',
 }
 
 const sizes = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2 text-sm',
-  lg: 'px-6 py-3 text-base',
+  sm: 'h-8 px-3 text-sm',
+  md: 'h-9 px-4 text-sm',
+  lg: 'h-11 px-6 text-base',
 }
 
 export default function Button({
@@ -30,10 +31,11 @@ export default function Button({
   return (
     <button
       className={`
-        inline-flex items-center justify-center gap-2 
-        font-medium rounded-lg transition-colors
-        focus:outline-none focus:ring-2 focus:ring-fire-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900
-        disabled:opacity-50 disabled:cursor-not-allowed
+        inline-flex items-center justify-center gap-2
+        rounded-control font-medium transition-colors duration-150
+        motion-reduce:transition-none
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface
+        disabled:pointer-events-none disabled:opacity-50
         ${variants[variant]}
         ${sizes[size]}
         ${className}

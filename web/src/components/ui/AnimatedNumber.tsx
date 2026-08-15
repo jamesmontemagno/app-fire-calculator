@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 
 interface AnimatedNumberProps {
   value: number
@@ -16,8 +17,17 @@ export default function AnimatedNumber({
   const [displayValue, setDisplayValue] = useState(value)
   const previousValue = useRef(value)
   const animationRef = useRef<number | undefined>(undefined)
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   useEffect(() => {
+    // A count-up is decorative: the final figure is the information. Honour the
+    // preference by jumping straight to it rather than animating faster.
+    if (prefersReducedMotion) {
+      previousValue.current = value
+      setDisplayValue(value)
+      return
+    }
+
     const startValue = previousValue.current
     const endValue = value
     const startTime = performance.now()
@@ -46,7 +56,7 @@ export default function AnimatedNumber({
         cancelAnimationFrame(animationRef.current)
       }
     }
-  }, [value, duration])
+  }, [value, duration, prefersReducedMotion])
 
   const formatValue = () => {
     switch (format) {
@@ -66,5 +76,5 @@ export default function AnimatedNumber({
     }
   }
 
-  return <span className={className}>{formatValue()}</span>
+  return <span className={`tabular ${className}`}>{formatValue()}</span>
 }

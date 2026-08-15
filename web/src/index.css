@@ -33,6 +33,7 @@
   --color-accent-hover: var(--app-accent-hover);
   --color-accent-contrast: var(--app-accent-contrast);
   --color-accent-subtle: var(--app-accent-subtle);
+  --color-accent-subtle-hover: var(--app-accent-subtle-hover);
   --color-ring: var(--app-ring);
 
   --color-success: var(--app-success);
@@ -76,7 +77,7 @@
   --color-fire-400: #fc8b5d;
   --color-fire-500: #fd6e2d;
   --color-fire-600: #e65d19;
-  --color-fire-700: #c14c11;
+  --color-fire-700: #b54100;
   --color-fire-800: #9e3e0e;
   --color-fire-900: #7b2f0b;
   --color-fire-950: #4f1b04;
@@ -96,10 +97,11 @@
   --app-content-muted: #66635e;
   --app-content-subtle: #706d68;
 
-  --app-accent: #c14c11;
+  --app-accent: #b54100;
   --app-accent-hover: #9e3e0e;
   --app-accent-contrast: #ffffff;
   --app-accent-subtle: #fef3ef;
+  --app-accent-subtle-hover: #ffe4d9;
   --app-ring: #e65d19;
 
   --app-success: #1d7d3e;
@@ -143,6 +145,7 @@
   --app-accent-hover: #fc8b5d;
   --app-accent-contrast: #19130a;
   --app-accent-subtle: #381b10;
+  --app-accent-subtle-hover: #492517;
   --app-ring: #fc8b5d;
 
   --app-success: #67d283;

@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { CreditCard } from 'lucide-react'
 import type { DebtItem } from '../../utils/calculations'
 import { CurrencyInput, PercentageInput } from './index'
 import { formatCurrency, formatPercent } from '../../utils/calculations'
+import { ChevronRight, Plus, X } from 'lucide-react'
 
 interface DebtListInputProps {
   debts: DebtItem[]
@@ -59,23 +61,21 @@ export default function DebtListInput({ debts, onChange }: DebtListInputProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Your Debts</h3>
+        <h3 className="text-sm font-semibold text-content-muted">Your Debts</h3>
         <button
           onClick={addDebt}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-fire-700 dark:text-fire-400 bg-fire-50 dark:bg-fire-900/30 hover:bg-fire-100 dark:hover:bg-fire-900/50 rounded-lg transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-accent bg-accent-subtle hover:bg-accent-subtle-hover rounded-control transition-colors"
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
+          <Plus className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
           Add Debt
         </button>
       </div>
 
       {debts.length === 0 ? (
-        <div className="text-center py-12 bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700">
-          <div className="text-4xl mb-3">💳</div>
-          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-1">No debts added yet</h4>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+        <div className="text-center py-12 bg-surface-sunken rounded-container border-2 border-dashed border-border-strong">
+          <CreditCard className="mx-auto mb-3 h-8 w-8 text-content-subtle" aria-hidden="true" strokeWidth={1.5} />
+          <h4 className="text-sm font-medium text-content mb-1">No debts added yet</h4>
+          <p className="text-xs text-content-subtle mb-4">
             Click "Add Debt" to start tracking your debt payoff journey
           </p>
         </div>
@@ -88,33 +88,26 @@ export default function DebtListInput({ debts, onChange }: DebtListInputProps) {
             return (
               <div
                 key={debt.id}
-                className="bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                className="bg-surface-sunken rounded-control border border-border-subtle overflow-hidden"
               >
                 {/* Collapsed Header - Always visible */}
                 <button
                   onClick={() => toggleExpanded(debt.id)}
-                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                  className="w-full px-4 py-3 flex items-center justify-between hover:bg-surface-sunken/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <svg 
-                      className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} 
-                      fill="none" 
-                      viewBox="0 0 24 24" 
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                    <span className="font-medium text-gray-900 dark:text-gray-100">
+                    <ChevronRight className={`w-4 h-4 text-content-subtle transition-transform ${isExpanded ? 'rotate-90' : ''}`} strokeWidth={1.5} aria-hidden="true" />
+                    <span className="font-medium text-content">
                       {debtName}
                     </span>
                   </div>
                   <div className="flex items-center gap-4">
                     {!isExpanded && debt.balance > 0 && (
                       <div className="text-right">
-                        <div className="text-sm font-semibold text-red-600 dark:text-red-400">
+                        <div className="text-sm font-semibold text-danger">
                           {formatCurrency(debt.balance)}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                        <div className="text-xs text-content-subtle">
                           {formatPercent(debt.rate)} APR
                         </div>
                       </div>
@@ -124,21 +117,19 @@ export default function DebtListInput({ debts, onChange }: DebtListInputProps) {
                         e.stopPropagation()
                         removeDebt(debt.id)
                       }}
-                      className="p-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                      className="p-1 text-content-subtle hover:text-danger transition-colors"
                       aria-label="Remove debt"
                     >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                      <X className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
                     </button>
                   </div>
                 </button>
 
                 {/* Expanded Content */}
                 {isExpanded && (
-                  <div className="px-4 pb-4 pt-2 border-t border-gray-200 dark:border-gray-700 space-y-3">
+                  <div className="px-4 pb-4 pt-2 border-t border-border-subtle space-y-3">
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                      <label className="block text-xs font-medium text-content-muted mb-1">
                         Debt Name
                       </label>
                       <input
@@ -146,7 +137,7 @@ export default function DebtListInput({ debts, onChange }: DebtListInputProps) {
                         value={debt.name}
                         onChange={(e) => updateDebt(debt.id, 'name', e.target.value)}
                         placeholder="e.g., Credit Card, Car Loan"
-                        className="w-full px-3 py-2 text-sm bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-fire-500 focus:border-transparent text-gray-900 dark:text-gray-100 placeholder-gray-400"
+                        className="w-full px-3 py-2 text-sm bg-surface-raised border border-border-strong rounded-control focus:ring-2 focus-visible:ring-ring focus:border-transparent text-content placeholder-content-subtle"
                       />
                     </div>
 
@@ -184,17 +175,17 @@ export default function DebtListInput({ debts, onChange }: DebtListInputProps) {
       )}
 
       {debts.length > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+        <div className="mt-4 pt-4 border-t border-border-subtle">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Total Debt</div>
-              <div className="text-lg font-bold text-red-600 dark:text-red-400">
+              <div className="text-xs text-content-muted mb-1">Total Debt</div>
+              <div className="text-lg font-bold text-danger">
                 {formatCurrency(totalDebt)}
               </div>
             </div>
             <div>
-              <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">Total Min. Payments</div>
-              <div className="text-lg font-bold text-gray-900 dark:text-gray-100">
+              <div className="text-xs text-content-muted mb-1">Total Min. Payments</div>
+              <div className="text-lg font-bold text-content">
                 {formatCurrency(totalMinPayments)}/mo
               </div>
             </div>

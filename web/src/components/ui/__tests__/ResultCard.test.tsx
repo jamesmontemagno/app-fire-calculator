@@ -42,11 +42,17 @@ describe('finite values render through their format', () => {
     expect(render(<ResultCard label="L" value={0} format="currency" />)).toContain('$0')
   })
 
-  it('renders the label, subtext and icon', () => {
-    const html = render(<ResultCard label="FIRE Number" value={1} subtext="at 4% SWR" icon="🔥" />)
+  it('renders the label and subtext', () => {
+    // The `icon` prop this test used to exercise was removed: no page ever passed it, so this
+    // test was the only caller of a code path that shipped to nobody.
+    const html = render(<ResultCard label="FIRE Number" value={1} subtext="at 4% SWR" />)
     expect(html).toContain('FIRE Number')
     expect(html).toContain('at 4% SWR')
-    expect(html).toContain('🔥')
+  })
+
+  it('renders figures with tabular numerals so columns of results stay aligned', () => {
+    const html = render(<ResultCard label="L" value={1234567} format="currency" />)
+    expect(html).toContain('tabular')
   })
 })
 

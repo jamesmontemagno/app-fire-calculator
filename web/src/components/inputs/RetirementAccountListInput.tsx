@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Wallet } from 'lucide-react'
 import type {
   RetirementAccount,
   RetirementAccountType,
@@ -9,6 +10,7 @@ import AgeInput from './AgeInput'
 import CurrencyInput from './CurrencyInput'
 import PercentageInput from './PercentageInput'
 import InputGroup from './InputGroup'
+import { ChevronRight, X } from 'lucide-react'
 
 interface RetirementAccountListInputProps {
   accounts: RetirementAccount[]
@@ -110,17 +112,17 @@ export default function RetirementAccountListInput({
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+          <h3 className="text-sm font-semibold text-content-muted">
             Retirement buckets
           </h3>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+          <p className="text-xs text-content-subtle mt-0.5">
             Each account can have its own availability and withdrawal rules.
           </p>
         </div>
         <button
           type="button"
           onClick={addAccount}
-          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-fire-700 dark:text-fire-400 bg-fire-50 dark:bg-fire-900/30 hover:bg-fire-100 dark:hover:bg-fire-900/50 rounded-lg transition-colors"
+          className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-accent bg-accent-subtle hover:bg-accent-subtle-hover rounded-control transition-colors"
         >
           <span aria-hidden="true">+</span>
           Add account
@@ -128,9 +130,9 @@ export default function RetirementAccountListInput({
       </div>
 
       {accounts.length === 0 ? (
-        <div className="text-center py-10 bg-gray-50 dark:bg-gray-800/50 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-700">
-          <div className="text-3xl mb-2" aria-hidden="true">🪣</div>
-          <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+        <div className="text-center py-10 bg-surface-sunken rounded-container border-2 border-dashed border-border-strong">
+          <Wallet className="mx-auto mb-2 h-7 w-7 text-content-subtle" aria-hidden="true" strokeWidth={1.5} />
+          <p className="text-sm font-medium text-content">
             Add an account to build your retirement cash flow
           </p>
         </div>
@@ -143,34 +145,26 @@ export default function RetirementAccountListInput({
             return (
               <div
                 key={account.id}
-                className="bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden"
+                className="bg-surface-sunken rounded-control border border-border-subtle overflow-hidden"
               >
                 <div className="flex items-center">
                   <button
                     type="button"
                     onClick={() => toggleExpanded(account.id)}
-                    className="min-w-0 flex-1 px-4 py-3 flex items-center justify-between gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors"
+                    className="min-w-0 flex-1 px-4 py-3 flex items-center justify-between gap-3 text-left hover:bg-surface-sunken/50 transition-colors"
                     aria-expanded={expanded}
                   >
                     <span className="flex items-center gap-3 min-w-0">
-                      <svg
-                        className={`w-4 h-4 shrink-0 text-gray-500 transition-transform ${expanded ? 'rotate-90' : ''}`}
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        aria-hidden="true"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                      <span className="truncate font-medium text-gray-900 dark:text-gray-100">
+                      <ChevronRight className={`w-4 h-4 shrink-0 text-content-subtle transition-transform ${expanded ? 'rotate-90' : ''}`} aria-hidden="true" strokeWidth={1.5} />
+                      <span className="truncate font-medium text-content">
                         {account.name || `Account ${index + 1}`}
                       </span>
                     </span>
                     <span className="text-right shrink-0">
-                      <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100">
+                      <span className="block text-sm font-semibold text-content">
                         {formatCurrency(account.balance)}
                       </span>
-                      <span className="block text-xs text-gray-500 dark:text-gray-400">
+                      <span className="block text-xs text-content-subtle">
                         {typeLabel}
                       </span>
                     </span>
@@ -178,21 +172,19 @@ export default function RetirementAccountListInput({
                   <button
                     type="button"
                     onClick={() => removeAccount(account.id)}
-                    className="p-3 mr-1 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                    className="p-3 mr-1 text-content-subtle hover:text-danger transition-colors"
                     aria-label={`Remove ${account.name || `account ${index + 1}`}`}
                   >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <X className="w-4 h-4" strokeWidth={1.5} aria-hidden="true" />
                   </button>
                 </div>
 
                 {expanded && (
-                  <div className="px-4 pb-4 pt-3 border-t border-gray-200 dark:border-gray-700 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="px-4 pb-4 pt-3 border-t border-border-subtle grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
                       <label
                         htmlFor={`account-name-${account.id}`}
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                        className="block text-sm font-medium text-content-muted mb-1.5"
                       >
                         Account name
                       </label>
@@ -203,13 +195,13 @@ export default function RetirementAccountListInput({
                         value={account.name}
                         onChange={event => updateAccount(account.id, 'name', event.target.value)}
                         placeholder="e.g., Company deferred comp"
-                        className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-fire-500 focus:border-fire-500"
+                        className="w-full px-3 py-2.5 bg-surface-raised border border-border-strong rounded-control text-content focus:ring-2 focus-visible:ring-ring focus-visible:border-accent"
                       />
                     </div>
                     <div>
                       <label
                         htmlFor={`account-type-${account.id}`}
-                        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5"
+                        className="block text-sm font-medium text-content-muted mb-1.5"
                       >
                         Account type
                       </label>
@@ -220,7 +212,7 @@ export default function RetirementAccountListInput({
                           account.id,
                           event.target.value as RetirementAccountType,
                         )}
-                        className="w-full px-3 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-fire-500 focus:border-fire-500"
+                        className="w-full px-3 py-2.5 bg-surface-raised border border-border-strong rounded-control text-content focus:ring-2 focus-visible:ring-ring focus-visible:border-accent"
                       >
                         {ACCOUNT_TYPES.map(type => (
                           <option key={type.value} value={type.value}>{type.label}</option>
@@ -257,7 +249,7 @@ export default function RetirementAccountListInput({
                           ? 'Required payouts begin at this age, even when other income covers spending.'
                           : 'The first age at which this bucket can cover a cash-flow gap.'}
                       />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      <p className="text-xs text-content-subtle mt-1">
                         Calendar year {currentYear + account.availableAge - currentAge}
                       </p>
                     </div>
@@ -298,9 +290,9 @@ export default function RetirementAccountListInput({
       )}
 
       {accounts.length > 0 && (
-        <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
-          <span className="text-sm text-gray-600 dark:text-gray-400">Current total</span>
-          <span className="font-bold text-gray-900 dark:text-gray-100">
+        <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
+          <span className="text-sm text-content-muted">Current total</span>
+          <span className="font-bold text-content">
             {formatCurrency(totalBalance)}
           </span>
         </div>
