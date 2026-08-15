@@ -9,7 +9,7 @@
                           x:DataType="viewModels:DebtPayoffViewModel"
                           Title="{Binding Title}"
                           Shell.NavBarIsVisible="True"
-                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                          Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                           SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding SavePlanCommand}"
@@ -22,14 +22,14 @@
     <ScrollView>
         <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" SemanticProperties.Description="Restoring your local calculator draft." />
-            <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light=#FFF4E8, Dark=#4A3323}" Stroke="{AppThemeBinding Light=#C97727, Dark=#F2B56D}" StrokeShape="RoundRectangle 8"><Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}" LineHeight="1.3" /></Border>
+            <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light={StaticResource SurfaceWarningLight}, Dark={StaticResource SurfaceWarningDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderWarningLight}, Dark={StaticResource BorderWarningDark}}" StrokeShape="RoundRectangle 8"><Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" LineHeight="1.3" /></Border>
 
             <controls:CalculatorInfoView Title="What is a debt payoff strategy?"
                                          Summary="Compare Snowball and Avalanche plans to eliminate multiple debts more intentionally."
                                          Details="Snowball prioritizes the smallest balance for early milestones. Avalanche prioritizes the highest rate and can reduce total interest."
                                          IconGlyph="&#xf09d;" />
 
-            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}" StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                         <Label Text="Your debts" Style="{StaticResource CalculatorSectionHeading}" />
@@ -39,16 +39,16 @@
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding DebtItems}" Spacing="{StaticResource SpaceSm}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="viewModels:DebtEditorItem">
-                                <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFF9F3, Dark=#2B2019}" Stroke="{AppThemeBinding Light=#F1D5BB, Dark=#634631}" StrokeShape="RoundRectangle 8">
+                                <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceWarningSoftLight}, Dark={StaticResource SurfaceWarningSoftDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderWarningSoftLight}, Dark={StaticResource BorderWarningSoftDark}}" StrokeShape="RoundRectangle 8">
                                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                                            <Entry Text="{Binding Name}" Placeholder="Debt name" Background="{AppThemeBinding Light=#FFFFFF, Dark=#15211C}" SemanticProperties.Description="Debt name" />
-                                            <Button Grid.Column="1" Text="Remove" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" Background="{AppThemeBinding Light=#FCE5E1, Dark=#4A2B2A}" TextColor="{AppThemeBinding Light=#7C352E, Dark=#FFB9B1}" FontSize="12" SemanticProperties.Description="Remove this debt from the payoff plan." />
+                                            <Entry Text="{Binding Name}" Placeholder="Debt name" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" SemanticProperties.Description="Debt name" />
+                                            <Button Grid.Column="1" Text="Remove" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" Background="{AppThemeBinding Light={StaticResource SurfaceDangerLight}, Dark={StaticResource SurfaceDangerDark}}" TextColor="{AppThemeBinding Light={StaticResource TextDangerLight}, Dark={StaticResource TextDangerDark}}" FontSize="12" SemanticProperties.Description="Remove this debt from the payoff plan." />
                                         </Grid>
                                         <Grid ColumnDefinitions="*,*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                            <VerticalStackLayout Spacing="3"><Label Text="Balance" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding BalanceText}" Keyboard="Numeric" Placeholder="5000" Background="{AppThemeBinding Light=#FFFFFF, Dark=#15211C}" SemanticProperties.Description="Current debt balance in dollars." /></VerticalStackLayout>
-                                            <VerticalStackLayout Grid.Column="1" Spacing="3"><Label Text="Rate (%)" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding RateText}" Keyboard="Numeric" Placeholder="19.99" Background="{AppThemeBinding Light=#FFFFFF, Dark=#15211C}" SemanticProperties.Description="Annual interest rate percentage." /></VerticalStackLayout>
-                                            <VerticalStackLayout Grid.Column="2" Spacing="3"><Label Text="Minimum" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding MinimumPaymentText}" Keyboard="Numeric" Placeholder="150" Background="{AppThemeBinding Light=#FFFFFF, Dark=#15211C}" SemanticProperties.Description="Minimum monthly payment in dollars." /></VerticalStackLayout>
+                                            <VerticalStackLayout Spacing="3"><Label Text="Balance" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding BalanceText}" Keyboard="Numeric" Placeholder="5000" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" SemanticProperties.Description="Current debt balance in dollars." /></VerticalStackLayout>
+                                            <VerticalStackLayout Grid.Column="1" Spacing="3"><Label Text="Rate (%)" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding RateText}" Keyboard="Numeric" Placeholder="19.99" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" SemanticProperties.Description="Annual interest rate percentage." /></VerticalStackLayout>
+                                            <VerticalStackLayout Grid.Column="2" Spacing="3"><Label Text="Minimum" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding MinimumPaymentText}" Keyboard="Numeric" Placeholder="150" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" SemanticProperties.Description="Minimum monthly payment in dollars." /></VerticalStackLayout>
                                         </Grid>
                                     </VerticalStackLayout>
                                 </Border>
@@ -78,11 +78,11 @@
             <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                 <Label Text="Your payoff outlook" Style="{StaticResource CalculatorSectionHeading}" />
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
-                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFF1E7, Dark=#493225}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Total debt" FontSize="12" /><Label Text="{Binding DebtTotalText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
-                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Minimum payments" FontSize="12" /><Label Text="{Binding DebtMinimumPaymentsText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Payoff time" FontSize="12" /><Label Text="{Binding DebtPayoffTimeText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Total interest" FontSize="12" /><Label Text="{Binding DebtInterestText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="2" Grid.ColumnSpan="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Monthly payment" FontSize="12" /><Label Text="{Binding DebtPaymentText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceWarningAltLight}, Dark={StaticResource SurfaceWarningAltDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Total debt" FontSize="12" /><Label Text="{Binding DebtTotalText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Minimum payments" FontSize="12" /><Label Text="{Binding DebtMinimumPaymentsText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Payoff time" FontSize="12" /><Label Text="{Binding DebtPayoffTimeText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Total interest" FontSize="12" /><Label Text="{Binding DebtInterestText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="2" Grid.ColumnSpan="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Monthly payment" FontSize="12" /><Label Text="{Binding DebtPaymentText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
                 </Grid>
                 <Label Text="{Binding DebtStrategySummary}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>
@@ -96,10 +96,10 @@
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}"><VerticalStackLayout Spacing="2"><Label Text="Snowball" FontAttributes="Bold" /><Label Text="{Binding DebtSnowballComparisonText}" Style="{StaticResource CalculatorSupportingText}" /></VerticalStackLayout><VerticalStackLayout Grid.Column="1" Spacing="2"><Label Text="Avalanche" FontAttributes="Bold" /><Label Text="{Binding DebtAvalancheComparisonText}" Style="{StaticResource CalculatorSupportingText}" /></VerticalStackLayout></Grid>
             </VerticalStackLayout>
 
-            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}" StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
-                    <Entry Text="{Binding PlanNameText}" Placeholder="My Debt Payoff Plan" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" SemanticProperties.Description="Name for this saved Debt Payoff plan" />
+                    <Entry Text="{Binding PlanNameText}" Placeholder="My Debt Payoff Plan" Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}" SemanticProperties.Description="Name for this saved Debt Payoff plan" />
                     <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />
                     <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Create a Debt Payoff workbook on this device and open the native share sheet." />
                     <Label IsVisible="{Binding HasPlanStatusMessage}" Text="{Binding PlanStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />

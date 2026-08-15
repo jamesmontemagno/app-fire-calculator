@@ -9,7 +9,7 @@
                           x:DataType="viewModels:CoastFireViewModel"
                           Title="{Binding Title}"
                           Shell.NavBarIsVisible="True"
-                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                          Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                           SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding SavePlanCommand}"
@@ -22,8 +22,8 @@
     <ScrollView>
         <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" SemanticProperties.Description="Restoring your local calculator draft." />
-            <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light=#FFF4E8, Dark=#4A3323}" Stroke="{AppThemeBinding Light=#C97727, Dark=#F2B56D}" StrokeShape="RoundRectangle 8">
-                <Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}" LineHeight="1.3" />
+            <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light={StaticResource SurfaceWarningLight}, Dark={StaticResource SurfaceWarningDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderWarningLight}, Dark={StaticResource BorderWarningDark}}" StrokeShape="RoundRectangle 8">
+                <Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" LineHeight="1.3" />
             </Border>
 
             <controls:CalculatorInfoView Title="What is Coast FIRE?"
@@ -31,7 +31,7 @@
                                          Details="Coast FIRE means current investments could grow to a full FIRE number without more contributions. You still need income for today’s expenses."
                                          IconGlyph="&#xf0eb;" />
 
-            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}" StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                         <Label Text="Your starting point" Style="{StaticResource CalculatorSectionHeading}" />
@@ -59,9 +59,9 @@
                 <Label Text="Your Coast FIRE outlook" Style="{StaticResource CalculatorSectionHeading}" />
                 <Label Text="{Binding CoastStatusText}" Style="{StaticResource CalculatorStatusHeadline}" SemanticProperties.Description="{Binding CoastStatusText}" />
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
-                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#EAF2FF, Dark=#1D3040}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Coast FIRE number" FontSize="12" /><Label Text="{Binding CoastNumberText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
-                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Full FIRE number" FontSize="12" /><Label Text="{Binding FullFireNumberText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Grid.ColumnSpan="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Time to Coast FIRE" FontSize="12" /><Label Text="{Binding YearsToCoastText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInfoLight}, Dark={StaticResource SurfaceInfoDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Coast FIRE number" FontSize="12" /><Label Text="{Binding CoastNumberText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Full FIRE number" FontSize="12" /><Label Text="{Binding FullFireNumberText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Grid.ColumnSpan="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Time to Coast FIRE" FontSize="12" /><Label Text="{Binding YearsToCoastText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
                 </Grid>
                 <Label Text="{Binding CoastProgressDescription}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>
@@ -72,10 +72,10 @@
                 <Label Text="{Binding CoastProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>
 
-            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}" StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
-                    <Entry Text="{Binding PlanNameText}" Placeholder="My Coast FIRE Plan" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" SemanticProperties.Description="Name for this saved Coast FIRE plan" />
+                    <Entry Text="{Binding PlanNameText}" Placeholder="My Coast FIRE Plan" Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}" SemanticProperties.Description="Name for this saved Coast FIRE plan" />
                     <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />
                     <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Create a Coast FIRE workbook on this device and open the native share sheet." />
                     <Label IsVisible="{Binding HasPlanStatusMessage}" Text="{Binding PlanStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />

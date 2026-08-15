@@ -8,7 +8,7 @@
              Title="About you"
              Shell.NavBarIsVisible="True"
              Shell.TabBarIsVisible="False"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
              SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Skip"
@@ -24,34 +24,34 @@
                            FontSize="28"
                            FontAttributes="Bold"
                            LineHeight="1.1"
-                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                            SemanticProperties.HeadingLevel="Level1" />
                     <Label Text="These three details give your calculators a useful starting point. You can fine-tune everything later."
                            LineHeight="1.35"
-                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                 </VerticalStackLayout>
 
                 <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceXl}">
                         <VerticalStackLayout Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
                                 <Label Text="Current age"
                                        FontAttributes="Bold"
-                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                                 <Label Grid.Column="1"
                                        Text="{Binding CurrentAgeText}"
-                                       TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
+                                       TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                             </Grid>
                             <Slider AutomationId="OnboardingCurrentAgeSlider"
                                     Minimum="18"
                                     Maximum="80"
                                     Value="{Binding CurrentAge}"
-                                    MinimumTrackColor="#2F6B57"
-                                    MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                                    ThumbColor="#2F6B57"
+                                    MinimumTrackColor="{StaticResource FixedAccent}"
+                                    MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                    ThumbColor="{StaticResource FixedAccent}"
                                     SemanticProperties.Description="Current age" />
                         </VerticalStackLayout>
 
@@ -59,18 +59,18 @@
                             <Grid ColumnDefinitions="*,Auto">
                                 <Label Text="After-tax take-home income"
                                        FontAttributes="Bold"
-                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                                 <Label Grid.Column="1"
                                         Text="{Binding AnnualIncomeText, Mode=OneWay}"
-                                       TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
+                                       TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                             </Grid>
                             <Slider AutomationId="OnboardingAnnualIncomeSlider"
                                     Minimum="0"
                                     Maximum="{Binding MaximumAnnualIncome}"
                                     Value="{Binding AnnualIncome, Mode=TwoWay}"
-                                    MinimumTrackColor="#2F6B57"
-                                    MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                                    ThumbColor="#2F6B57"
+                                    MinimumTrackColor="{StaticResource FixedAccent}"
+                                    MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                    ThumbColor="{StaticResource FixedAccent}"
                                     SemanticProperties.Description="Current annual after-tax take-home income in dollars" />
                         </VerticalStackLayout>
 
@@ -78,18 +78,18 @@
                             <Grid ColumnDefinitions="*,Auto">
                                 <Label Text="Current annual expenses"
                                        FontAttributes="Bold"
-                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                                 <Label Grid.Column="1"
                                         Text="{Binding AnnualExpensesText, Mode=OneWay}"
-                                       TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
+                                       TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                             </Grid>
                             <Slider AutomationId="OnboardingAnnualExpensesSlider"
                                     Minimum="0"
                                     Maximum="{Binding MaximumAnnualExpenses}"
                                     Value="{Binding AnnualExpenses, Mode=TwoWay}"
-                                    MinimumTrackColor="#2F6B57"
-                                    MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
-                                    ThumbColor="#2F6B57"
+                                    MinimumTrackColor="{StaticResource FixedAccent}"
+                                    MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                    ThumbColor="{StaticResource FixedAccent}"
                                     SemanticProperties.Description="Current annual expenses in dollars" />
                         </VerticalStackLayout>
                     </VerticalStackLayout>
@@ -98,8 +98,8 @@
                 <Button AutomationId="SaveOnboardingDefaultsButton"
                         Text="Continue"
                         Command="{Binding SaveAndContinueCommand}"
-                        Background="#2F6B57"
-                        TextColor="#FFFFFF"
+                        Background="{StaticResource FixedAccent}"
+                        TextColor="{StaticResource FixedWhite}"
                         SemanticProperties.Description="Save these details and continue to withdrawal rate." />
 
                 <controls:EducationalDisclaimerView />

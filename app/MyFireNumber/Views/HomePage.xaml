@@ -7,7 +7,7 @@
              x:Class="MyFireNumber.Views.HomePage"
              x:DataType="viewModels:HomeViewModel"
              Title="Home"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
              SafeAreaEdges="Container">
 
     <Grid>
@@ -17,43 +17,43 @@
                     <Label Text="&#xf201;"
                               FontFamily="FontAwesomeSolid"
                               VerticalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                            FontSize="28"
                            SemanticProperties.Description="Financial progress" />
                     <VerticalStackLayout Grid.Column="1" Spacing="{StaticResource SpaceSm}">
                     <Label Text="MY FIRE NUMBER"
-                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                            FontAttributes="Bold"
                            FontSize="12"
                            CharacterSpacing="1.2" />
                     <Label Text="Build your financial independence plan."
-                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                            FontAttributes="Bold"
                            FontSize="30"
                            LineHeight="1.1"
                            SemanticProperties.HeadingLevel="Level1" />
                     <Label Text="Every calculation stays on this device. Results are estimates, not financial advice."
-                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                            FontSize="15"
                            LineHeight="1.3" />
                     </VerticalStackLayout>
                 </Grid>
 
                 <Border IsVisible="{Binding HasRecentCalculators}"
-                       Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                       Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                        Padding="{StaticResource CardPadding}"
-                       Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                       Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                        StrokeShape="RoundRectangle 12">
                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                            <Label Text="&#xf1da;"
                                   FontFamily="FontAwesomeSolid"
                                   VerticalTextAlignment="Center"
-                                  TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                  TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                   SemanticProperties.Description="Recent calculators" />
                            <Label Grid.Column="1"
                                   Text="Recently used calculators"
-                                  TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                  TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                   FontAttributes="Bold"
                                   FontSize="20" />
                        </Grid>
@@ -61,7 +61,7 @@
                            <BindableLayout.ItemTemplate>
                                <DataTemplate x:DataType="catalog:CalculatorDefinition">
                                    <Border Padding="{StaticResource CardPaddingCompact}"
-                                           Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                                           Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                                            StrokeThickness="0"
                                            StrokeShape="RoundRectangle 10"
                                            SemanticProperties.Description="{Binding Title, StringFormat='Open recent {0} calculator'}">
@@ -75,18 +75,18 @@
                                                   FontSize="16"
                                                   HorizontalTextAlignment="Center"
                                                   VerticalTextAlignment="Center"
-                                                  TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                                  TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                                   SemanticProperties.Description="{Binding Title, StringFormat='{0} icon'}" />
                                            <Label Grid.Column="1"
                                                   Text="{Binding Title}"
                                                   VerticalTextAlignment="Center"
-                                                  TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                                  TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                                   FontAttributes="Bold" />
                                            <Label Grid.Column="2"
                                                   Text="&#xf054;"
                                                   FontFamily="FontAwesomeSolid"
                                                   VerticalTextAlignment="Center"
-                                                  TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                                  TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                                   SemanticProperties.Description="Open" />
                                        </Grid>
                                    </Border>
@@ -97,20 +97,20 @@
                 </Border>
 
                 <Border IsVisible="{Binding HasRecentPlans}"
-                       Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                       Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                        Padding="{StaticResource CardPadding}"
-                       Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                       Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                        StrokeShape="RoundRectangle 12">
                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                            <Label Text="&#xf15c;"
                                   FontFamily="FontAwesomeSolid"
                                   VerticalTextAlignment="Center"
-                                  TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                  TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                   SemanticProperties.Description="Recent plans" />
                            <Label Grid.Column="1"
                                   Text="Recently opened plans"
-                                  TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                  TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                   FontAttributes="Bold"
                                   FontSize="20" />
                        </Grid>
@@ -118,7 +118,7 @@
                            <BindableLayout.ItemTemplate>
                                <DataTemplate x:DataType="viewModels:RecentPlanItem">
                                    <Border Padding="{StaticResource CardPaddingCompact}"
-                                           Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                                           Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                                            StrokeThickness="0"
                                            StrokeShape="RoundRectangle 10"
                                            SemanticProperties.Description="{Binding Name, StringFormat='Open recent plan {0}'}">
@@ -129,17 +129,17 @@
                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                                            <VerticalStackLayout Spacing="2">
                                                <Label Text="{Binding Name}"
-                                                      TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                                      TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                                       FontAttributes="Bold" />
                                                <Label Text="{Binding CalculatorTitle}"
-                                                      TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                                      TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                                       FontSize="12" />
                                            </VerticalStackLayout>
                                            <Label Grid.Column="1"
                                                   Text="&#xf054;"
                                                   FontFamily="FontAwesomeSolid"
                                                   VerticalTextAlignment="Center"
-                                                  TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                                  TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                                   SemanticProperties.Description="Open" />
                                        </Grid>
                                    </Border>
@@ -150,25 +150,25 @@
                 </Border>
 
                 <Border IsVisible="{Binding ShowRecommendedBooks}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                         Padding="{StaticResource CardPadding}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                            <Label Text="&#xf02d;"
                                   FontFamily="FontAwesomeSolid"
                                   VerticalTextAlignment="Center"
-                                  TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                  TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                   SemanticProperties.Description="Recommended books" />
                            <VerticalStackLayout Grid.Column="1" Spacing="{StaticResource SpaceXs}">
                                <Label Text="Recommended FIRE books"
-                                      TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                      TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                       FontAttributes="Bold"
                                       FontSize="20"
                                       SemanticProperties.HeadingLevel="Level2" />
                                <Label Text="Essential reading for your financial independence journey."
-                                      TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                      TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                       FontSize="13" />
                            </VerticalStackLayout>
                        </Grid>
@@ -180,8 +180,8 @@
                                <DataTemplate x:DataType="books:RecommendedBook">
                                    <Border FlexLayout.Basis="48%"
                                            Margin="0,0,0,12"
-                                           Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
-                                           Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                                           Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+                                           Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                                            StrokeShape="RoundRectangle 10"
                                            SemanticProperties.Description="{Binding Title, StringFormat='Open {0} on Amazon.'}">
                                        <Border.GestureRecognizers>
@@ -195,25 +195,25 @@
                                                   SemanticProperties.Description="{Binding Title, StringFormat='{0} book artwork'}" />
                                            <VerticalStackLayout Grid.Row="1" Padding="10,9" Spacing="3">
                                                <Label Text="{Binding Title}"
-                                                      TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                                      TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                                       FontAttributes="Bold"
                                                       FontSize="13"
                                                       LineBreakMode="TailTruncation"
                                                       MaxLines="2" />
                                                <Label Text="{Binding Author}"
-                                                      TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                                      TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                                       FontSize="11"
                                                       LineBreakMode="TailTruncation"
                                                       MaxLines="2" />
                                                <Grid Margin="0,4,0,0" ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceXs}">
                                                    <Label Text="View on Amazon"
-                                                          TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                                          TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                                           FontAttributes="Bold"
                                                           FontSize="11" />
                                                    <Label Grid.Column="1"
                                                           Text="&#xf35d;"
                                                           FontFamily="FontAwesomeSolid"
-                                                          TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                                          TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                                           FontSize="11"
                                                           SemanticProperties.Description="Opens externally" />
                                                </Grid>
@@ -224,16 +224,16 @@
                            </BindableLayout.ItemTemplate>
                        </FlexLayout>
                        <Border Padding="{StaticResource CardPaddingCompact}"
-                               Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
-                               Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                               Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                               Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                                StrokeShape="RoundRectangle 10">
                            <VerticalStackLayout Spacing="3">
                                <Label Text="Affiliate disclosure"
-                                      TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                      TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                       FontAttributes="Bold"
                                       FontSize="12" />
                                <Label Text="These Amazon links are affiliate links. We may earn a small commission at no extra cost to you, which helps support this free calculator."
-                                      TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                                      TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                       FontSize="12"
                                       LineHeight="1.25" />
                            </VerticalStackLayout>
@@ -242,27 +242,27 @@
                 </Border>
 
                 <Border IsVisible="{Binding ShowGettingStarted}"
-                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                         Padding="{StaticResource CardPadding}"
-                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 8">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf1ec;"
                                 FontFamily="FontAwesomeSolid"
                                 VerticalTextAlignment="Center"
-                                TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                    SemanticProperties.Description="Calculator" />
                             <Label Grid.Column="1"
                                 Text="Suggested calculators"
-                                TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                 FontAttributes="Bold"
                                 FontSize="20" />
                            </Grid>
                         <Border IsVisible="{Binding HasQuizRecommendation}"
                                 Padding="14"
-                                Background="{AppThemeBinding Light=#EAF4EC, Dark=#15211C}"
-                                Stroke="{AppThemeBinding Light=#A8D4B2, Dark=#43805B}"
+                                Background="{AppThemeBinding Light={StaticResource SurfaceAccentTintFlatLight}, Dark={StaticResource SurfaceAccentTintFlatDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource BorderAccentSoftLight}, Dark={StaticResource BorderAccentSoftDark}}"
                                 StrokeShape="RoundRectangle 10"
                                 SemanticProperties.Description="{Binding RecommendedCalculator.Title, StringFormat='Open your recommended {0} calculator'}">
                             <Border.GestureRecognizers>
@@ -275,31 +275,31 @@
                                        FontSize="20"
                                        HorizontalTextAlignment="Center"
                                        VerticalTextAlignment="Center"
-                                       TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                        SemanticProperties.Description="Quiz recommendation" />
                                 <VerticalStackLayout Grid.Column="1" Spacing="2">
                                     <Label Text="Recommended from your quiz"
                                            FontSize="12"
-                                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                                     <Label Text="{Binding RecommendedCalculator.Title}"
                                            FontAttributes="Bold"
                                            FontSize="18"
-                                           TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                                     <Label Text="{Binding RecommendedCalculator.Summary}"
                                            FontSize="13"
-                                           TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                 </VerticalStackLayout>
                                 <Label Grid.Column="2"
                                        Text="&#xf054;"
                                        FontFamily="FontAwesomeSolid"
                                        VerticalTextAlignment="Center"
-                                       TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                       TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                        SemanticProperties.Description="Open" />
                             </Grid>
                         </Border>
                         <Label IsVisible="{Binding ShowFeaturedCalculators}"
                                Text="Start with one of these to build your first estimate."
-                               TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                                LineHeight="1.3" />
                         <VerticalStackLayout IsVisible="{Binding ShowFeaturedCalculators}"
                                              BindableLayout.ItemsSource="{Binding FeaturedCalculators}"
@@ -317,17 +317,17 @@
                                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
                                             <VerticalStackLayout Spacing="2">
                                                 <Label Text="{Binding Title}"
-                                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
+                                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                                        FontAttributes="Bold" />
                                                 <Label Text="{Binding Summary}"
-                                                       TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                                       TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                                        FontSize="13" />
                                             </VerticalStackLayout>
                                             <Label Grid.Column="1"
                                                    Text="&#xf054;"
                                                    FontFamily="FontAwesomeSolid"
                                                    VerticalTextAlignment="Center"
-                                                   TextColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
+                                                   TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                                    SemanticProperties.Description="Open" />
                                         </Grid>
                                     </Border>
@@ -337,19 +337,19 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Button Text="Retake quiz"
                                     Command="{Binding RetakeQuizCommand}"
-                                    Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}"
-                                    TextColor="{AppThemeBinding Light=#245744, Dark=#C8E7D5}">
+                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftLight}, Dark={StaticResource SurfaceAccentSoftDark}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}">
                                 <Button.ImageSource>
-                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf2f1;" Color="{AppThemeBinding Light=#245744, Dark=#C8E7D5}" Size="14" />
+                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf2f1;" Color="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}" Size="14" />
                                 </Button.ImageSource>
                             </Button>
                             <Button Grid.Column="1"
                                     Text="Browse all"
                                     Command="{Binding BrowseCalculatorsCommand}"
-                                    Background="#2F6B57"
-                                    TextColor="#FFFFFF">
+                                    Background="{StaticResource FixedAccent}"
+                                    TextColor="{StaticResource FixedWhite}">
                                 <Button.ImageSource>
-                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf00e;" Color="#FFFFFF" Size="14" />
+                                    <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf00e;" Color="{StaticResource FixedWhite}" Size="14" />
                                 </Button.ImageSource>
                             </Button>
                         </Grid>

@@ -35,6 +35,123 @@
     <Color x:Key="PlaceholderLight">#587068</Color>
     <Color x:Key="PlaceholderDark">#B9D1C2</Color>
 
+
+    <!--
+    App theme tokens. Each entry is keyed on the exact (light, dark) pair it
+    replaced in the view XAML, so two colours that differ by even one channel
+    keep two tokens. Names ending in Alt mark near-duplicates that are
+    preserved deliberately rather than collapsed.
+    -->
+    <Color x:Key="TextAccentLight">#326B57</Color>
+    <Color x:Key="TextAccentDark">#9ACCB3</Color>
+    <Color x:Key="TextAccentAltLight">#2F6B57</Color>
+    <Color x:Key="TextAccentAltDark">#9ACCB3</Color>
+    <Color x:Key="TextAccentStrongLight">#245744</Color>
+    <Color x:Key="TextAccentStrongDark">#C8E7D5</Color>
+    <Color x:Key="TextDangerLight">#7C352E</Color>
+    <Color x:Key="TextDangerDark">#FFB9B1</Color>
+    <Color x:Key="TextDangerAltLight">#A6473C</Color>
+    <Color x:Key="TextDangerAltDark">#FFB9B1</Color>
+    <Color x:Key="TextDangerDeepLight">#8A342B</Color>
+    <Color x:Key="TextDangerDeepDark">#FFB9B1</Color>
+    <Color x:Key="TextMutedAltLight">#587068</Color>
+    <Color x:Key="TextMutedAltDark">#8EAA9B</Color>
+    <Color x:Key="TextOnAccentLight">#FFFFFF</Color>
+    <Color x:Key="TextOnAccentDark">#17352C</Color>
+    <Color x:Key="TextPrimaryLight">#17352C</Color>
+    <Color x:Key="TextPrimaryDark">#F2F7F3</Color>
+    <Color x:Key="TextSecondaryLight">#425D54</Color>
+    <Color x:Key="TextSecondaryDark">#B9D1C2</Color>
+    <Color x:Key="TextSecondaryAltLight">#425D54</Color>
+    <Color x:Key="TextSecondaryAltDark">#D8E8DE</Color>
+    <Color x:Key="TextSecondaryAltMutedLight">#425D54</Color>
+    <Color x:Key="TextSecondaryAltMutedDark">#D6E5DC</Color>
+    <Color x:Key="TextWarningLight">#6B3B12</Color>
+    <Color x:Key="TextWarningDark">#FFE0BC</Color>
+    <Color x:Key="TextWarningAltLight">#9A5C17</Color>
+    <Color x:Key="TextWarningAltDark">#F2B56D</Color>
+
+    <Color x:Key="SurfaceAccentSoftLight">#E4F0E9</Color>
+    <Color x:Key="SurfaceAccentSoftDark">#29483B</Color>
+    <Color x:Key="SurfaceAccentSoftAltLight">#E4F0E9</Color>
+    <Color x:Key="SurfaceAccentSoftAltDark">#29483A</Color>
+    <Color x:Key="SurfaceAccentSoftWarmLight">#E6F0EA</Color>
+    <Color x:Key="SurfaceAccentSoftWarmDark">#29483A</Color>
+    <Color x:Key="SurfaceAccentTintDeepLight">#EAF4EC</Color>
+    <Color x:Key="SurfaceAccentTintDeepDark">#1B3B2D</Color>
+    <Color x:Key="SurfaceAccentTintFlatLight">#EAF4EC</Color>
+    <Color x:Key="SurfaceAccentTintFlatDark">#15211C</Color>
+    <Color x:Key="SurfaceAccentTintLight">#EAF4EC</Color>
+    <Color x:Key="SurfaceAccentTintDark">#29483B</Color>
+    <Color x:Key="SurfaceAccentTintPaleLight">#F4FAF6</Color>
+    <Color x:Key="SurfaceAccentTintPaleDark">#182A22</Color>
+    <Color x:Key="SurfaceCardLight">#FFFFFF</Color>
+    <Color x:Key="SurfaceCardDark">#203129</Color>
+    <Color x:Key="SurfaceCardFlatLight">#FFFFFF</Color>
+    <Color x:Key="SurfaceCardFlatDark">#15211C</Color>
+    <Color x:Key="SurfaceDangerLight">#FCE5E1</Color>
+    <Color x:Key="SurfaceDangerDark">#4A2B2A</Color>
+    <Color x:Key="SurfaceDangerAltLight">#FDEEEB</Color>
+    <Color x:Key="SurfaceDangerAltDark">#4A2B2A</Color>
+    <Color x:Key="SurfaceDangerSoftLight">#FFF7F5</Color>
+    <Color x:Key="SurfaceDangerSoftDark">#2E201E</Color>
+    <Color x:Key="SurfaceInfoLight">#EAF2FF</Color>
+    <Color x:Key="SurfaceInfoDark">#1D3040</Color>
+    <Color x:Key="SurfaceInfoSkyLight">#EAF5FC</Color>
+    <Color x:Key="SurfaceInfoSkyDark">#1B3546</Color>
+    <Color x:Key="SurfaceInfoTealLight">#E8F7F7</Color>
+    <Color x:Key="SurfaceInfoTealDark">#19393C</Color>
+    <Color x:Key="SurfaceInfoVioletLight">#EEF0FA</Color>
+    <Color x:Key="SurfaceInfoVioletDark">#2A2E4C</Color>
+    <Color x:Key="SurfaceInsetLight">#EDF2EE</Color>
+    <Color x:Key="SurfaceInsetDark">#15211C</Color>
+    <Color x:Key="SurfacePageLight">#F5F7F2</Color>
+    <Color x:Key="SurfacePageDark">#15211C</Color>
+    <Color x:Key="SurfaceWarningLight">#FFF4E8</Color>
+    <Color x:Key="SurfaceWarningDark">#4A3323</Color>
+    <Color x:Key="SurfaceWarningAltLight">#FFF1E7</Color>
+    <Color x:Key="SurfaceWarningAltDark">#493225</Color>
+    <Color x:Key="SurfaceWarningMutedLight">#FFF6E5</Color>
+    <Color x:Key="SurfaceWarningMutedDark">#3A2F1B</Color>
+    <Color x:Key="SurfaceWarningSoftLight">#FFF9F3</Color>
+    <Color x:Key="SurfaceWarningSoftDark">#2B2019</Color>
+
+    <Color x:Key="BorderAccentAltLight">#C8DDD0</Color>
+    <Color x:Key="BorderAccentAltDark">#365244</Color>
+    <Color x:Key="BorderAccentSoftLight">#A8D4B2</Color>
+    <Color x:Key="BorderAccentSoftDark">#43805B</Color>
+    <Color x:Key="BorderDangerLight">#EBCBC6</Color>
+    <Color x:Key="BorderDangerDark">#68413C</Color>
+    <Color x:Key="BorderNeutralLight">#A8B8AF</Color>
+    <Color x:Key="BorderNeutralDark">#587668</Color>
+    <Color x:Key="BorderSubtleLight">#D7DED8</Color>
+    <Color x:Key="BorderSubtleDark">#365244</Color>
+    <Color x:Key="BorderWarningLight">#C97727</Color>
+    <Color x:Key="BorderWarningDark">#F2B56D</Color>
+    <Color x:Key="BorderWarningMutedLight">#E8C889</Color>
+    <Color x:Key="BorderWarningMutedDark">#6B5426</Color>
+    <Color x:Key="BorderWarningSoftLight">#F1D5BB</Color>
+    <Color x:Key="BorderWarningSoftDark">#634631</Color>
+
+    <!--
+    Colours that are intentionally the same in both themes. They are plain
+    resources rather than AppThemeBinding pairs because they render one value
+    today; giving them a dark variant would change what the app looks like.
+    -->
+    <Color x:Key="FixedAccent">#2F6B57</Color>
+    <Color x:Key="FixedAccentAlt">#326B57</Color>
+    <Color x:Key="FixedAccentLight">#9ACCB3</Color>
+    <Color x:Key="FixedAccentStrong">#245744</Color>
+    <Color x:Key="FixedAccentSurface">#E4F0E9</Color>
+    <Color x:Key="FixedDanger">#7C352E</Color>
+    <Color x:Key="FixedDangerAlt">#9A4335</Color>
+    <Color x:Key="FixedDangerStrong">#A33A31</Color>
+    <Color x:Key="FixedDangerSurface">#FCE5E1</Color>
+    <Color x:Key="FixedInfo">#426B9D</Color>
+    <Color x:Key="FixedWarning">#7A4A1A</Color>
+    <Color x:Key="FixedWarningSurface">#FFF0DD</Color>
+    <Color x:Key="FixedWhite">#FFFFFF</Color>
+
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
