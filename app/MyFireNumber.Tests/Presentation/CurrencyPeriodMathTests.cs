@@ -79,6 +79,9 @@ public class CurrencyPeriodMathTests
     /// only pinned negatives would still fail a naive default via -1.5, but it would leave the
     /// likeliest real divergence untested and imply the risk is a negative-number edge case. Issue
     /// #63 shipped this bug class in this repo already.</para>
+    /// <para>The -0.5 row is written as <c>0</c> because <c>-0.0 == 0.0</c> makes the two
+    /// indistinguishable to <c>Assert.Equal</c>; the sign is pinned separately in
+    /// <see cref="RoundHalfUp_does_not_produce_negative_zero"/>.</para>
     /// </summary>
     [Theory]
     [InlineData(0.5, 1)]
@@ -96,6 +99,55 @@ public class CurrencyPeriodMathTests
     public void RoundHalfUp_matches_javascript_Math_round(double value, double expected)
     {
         Assert.Equal(expected, CurrencyPeriodMath.RoundHalfUp(value));
+    }
+
+    /// <summary>
+    /// The -0.5 row above cannot see the sign of its own result, so it is pinned separately.
+    ///
+    /// <para>JavaScript's <c>Math.round(-0.5)</c> is <c>-0</c>, not <c>0</c>. In C# — as in JS —
+    /// <c>-0.0 == 0.0</c> is <c>true</c>, so <c>Assert.Equal(0, ...)</c> passes whichever zero comes
+    /// back and proves nothing about the sign. That matters because a negative zero reaching
+    /// <see cref="CurrencyPeriodMath.Format"/> would render as the string <c>"-0"</c> in an entry.
+    /// </para>
+    /// <para>This implementation returns <b>positive</b> zero: <c>Math.Floor(-0.5)</c> is
+    /// <c>-1.0</c>, and IEEE-754 addition of exact opposites yields <c>+0.0</c> under
+    /// round-to-nearest, so the <c>-0</c> path is never taken. So it is one step *safer* than the JS
+    /// original here rather than a match, and this test pins that rather than the JS bit pattern —
+    /// picking the behaviour that cannot surface "-0" in the UI.</para>
+    /// <para>All three negative rows are defensive only. <c>RoundHalfUp</c> is reachable from the
+    /// field solely through <c>IsSameToCent</c> &lt;- <c>ResolveEditedAmount</c> &lt;-
+    /// <c>PeriodicAmountField.TrySetText</c>, which rejects <c>typed &lt; 0</c> before it converts,
+    /// so no negative amount reaches this helper from a currency entry. They are pinned because the
+    /// helper is public Core surface, not because a user can produce them.</para>
+    /// </summary>
+    [Fact]
+    public void RoundHalfUp_does_not_produce_negative_zero()
+    {
+        var result = CurrencyPeriodMath.RoundHalfUp(-0.5);
+
+        Assert.Equal(0, result);
+        Assert.False(double.IsNegative(result), "-0.5 rounded to negative zero, which formats as \"-0\".");
+        Assert.Equal("0", CurrencyPeriodMath.Format(result, CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>
+    /// Pins the guard that makes the negative rows above unreachable in practice, so that if the
+    /// guard is ever removed this suite says so rather than the negative rows quietly becoming live.
+    /// </summary>
+    [Theory]
+    [InlineData("-1")]
+    [InlineData("-0.5")]
+    [InlineData("-50000")]
+    public void A_negative_amount_never_reaches_the_rounding_helper(string typed)
+    {
+        var field = new PeriodicAmountField(
+            CurrencyPeriod.Annual,
+            CurrencyPeriod.Annual,
+            CultureInfo.InvariantCulture);
+        field.SetStoredValue(50_000);
+
+        Assert.False(field.TrySetText(typed));
+        Assert.Equal(50_000, field.StoredValue);
     }
 
     [Theory]
