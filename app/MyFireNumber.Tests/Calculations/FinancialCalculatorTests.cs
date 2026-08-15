@@ -205,6 +205,89 @@ public class FinancialCalculatorTests
     }
 
     [Fact]
+    public void SnowballPayoff_WithInterest_ChargesInterestOncePerMonth()
+    {
+        var debt = new DebtItem("card", "Credit card", 10_000, 0.20, 250);
+
+        var result = FinancialCalculator.CalculateSnowballPayoff([debt], 500);
+
+        Assert.Equal(25, result.TotalMonths);
+        Assert.Equal(2_266, result.TotalInterest);
+        Assert.Equal(10_000, result.TotalPrincipal);
+
+        // $10,000 at 20% APR accrues $166.67 in month one, not $333.33.
+        var firstMonth = result.Projections[0];
+        Assert.Equal(167, firstMonth.InterestPaid);
+        Assert.Equal(333, firstMonth.PrincipalPaid);
+        Assert.Equal(9_667, firstMonth.TotalBalance);
+
+        Assert.Equal(0, result.Projections[^1].TotalBalance);
+        Assert.Equal(10_000, result.Projections[^1].CumulativePrincipal);
+    }
+
+    [Fact]
+    public void AvalanchePayoff_NeverCostsMoreInterestThanSnowball()
+    {
+        DebtItem[] debts =
+        [
+            new("small", "Small balance", 2_000, 0.06, 50),
+            new("big", "High rate", 8_000, 0.22, 200)
+        ];
+
+        var snowball = FinancialCalculator.CalculateSnowballPayoff(debts, 600);
+        var avalanche = FinancialCalculator.CalculateAvalanchePayoff(debts, 600);
+
+        Assert.True(
+            avalanche.TotalInterest <= snowball.TotalInterest,
+            $"Avalanche interest {avalanche.TotalInterest} should not exceed snowball interest {snowball.TotalInterest}.");
+
+        Assert.Equal(20, snowball.TotalMonths);
+        Assert.Equal(1_930, snowball.TotalInterest);
+        Assert.Equal(["Small balance", "High rate"], snowball.PayoffOrder);
+
+        Assert.Equal(20, avalanche.TotalMonths);
+        Assert.Equal(1_543, avalanche.TotalInterest);
+        Assert.Equal(["High rate", "Small balance"], avalanche.PayoffOrder);
+    }
+
+    [Fact]
+    public void DebtPayoff_WithBudgetBelowMinimums_DoesNotSpendMoreThanBudget()
+    {
+        DebtItem[] debts =
+        [
+            new("small", "Small balance", 2_000, 0.06, 50),
+            new("big", "High rate", 8_000, 0.22, 200)
+        ];
+
+        var result = FinancialCalculator.CalculateSnowballPayoff(debts, 100);
+
+        foreach (var month in result.Projections)
+        {
+            Assert.True(
+                month.PrincipalPaid + month.InterestPaid <= 100,
+                $"Month {month.Month} spent {month.PrincipalPaid + month.InterestPaid} against a $100 budget.");
+        }
+
+        // A budget that cannot cover minimums never retires the debt instead of silently overpaying.
+        Assert.Equal(600, result.TotalMonths);
+        Assert.DoesNotContain("High rate", result.PayoffOrder);
+        Assert.True(result.Projections[^1].TotalBalance > 8_000);
+    }
+
+    [Fact]
+    public void DebtTimeline_UsesCorrectedInterestWhenSolvingForPayment()
+    {
+        var debt = new DebtItem("card", "Credit card", 10_000, 0.20, 250);
+
+        var timeline = FinancialCalculator.CalculateDebtPayoffByTimeline([debt], 24, useSnowball: true);
+
+        Assert.NotNull(timeline);
+        Assert.Equal(509, timeline.RequiredPayment);
+        Assert.True(timeline.Result.TotalMonths <= 24);
+        Assert.Equal(2_212, timeline.Result.TotalInterest);
+    }
+
+    [Fact]
     public void ReverseFire_MatchesWebDefaultRequirement()
     {
         var result = FinancialCalculator.CalculateReverseFire(DefaultInputs);
