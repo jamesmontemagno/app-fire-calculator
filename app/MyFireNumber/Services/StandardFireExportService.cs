@@ -10,6 +10,13 @@ public interface IStandardFireExportService
 
 public sealed class StandardFireExportService : IStandardFireExportService
 {
+    private readonly IDisplayPeriodPreferencesService displayPeriodPreferences;
+
+    public StandardFireExportService(IDisplayPeriodPreferencesService displayPeriodPreferences)
+    {
+        this.displayPeriodPreferences = displayPeriodPreferences;
+    }
+
     public async Task ShareAsync(StandardFireDraft draft, StandardFireResult result, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -17,7 +24,7 @@ public sealed class StandardFireExportService : IStandardFireExportService
         var filePath = Path.Combine(
             FileSystem.CacheDirectory,
             $"standard-fire-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}.xlsx");
-        StandardFireWorkbook.Create(filePath, draft, result, DateTimeOffset.UtcNow);
+        StandardFireWorkbook.Create(filePath, draft, result, displayPeriodPreferences.Get("standard-fire"), DateTimeOffset.UtcNow);
 
         await Share.Default.RequestAsync(new ShareFileRequest
         {

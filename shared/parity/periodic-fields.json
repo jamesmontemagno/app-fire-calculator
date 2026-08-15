@@ -7,10 +7,14 @@
     "No conversion arithmetic is pinned here. '50000 / 12 = 4166.67' is not an independent oracle, it is the implementation restated, which is the screenshot test this directory's README forbids. Behaviour is pinned in each platform's own suite instead."
   ],
   "storedPeriodValues": ["annual", "monthly"],
+  "fieldLabels": {
+    "annualExpenses": "Retirement spending (today’s dollars)"
+  },
   "calculators": [
     {
       "id": "standard-fire",
       "webPage": "StandardFIRE.tsx",
+      "nativePage": "FireNumberPage.xaml",
       "fields": [
         { "key": "annualContribution", "storedPeriod": "annual" },
         { "key": "annualIncome", "storedPeriod": "annual" },
@@ -20,6 +24,7 @@
     {
       "id": "lean-fire",
       "webPage": "LeanFIRE.tsx",
+      "nativePage": "FireNumberPage.xaml",
       "fields": [
         { "key": "annualContribution", "storedPeriod": "annual" },
         { "key": "annualIncome", "storedPeriod": "annual" },
@@ -29,6 +34,7 @@
     {
       "id": "fat-fire",
       "webPage": "FatFIRE.tsx",
+      "nativePage": "FireNumberPage.xaml",
       "fields": [
         { "key": "annualContribution", "storedPeriod": "annual" },
         { "key": "annualIncome", "storedPeriod": "annual" },
@@ -38,6 +44,7 @@
     {
       "id": "coast-fire",
       "webPage": "CoastFIRE.tsx",
+      "nativePage": "CoastFirePage.xaml",
       "fields": [
         { "key": "annualContribution", "storedPeriod": "annual" },
         { "key": "annualExpenses", "storedPeriod": "annual" }
@@ -46,6 +53,7 @@
     {
       "id": "barista-fire",
       "webPage": "BaristaFIRE.tsx",
+      "nativePage": "BaristaFirePage.xaml",
       "fields": [
         { "key": "annualContribution", "storedPeriod": "annual" },
         { "key": "annualExpenses", "storedPeriod": "annual" },
@@ -55,6 +63,7 @@
     {
       "id": "reverse-fire",
       "webPage": "ReverseFIRE.tsx",
+      "nativePage": "ReverseFirePage.xaml",
       "fields": [{ "key": "annualExpenses", "storedPeriod": "annual" }]
     },
     {
@@ -76,6 +85,7 @@
     {
       "id": "retirement-cash-flow",
       "webPage": "DeferredCompensation.tsx",
+      "nativePage": "RetirementCashFlowPage.xaml",
       "note": "Named retirement-cash-flow on MAUI and DeferredCompensation on web. Per-account contributions are not periodic on either platform.",
       "fields": [{ "key": "annualExpenses", "storedPeriod": "annual" }]
     },

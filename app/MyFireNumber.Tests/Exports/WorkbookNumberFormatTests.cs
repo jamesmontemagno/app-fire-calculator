@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MyFireNumber.Core.Calculations;
 using MyFireNumber.Core.Exports;
+using MyFireNumber.Core.Presentation;
 
 namespace MyFireNumber.Tests.Exports;
 
@@ -38,7 +39,7 @@ public sealed class WorkbookNumberFormatTests : IDisposable
     {
         var draft = StandardFireDraft.Default;
         var result = FinancialCalculator.CalculateStandardFire(draft.ToFireInputs(2026));
-        StandardFireWorkbook.Create(workbookPath, draft, result, GeneratedAt);
+        StandardFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, GeneratedAt);
 
         // Draft ages on the Inputs sheet are int and were the omission the reviewer caught (#69) — they
         // must be plain integers, not "45.0".
@@ -61,7 +62,7 @@ public sealed class WorkbookNumberFormatTests : IDisposable
     {
         var draft = BaristaFireDraft.Default;
         var result = FinancialCalculator.CalculateBaristaFire(draft.ToFireInputs(2026), draft.PartTimeAnnualIncome);
-        BaristaFireWorkbook.Create(workbookPath, draft, result, GeneratedAt);
+        BaristaFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, GeneratedAt);
 
         Assert.Equal("0", ResolveFormat(0, "B5"));      // BaristaFireDraft.CurrentAge (int)
     }
@@ -71,7 +72,7 @@ public sealed class WorkbookNumberFormatTests : IDisposable
     {
         var draft = CoastFireDraft.Default;
         var result = FinancialCalculator.CalculateCoastFire(draft.ToFireInputs(2026));
-        CoastFireWorkbook.Create(workbookPath, draft, result, GeneratedAt);
+        CoastFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, GeneratedAt);
 
         Assert.Equal("0", ResolveFormat(0, "B5"));      // CoastFireDraft.CurrentAge (int)
         Assert.Equal("0", ResolveFormat(0, "B6"));      // CoastFireDraft.RetirementAge (int)
@@ -111,7 +112,7 @@ public sealed class WorkbookNumberFormatTests : IDisposable
     {
         var draft = ReverseFireDraft.Default;
         var result = FinancialCalculator.CalculateReverseFire(draft.ToFireInputs(2026));
-        ReverseFireWorkbook.Create(workbookPath, draft, result, GeneratedAt);
+        ReverseFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, GeneratedAt);
 
         Assert.Equal("0", ResolveFormat(0, "B5"));      // CurrentAge (int)
         Assert.Equal("0", ResolveFormat(0, "B6"));      // TargetRetirementAge (int)
@@ -141,7 +142,7 @@ public sealed class WorkbookNumberFormatTests : IDisposable
     {
         var draft = DeferredCompensationDraft.Default;
         var result = DeferredCompensationCalculator.Calculate(draft.ToInputs(2026));
-        DeferredCompensationWorkbook.Create(workbookPath, draft, result, GeneratedAt);
+        DeferredCompensationWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, GeneratedAt);
 
         Assert.Equal("0", ResolveFormat(0, "B5"));      // draft.CurrentAge (int)
         Assert.Equal("0", ResolveFormat(0, "B6"));      // SemiRetirementAge (int)

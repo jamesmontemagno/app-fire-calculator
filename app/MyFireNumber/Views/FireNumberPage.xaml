@@ -126,8 +126,8 @@
                                                    Text="{Binding AnnualIncomeText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                         <controls:NumericInputView Grid.Row="2"
                                                    Grid.ColumnSpan="2"
-                                                   Header="Retirement expenses"
-                                                   HelpText="Estimated spending after leaving full-time work, in today’s dollars."
+                                                   Header="Retirement spending (today’s dollars)"
+                                                   HelpText="Estimated spending after leaving full-time work."
                                                    Placeholder="48000"
                                                    Text="{Binding AnnualExpensesText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                     </Grid>

@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MyFireNumber.Core.Calculations;
 using MyFireNumber.Core.Exports;
+using MyFireNumber.Core.Presentation;
 
 namespace MyFireNumber.Tests.Exports;
 
@@ -23,7 +24,7 @@ public sealed class UnreachableResultExportTests : IDisposable
 
         Assert.True(double.IsPositiveInfinity(result.YearsToFire), "Expected the target to be unreachable.");
 
-        StandardFireWorkbook.Create(workbookPath, draft, result, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
+        StandardFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
 
         var cell = GetCell(1, "B6");
         Assert.Equal(WorkbookValues.Unreachable, cell.InlineString?.Text?.Text);
@@ -38,7 +39,7 @@ public sealed class UnreachableResultExportTests : IDisposable
 
         Assert.True(double.IsPositiveInfinity(result.YearsToCoast), "Expected the coast target to be unreachable.");
 
-        CoastFireWorkbook.Create(workbookPath, draft, result, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
+        CoastFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
 
         Assert.Equal(WorkbookValues.Unreachable, GetCell(1, "B7").InlineString?.Text?.Text);
     }
@@ -51,7 +52,7 @@ public sealed class UnreachableResultExportTests : IDisposable
 
         Assert.True(double.IsPositiveInfinity(result.YearsToBaristaFire), "Expected the barista target to be unreachable.");
 
-        BaristaFireWorkbook.Create(workbookPath, draft, result, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
+        BaristaFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
 
         Assert.Equal(WorkbookValues.Unreachable, GetCell(1, "B7").InlineString?.Text?.Text);
     }
@@ -62,7 +63,7 @@ public sealed class UnreachableResultExportTests : IDisposable
         var draft = StandardFireDraft.Default;
         var result = FinancialCalculator.CalculateStandardFire(draft.ToFireInputs(2026));
 
-        StandardFireWorkbook.Create(workbookPath, draft, result, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
+        StandardFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
 
         var cell = GetCell(1, "B6");
         Assert.Null(cell.InlineString);

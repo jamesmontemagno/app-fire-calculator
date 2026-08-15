@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MyFireNumber.Core.Calculations;
 using MyFireNumber.Core.Exports;
+using MyFireNumber.Core.Presentation;
 
 namespace MyFireNumber.Tests.Exports;
 
@@ -15,7 +16,7 @@ public sealed class StandardFireWorkbookTests : IDisposable
         var draft = StandardFireDraft.Default;
         var result = FinancialCalculator.CalculateStandardFire(draft.ToFireInputs(2026));
 
-        StandardFireWorkbook.Create(workbookPath, draft, result, new DateTimeOffset(2026, 8, 8, 12, 0, 0, TimeSpan.Zero));
+        StandardFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, new DateTimeOffset(2026, 8, 8, 12, 0, 0, TimeSpan.Zero));
 
         using var document = SpreadsheetDocument.Open(workbookPath, false);
         var workbookPart = document.WorkbookPart ?? throw new InvalidOperationException("Workbook part was not created.");
@@ -24,7 +25,7 @@ public sealed class StandardFireWorkbookTests : IDisposable
 
         Assert.Equal(["Inputs", "Results", "Projections"], sheets.Select(sheet => sheet.Name!.Value));
         Assert.Equal("Annual take-home income (after tax)", GetCellText(workbookPart, sheets[0], "A9"));
-        Assert.Equal("Annual retirement spending (today's dollars)", GetCellText(workbookPart, sheets[0], "A10"));
+        Assert.Equal("Retirement spending (today’s dollars) (per year)", GetCellText(workbookPart, sheets[0], "A10"));
         Assert.Equal("100000", GetCell(workbookPart, sheets[0], "B7").CellValue!.Text);
         Assert.Equal("Inputs!B10/Inputs!B13", GetCell(workbookPart, sheets[1], "B5").CellFormula!.Text);
         Assert.Equal("Target retirement age", GetCellText(workbookPart, sheets[1], "A11"));
@@ -41,7 +42,7 @@ public sealed class StandardFireWorkbookTests : IDisposable
         var draft = LeanFireDraft.Default;
         var result = FinancialCalculator.CalculateLeanFire(draft.ToFireInputs(2026)).Standard;
 
-        StandardFireWorkbook.CreateLean(workbookPath, draft, result, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
+        StandardFireWorkbook.CreateLean(workbookPath, draft, result, CurrencyPeriod.Annual, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
 
         using var document = SpreadsheetDocument.Open(workbookPath, false);
         var workbookPart = document.WorkbookPart ?? throw new InvalidOperationException("Workbook part was not created.");
@@ -59,7 +60,7 @@ public sealed class StandardFireWorkbookTests : IDisposable
         var draft = FatFireDraft.Default with { AnnualExpenses = 125_000 };
         var result = FinancialCalculator.CalculateFatFire(draft.ToFireInputs(2026)).Standard;
 
-        StandardFireWorkbook.CreateFat(workbookPath, draft, result, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
+        StandardFireWorkbook.CreateFat(workbookPath, draft, result, CurrencyPeriod.Annual, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
 
         using var document = SpreadsheetDocument.Open(workbookPath, false);
         var workbookPart = document.WorkbookPart ?? throw new InvalidOperationException("Workbook part was not created.");
@@ -69,6 +70,22 @@ public sealed class StandardFireWorkbookTests : IDisposable
         Assert.Equal("Fat FIRE Inputs", GetCell(workbookPart, sheets[0], "A1").InlineString!.Text!.Text);
         Assert.Equal("125000", GetCell(workbookPart, sheets[0], "B10").CellValue!.Text);
         Assert.Equal("Fat FIRE Results", GetCell(workbookPart, sheets[1], "A1").InlineString!.Text!.Text);
+    }
+
+    [Fact]
+    public void Create_UsesTheActiveMonthlyDisplayPeriodForRetirementSpending()
+    {
+        var draft = StandardFireDraft.Default with { AnnualExpenses = 48_000 };
+        var result = FinancialCalculator.CalculateStandardFire(draft.ToFireInputs(2026));
+
+        StandardFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Monthly, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
+
+        using var document = SpreadsheetDocument.Open(workbookPath, false);
+        var workbookPart = document.WorkbookPart ?? throw new InvalidOperationException("Workbook part was not created.");
+        var sheets = (workbookPart.Workbook?.Sheets ?? throw new InvalidOperationException("Workbook sheets were not created.")).Elements<Sheet>().ToArray();
+
+        Assert.Equal("Retirement spending (today’s dollars) (per month)", GetCellText(workbookPart, sheets[0], "A10"));
+        Assert.Equal("4000", GetCell(workbookPart, sheets[0], "B10").CellValue!.Text);
     }
 
     public void Dispose()

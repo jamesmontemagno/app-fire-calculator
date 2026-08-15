@@ -10,6 +10,13 @@ public interface ICoastFireExportService
 
 public sealed class CoastFireExportService : ICoastFireExportService
 {
+    private readonly IDisplayPeriodPreferencesService displayPeriodPreferences;
+
+    public CoastFireExportService(IDisplayPeriodPreferencesService displayPeriodPreferences)
+    {
+        this.displayPeriodPreferences = displayPeriodPreferences;
+    }
+
     public async Task ShareAsync(CoastFireDraft draft, CoastFireResult result, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -17,7 +24,7 @@ public sealed class CoastFireExportService : ICoastFireExportService
         var filePath = Path.Combine(
             FileSystem.CacheDirectory,
             $"coast-fire-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmss}.xlsx");
-        CoastFireWorkbook.Create(filePath, draft, result, DateTimeOffset.UtcNow);
+        CoastFireWorkbook.Create(filePath, draft, result, displayPeriodPreferences.Get("coast-fire"), DateTimeOffset.UtcNow);
 
         await Share.Default.RequestAsync(new ShareFileRequest
         {

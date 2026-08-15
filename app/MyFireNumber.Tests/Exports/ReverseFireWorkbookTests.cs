@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using MyFireNumber.Core.Calculations;
 using MyFireNumber.Core.Exports;
+using MyFireNumber.Core.Presentation;
 
 namespace MyFireNumber.Tests.Exports;
 
@@ -15,14 +16,14 @@ public sealed class ReverseFireWorkbookTests : IDisposable
         var draft = ReverseFireDraft.Default;
         var result = FinancialCalculator.CalculateReverseFire(draft.ToFireInputs(2026));
 
-        ReverseFireWorkbook.Create(workbookPath, draft, result, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
+        ReverseFireWorkbook.Create(workbookPath, draft, result, CurrencyPeriod.Annual, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
 
         using var document = SpreadsheetDocument.Open(workbookPath, false);
         var workbookPart = document.WorkbookPart ?? throw new InvalidOperationException("Workbook part was not created.");
         var sheets = (workbookPart.Workbook?.Sheets ?? throw new InvalidOperationException("Workbook sheets were not created.")).Elements<Sheet>().ToArray();
 
         Assert.Equal(["Inputs", "Results", "Projection"], sheets.Select(sheet => sheet.Name!.Value));
-        Assert.Equal("Annual retirement spending (today's dollars)", GetCellText(workbookPart, sheets[0], "A8"));
+        Assert.Equal("Retirement spending (today’s dollars) (per year)", GetCellText(workbookPart, sheets[0], "A8"));
         Assert.Equal("55", GetCell(workbookPart, sheets[0], "B6").CellValue!.Text);
         Assert.Equal("Inputs!B8/Inputs!B11", GetCell(workbookPart, sheets[1], "B5").CellFormula!.Text);
         Assert.Equal("Inputs!B6-Inputs!B5", GetCell(workbookPart, sheets[1], "B6").CellFormula!.Text);
