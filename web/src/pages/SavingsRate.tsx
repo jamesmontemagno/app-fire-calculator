@@ -36,8 +36,8 @@ export default function SavingsRate() {
       inputFormats, resultFormats,
       resultFormulas: {
         savingsRate: params.savingsFrequency === 'monthly'
-          ? '({contributionAmount}*12)/{annualIncome}'
-          : '{contributionAmount}/{annualIncome}',
+          ? 'IF({annualIncome}>0,({contributionAmount}*12)/{annualIncome},0)'
+          : 'IF({annualIncome}>0,{contributionAmount}/{annualIncome},0)',
       },
     })
   }

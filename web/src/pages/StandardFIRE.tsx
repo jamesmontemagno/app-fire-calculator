@@ -66,7 +66,7 @@ export default function StandardFIRE() {
       resultFormats,
       resultFormulas: {
         fireNumber: '{annualExpenses}/{withdrawalRate}',
-        savingsRate: '{annualContribution}/{annualIncome}',
+        savingsRate: 'IF({annualIncome}>0,{annualContribution}/{annualIncome},0)',
         monthlyContribution: '{annualContribution}/12',
       },
     })

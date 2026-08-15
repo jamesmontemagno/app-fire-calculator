@@ -28,8 +28,8 @@ export default function HealthcareGap() {
       calculatorName: 'Healthcare Gap', inputs, results: resultValues, projections: results.yearlyBreakdown,
       inputFormats, resultFormats,
       resultFormulas: {
-        yearsInGap: '{medicareAge}-{earlyRetirementAge}',
-        annualBaseCost: '({monthlyPremium}*12)+{annualDeductible}+{annualOutOfPocket}',
+        gapYears: 'MAX(0,{medicareAge}-{earlyRetirementAge})',
+        annualCost: '({monthlyPremium}*12)+{annualDeductible}+{annualOutOfPocket}',
       },
     })
   }

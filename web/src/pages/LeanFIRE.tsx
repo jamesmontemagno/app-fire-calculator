@@ -37,7 +37,7 @@ export default function LeanFIRE() {
     const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
     exportToExcel({
       calculatorName: 'Lean FIRE', inputs, results: resultValues, projections: results.projections, inputFormats, resultFormats,
-      resultFormulas: { fireNumber: '{annualExpenses}/{withdrawalRate}', savingsRate: '{annualContribution}/{annualIncome}' },
+      resultFormulas: { fireNumber: '{annualExpenses}/{withdrawalRate}', savingsRate: 'IF({annualIncome}>0,{annualContribution}/{annualIncome},0)' },
     })
   }
 
