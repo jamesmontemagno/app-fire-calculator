@@ -1,59 +1,12 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
-import { formatCurrency } from '../utils/calculations'
+import { calculateInvestmentGrowth, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, InputGroup, PercentageInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, InputGroup, PercentageInput, ToggleInput } from '../components/inputs'
 import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
-
-function calculateInvestmentGrowth(
-  startingAmount: number,
-  contributionAmount: number,
-  contributionFrequency: 'monthly' | 'yearly',
-  yearsInvesting: number,
-  expectedReturn: number,
-  inflationRate: number,
-  annualIncome: number,
-  currentAge: number,
-) {
-  const annualContribution = contributionFrequency === 'monthly' ? contributionAmount * 12 : contributionAmount
-  const savingsRate = annualIncome > 0 ? annualContribution / annualIncome : 0
-  const projections = []
-  let nominalBalance = startingAmount
-  let inflationAdjustedBalance = startingAmount
-  let totalContributions = startingAmount
-  const currentYear = new Date().getFullYear()
-  const realReturn = (1 + expectedReturn) / (1 + inflationRate) - 1
-
-  for (let year = 0; year <= yearsInvesting; year += 1) {
-    projections.push({
-      age: currentAge + year,
-      year: currentYear + year,
-      portfolio: Math.round(nominalBalance),
-      inflationAdjusted: Math.round(inflationAdjustedBalance),
-      totalContributions: Math.round(totalContributions),
-      contributions: year === 0 ? 0 : annualContribution,
-    })
-    if (year === yearsInvesting) break
-    nominalBalance = nominalBalance * (1 + expectedReturn) + annualContribution
-    inflationAdjustedBalance = inflationAdjustedBalance * (1 + realReturn) + annualContribution
-    totalContributions += annualContribution
-  }
-
-  return {
-    savingsRate,
-    annualContribution,
-    monthlyContribution: annualContribution / 12,
-    finalNominalBalance: nominalBalance,
-    finalInflationAdjustedBalance: inflationAdjustedBalance,
-    totalInvested: totalContributions,
-    totalGrowth: nominalBalance - totalContributions,
-    inflationImpact: nominalBalance - inflationAdjustedBalance,
-    projections,
-  }
-}
 
 export default function SavingsRate() {
   const {
@@ -63,6 +16,7 @@ export default function SavingsRate() {
   const results = useMemo(() => calculateInvestmentGrowth(
     params.currentSavings, params.savingsContribution, params.savingsFrequency, params.savingsYears,
     params.expectedReturn, params.inflationRate, params.annualIncome, params.currentAge,
+    params.contributionGrowth,
   ), [params])
 
   const handleExport = () => {
@@ -145,6 +99,13 @@ export default function SavingsRate() {
         <AdvancedDetails description="These assumptions control the nominal and inflation-adjusted growth scenarios.">
           <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation." min={0} max={0.15} />
           <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual price growth." min={0} max={0.1} />
+          <ToggleInput
+            label="Increase contributions with inflation"
+            tooltip="On: the amount you invest rises with inflation, so its purchasing power stays constant. Off: you invest the same dollar amount every year and its purchasing power erodes."
+            checked={params.contributionGrowth === 'inflation'}
+            onChange={checked => setParam('contributionGrowth', checked ? 'inflation' : 'flat')}
+            className="sm:col-span-2"
+          />
         </AdvancedDetails>
 
         <section aria-labelledby="savings-projection-heading">

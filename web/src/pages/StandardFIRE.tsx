@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateStandardFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, PercentageInput, ToggleInput } from '../components/inputs'
 import {
   AdvancedDetails,
   CalculatorFooter,
@@ -41,6 +41,7 @@ export default function StandardFIRE() {
     inflationRate: params.inflationRate,
     withdrawalRate: params.withdrawalRate,
     annualExpenses: params.annualExpenses,
+    contributionGrowth: params.contributionGrowth,
   }), [params])
 
   const handleExport = () => {
@@ -119,6 +120,13 @@ export default function StandardFIRE() {
           <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation. This is an estimate, not a guarantee." min={0} max={0.15} />
           <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual increase in prices. Spending is kept in today’s dollars for this calculation." min={0} max={0.1} />
           <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="The portion of your portfolio you plan to spend each year in retirement." min={0.02} max={0.06} />
+          <ToggleInput
+            label="Increase contributions with inflation"
+            tooltip="On: the amount you invest rises with inflation, so its purchasing power stays constant. Off: you invest the same dollar amount every year and its purchasing power erodes."
+            checked={params.contributionGrowth === 'inflation'}
+            onChange={checked => setParam('contributionGrowth', checked ? 'inflation' : 'flat')}
+            className="sm:col-span-2"
+          />
         </AdvancedDetails>
 
         <section aria-labelledby="standard-projection-heading">
@@ -127,7 +135,7 @@ export default function StandardFIRE() {
               <h2 id="standard-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Compare the projected portfolio with your FIRE number; the dashed line shows purchasing power in today&apos;s dollars.</p>
             </CardHeader>
-            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} colorScheme="orange" height={350} /></CardContent>
+            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="orange" height={350} /></CardContent>
           </Card>
         </section>
 

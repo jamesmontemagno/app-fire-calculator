@@ -10,7 +10,22 @@ public sealed record FireInputs(
     double InflationRate,
     double WithdrawalRate,
     double AnnualExpenses,
-    int ProjectionStartYear = 0);
+    int ProjectionStartYear = 0,
+    ContributionGrowth ContributionGrowth = ContributionGrowth.Inflation);
+
+/// <summary>
+/// How contributions behave over time.
+/// <para><see cref="Inflation"/>: the contribution keeps a constant purchasing power, so the nominal
+/// amount paid at the end of year k is <c>annualContribution * (1 + inflationRate)^k</c>. This is the
+/// model the closed-form solver assumes, and it is the app default.</para>
+/// <para><see cref="Flat"/>: the same nominal amount is contributed every year, so its purchasing power
+/// erodes.</para>
+/// </summary>
+public enum ContributionGrowth
+{
+    Inflation,
+    Flat
+}
 
 public sealed record ProjectionPoint(
     double Age,
@@ -146,7 +161,8 @@ public sealed record InvestmentGrowthInputs(
     double InflationRate,
     double AnnualIncome,
     double CurrentAge = 30,
-    int ProjectionStartYear = 0);
+    int ProjectionStartYear = 0,
+    ContributionGrowth ContributionGrowth = ContributionGrowth.Inflation);
 
 public sealed record InvestmentProjectionPoint(
     double Age,

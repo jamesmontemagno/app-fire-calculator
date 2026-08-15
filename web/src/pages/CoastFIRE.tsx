@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateCoastFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, PercentageInput, ToggleInput } from '../components/inputs'
 import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
@@ -16,6 +16,7 @@ export default function CoastFIRE() {
   const results = useMemo(() => calculateCoastFIRE(
     params.currentAge, params.retirementAge, params.currentSavings, params.annualContribution,
     params.expectedReturn, params.inflationRate, params.annualExpenses, params.withdrawalRate,
+    params.contributionGrowth,
   ), [params])
 
   const handleExport = () => {
@@ -76,6 +77,13 @@ export default function CoastFIRE() {
           <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation." min={0} max={0.15} />
           <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual price growth." min={0} max={0.1} />
           <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="Share of the portfolio available for annual retirement spending." min={0.02} max={0.06} />
+          <ToggleInput
+            label="Increase contributions with inflation"
+            tooltip="On: the amount you invest rises with inflation, so its purchasing power stays constant. Off: you invest the same dollar amount every year and its purchasing power erodes."
+            checked={params.contributionGrowth === 'inflation'}
+            onChange={checked => setParam('contributionGrowth', checked ? 'inflation' : 'flat')}
+            className="sm:col-span-2"
+          />
         </AdvancedDetails>
 
         <section aria-labelledby="coast-projection-heading">
@@ -84,7 +92,7 @@ export default function CoastFIRE() {
               <h2 id="coast-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Continue contributing</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">The projection includes your stated contributions. The FIRE line represents the retirement target in today&apos;s dollars.</p>
             </CardHeader>
-            <CardContent><ProjectionChart data={results.projectionsWithContributions} fireNumber={results.fireNumber} colorScheme="blue" height={350} /></CardContent>
+            <CardContent><ProjectionChart data={results.projectionsWithContributions} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="blue" height={350} /></CardContent>
           </Card>
         </section>
 
