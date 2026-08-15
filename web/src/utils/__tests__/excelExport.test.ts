@@ -14,6 +14,15 @@ import {
 } from '../calculations'
 import type { FIREInputs } from '../calculations'
 import { isExportFieldDeclared, prepareInputsForExport, prepareResultsForExport } from '../excelExport'
+import {
+  PAGE_SOURCES,
+  RESULT_FORMULAS_MARKER,
+  blankOutCommentsAndStrings,
+  countLiteralCallSites,
+  pageFileName,
+  readCallSiteKeys,
+  readResultFormulas,
+} from './pageSources'
 
 /**
  * Both export helpers used to infer a cell format by substring-matching the key name against
@@ -68,168 +77,11 @@ const RESULT_BUILDERS = {
 // ================================================================================================
 
 /**
- * The source of every calculator page, read through Vite rather than `node:fs` so the suite keeps
- * type-checking under `npm run build` without pulling in Node type definitions.
+ * The page-source scan these suites run on lives in `./pageSources.ts` so that this file and
+ * `excelFormulaEquivalence.test.ts` share one parser. #68 hardened that scan once — comments and
+ * strings blanked length-preservingly before any brace is counted, an unbalanced literal throwing
+ * rather than returning a short list — and a second copy would be a second set of blind spots.
  */
-const PAGE_SOURCES = import.meta.glob('../../pages/*.tsx', {
-  query: '?raw',
-  import: 'default',
-  eager: true,
-}) as Record<string, string>
-
-/**
- * Read the object literals the pages actually pass to the export helpers.
- *
- * The input shapes are built inline inside each page's export handler, so there is nothing to
- * import. Listing them here by hand would reintroduce exactly the drift this file exists to catch:
- * the list would be correct the day it was written and quietly wrong afterwards. Reading the call
- * sites keeps the check tied to shipping code, so adding `mortgageBalance: …` to a page fails this
- * test rather than surfacing in someone's spreadsheet.
- */
-function readCallSiteKeys(fnName: string): Map<string, string[]> {
-  const byFile = new Map<string, string[]>()
-
-  for (const [path, raw] of Object.entries(PAGE_SOURCES)) {
-    const source = blankOutCommentsAndStrings(raw)
-    const keys: string[] = []
-    const call = new RegExp(`\\b${fnName}\\s*\\(\\s*\\{`, 'g')
-
-    for (const match of source.matchAll(call)) {
-      const open = match.index + match[0].length - 1
-      let depth = 0
-      let close = -1
-
-      for (let i = open; i < source.length; i += 1) {
-        const char = source[i]
-        if (char === '{' || char === '[' || char === '(') depth += 1
-        else if (char === '}' || char === ']' || char === ')') {
-          depth -= 1
-          if (depth === 0) {
-            close = i
-            break
-          }
-        }
-      }
-      // An unbalanced literal means the scan lost track, and a scan that quietly returns fewer
-      // keys is worse than no scan at all: it reports success over fields nobody checked.
-      if (close === -1) throw new Error(`Could not find the end of the ${fnName} call in ${path}`)
-
-      keys.push(...topLevelKeys(source.slice(open + 1, close)))
-    }
-
-    if (keys.length > 0) byFile.set(path.split('/').pop() ?? path, keys)
-  }
-
-  return byFile
-}
-
-/**
- * Replace the contents of comments and string literals with spaces, preserving length and so every
- * offset, before anything counts a brace.
- *
- * A `//` comment or a string holding an unbalanced `)` would otherwise end a scan early and drop
- * every key after it, silently. That is the one failure mode this whole file cannot afford: the
- * coverage suites would still pass, over a shorter list, which is indistinguishable from success.
- */
-function blankOutCommentsAndStrings(source: string): string {
-  const out = source.split('')
-  let i = 0
-
-  const blankUntil = (isEnd: (index: number) => boolean, escapes: boolean) => {
-    i += 1
-    while (i < source.length && !isEnd(i)) {
-      if (escapes && source[i] === '\\') out[i++] = ' '
-      out[i] = source[i] === '\n' ? '\n' : ' '
-      i += 1
-    }
-  }
-
-  while (i < source.length) {
-    const char = source[i]
-    const next = source[i + 1]
-
-    if (char === '/' && next === '/') {
-      while (i < source.length && source[i] !== '\n') out[i++] = ' '
-    } else if (char === '/' && next === '*') {
-      out[i] = ' '
-      blankUntil(index => source[index] === '*' && source[index + 1] === '/', false)
-      out[i] = ' '
-      out[i + 1] = ' '
-      i += 2
-    } else if (char === '"' || char === "'" || char === '`') {
-      blankUntil(index => source[index] === char, true)
-      i += 1
-    } else {
-      i += 1
-    }
-  }
-
-  return out.join('')
-}
-
-/** Property names declared directly on an object literal body, ignoring anything nested. */
-function topLevelKeys(body: string): string[] {
-  const keys: string[] = []
-  let depth = 0
-  let start = 0
-
-  const take = (segment: string) => {
-    const text = segment.trim()
-    if (!text) return
-    const colon = text.indexOf(':')
-    // A colon-less segment is shorthand (`totalDebt,`), which is a property name on its own.
-    const name = (colon === -1 ? text : text.slice(0, colon)).trim()
-    if (/^[A-Za-z_$][\w$]*$/.test(name)) keys.push(name)
-  }
-
-  for (let i = 0; i < body.length; i += 1) {
-    const char = body[i]
-    if (char === '{' || char === '[' || char === '(') depth += 1
-    else if (char === '}' || char === ']' || char === ')') depth -= 1
-    else if (char === ',' && depth === 0) {
-      take(body.slice(start, i))
-      start = i + 1
-    }
-  }
-  take(body.slice(start))
-
-  return keys
-}
-
-/**
- * Like `topLevelKeys`, but pairs each top-level property name with the RAW text of its value.
- *
- * Comma and colon positions are found in the length-preserved blanked body (so a brace or colon
- * inside a string never splits a segment), then the same offsets index into the raw body to recover
- * the untouched formula string that blanking would otherwise have emptied.
- */
-function topLevelEntries(blanked: string, raw: string): Array<[string, string]> {
-  const entries: Array<[string, string]> = []
-  let depth = 0
-  let start = 0
-
-  const take = (from: number, to: number) => {
-    const blankedSegment = blanked.slice(from, to)
-    const colon = blankedSegment.indexOf(':')
-    if (colon === -1) return
-    const name = blankedSegment.slice(0, colon).trim()
-    if (!/^[A-Za-z_$][\w$]*$/.test(name)) return
-    entries.push([name, raw.slice(from + colon + 1, to)])
-  }
-
-  for (let i = 0; i < blanked.length; i += 1) {
-    const char = blanked[i]
-    if (char === '{' || char === '[' || char === '(') depth += 1
-    else if (char === '}' || char === ']' || char === ')') depth -= 1
-    else if (char === ',' && depth === 0) {
-      take(start, i)
-      start = i + 1
-    }
-  }
-  take(start, blanked.length)
-
-  return entries
-}
 
 function undeclared(keys: Iterable<string>): string[] {
   return [...new Set(keys)].filter(key => !isExportFieldDeclared(key)).sort()
@@ -284,20 +136,17 @@ describe('exported fields are declared', () => {
       const parsed = readCallSiteKeys(fnName)
       let literalCallSites = 0
 
-      for (const [path, raw] of Object.entries(PAGE_SOURCES)) {
-        const file = path.split('/').pop() ?? path
-        const source = blankOutCommentsAndStrings(raw)
-
-        for (const call of source.matchAll(new RegExp(`\\b${fnName}\\s*\\(`, 'g'))) {
-          // Pages either build the shape inline or hand over a result object wholesale. Only the
-          // inline ones are this scanner's job; the rest are covered by RESULT_BUILDERS above.
-          if (!/^\s*\{/.test(source.slice(call.index + call[0].length))) continue
+      for (const path of Object.keys(PAGE_SOURCES)) {
+        // Pages either build the shape inline or hand over a result object wholesale. Only the
+        // inline ones are this scanner's job; the rest are covered by RESULT_BUILDERS above.
+        const file = pageFileName(path)
+        for (let i = 0; i < countLiteralCallSites(path, fnName); i += 1) {
           literalCallSites += 1
           expect(
             parsed.get(file),
-            `${file} passes an object literal to ${fnName}, but the call-site scanner in this ` +
-              'file read no fields out of it, so those exports are unchecked. Fix the scanner — ' +
-              'do not delete this assertion, and do not relax it to make the build go green.',
+            `${file} passes an object literal to ${fnName}, but the call-site scanner in ` +
+              'pageSources.ts read no fields out of it, so those exports are unchecked. Fix the ' +
+              'scanner — do not delete this assertion, and do not relax it to make the build go green.',
           ).toBeDefined()
         }
       }
@@ -729,55 +578,6 @@ const PAGE_RESULT_BUILDER: Record<string, keyof typeof RESULT_BUILDERS> = {
   'WithdrawalRate.tsx': 'Withdrawal',
 }
 
-/**
- * Read each page's `resultFormulas` object literal as key → formula string.
- *
- * Built on the same hardened scan as `readCallSiteKeys`: comments and strings are blanked
- * length-preservingly before any brace is counted, and an unbalanced literal throws rather than
- * returning a short list, so this can never quietly report fewer formulas than a page declares.
- */
-function readResultFormulas(): Map<string, Map<string, string>> {
-  const byFile = new Map<string, Map<string, string>>()
-
-  for (const [path, raw] of Object.entries(PAGE_SOURCES)) {
-    const source = blankOutCommentsAndStrings(raw)
-    const marker = /\bresultFormulas\s*:\s*\{/g
-    const formulas = new Map<string, string>()
-
-    for (const match of source.matchAll(marker)) {
-      const open = match.index + match[0].length - 1
-      let depth = 0
-      let close = -1
-
-      for (let i = open; i < source.length; i += 1) {
-        const char = source[i]
-        if (char === '{' || char === '[' || char === '(') depth += 1
-        else if (char === '}' || char === ']' || char === ')') {
-          depth -= 1
-          if (depth === 0) {
-            close = i
-            break
-          }
-        }
-      }
-      if (close === -1) throw new Error(`Could not find the end of resultFormulas in ${path}`)
-
-      // Keys are read from blanked source so nesting counts correctly; each key's formula refs are
-      // read from the RAW slice (blanking emptied every string literal). Attribute refs per key by
-      // walking the same top-level segments the key extraction used.
-      const blankedBody = source.slice(open + 1, close)
-      const rawBody = raw.slice(open + 1, close)
-      for (const [key, rawSegment] of topLevelEntries(blankedBody, rawBody)) {
-        const formulaRefs = [...rawSegment.matchAll(/\{([A-Za-z_$][\w$]*)\}/g)].map(m => m[1])
-        formulas.set(key, formulaRefs.join(' '))
-      }
-    }
-
-    if (formulas.size > 0) byFile.set(path.split('/').pop() ?? path, formulas)
-  }
-
-  return byFile
-}
 
 describe('declared result formulas attach to real cells', () => {
   const formulasByFile = readResultFormulas()
@@ -803,7 +603,7 @@ describe('declared result formulas attach to real cells', () => {
 
   it.each([...formulasByFile])('%s formulas reference only declared input fields', (file, formulas) => {
     const inputs = new Set(inputKeysByFile.get(file) ?? [])
-    const unresolved = [...new Set([...formulas.values()].flatMap(refs => refs.split(' ').filter(Boolean)))]
+    const unresolved = [...new Set([...formulas.values()].flatMap(formula => formula.refs))]
       .filter(ref => !inputs.has(ref))
       .sort()
     expect(
@@ -820,10 +620,10 @@ describe('declared result formulas attach to real cells', () => {
     // passes when a tenth page is missed), locate every `resultFormulas:` literal independently and
     // require that each one was read into a non-empty map.
     let literalSites = 0
-    for (const [path, raw] of Object.entries(PAGE_SOURCES)) {
-      const file = path.split('/').pop() ?? path
-      const source = blankOutCommentsAndStrings(raw)
-      for (const _ of source.matchAll(/\bresultFormulas\s*:\s*\{/g)) {
+    for (const path of Object.keys(PAGE_SOURCES)) {
+      const file = pageFileName(path)
+      const source = blankOutCommentsAndStrings(PAGE_SOURCES[path])
+      for (const _ of source.matchAll(RESULT_FORMULAS_MARKER)) {
         literalSites += 1
         expect(
           formulasByFile.get(file)?.size,
@@ -835,7 +635,7 @@ describe('declared result formulas attach to real cells', () => {
     expect(literalSites).toBeGreaterThan(0)
 
     // A known-good pair, so the scan cannot pass by reading keys but losing their formula refs.
-    expect(formulasByFile.get('HealthcareGap.tsx')?.get('gapYears')).toContain('medicareAge')
+    expect(formulasByFile.get('HealthcareGap.tsx')?.get('gapYears')?.refs).toContain('medicareAge')
     expect(formulasByFile.get('HealthcareGap.tsx')?.has('annualCost')).toBe(true)
   })
 })
