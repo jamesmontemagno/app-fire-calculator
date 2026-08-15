@@ -1,44 +1,12 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
-import { formatCurrency, generateProjections } from '../utils/calculations'
+import { calculateReverseFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, PercentageInput, ToggleInput } from '../components/inputs'
 import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
-
-function calculateReverseFIRE(
-  currentAge: number,
-  targetRetirementAge: number,
-  currentSavings: number,
-  annualExpenses: number,
-  expectedReturn: number,
-  inflationRate: number,
-  withdrawalRate: number,
-) {
-  const yearsToFIRE = Math.max(1, targetRetirementAge - currentAge)
-  const fireNumber = annualExpenses / withdrawalRate
-  const realReturn = (1 + expectedReturn) / (1 + inflationRate) - 1
-  const compoundFactor = Math.pow(1 + realReturn, yearsToFIRE)
-  const futureValueOfCurrent = currentSavings * compoundFactor
-  const requiredAnnualSavings = futureValueOfCurrent >= fireNumber
-    ? 0
-    : realReturn === 0
-      ? (fireNumber - currentSavings) / yearsToFIRE
-      : (fireNumber - futureValueOfCurrent) * realReturn / (compoundFactor - 1)
-  const safeAnnualSavings = Math.max(0, requiredAnnualSavings)
-
-  return {
-    fireNumber,
-    yearsToFIRE,
-    requiredAnnualSavings: safeAnnualSavings,
-    requiredMonthlySavings: safeAnnualSavings / 12,
-    projections: generateProjections(currentAge, currentSavings, safeAnnualSavings, expectedReturn, inflationRate, yearsToFIRE + 10),
-    alreadyAchievable: futureValueOfCurrent >= fireNumber,
-    currentWillGrowTo: Math.round(futureValueOfCurrent),
-  }
-}
 
 export default function ReverseFIRE() {
   const {
@@ -47,7 +15,7 @@ export default function ReverseFIRE() {
   } = useCalculatorParams()
   const results = useMemo(() => calculateReverseFIRE(
     params.currentAge, params.retirementAge, params.currentSavings, params.annualExpenses,
-    params.expectedReturn, params.inflationRate, params.withdrawalRate,
+    params.expectedReturn, params.inflationRate, params.withdrawalRate, params.contributionGrowth,
   ), [params])
 
   const handleExport = () => {
@@ -108,12 +76,19 @@ export default function ReverseFIRE() {
           <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation." min={0} max={0.15} />
           <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual price growth." min={0} max={0.1} />
           <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="The portion of the retirement portfolio spent in the first year." min={0.025} max={0.06} />
+          <ToggleInput
+            label="Increase contributions with inflation"
+            tooltip="On: the amount you invest rises with inflation, so its purchasing power stays constant. Off: you invest the same dollar amount every year and its purchasing power erodes."
+            checked={params.contributionGrowth === 'inflation'}
+            onChange={checked => setParam('contributionGrowth', checked ? 'inflation' : 'flat')}
+            className="sm:col-span-2"
+          />
         </AdvancedDetails>
 
         <section aria-labelledby="reverse-projection-heading">
           <Card>
             <CardHeader><h2 id="reverse-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2></CardHeader>
-            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} colorScheme="blue" height={350} /></CardContent>
+            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="blue" height={350} /></CardContent>
           </Card>
         </section>
 

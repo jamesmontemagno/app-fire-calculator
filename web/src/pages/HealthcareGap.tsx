@@ -1,48 +1,11 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
-import { formatCurrency } from '../utils/calculations'
+import { MEDICARE_AGE, calculateHealthcareGap, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
 import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
-
-const MEDICARE_AGE = 65
-
-function calculateHealthcareGap(
-  currentAge: number,
-  earlyRetirementAge: number,
-  monthlyPremium: number,
-  annualDeductible: number,
-  annualOutOfPocket: number,
-  inflationRate: number,
-) {
-  const gapYears = Math.max(0, MEDICARE_AGE - earlyRetirementAge)
-  const annualCost = monthlyPremium * 12 + annualDeductible + annualOutOfPocket
-  let totalCost = 0
-  const yearlyBreakdown = []
-
-  for (let index = 0; index < gapYears; index += 1) {
-    const cost = annualCost * Math.pow(1 + inflationRate, index)
-    totalCost += cost
-    yearlyBreakdown.push({
-      age: earlyRetirementAge + index,
-      year: new Date().getFullYear() + earlyRetirementAge - currentAge + index,
-      cost: Math.round(cost),
-      premium: Math.round(monthlyPremium * 12 * Math.pow(1 + inflationRate, index)),
-      deductible: Math.round(annualDeductible * Math.pow(1 + inflationRate, index)),
-      outOfPocket: Math.round(annualOutOfPocket * Math.pow(1 + inflationRate, index)),
-    })
-  }
-
-  return {
-    gapYears,
-    annualCost,
-    totalCost: Math.round(totalCost),
-    avgAnnualCost: gapYears > 0 ? Math.round(totalCost / gapYears) : 0,
-    yearlyBreakdown,
-  }
-}
 
 export default function HealthcareGap() {
   const {

@@ -5,6 +5,26 @@ public static class FinancialCalculator
     public const double LeanFireThreshold = 40_000;
     public const double FatFireThreshold = 100_000;
 
+    private const int MaxProjectionYears = 100;
+
+    /// <summary>
+    /// Balance in today's dollars after <paramref name="years"/> of flat nominal contributions.
+    /// Matches the year-by-year projection exactly at whole years, and interpolates between them.
+    /// </summary>
+    private static double FlatContributionRealBalance(
+        double presentValue,
+        double annualContribution,
+        double expectedReturn,
+        double inflationRate,
+        double years)
+    {
+        var compoundFactor = Math.Pow(1 + expectedReturn, years);
+        var nominal = expectedReturn == 0
+            ? presentValue + (annualContribution * years)
+            : (presentValue * compoundFactor) + (annualContribution * ((compoundFactor - 1) / expectedReturn));
+        return nominal / Math.Pow(1 + inflationRate, years);
+    }
+
     public static double FutureValue(double presentValue, double annualContribution, double rate, double years)
     {
         if (rate == 0)
@@ -39,19 +59,99 @@ public static class FinancialCalculator
         {
             var years = 0;
             var current = presentValue;
-            while (current < target && years < 100)
+            while (current < target && years < MaxProjectionYears)
             {
                 current = (current * (1 + rate)) + annualContribution;
                 years++;
             }
 
-            return years >= 100 ? double.PositiveInfinity : years;
+            return years >= MaxProjectionYears ? double.PositiveInfinity : years;
         }
 
         var result = Math.Log(numerator / denominator) / Math.Log(1 + rate);
-        return result is < 0 or > 100 ? double.PositiveInfinity : result;
+        return result is < 0 or > MaxProjectionYears ? double.PositiveInfinity : result;
     }
 
+    /// <summary>
+    /// Years until the portfolio reaches a target expressed in today's dollars.
+    /// This is the single source of truth for every headline FIRE age, and it is solved against the same
+    /// path <see cref="GenerateProjections"/> draws, so the projection crossing always equals the headline.
+    /// </summary>
+    public static double YearsToFireTarget(
+        double presentValue,
+        double annualContribution,
+        double expectedReturn,
+        double inflationRate,
+        double target,
+        ContributionGrowth contributionGrowth = ContributionGrowth.Inflation)
+    {
+        if (presentValue >= target)
+        {
+            return 0;
+        }
+
+        if (contributionGrowth == ContributionGrowth.Inflation)
+        {
+            return YearsToTarget(presentValue, annualContribution, RealReturn(expectedReturn, inflationRate), target);
+        }
+
+        double BalanceAt(double years) =>
+            FlatContributionRealBalance(presentValue, annualContribution, expectedReturn, inflationRate, years);
+
+        double lower = 0;
+        double upper = -1;
+        for (var year = 1; year <= MaxProjectionYears; year++)
+        {
+            if (BalanceAt(year) >= target)
+            {
+                upper = year;
+                lower = year - 1;
+                break;
+            }
+        }
+
+        if (upper < 0)
+        {
+            return double.PositiveInfinity;
+        }
+
+        for (var iteration = 0; iteration < 60; iteration++)
+        {
+            var midpoint = (lower + upper) / 2;
+            if (BalanceAt(midpoint) >= target)
+            {
+                upper = midpoint;
+            }
+            else
+            {
+                lower = midpoint;
+            }
+        }
+
+        return (lower + upper) / 2;
+    }
+
+    /// <summary>
+    /// Nominal contribution paid at the end of year <paramref name="year"/> (1-based).
+    /// With <see cref="ContributionGrowth.Inflation"/> the contribution keeps a constant purchasing power,
+    /// which is what makes the deflated projection identical to the closed-form headline solution.
+    /// </summary>
+    public static double ContributionForYear(
+        double annualContribution,
+        double inflationRate,
+        int year,
+        ContributionGrowth contributionGrowth = ContributionGrowth.Inflation)
+    {
+        return contributionGrowth == ContributionGrowth.Inflation
+            ? annualContribution * Math.Pow(1 + inflationRate, year)
+            : annualContribution;
+    }
+
+    /// <summary>
+    /// Generate projection points over time.
+    /// <c>Portfolio</c> is in future (nominal) dollars and <c>InflationAdjusted</c> is the same portfolio in
+    /// today's dollars. <paramref name="annualContribution"/> is stated in today's dollars.
+    /// </summary>
     public static IReadOnlyList<ProjectionPoint> GenerateProjections(
         double currentAge,
         double currentSavings,
@@ -59,7 +159,8 @@ public static class FinancialCalculator
         double expectedReturn,
         double inflationRate,
         int years,
-        int startYear = 0)
+        int startYear = 0,
+        ContributionGrowth contributionGrowth = ContributionGrowth.Inflation)
     {
         var projections = new List<ProjectionPoint>();
         var portfolio = currentSavings;
@@ -72,12 +173,15 @@ public static class FinancialCalculator
                 currentAge + year,
                 projectionStartYear + year,
                 Round(portfolio),
-                year == 0 ? currentSavings : annualContribution,
+                year == 0
+                    ? currentSavings
+                    : ContributionForYear(annualContribution, inflationRate, year, contributionGrowth),
                 Round(totalContributions),
                 Round(portfolio / Math.Pow(1 + inflationRate, year))));
 
-            portfolio = (portfolio * (1 + expectedReturn)) + annualContribution;
-            totalContributions += annualContribution;
+            var nextContribution = ContributionForYear(annualContribution, inflationRate, year + 1, contributionGrowth);
+            portfolio = (portfolio * (1 + expectedReturn)) + nextContribution;
+            totalContributions += nextContribution;
         }
 
         return projections;
@@ -87,7 +191,7 @@ public static class FinancialCalculator
     {
         var fireNumber = inputs.AnnualExpenses / inputs.WithdrawalRate;
         var realReturn = RealReturn(inputs.ExpectedReturn, inputs.InflationRate);
-        var yearsToFire = YearsToTarget(inputs.CurrentSavings, inputs.AnnualContribution, realReturn, fireNumber);
+        var yearsToFire = YearsToFireTarget(inputs.CurrentSavings, inputs.AnnualContribution, inputs.ExpectedReturn, inputs.InflationRate, fireNumber, inputs.ContributionGrowth);
         var yearsToRetirement = Math.Max(0, inputs.RetirementAge - inputs.CurrentAge);
         var projectionYears = double.IsFinite(yearsToFire)
             ? Math.Min((int)Math.Ceiling(yearsToFire) + 10, 50)
@@ -99,7 +203,7 @@ public static class FinancialCalculator
             Round(fireNumber),
             RoundToTenth(yearsToFire),
             fireAge,
-            GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, inputs.AnnualContribution, inputs.ExpectedReturn, inputs.InflationRate, projectionYears, inputs.ProjectionStartYear),
+            GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, inputs.AnnualContribution, inputs.ExpectedReturn, inputs.InflationRate, projectionYears, inputs.ProjectionStartYear, inputs.ContributionGrowth),
             inputs.AnnualIncome > 0 ? inputs.AnnualContribution / inputs.AnnualIncome : 0,
             inputs.AnnualContribution / 12,
             Round(PresentValue(fireNumber, realReturn, yearsToRetirement)))
@@ -117,15 +221,15 @@ public static class FinancialCalculator
         var alreadyCoasting = inputs.CurrentSavings >= coastNumber;
         var yearsToCoast = alreadyCoasting
             ? 0
-            : YearsToTarget(inputs.CurrentSavings, inputs.AnnualContribution, realReturn, coastNumber);
+            : YearsToFireTarget(inputs.CurrentSavings, inputs.AnnualContribution, inputs.ExpectedReturn, inputs.InflationRate, coastNumber, inputs.ContributionGrowth);
 
         return new CoastFireResult(
             Round(coastNumber),
             RoundToTenth(yearsToCoast),
             alreadyCoasting,
             Round(fireNumber),
-            GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, 0, inputs.ExpectedReturn, inputs.InflationRate, (int)yearsToRetirement + 10, inputs.ProjectionStartYear),
-            GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, inputs.AnnualContribution, inputs.ExpectedReturn, inputs.InflationRate, (int)yearsToRetirement + 10, inputs.ProjectionStartYear));
+            GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, 0, inputs.ExpectedReturn, inputs.InflationRate, (int)yearsToRetirement + 10, inputs.ProjectionStartYear, inputs.ContributionGrowth),
+            GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, inputs.AnnualContribution, inputs.ExpectedReturn, inputs.InflationRate, (int)yearsToRetirement + 10, inputs.ProjectionStartYear, inputs.ContributionGrowth));
     }
 
     public static LeanFireResult CalculateLeanFire(FireInputs inputs)
@@ -142,7 +246,7 @@ public static class FinancialCalculator
     {
         var fullFireNumber = inputs.AnnualExpenses / inputs.WithdrawalRate;
         var baristaNumber = Math.Max(0, inputs.AnnualExpenses - partTimeAnnualIncome) / inputs.WithdrawalRate;
-        var yearsToBaristaFire = YearsToTarget(inputs.CurrentSavings, inputs.AnnualContribution, RealReturn(inputs.ExpectedReturn, inputs.InflationRate), baristaNumber);
+        var yearsToBaristaFire = YearsToFireTarget(inputs.CurrentSavings, inputs.AnnualContribution, inputs.ExpectedReturn, inputs.InflationRate, baristaNumber, inputs.ContributionGrowth);
         var projectionYears = Math.Min((int)Math.Ceiling(yearsToBaristaFire) + 10, 50);
 
         return new BaristaFireResult(
@@ -150,7 +254,7 @@ public static class FinancialCalculator
             Round(fullFireNumber),
             RoundToTenth(yearsToBaristaFire),
             partTimeAnnualIncome,
-            GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, inputs.AnnualContribution, inputs.ExpectedReturn, inputs.InflationRate, projectionYears, inputs.ProjectionStartYear),
+            GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, inputs.AnnualContribution, inputs.ExpectedReturn, inputs.InflationRate, projectionYears, inputs.ProjectionStartYear, inputs.ContributionGrowth),
             Round(fullFireNumber - baristaNumber));
     }
 
@@ -238,20 +342,41 @@ public static class FinancialCalculator
         var yearsToFire = Math.Max(1, inputs.RetirementAge - inputs.CurrentAge);
         var fireNumber = inputs.AnnualExpenses / inputs.WithdrawalRate;
         var realReturn = RealReturn(inputs.ExpectedReturn, inputs.InflationRate);
-        var compoundFactor = Math.Pow(1 + realReturn, yearsToFire);
-        var futureValueOfCurrent = inputs.CurrentSavings * compoundFactor;
-        var requiredAnnualSavings = futureValueOfCurrent >= fireNumber
-            ? 0
-            : realReturn == 0
+
+        // Existing savings deflate the same way in both models, so this is always in today's dollars.
+        var futureValueOfCurrent = inputs.CurrentSavings * Math.Pow(1 + realReturn, yearsToFire);
+
+        double requiredAnnualSavings;
+        if (futureValueOfCurrent >= fireNumber)
+        {
+            requiredAnnualSavings = 0;
+        }
+        else if (inputs.ContributionGrowth == ContributionGrowth.Inflation)
+        {
+            var compoundFactor = Math.Pow(1 + realReturn, yearsToFire);
+            requiredAnnualSavings = realReturn == 0
                 ? (fireNumber - inputs.CurrentSavings) / yearsToFire
                 : ((fireNumber - futureValueOfCurrent) * realReturn) / (compoundFactor - 1);
+        }
+        else
+        {
+            // Flat nominal contributions: solve the deflated flat path for a constant nominal payment.
+            var nominalTarget = fireNumber * Math.Pow(1 + inputs.InflationRate, yearsToFire);
+            var compoundFactor = Math.Pow(1 + inputs.ExpectedReturn, yearsToFire);
+            var nominalValueOfCurrent = inputs.CurrentSavings * compoundFactor;
+            requiredAnnualSavings = inputs.ExpectedReturn == 0
+                ? (nominalTarget - nominalValueOfCurrent) / yearsToFire
+                : ((nominalTarget - nominalValueOfCurrent) * inputs.ExpectedReturn) / (compoundFactor - 1);
+        }
+
+        var safeAnnualSavings = Math.Max(0, requiredAnnualSavings);
 
         return new ReverseFireResult(
             fireNumber,
             yearsToFire,
-            Math.Max(0, requiredAnnualSavings),
-            Math.Max(0, requiredAnnualSavings / 12),
-            GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, requiredAnnualSavings, inputs.ExpectedReturn, inputs.InflationRate, (int)yearsToFire + 10, inputs.ProjectionStartYear),
+            safeAnnualSavings,
+            safeAnnualSavings / 12,
+            GenerateProjections(inputs.CurrentAge, inputs.CurrentSavings, safeAnnualSavings, inputs.ExpectedReturn, inputs.InflationRate, (int)yearsToFire + 10, inputs.ProjectionStartYear, inputs.ContributionGrowth),
             futureValueOfCurrent >= fireNumber,
             Round(futureValueOfCurrent));
     }
@@ -264,31 +389,34 @@ public static class FinancialCalculator
         var savingsRate = inputs.AnnualIncome > 0 ? annualContribution / inputs.AnnualIncome : 0;
         var startYear = inputs.ProjectionStartYear == 0 ? DateTime.Now.Year : inputs.ProjectionStartYear;
         var nominalBalance = inputs.StartingAmount;
-        var inflationAdjustedBalance = inputs.StartingAmount;
         var totalContributions = inputs.StartingAmount;
-        var realReturn = RealReturn(inputs.ExpectedReturn, inputs.InflationRate);
         var projections = new List<InvestmentProjectionPoint>
         {
-            new(inputs.CurrentAge, startYear, 0, Round(nominalBalance), Round(inflationAdjustedBalance), Round(totalContributions), 0)
+            new(inputs.CurrentAge, startYear, 0, Round(nominalBalance), Round(nominalBalance), Round(totalContributions), 0)
         };
 
         for (var year = 1; year <= inputs.YearsInvesting; year++)
         {
-            nominalBalance = (nominalBalance * (1 + inputs.ExpectedReturn)) + annualContribution;
-            inflationAdjustedBalance = (inflationAdjustedBalance * (1 + realReturn)) + annualContribution;
-            totalContributions += annualContribution;
-            projections.Add(new InvestmentProjectionPoint(inputs.CurrentAge + year, startYear + year, year, Round(nominalBalance), Round(inflationAdjustedBalance), Round(totalContributions), annualContribution));
+            var contribution = ContributionForYear(annualContribution, inputs.InflationRate, year, inputs.ContributionGrowth);
+            nominalBalance = (nominalBalance * (1 + inputs.ExpectedReturn)) + contribution;
+            totalContributions += contribution;
+
+            // One plan, two views: the nominal balance deflated to today's dollars.
+            var inflationAdjusted = nominalBalance / Math.Pow(1 + inputs.InflationRate, year);
+            projections.Add(new InvestmentProjectionPoint(inputs.CurrentAge + year, startYear + year, year, Round(nominalBalance), Round(inflationAdjusted), Round(totalContributions), contribution));
         }
+
+        var finalInflationAdjustedBalance = nominalBalance / Math.Pow(1 + inputs.InflationRate, inputs.YearsInvesting);
 
         return new InvestmentGrowthResult(
             savingsRate,
             annualContribution,
             annualContribution / 12,
             nominalBalance,
-            inflationAdjustedBalance,
+            finalInflationAdjustedBalance,
             totalContributions,
             nominalBalance - totalContributions,
-            nominalBalance - inflationAdjustedBalance,
+            nominalBalance - finalInflationAdjustedBalance,
             projections,
             SavingsCategory(savingsRate));
     }

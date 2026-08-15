@@ -2,6 +2,18 @@
 // FIRE Calculator - Core Calculation Functions
 // ============================================
 
+/**
+ * How contributions behave over time.
+ *
+ * - `inflation`: the contribution keeps a constant purchasing power, so the nominal amount paid at the
+ *   end of year k is `annualContribution * (1 + inflationRate)^k`. This is the model the closed-form
+ *   solver assumes, and it is the app default.
+ * - `flat`: the same nominal amount is contributed every year, so its purchasing power erodes.
+ */
+export type ContributionGrowth = 'inflation' | 'flat'
+
+export const DEFAULT_CONTRIBUTION_GROWTH: ContributionGrowth = 'inflation'
+
 export interface FIREInputs {
   currentAge: number
   retirementAge?: number
@@ -12,6 +24,7 @@ export interface FIREInputs {
   inflationRate: number // as decimal
   withdrawalRate: number // as decimal, e.g., 0.04 for 4%
   annualExpenses: number
+  contributionGrowth?: ContributionGrowth
 }
 
 export interface ProjectionPoint {
@@ -111,6 +124,50 @@ export function presentValue(futureVal: number, rate: number, years: number): nu
 }
 
 /**
+ * Real (inflation-adjusted) return: r_real = (1 + r_nominal) / (1 + i) - 1
+ */
+export function realReturn(expectedReturn: number, inflationRate: number): number {
+  return (1 + expectedReturn) / (1 + inflationRate) - 1
+}
+
+const MAX_PROJECTION_YEARS = 100
+
+/**
+ * Nominal contribution paid at the end of year `year` (1-based).
+ *
+ * With `inflation` growth the contribution keeps a constant purchasing power, which is what makes the
+ * deflated projection identical to the closed-form solution used for the headline FIRE age.
+ */
+export function contributionForYear(
+  annualContribution: number,
+  inflationRate: number,
+  year: number,
+  contributionGrowth: ContributionGrowth = DEFAULT_CONTRIBUTION_GROWTH
+): number {
+  return contributionGrowth === 'inflation'
+    ? annualContribution * Math.pow(1 + inflationRate, year)
+    : annualContribution
+}
+
+/**
+ * Balance in today's dollars after `years` of flat nominal contributions.
+ * Matches the year-by-year projection exactly at whole years, and interpolates between them.
+ */
+function flatContributionRealBalance(
+  presentVal: number,
+  annualContribution: number,
+  expectedReturn: number,
+  inflationRate: number,
+  years: number
+): number {
+  const compoundFactor = Math.pow(1 + expectedReturn, years)
+  const nominal = expectedReturn === 0
+    ? presentVal + annualContribution * years
+    : presentVal * compoundFactor + annualContribution * ((compoundFactor - 1) / expectedReturn)
+  return nominal / Math.pow(1 + inflationRate, years)
+}
+
+/**
  * Calculate years to reach a target with contributions
  * Solves for n in: FV = PV(1+r)^n + PMT * (((1+r)^n - 1) / r)
  * Uses closed-form solution: n = ln((PMT + target*r) / (PMT + PV*r)) / ln(1+r)
@@ -137,7 +194,7 @@ export function yearsToTarget(
     // Fall back to iterative approach if closed-form doesn't work
     let years = 0
     let current = presentVal
-    const maxYears = 100
+    const maxYears = MAX_PROJECTION_YEARS
     
     while (current < target && years < maxYears) {
       current = current * (1 + rate) + annualContribution
@@ -150,7 +207,7 @@ export function yearsToTarget(
   const years = Math.log(numerator / denominator) / Math.log(1 + rate)
   
   // Sanity check - if result is negative or too large, use iterative
-  if (years < 0 || years > 100) {
+  if (years < 0 || years > MAX_PROJECTION_YEARS) {
     return Infinity
   }
   
@@ -158,7 +215,63 @@ export function yearsToTarget(
 }
 
 /**
- * Generate projection points over time
+ * Years until the portfolio reaches a target expressed in today's dollars.
+ *
+ * This is the single source of truth for every headline FIRE age, and it is solved against the same
+ * path that `generateProjections()` draws, so the chart crossing always equals the headline number.
+ *
+ * - `inflation` growth: closed form at the real return, because a constant-real contribution compounds
+ *   at the real rate.
+ * - `flat` growth: the closed form does not apply, so the deflated flat-contribution path is solved
+ *   numerically (bracket scan, then bisection) for the same fractional-year precision.
+ */
+export function yearsToFIRETarget(
+  presentVal: number,
+  annualContribution: number,
+  expectedReturn: number,
+  inflationRate: number,
+  target: number,
+  contributionGrowth: ContributionGrowth = DEFAULT_CONTRIBUTION_GROWTH
+): number {
+  if (presentVal >= target) return 0
+
+  if (contributionGrowth === 'inflation') {
+    return yearsToTarget(presentVal, annualContribution, realReturn(expectedReturn, inflationRate), target)
+  }
+
+  const balanceAt = (years: number) =>
+    flatContributionRealBalance(presentVal, annualContribution, expectedReturn, inflationRate, years)
+
+  let lower = 0
+  let upper = -1
+  for (let year = 1; year <= MAX_PROJECTION_YEARS; year++) {
+    if (balanceAt(year) >= target) {
+      upper = year
+      lower = year - 1
+      break
+    }
+  }
+
+  if (upper < 0) return Infinity
+
+  for (let iteration = 0; iteration < 60; iteration++) {
+    const midpoint = (lower + upper) / 2
+    if (balanceAt(midpoint) >= target) {
+      upper = midpoint
+    } else {
+      lower = midpoint
+    }
+  }
+
+  return (lower + upper) / 2
+}
+
+/**
+ * Generate projection points over time.
+ *
+ * `portfolio` is in future (nominal) dollars and `inflationAdjusted` is the same portfolio expressed in
+ * today's dollars. `annualContribution` is stated in today's dollars; with the default `inflation`
+ * growth the nominal amount contributed each year rises to preserve its purchasing power.
  */
 export function generateProjections(
   currentAge: number,
@@ -166,7 +279,8 @@ export function generateProjections(
   annualContribution: number,
   expectedReturn: number,
   inflationRate: number,
-  years: number
+  years: number,
+  contributionGrowth: ContributionGrowth = DEFAULT_CONTRIBUTION_GROWTH
 ): ProjectionPoint[] {
   const projections: ProjectionPoint[] = []
   let portfolio = currentSavings
@@ -175,18 +289,20 @@ export function generateProjections(
 
   for (let i = 0; i <= years; i++) {
     const inflationAdjusted = portfolio / Math.pow(1 + inflationRate, i)
-    
+    const contribution = contributionForYear(annualContribution, inflationRate, i, contributionGrowth)
+
     projections.push({
       age: currentAge + i,
       year: currentYear + i,
       portfolio: Math.round(portfolio),
-      contributions: i === 0 ? currentSavings : annualContribution,
+      contributions: i === 0 ? currentSavings : contribution,
       totalContributions: Math.round(totalContributions),
       inflationAdjusted: Math.round(inflationAdjusted),
     })
 
-    portfolio = portfolio * (1 + expectedReturn) + annualContribution
-    totalContributions += annualContribution
+    const nextContribution = contributionForYear(annualContribution, inflationRate, i + 1, contributionGrowth)
+    portfolio = portfolio * (1 + expectedReturn) + nextContribution
+    totalContributions += nextContribution
   }
 
   return projections
@@ -256,22 +372,30 @@ export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
     expectedReturn, 
     inflationRate,
     withdrawalRate, 
-    annualExpenses 
+    annualExpenses,
+    contributionGrowth = DEFAULT_CONTRIBUTION_GROWTH,
   } = inputs
 
   // FIRE Number = Annual Expenses / Withdrawal Rate
   const fireNumber = annualExpenses / withdrawalRate
 
   // Real return (adjusted for inflation)
-  const realReturn = (1 + expectedReturn) / (1 + inflationRate) - 1
+  const realReturnRate = realReturn(expectedReturn, inflationRate)
 
-  // Years to reach FIRE number
-  const yearsToFIRE = yearsToTarget(currentSavings, annualContribution, realReturn, fireNumber)
+  // Years to reach FIRE number, solved against the same path the projections draw
+  const yearsToFIRE = yearsToFIRETarget(
+    currentSavings,
+    annualContribution,
+    expectedReturn,
+    inflationRate,
+    fireNumber,
+    contributionGrowth
+  )
   const fireAge = currentAge + yearsToFIRE
 
   // Coast FIRE Number (amount needed now to coast to FIRE at target retirement age)
   const yearsToRetirement = Math.max(0, (inputs.retirementAge ?? fireAge) - currentAge)
-  const coastFireNumber = presentValue(fireNumber, realReturn, yearsToRetirement)
+  const coastFireNumber = presentValue(fireNumber, realReturnRate, yearsToRetirement)
   const roundedFireAge = Math.round(fireAge * 10) / 10
   const targetRetirementAge = inputs.retirementAge ?? roundedFireAge
   const targetAgeGap = roundedFireAge - targetRetirementAge
@@ -295,7 +419,8 @@ export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
     annualContribution,
     expectedReturn,
     inflationRate,
-    projectionYears
+    projectionYears,
+    contributionGrowth
   )
 
   return {
@@ -357,7 +482,8 @@ export function calculateCoastFIRE(
   expectedReturn: number,
   inflationRate: number,
   annualExpenses: number,
-  withdrawalRate: number
+  withdrawalRate: number,
+  contributionGrowth: ContributionGrowth = DEFAULT_CONTRIBUTION_GROWTH
 ): CoastFIREResult {
   // FIRE number at retirement
   const fireNumber = annualExpenses / withdrawalRate
@@ -366,16 +492,25 @@ export function calculateCoastFIRE(
   const yearsToRetirement = Math.max(0, targetRetirementAge - currentAge)
   
   // Real return
-  const realReturn = (1 + expectedReturn) / (1 + inflationRate) - 1
+  const realReturnRate = realReturn(expectedReturn, inflationRate)
   
   // Coast number = what you need NOW to reach FIRE number at retirement without contributions
-  const coastNumber = presentValue(fireNumber, realReturn, yearsToRetirement)
+  const coastNumber = presentValue(fireNumber, realReturnRate, yearsToRetirement)
   
   // Are we already coasting?
   const alreadyCoasting = currentSavings >= coastNumber
   
   // Years to reach coast number (with contributions)
-  const yearsToCoast = alreadyCoasting ? 0 : yearsToTarget(currentSavings, annualContribution, realReturn, coastNumber)
+  const yearsToCoast = alreadyCoasting
+    ? 0
+    : yearsToFIRETarget(
+        currentSavings,
+        annualContribution,
+        expectedReturn,
+        inflationRate,
+        coastNumber,
+        contributionGrowth
+      )
   
   // Projections without contributions (coast scenario)
   const projections = generateProjections(
@@ -384,7 +519,8 @@ export function calculateCoastFIRE(
     0, // No contributions
     expectedReturn,
     inflationRate,
-    yearsToRetirement + 10
+    yearsToRetirement + 10,
+    contributionGrowth
   )
   
   // Projections with contributions (for comparison)
@@ -394,7 +530,8 @@ export function calculateCoastFIRE(
     annualContribution,
     expectedReturn,
     inflationRate,
-    yearsToRetirement + 10
+    yearsToRetirement + 10,
+    contributionGrowth
   )
 
   return {
@@ -451,7 +588,8 @@ export function calculateBaristaFIRE(
   inflationRate: number,
   annualExpenses: number,
   withdrawalRate: number,
-  partTimeAnnualIncome: number
+  partTimeAnnualIncome: number,
+  contributionGrowth: ContributionGrowth = DEFAULT_CONTRIBUTION_GROWTH
 ): BaristaFIREResult {
   // Full FIRE number (without part-time income)
   const fullFireNumber = annualExpenses / withdrawalRate
@@ -462,11 +600,15 @@ export function calculateBaristaFIRE(
   // Barista FIRE number = reduced expenses / withdrawal rate
   const baristaNumber = portfolioExpenses / withdrawalRate
   
-  // Real return
-  const realReturn = (1 + expectedReturn) / (1 + inflationRate) - 1
-  
   // Years to reach Barista FIRE
-  const yearsToBaristaFIRE = yearsToTarget(currentSavings, annualContribution, realReturn, baristaNumber)
+  const yearsToBaristaFIRE = yearsToFIRETarget(
+    currentSavings,
+    annualContribution,
+    expectedReturn,
+    inflationRate,
+    baristaNumber,
+    contributionGrowth
+  )
   
   // How much the part-time work saves in required portfolio
   const savingsFromPartTime = fullFireNumber - baristaNumber
@@ -479,7 +621,8 @@ export function calculateBaristaFIRE(
     annualContribution,
     expectedReturn,
     inflationRate,
-    projectionYears
+    projectionYears,
+    contributionGrowth
   )
 
   return {
@@ -808,4 +951,235 @@ export function calculateDebtPayoffByTimeline(
   }
   
   return result ? { requiredPayment: Math.round(requiredPayment), result } : null
+}
+
+// ============================================
+// Reverse FIRE Calculator
+// ============================================
+
+export interface ReverseFIREResult {
+  fireNumber: number
+  yearsToFIRE: number
+  requiredAnnualSavings: number
+  requiredMonthlySavings: number
+  projections: ProjectionPoint[]
+  alreadyAchievable: boolean
+  currentWillGrowTo: number
+}
+
+/**
+ * Work backwards from a retirement age to the savings required each year.
+ *
+ * The FIRE number is expressed in today's dollars, so the required saving is solved against the same
+ * deflated path `generateProjections()` draws. With the default `inflation` growth the answer is the
+ * contribution in today's dollars; with `flat` growth it is a fixed nominal amount.
+ */
+export function calculateReverseFIRE(
+  currentAge: number,
+  targetRetirementAge: number,
+  currentSavings: number,
+  annualExpenses: number,
+  expectedReturn: number,
+  inflationRate: number,
+  withdrawalRate: number,
+  contributionGrowth: ContributionGrowth = DEFAULT_CONTRIBUTION_GROWTH
+): ReverseFIREResult {
+  const yearsToFIRE = Math.max(1, targetRetirementAge - currentAge)
+  const fireNumber = annualExpenses / withdrawalRate
+  const realReturnRate = realReturn(expectedReturn, inflationRate)
+
+  // Existing savings deflate the same way in both models, so this is always in today's dollars.
+  const futureValueOfCurrent = currentSavings * Math.pow(1 + realReturnRate, yearsToFIRE)
+
+  let requiredAnnualSavings: number
+  if (futureValueOfCurrent >= fireNumber) {
+    requiredAnnualSavings = 0
+  } else if (contributionGrowth === 'inflation') {
+    const compoundFactor = Math.pow(1 + realReturnRate, yearsToFIRE)
+    requiredAnnualSavings = realReturnRate === 0
+      ? (fireNumber - currentSavings) / yearsToFIRE
+      : (fireNumber - futureValueOfCurrent) * realReturnRate / (compoundFactor - 1)
+  } else {
+    // Flat nominal contributions: solve the deflated flat path for a constant nominal payment.
+    const nominalTarget = fireNumber * Math.pow(1 + inflationRate, yearsToFIRE)
+    const compoundFactor = Math.pow(1 + expectedReturn, yearsToFIRE)
+    const nominalValueOfCurrent = currentSavings * compoundFactor
+    requiredAnnualSavings = expectedReturn === 0
+      ? (nominalTarget - nominalValueOfCurrent) / yearsToFIRE
+      : (nominalTarget - nominalValueOfCurrent) * expectedReturn / (compoundFactor - 1)
+  }
+
+  const safeAnnualSavings = Math.max(0, requiredAnnualSavings)
+
+  return {
+    fireNumber,
+    yearsToFIRE,
+    requiredAnnualSavings: safeAnnualSavings,
+    requiredMonthlySavings: safeAnnualSavings / 12,
+    projections: generateProjections(
+      currentAge,
+      currentSavings,
+      safeAnnualSavings,
+      expectedReturn,
+      inflationRate,
+      yearsToFIRE + 10,
+      contributionGrowth
+    ),
+    alreadyAchievable: futureValueOfCurrent >= fireNumber,
+    currentWillGrowTo: Math.round(futureValueOfCurrent),
+  }
+}
+
+// ============================================
+// Savings & Investment Growth Calculator
+// ============================================
+
+export interface InvestmentProjectionPoint {
+  age: number
+  year: number
+  portfolio: number
+  inflationAdjusted: number
+  totalContributions: number
+  contributions: number
+}
+
+export interface InvestmentGrowthResult {
+  savingsRate: number
+  annualContribution: number
+  monthlyContribution: number
+  finalNominalBalance: number
+  finalInflationAdjustedBalance: number
+  totalInvested: number
+  totalGrowth: number
+  inflationImpact: number
+  projections: InvestmentProjectionPoint[]
+}
+
+/**
+ * Project a repeatable contribution plan.
+ *
+ * Both series describe one plan: `portfolio` is in future dollars and `inflationAdjusted` is that same
+ * balance deflated to today's dollars. The contribution is stated in today's dollars, so with the
+ * default `inflation` growth the nominal amount invested rises each year to hold its purchasing power.
+ */
+export function calculateInvestmentGrowth(
+  startingAmount: number,
+  contributionAmount: number,
+  contributionFrequency: 'monthly' | 'yearly',
+  yearsInvesting: number,
+  expectedReturn: number,
+  inflationRate: number,
+  annualIncome: number,
+  currentAge: number,
+  contributionGrowth: ContributionGrowth = DEFAULT_CONTRIBUTION_GROWTH
+): InvestmentGrowthResult {
+  const annualContribution = contributionFrequency === 'monthly' ? contributionAmount * 12 : contributionAmount
+  const savingsRate = annualIncome > 0 ? annualContribution / annualIncome : 0
+  const projections: InvestmentProjectionPoint[] = []
+  const currentYear = new Date().getFullYear()
+
+  let nominalBalance = startingAmount
+  let totalContributions = startingAmount
+
+  projections.push({
+    age: currentAge,
+    year: currentYear,
+    portfolio: Math.round(nominalBalance),
+    inflationAdjusted: Math.round(nominalBalance),
+    totalContributions: Math.round(totalContributions),
+    contributions: 0,
+  })
+
+  for (let year = 1; year <= yearsInvesting; year += 1) {
+    const contribution = contributionForYear(annualContribution, inflationRate, year, contributionGrowth)
+    nominalBalance = nominalBalance * (1 + expectedReturn) + contribution
+    totalContributions += contribution
+
+    projections.push({
+      age: currentAge + year,
+      year: currentYear + year,
+      portfolio: Math.round(nominalBalance),
+      inflationAdjusted: Math.round(nominalBalance / Math.pow(1 + inflationRate, year)),
+      totalContributions: Math.round(totalContributions),
+      contributions: contribution,
+    })
+  }
+
+  const finalInflationAdjustedBalance = nominalBalance / Math.pow(1 + inflationRate, yearsInvesting)
+
+  return {
+    savingsRate,
+    annualContribution,
+    monthlyContribution: annualContribution / 12,
+    finalNominalBalance: nominalBalance,
+    finalInflationAdjustedBalance,
+    totalInvested: totalContributions,
+    totalGrowth: nominalBalance - totalContributions,
+    inflationImpact: nominalBalance - finalInflationAdjustedBalance,
+    projections,
+  }
+}
+
+// ============================================
+// Healthcare Gap Calculator
+// ============================================
+
+export const MEDICARE_AGE = 65
+
+export interface HealthcareYear {
+  age: number
+  year: number
+  cost: number
+  premium: number
+  deductible: number
+  outOfPocket: number
+}
+
+export interface HealthcareGapResult {
+  gapYears: number
+  annualCost: number
+  totalCost: number
+  avgAnnualCost: number
+  yearlyBreakdown: HealthcareYear[]
+}
+
+/**
+ * Cost of self-funded healthcare between early retirement and Medicare eligibility.
+ * Costs are stated in today's dollars and inflated year by year.
+ */
+export function calculateHealthcareGap(
+  currentAge: number,
+  earlyRetirementAge: number,
+  monthlyPremium: number,
+  annualDeductible: number,
+  annualOutOfPocket: number,
+  inflationRate: number
+): HealthcareGapResult {
+  const gapYears = Math.max(0, MEDICARE_AGE - earlyRetirementAge)
+  const annualCost = monthlyPremium * 12 + annualDeductible + annualOutOfPocket
+  const currentYear = new Date().getFullYear()
+  const yearlyBreakdown: HealthcareYear[] = []
+  let totalCost = 0
+
+  for (let index = 0; index < gapYears; index += 1) {
+    const multiplier = Math.pow(1 + inflationRate, index)
+    const cost = annualCost * multiplier
+    totalCost += cost
+    yearlyBreakdown.push({
+      age: earlyRetirementAge + index,
+      year: currentYear + earlyRetirementAge - currentAge + index,
+      cost: Math.round(cost),
+      premium: Math.round(monthlyPremium * 12 * multiplier),
+      deductible: Math.round(annualDeductible * multiplier),
+      outOfPocket: Math.round(annualOutOfPocket * multiplier),
+    })
+  }
+
+  return {
+    gapYears,
+    annualCost,
+    totalCost: Math.round(totalCost),
+    avgAnnualCost: gapYears > 0 ? Math.round(totalCost / gapYears) : 0,
+    yearlyBreakdown,
+  }
 }
