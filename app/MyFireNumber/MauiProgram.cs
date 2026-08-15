@@ -2,6 +2,7 @@
 using LiveChartsCore.SkiaSharpView.Maui;
 using MyFireNumber.Core.Books;
 using MyFireNumber.Core.Calculators;
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
 using MyFireNumber.ViewModels;
@@ -55,6 +56,9 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IAppBehaviorPreferencesService, AppBehaviorPreferencesService>();
 		builder.Services.AddSingleton<ICurrencyPreferencesService, CurrencyPreferencesService>();
 		builder.Services.AddSingleton<IDisplayPeriodPreferencesService, DisplayPeriodPreferencesService>();
+		// Singleton on purpose: this is the only thing that outlives a transient calculator page, so
+		// it is what lets a reopened calculator remember its advanced assumptions were showing.
+		builder.Services.AddSingleton<IAdvancedAssumptionsSessionState, AdvancedAssumptionsSessionState>();
 		builder.Services.AddSingleton<ITemporaryExportCleanupService, TemporaryExportCleanupService>();
 		builder.Services.AddSingleton<IErrorPresentationService, ErrorPresentationService>();
 		builder.Services.AddSingleton<IExternalLinkService, ExternalLinkService>();

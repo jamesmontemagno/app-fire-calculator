@@ -1,3 +1,5 @@
+using MyFireNumber.Core.Presentation;
+
 namespace MyFireNumber.Views.Controls;
 
 public sealed class AdvancedAssumptionsExpander : VerticalStackLayout
@@ -5,6 +7,8 @@ public sealed class AdvancedAssumptionsExpander : VerticalStackLayout
     private readonly Button toggleButton;
     private bool isExpanded;
     private bool hasAppliedInitialState;
+    private IAdvancedAssumptionsSessionState? sessionState;
+    private string? calculatorId;
 
     public static readonly BindableProperty TitleProperty = BindableProperty.Create(
         nameof(Title),
@@ -42,9 +46,35 @@ public sealed class AdvancedAssumptionsExpander : VerticalStackLayout
     }
 
     /// <summary>
+    /// Restores what the user last chose for this calculator in this app run, and starts recording
+    /// their choices against it.
+    /// </summary>
+    /// <remarks>
+    /// Called from <see cref="CalculatorPageBase.ApplyQueryAttributes"/>, which Shell runs after the
+    /// page's XAML is inflated but before the page is given a handler and drawn. That ordering is
+    /// what keeps this flash-free in both directions: children were already hidden by
+    /// <see cref="OnChildAdded"/>, and a restored expansion is applied before the first paint rather
+    /// than after it.
+    /// </remarks>
+    /// <param name="state">Session-scoped store shared by every calculator.</param>
+    /// <param name="calculatorId">
+    /// Catalog id, not the page type. Standard, Lean, and Fat FIRE share one page type, so keying on
+    /// the page would make all three disclose together.
+    /// </param>
+    public void BindSessionState(IAdvancedAssumptionsSessionState state, string calculatorId)
+    {
+        ArgumentNullException.ThrowIfNull(state);
+        ArgumentException.ThrowIfNullOrWhiteSpace(calculatorId);
+
+        sessionState = state;
+        this.calculatorId = calculatorId;
+        SetExpanded(state.IsExpanded(calculatorId));
+    }
+
+    /// <summary>
     /// Safety net in case a child is ever added without going through <see cref="OnChildAdded"/>.
-    /// Runs once: Shell reuses cached pages, so collapsing on every <c>Loaded</c> would throw away
-    /// the user's expanded section each time they returned to a calculator.
+    /// Runs once, and re-applies whatever state is current rather than forcing a collapse, so it
+    /// cannot undo a restore from <see cref="BindSessionState"/>.
     /// </summary>
     protected override void OnHandlerChanged()
     {
@@ -73,7 +103,15 @@ public sealed class AdvancedAssumptionsExpander : VerticalStackLayout
         }
     }
 
-    private void OnToggleClicked(object? sender, EventArgs e) => SetExpanded(!isExpanded);
+    private void OnToggleClicked(object? sender, EventArgs e)
+    {
+        SetExpanded(!isExpanded);
+
+        if (sessionState is not null && calculatorId is not null)
+        {
+            sessionState.SetExpanded(calculatorId, isExpanded);
+        }
+    }
 
     private void SetExpanded(bool value)
     {
