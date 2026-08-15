@@ -7,8 +7,9 @@
              Title="Annual Cash Flow"
              Shell.NavBarIsVisible="True"
              Shell.TabBarIsVisible="False"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
-    <Grid Padding="20,16,20,0" RowDefinitions="Auto,*" RowSpacing="14">
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             SafeAreaEdges="All">
+    <Grid Padding="{StaticResource PagePaddingCompact}" RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
         <VerticalStackLayout Spacing="4">
             <Label Text="Annual cash-flow details"
                    FontAttributes="Bold"
@@ -28,7 +29,7 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="viewModels:RetirementAnnualDetailItem">
                     <Border Margin="0,0,0,10"
-                            Padding="16"
+                            Padding="{StaticResource CardPadding}"
                             Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                             Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                             StrokeShape="RoundRectangle 12"
@@ -36,8 +37,8 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding ToggleCommand}" />
                         </Border.GestureRecognizers>
-                        <Grid RowDefinitions="Auto,Auto" RowSpacing="12">
-                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <Grid RowDefinitions="Auto,Auto" RowSpacing="{StaticResource SpaceMd}">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
                                 <VerticalStackLayout Spacing="3">
                                     <Label Text="{Binding Title}"
                                            FontAttributes="Bold"
@@ -57,8 +58,8 @@
 
                             <VerticalStackLayout Grid.Row="1"
                                                  IsVisible="{Binding IsExpanded}"
-                                                 Spacing="12">
-                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                                                 Spacing="{StaticResource SpaceMd}">
+                                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
                                     <Border Padding="10" StrokeThickness="0" Background="{AppThemeBinding Light=#EAF4EC, Dark=#29483B}" StrokeShape="RoundRectangle 8">
                                         <VerticalStackLayout Spacing="2"><Label Text="Income" FontSize="12" /><Label Text="{Binding IncomeText}" FontAttributes="Bold" /></VerticalStackLayout>
                                     </Border>

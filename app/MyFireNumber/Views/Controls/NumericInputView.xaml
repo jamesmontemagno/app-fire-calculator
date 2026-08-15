@@ -4,10 +4,18 @@
              xmlns:local="clr-namespace:MyFireNumber.Views.Controls"
              x:Class="MyFireNumber.Views.Controls.NumericInputView"
              x:Name="Root">
-    <Grid RowDefinitions="Auto,Auto"
-          RowSpacing="4">
+    <!--
+    Rows are "*,Auto" rather than "Auto,Auto" on purpose. Side-by-side fields in a
+    two-column input grid get the same height, so pinning the entry to the bottom
+    row keeps the entry boxes aligned even when one label wraps to two lines and
+    its neighbour does not. Without this the labels have to be capped or truncated
+    to stay tidy, which hides text the user needs.
+    -->
+    <Grid RowDefinitions="*,Auto"
+          RowSpacing="{StaticResource SpaceXs}">
         <local:FieldHelpView Header="{Binding DisplayHeader, Source={x:Reference Root}}"
-                             HelpText="{Binding HelpText, Source={x:Reference Root}}" />
+                             HelpText="{Binding HelpText, Source={x:Reference Root}}"
+                             VerticalOptions="Start" />
         <Grid Grid.Row="1"
               ColumnDefinitions="*,Auto"
               ColumnSpacing="6">

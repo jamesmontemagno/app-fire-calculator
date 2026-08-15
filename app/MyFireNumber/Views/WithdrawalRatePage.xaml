@@ -9,7 +9,8 @@
                           x:DataType="viewModels:WithdrawalRateViewModel"
                           Title="{Binding Title}"
                           Shell.NavBarIsVisible="True"
-                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                          SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding SavePlanCommand}"
                      SemanticProperties.Description="Save the current calculator values as a plan.">
@@ -19,7 +20,7 @@
         </ToolbarItem>
     </ContentPage.ToolbarItems>
     <ScrollView>
-        <VerticalStackLayout Padding="20,20,20,32" Spacing="18">
+        <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" SemanticProperties.Description="Restoring your local calculator draft." />
             <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light=#FFF4E8, Dark=#4A3323}" Stroke="{AppThemeBinding Light=#C97727, Dark=#F2B56D}" StrokeShape="RoundRectangle 8"><Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}" LineHeight="1.3" /></Border>
 
@@ -28,15 +29,15 @@
                                          Details="A withdrawal rate is the first-year percentage spent from your portfolio. The 4% rule is a common starting point, not a guarantee."
                                          IconGlyph="&#xf02d;" />
 
-            <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
-                <VerticalStackLayout Spacing="14">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><Label Text="Your portfolio" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Withdrawal Rate values to their defaults." /></Grid>
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}"><Label Text="Your portfolio" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Withdrawal Rate values to their defaults." /></Grid>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
                         <controls:NumericInputView Header="Portfolio value" HelpText="Current total invested portfolio, in dollars." Placeholder="1000000" Text="{Binding PortfolioValueText}" />
                         <controls:NumericInputView Grid.Column="1" Header="Retirement duration" HelpText="Number of retirement years to model." Placeholder="30" Text="{Binding RetirementYearsText}" />
                     </Grid>
                     <controls:AdvancedAssumptionsExpander>
-                        <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                        <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}" RowSpacing="{StaticResource SpaceMd}">
                             <controls:PercentageInputView Header="Withdrawal rate (%)" HelpText="First-year percentage withdrawn from the portfolio. This is an assumption, not a promise." Placeholder="4" Minimum="2" Maximum="8" Text="{Binding WithdrawalRateText}" />
                             <controls:PercentageInputView Grid.Column="1" Header="Expected return (%)" HelpText="Expected average annual investment return before inflation." Placeholder="7" Minimum="0" Maximum="15" Text="{Binding ExpectedReturnText}" />
                             <controls:PercentageInputView Grid.Row="1" Grid.ColumnSpan="2" Header="Inflation (%)" HelpText="Expected annual increase in the cost of living." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding InflationRateText}" />
@@ -45,24 +46,25 @@
                 </VerticalStackLayout>
             </Border>
 
-            <VerticalStackLayout Spacing="10">
-                <Label Text="{Binding WithdrawalStatusText}" Style="{StaticResource CalculatorSectionHeading}" />
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                    <Border Padding="12" Background="{AppThemeBinding Light=#EAF5FC, Dark=#1B3546}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Annual withdrawal" FontSize="12" /><Label Text="{Binding WithdrawalAnnualText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
-                    <Border Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Monthly withdrawal" FontSize="12" /><Label Text="{Binding WithdrawalMonthlyText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Portfolio lasts" FontSize="12" /><Label Text="{Binding WithdrawalLongevityText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Share of horizon funded" FontSize="12" /><Label Text="{Binding WithdrawalHorizonFundedText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+            <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                <Label Text="Your withdrawal outlook" Style="{StaticResource CalculatorSectionHeading}" />
+                <Label Text="{Binding WithdrawalStatusText}" Style="{StaticResource CalculatorStatusHeadline}" SemanticProperties.Description="{Binding WithdrawalStatusText}" />
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
+                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#EAF5FC, Dark=#1B3546}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Annual withdrawal" FontSize="12" /><Label Text="{Binding WithdrawalAnnualText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Monthly withdrawal" FontSize="12" /><Label Text="{Binding WithdrawalMonthlyText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Portfolio lasts" FontSize="12" /><Label Text="{Binding WithdrawalLongevityText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Share of horizon funded" FontSize="12" /><Label Text="{Binding WithdrawalHorizonFundedText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
                 </Grid>
                 <Label Text="{Binding WithdrawalRateAnalysisText}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>
 
-            <VerticalStackLayout Spacing="10">
+            <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                 <Label Text="Portfolio balance over time" Style="{StaticResource CalculatorSectionHeading}" />
                 <lvc:CartesianChart Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" HeightRequest="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
             </VerticalStackLayout>
 
-            <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
-                <VerticalStackLayout Spacing="10">
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
                     <Entry Text="{Binding PlanNameText}" Placeholder="My Withdrawal Plan" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" SemanticProperties.Description="Name for this saved Withdrawal Rate plan" />
                     <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />

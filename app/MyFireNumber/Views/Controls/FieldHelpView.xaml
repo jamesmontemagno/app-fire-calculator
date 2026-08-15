@@ -4,15 +4,15 @@
              x:Class="MyFireNumber.Views.Controls.FieldHelpView"
              x:Name="Root">
     <Grid ColumnDefinitions="*,Auto"
-          ColumnSpacing="4">
+          ColumnSpacing="{StaticResource SpaceXs}">
         <Label Text="{Binding Header, Source={x:Reference Root}}"
-               FontAttributes="Bold"
+               Style="{StaticResource CalculatorFieldHeading}"
                VerticalTextAlignment="Center"
                SemanticProperties.HeadingLevel="Level3" />
         <Button Grid.Column="1"
                 Text="&#xf05a;"
                 Style="{StaticResource FieldHelpInfoButton}"
                 Clicked="OnInfoClicked"
-                SemanticProperties.Description="Show help for this field" />
+                SemanticProperties.Description="{Binding Header, Source={x:Reference Root}, StringFormat='Show help for {0}'}" />
     </Grid>
 </ContentView>

@@ -8,7 +8,8 @@
              Title="About you"
              Shell.NavBarIsVisible="True"
              Shell.TabBarIsVisible="False"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Skip"
                      Command="{Binding SkipCommand}"
@@ -17,7 +18,7 @@
 
     <Grid>
         <ScrollView>
-            <VerticalStackLayout Padding="24,20,24,32" Spacing="18">
+            <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Tell us about today"
                            FontSize="28"
@@ -30,11 +31,11 @@
                            TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
                 </VerticalStackLayout>
 
-                <Border Padding="18"
+                <Border Padding="{StaticResource CardPadding}"
                         Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                         Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                         StrokeShape="RoundRectangle 12">
-                    <VerticalStackLayout Spacing="22">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceXl}">
                         <VerticalStackLayout Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
                                 <Label Text="Current age"

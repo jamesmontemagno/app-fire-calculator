@@ -27,6 +27,14 @@
     <Color x:Key="Gray900">#212121</Color>
     <Color x:Key="Gray950">#141414</Color>
 
+    <!--
+    Placeholder text. The grays above fail WCAG AA badly on this app's field
+    backgrounds (Gray200 on the light field surface is 1.55:1), so placeholders
+    use these instead. Light 5.0:1, dark 10.2:1 against the field backgrounds.
+    -->
+    <Color x:Key="PlaceholderLight">#587068</Color>
+    <Color x:Key="PlaceholderDark">#B9D1C2</Color>
+
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>

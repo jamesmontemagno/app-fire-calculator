@@ -9,7 +9,8 @@
                           x:DataType="viewModels:ReverseFireViewModel"
                           Title="{Binding Title}"
                           Shell.NavBarIsVisible="True"
-                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                          SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding SavePlanCommand}"
                      SemanticProperties.Description="Save the current calculator values as a plan.">
@@ -19,7 +20,7 @@
         </ToolbarItem>
     </ContentPage.ToolbarItems>
     <ScrollView>
-        <VerticalStackLayout Padding="20,20,20,32" Spacing="18">
+        <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" SemanticProperties.Description="Restoring your local calculator draft." />
             <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light=#FFF4E8, Dark=#4A3323}" Stroke="{AppThemeBinding Light=#C97727, Dark=#F2B56D}" StrokeShape="RoundRectangle 8"><Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}" LineHeight="1.3" /></Border>
 
@@ -28,18 +29,18 @@
                                          Details="Reverse FIRE makes the tradeoff between a target date, the portfolio target, and the savings needed explicit."
                                          IconGlyph="&#xf2f1;" />
 
-            <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
-                <VerticalStackLayout Spacing="14">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><Label Text="Your FIRE goal" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Reverse FIRE values to their defaults." /></Grid>
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}"><Label Text="Your FIRE goal" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Reverse FIRE values to their defaults." /></Grid>
                     <controls:PeriodToggleView />
-                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}" RowSpacing="{StaticResource SpaceMd}">
                         <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="30" Text="{Binding CurrentAgeText}" />
                         <controls:NumericInputView Grid.Column="1" Header="Target FIRE age" HelpText="The age at which you want to be financially independent." Placeholder="55" Text="{Binding RetirementAgeText}" />
                         <controls:NumericInputView Grid.Row="1" Header="Current savings" HelpText="Invested assets available for this goal, in dollars." Placeholder="100000" Text="{Binding CurrentSavingsText}" />
                         <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="Retirement expenses" HelpText="Expected spending after retirement, in today’s dollars." Placeholder="48000" Text="{Binding AnnualExpensesText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                     </Grid>
                     <controls:AdvancedAssumptionsExpander>
-                        <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                        <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}" RowSpacing="{StaticResource SpaceMd}">
                             <controls:PercentageInputView Header="Expected return (%)" HelpText="Expected average annual investment return before inflation." Placeholder="7" Minimum="0" Maximum="15" Text="{Binding ExpectedReturnText}" />
                             <controls:PercentageInputView Grid.Column="1" Header="Inflation (%)" HelpText="Expected annual increase in the cost of living." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding InflationRateText}" />
                             <controls:PercentageInputView Grid.Row="1" Grid.ColumnSpan="2" Header="Withdrawal rate (%)" HelpText="First-year percentage withdrawn from the portfolio. This is an assumption, not a promise." Placeholder="4" Minimum="2" Maximum="6" Text="{Binding WithdrawalRateText}" />
@@ -48,24 +49,25 @@
                 </VerticalStackLayout>
             </Border>
 
-            <VerticalStackLayout Spacing="10">
-                <Label Text="{Binding ReverseStatusText}" Style="{StaticResource CalculatorSectionHeading}" />
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                    <Border Padding="12" Background="{AppThemeBinding Light=#E8F7F7, Dark=#19393C}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Monthly savings needed" FontSize="12" /><Label Text="{Binding ReverseRequiredMonthlySavingsText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
-                    <Border Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Annual savings needed" FontSize="12" /><Label Text="{Binding ReverseRequiredAnnualSavingsText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Years to FIRE" FontSize="12" /><Label Text="{Binding ReverseYearsText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Current savings will grow to" FontSize="12" /><Label Text="{Binding ReverseCurrentGrowthText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+            <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                <Label Text="Your Reverse FIRE outlook" Style="{StaticResource CalculatorSectionHeading}" />
+                <Label Text="{Binding ReverseStatusText}" Style="{StaticResource CalculatorStatusHeadline}" SemanticProperties.Description="{Binding ReverseStatusText}" />
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
+                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#E8F7F7, Dark=#19393C}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Monthly savings needed" FontSize="12" /><Label Text="{Binding ReverseRequiredMonthlySavingsText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Annual savings needed" FontSize="12" /><Label Text="{Binding ReverseRequiredAnnualSavingsText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Years to FIRE" FontSize="12" /><Label Text="{Binding ReverseYearsText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Current savings will grow to" FontSize="12" /><Label Text="{Binding ReverseCurrentGrowthText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
                 </Grid>
             </VerticalStackLayout>
 
-            <VerticalStackLayout Spacing="10">
+            <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                 <Label Text="Portfolio projection" Style="{StaticResource CalculatorSectionHeading}" />
                 <lvc:CartesianChart Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" HeightRequest="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
                 <Label Text="{Binding ReverseProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>
 
-            <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
-                <VerticalStackLayout Spacing="10">
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
                     <Entry Text="{Binding PlanNameText}" Placeholder="My Reverse FIRE Plan" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" SemanticProperties.Description="Name for this saved Reverse FIRE plan" />
                     <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />

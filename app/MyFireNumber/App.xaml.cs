@@ -1,19 +1,20 @@
-﻿using MyFireNumber.Services;
+﻿using Microsoft.Extensions.DependencyInjection;
+using MyFireNumber.Services;
 
 namespace MyFireNumber;
 
 public partial class App : Application
 {
-	private readonly AppShell appShell;
+	private readonly IServiceProvider services;
 
 	public App(
-		AppShell appShell,
+		IServiceProvider services,
 		IThemeService themeService,
 		IAppBehaviorPreferencesService behaviorPreferencesService,
 		ITemporaryExportCleanupService temporaryExportCleanupService)
 	{
 		InitializeComponent();
-		this.appShell = appShell;
+		this.services = services;
 		temporaryExportCleanupService.RemoveStaleFiles();
 		themeService.Apply(behaviorPreferencesService.Current.HighContrast
 			? ThemePreference.Dark
@@ -22,6 +23,10 @@ public partial class App : Application
 
 	protected override Window CreateWindow(IActivationState? activationState)
 	{
-		return new Window(appShell);
+		// Resolve AppShell here rather than injecting it into the constructor. Constructor
+		// injection forced DI to build AppShell -- and with it the four tab pages -- before
+		// InitializeComponent() merged Colors.xaml and Styles.xaml into Application.Resources,
+		// so any {StaticResource} in those pages threw "StaticResource not found" at startup.
+		return new Window(services.GetRequiredService<AppShell>());
 	}
 }

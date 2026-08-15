@@ -7,10 +7,12 @@
     <ContentView.Resources>
         <local:NumericTextConverter x:Key="NumericTextConverter" />
     </ContentView.Resources>
-    <Grid RowDefinitions="Auto,Auto,Auto"
-          RowSpacing="4">
+    <!-- See NumericInputView for why the label row is "*" and not "Auto". -->
+    <Grid RowDefinitions="*,Auto,Auto"
+          RowSpacing="{StaticResource SpaceXs}">
         <local:FieldHelpView Header="{Binding Header, Source={x:Reference Root}}"
-                             HelpText="{Binding HelpText, Source={x:Reference Root}}" />
+                             HelpText="{Binding HelpText, Source={x:Reference Root}}"
+                             VerticalOptions="Start" />
         <Entry Grid.Row="1"
                Text="{Binding Text, Source={x:Reference Root}, Mode=TwoWay}"
                Placeholder="{Binding Placeholder, Source={x:Reference Root}}"
