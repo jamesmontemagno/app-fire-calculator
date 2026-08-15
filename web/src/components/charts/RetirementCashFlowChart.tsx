@@ -95,9 +95,9 @@ export default function RetirementCashFlowChart({ data }: RetirementCashFlowChar
         />
         <Tooltip content={<ChartTooltip />} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
-        <Line yAxisId="cash-flow" type="monotone" dataKey="totalIncome" name="Income available" stroke="#16a34a" strokeWidth={2} dot={false} />
+        <Line yAxisId="cash-flow" type="monotone" dataKey="totalIncome" name="Income available (after tax)" stroke="#16a34a" strokeWidth={2} dot={false} />
         <Line yAxisId="cash-flow" type="monotone" dataKey="expenses" name="Expenses" stroke="#f59e0b" strokeWidth={2} dot={false} />
-        <Line yAxisId="cash-flow" type="monotone" dataKey="portfolioWithdrawals" name="Gap withdrawals" stroke="#8b5cf6" strokeWidth={2} strokeDasharray="4 4" dot={false} />
+        <Line yAxisId="cash-flow" type="monotone" dataKey="portfolioWithdrawals" name="Gap withdrawals (after tax)" stroke="#8b5cf6" strokeWidth={2} strokeDasharray="4 4" dot={false} />
         <Line yAxisId="portfolio" type="monotone" dataKey="totalBalance" name="Portfolio value" stroke="#0ea5e9" strokeWidth={2} dot={false} />
       </ComposedChart>
     </ResponsiveContainer>

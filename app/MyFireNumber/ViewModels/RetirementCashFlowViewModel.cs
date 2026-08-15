@@ -52,6 +52,11 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     [ObservableProperty] private string retirementBalanceAtSemiText = string.Empty;
     [ObservableProperty] private string retirementEndingBalanceText = string.Empty;
     [ObservableProperty] private string retirementFundedYearsText = string.Empty;
+    [ObservableProperty] private string retirementFirstShortfallText = string.Empty;
+    [ObservableProperty] private string retirementBalanceBasisText = string.Empty;
+    [ObservableProperty] private string retirementEndingBasisText = string.Empty;
+    [ObservableProperty] private string retirementPolicyLimitText = string.Empty;
+    [ObservableProperty] private bool hasRetirementPolicyLimit;
 
     [ObservableProperty]
     private bool withdrawOnlyAfterRetirement = true;
@@ -284,7 +289,23 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
         RetirementCurrentBalanceText = FormatCurrency(result.CurrentBalance);
         RetirementBalanceAtSemiText = FormatCurrency(result.BalanceAtSemiRetirement);
         RetirementEndingBalanceText = FormatCurrency(result.EndingBalance);
-        RetirementFundedYearsText = $"{result.FundedYears} of {result.Projections.Count} years funded";
+        RetirementFundedYearsText = result.FirstShortfallAge is null
+            ? $"All {result.RetirementYears} retirement years funded"
+            : $"{result.FundedYears} consecutive years from age {draft.SemiRetirementAge} ({result.YearsFullyCovered} of {result.RetirementYears} covered in total)";
+        RetirementFirstShortfallText = result.FirstShortfallAge is int shortfallAge
+            ? $"Age {shortfallAge}"
+            : "None projected";
+        RetirementBalanceBasisText = $"Future dollars at age {draft.SemiRetirementAge}";
+        RetirementEndingBasisText = $"Future dollars at age {draft.PlanThroughAge}";
+
+        var firstPolicyLimitedPoint = result.Projections
+            .FirstOrDefault(point => point.Age >= draft.SemiRetirementAge
+                && point.Surplus < 0
+                && point.PolicyLimitedWithdrawals > 0);
+        HasRetirementPolicyLimit = firstPolicyLimitedPoint is not null;
+        RetirementPolicyLimitText = firstPolicyLimitedPoint is null
+            ? string.Empty
+            : $"At age {firstPolicyLimitedPoint.Age} the per-account withdrawal rate held back {FormatCurrency(firstPolicyLimitedPoint.PolicyLimitedWithdrawals)} that the balance could have covered. The withdrawal rate is a self-imposed policy limit, not a depletion model, so some shortfalls reflect that cap rather than running out of money. See issue #56.";
         ProjectionSeries =
         [
             CreateProjectionSeries("Portfolio balance", result.Projections.Select(point => point.TotalBalance), new SKColor(43, 111, 83)),
@@ -334,7 +355,10 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
             .Concat(draft.Accounts
                 .Select(account => (account.Name, Amount: point.Withdrawals.GetValueOrDefault(account.Id)))
                 .Where(item => item.Amount > 0)
-                .Select(item => $"{item.Name} withdrawal: {FormatCurrency(item.Amount)}"));
+                .Select(item => $"{item.Name} withdrawal (gross): {FormatCurrency(item.Amount)}"))
+            .Concat(point.WithdrawalTaxes > 0
+                ? [$"Estimated withdrawal tax: -{FormatCurrency(point.WithdrawalTaxes)}"]
+                : Array.Empty<string>());
         var expenseParts = new[] { $"Core expenses: {FormatCurrency(point.CoreExpenses)}" }
             .Concat(draft.AdditionalExpenses
                 .Select(expense => (expense.Name, Amount: point.ExpensesByItem.GetValueOrDefault(expense.Id)))
