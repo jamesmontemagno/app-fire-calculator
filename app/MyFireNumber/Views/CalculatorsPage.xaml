@@ -87,7 +87,7 @@
                                        FontSize="19"
                                        HorizontalTextAlignment="Center"
                                        VerticalTextAlignment="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                        SemanticProperties.Description="{Binding Title, StringFormat='{0} icon'}" />
                             </Border>
                             <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">

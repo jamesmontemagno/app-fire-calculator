@@ -23,7 +23,7 @@
                 <Label Text="&#xf0d6;"
                        FontFamily="FontAwesomeSolid"
                        FontSize="48"
-                       TextColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}"
+                       TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                        SemanticProperties.Description="A sprouting plant representing growth" />
             </Border>
 
@@ -75,7 +75,7 @@
             <Button AutomationId="WelcomeGetStartedButton"
                     Text="Get started"
                     Command="{Binding GetStartedCommand}"
-                    Background="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}"
+                    Background="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                     TextColor="{AppThemeBinding Light={StaticResource TextOnAccentLight}, Dark={StaticResource TextOnAccentDark}}"
                     SemanticProperties.Description="Get started with your starting assumptions." />
             <controls:EducationalDisclaimerView />

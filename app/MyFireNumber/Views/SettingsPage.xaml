@@ -395,7 +395,7 @@
                                             FontFamily="FontAwesomeSolid"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=MoveCalculatorUpCommand}"
                                             CommandParameter="{Binding .}"
-                                            Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftAltLight}, Dark={StaticResource SurfaceAccentSoftAltDark}}"
+                                            Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftLight}, Dark={StaticResource SurfaceAccentSoftDark}}"
                                             TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}"
                                             FontSize="14"
                                             Padding="0"
@@ -405,7 +405,7 @@
                                             FontFamily="FontAwesomeSolid"
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:SettingsViewModel}}, Path=MoveCalculatorDownCommand}"
                                             CommandParameter="{Binding .}"
-                                            Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftAltLight}, Dark={StaticResource SurfaceAccentSoftAltDark}}"
+                                            Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftLight}, Dark={StaticResource SurfaceAccentSoftDark}}"
                                             TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}"
                                             FontSize="14"
                                             Padding="0"
@@ -460,7 +460,7 @@
                             <Button Grid.Column="1"
                                     Text="Import backup"
                                     Command="{Binding ImportDataCommand}"
-                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftAltLight}, Dark={StaticResource SurfaceAccentSoftAltDark}}"
+                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftLight}, Dark={StaticResource SurfaceAccentSoftDark}}"
                                     TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}"
                                     SemanticProperties.Description="Choose a backup file to replace local app data after confirmation." />
                         </Grid>
@@ -497,13 +497,13 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Button Text="Terms"
                                     Command="{Binding OpenTermsCommand}"
-                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftAltLight}, Dark={StaticResource SurfaceAccentSoftAltDark}}"
+                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftLight}, Dark={StaticResource SurfaceAccentSoftDark}}"
                                     TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}"
                                     SemanticProperties.Description="Open the My Fire Number terms on the website." />
                             <Button Grid.Column="1"
                                     Text="Privacy policy"
                                     Command="{Binding OpenPrivacyCommand}"
-                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftAltLight}, Dark={StaticResource SurfaceAccentSoftAltDark}}"
+                                    Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftLight}, Dark={StaticResource SurfaceAccentSoftDark}}"
                                     TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}"
                                     SemanticProperties.Description="Open the My Fire Number privacy policy on the website." />
                         </Grid>

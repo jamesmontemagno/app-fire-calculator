@@ -12,7 +12,7 @@
                 <Label Text="{Binding IconGlyph, Source={x:Reference Root}}"
                        FontFamily="FontAwesomeSolid"
                        VerticalTextAlignment="Center"
-                       TextColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}"
+                       TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                        SemanticProperties.Description="Calculator information" />
                 <Label Grid.Column="1"
                        Text="{Binding Title, Source={x:Reference Root}}"
@@ -30,7 +30,7 @@
                     HorizontalOptions="Start"
                     Padding="0,6"
                     Background="Transparent"
-                    TextColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}"
+                    TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                     FontAttributes="Bold"
                     SemanticProperties.Description="Show more information about this calculator" />
             <Label x:Name="DetailsLabel"

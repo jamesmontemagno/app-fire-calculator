@@ -46,7 +46,7 @@
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                         <ProgressBar Progress="{Binding QuestionProgress}"
-                                     ProgressColor="{AppThemeBinding Light={StaticResource TextAccentAltLight}, Dark={StaticResource TextAccentAltDark}}"
+                                     ProgressColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                      SemanticProperties.Description="{Binding QuestionProgressText}" />
                     </VerticalStackLayout>
 
@@ -242,7 +242,7 @@
                             Background="Transparent"
                             BorderColor="{AppThemeBinding Light={StaticResource BorderNeutralLight}, Dark={StaticResource BorderNeutralDark}}"
                             BorderWidth="1"
-                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryAltMutedLight}, Dark={StaticResource TextSecondaryAltMutedDark}}" />
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryAltLight}, Dark={StaticResource TextSecondaryAltDark}}" />
                 </VerticalStackLayout>
 
                 <controls:EducationalDisclaimerView />
