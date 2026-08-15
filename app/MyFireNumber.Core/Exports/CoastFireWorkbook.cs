@@ -157,8 +157,6 @@ public static class CoastFireWorkbook
         InlineString = new InlineString(new Text(value))
     };
 
-    // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
-    // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
     // This overload exists solely to be un-callable. Without it, CreateNumberCell("B5", someInt,
     // DecimalStyleIndex) would bind to the (double, uint) overload via int->double widening and
     // silently reintroduce #69. Making the (int, uint) shape a compile error (error: true) forces
@@ -174,6 +172,8 @@ public static class CoastFireWorkbook
     private static Cell CreateNumberCell(string reference, int value, IntegerFormat format) =>
         CreateNumberCell(reference, (double)value, WorkbookStyles.StyleIndexFor(format));
 
+    // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
+    // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
     private static Cell CreateNumberCell(string reference, double value, uint styleIndex) => double.IsFinite(value)
         ? new()
         {

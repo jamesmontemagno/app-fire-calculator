@@ -69,8 +69,10 @@ public static class DeferredCompensationWorkbook
     }
 
     private static Cell Text(string reference, string value) => new() { CellReference = reference, DataType = CellValues.InlineString, InlineString = new InlineString(new Text(value)) };
-    // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
-    // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
+    // This overload exists solely to be un-callable. Without it, Number("B5", someInt, DecimalStyleIndex)
+    // would bind to the (double, uint) overload via int->double widening and silently reintroduce #69.
+    // Making the (int, uint) shape a compile error (error: true) forces every integer cell through the
+    // IntegerFormat overload, so the guarantee holds at compile time rather than merely by convention.
     [Obsolete("An int cell must use IntegerFormat, never a raw style index (issue #69).", error: true)]
     private static Cell Number(string reference, int value, uint style) =>
         throw new InvalidOperationException();
@@ -78,6 +80,8 @@ public static class DeferredCompensationWorkbook
     private static Cell Number(string reference, int value, IntegerFormat format) =>
         Number(reference, (double)value, WorkbookStyles.StyleIndexFor(format));
 
+    // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
+    // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
     private static Cell Number(string reference, double value, uint style) => double.IsFinite(value)
         ? new() { CellReference = reference, StyleIndex = style, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) }
         : Text(reference, WorkbookValues.Unreachable);
