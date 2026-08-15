@@ -210,3 +210,20 @@ export function drawdownSeries(
   }
   return series
 }
+
+/**
+ * Rounds to a whole unit with midpoints going away from zero, written as `floor(|x| + 1/2)` carrying
+ * the sign back.
+ *
+ * This is the textbook "round half away from zero" definition, deliberately expressed differently
+ * from the shipped `roundSigned`, which multiplies a sign by `Math.round` of a magnitude. Two
+ * formulations agreeing is the check; sharing one would prove nothing.
+ *
+ * The convention matters because issue #63 was a mismatch in exactly this rule: bare JS `Math.round`
+ * takes a midpoint toward +Infinity (`Math.round(-2.5) === -2`) while C#
+ * `MidpointRounding.AwayFromZero` takes it to -3. Both platforms now use away-from-zero.
+ */
+export function roundHalfAwayFromZero(value: number): number {
+  const magnitude = Math.floor(Math.abs(value) + 0.5)
+  return value < 0 ? -magnitude : magnitude
+}

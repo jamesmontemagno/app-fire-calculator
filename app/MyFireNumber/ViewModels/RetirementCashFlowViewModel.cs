@@ -300,6 +300,10 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
 
         var firstPolicyLimitedPoint = result.Projections
             .FirstOrDefault(point => point.Age >= draft.SemiRetirementAge
+                // Reads the rounded Surplus rather than the calculator's IsShortfall predicate, which
+                // is safe only because the two are exactly equivalent: RoundSigned rounds away from
+                // zero, so Surplus < 0 holds for precisely the values where exact <= -0.5. Keep them
+                // in step — a tighter tolerance in the calculator would desynchronise this. See #63.
                 && point.Surplus < 0
                 && point.PolicyLimitedWithdrawals > 0);
         HasRetirementPolicyLimit = firstPolicyLimitedPoint is not null;

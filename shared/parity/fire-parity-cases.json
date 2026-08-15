@@ -754,6 +754,254 @@
         "totalCost": 0,
         "avgAnnualCost": 0
       }
-    }
+    },
+      {
+        "id": "deferred-negative-midpoint-half-dollar",
+        "kind": "deferred",
+        "description": "A fifty-cent annual shortfall: the exact input that made web and MAUI give opposite verdicts before issue #63.",
+        "derivation": "Flat plan, chosen so every intermediate value is exact and the surplus can be derived by hand. inflationRate is 0, so inflationMultiplier = (1+0)^k = 1 for every year and expenses = annualExpenses exactly. There are no accounts, so deferredIncome and portfolioWithdrawals are both 0 and totalIncome is the pension alone. The pension is after-tax with annualGrowth 0 and is active across the whole span, so its nominal amount is 10000*(1+0)^k = 10000 exactly every year. Therefore surplus = 10000 - annualExpenses, identically in each of the three projected years. annualExpenses = 10000.50, so surplus = 10000 - 10000.50 = -0.50 exactly; 10000 and 10000.5 are both exactly representable in binary64 (10000.5 = 20001/2), so this is a true midpoint and not floating-point noise. Rounded away from zero for display, -0.50 becomes -1. The verdict is taken from the unrounded value against a half-dollar tolerance: -0.50 <= -0.50 is true, so all three years are short, giving fundedYears 0, firstShortfallAge 60 and yearsFullyCovered 0. expenses displays as round(10000.50) = 10001 (the positive midpoint rounds the same way under both platforms' rules). Before the fix web produced Math.round(-0.5) = -0, and -0 < 0 is false, so it reported fundedYears 3 and firstShortfallAge null.",
+        "inputs": {
+          "currentAge": 60,
+          "semiRetirementAge": 60,
+          "planThroughAge": 62,
+          "annualExpenses": 10000.5,
+          "inflationRate": 0,
+          "withdrawOnlyAfterRetirement": false,
+          "reinvestSurplus": false,
+          "accounts": [],
+          "incomeSources": [
+            {
+              "id": "pension",
+              "name": "Pension",
+              "type": "pension",
+              "annualAmount": 10000,
+              "startAge": 0,
+              "endAge": 200,
+              "annualGrowth": 0,
+              "isAfterTax": true,
+              "taxRate": 0
+            }
+          ],
+          "additionalExpenses": []
+        },
+        "expected": {
+          "projectionCount": 3,
+          "currentBalance": 0,
+          "balanceAtSemiRetirement": 0,
+          "endingBalance": 0,
+          "firstYearIncome": 10000,
+          "firstYearSurplus": -1,
+          "retirementYears": 3,
+          "fundedYears": 0,
+          "yearsFullyCovered": 0,
+          "firstShortfallAge": 60,
+          "annualSamples": [
+            {
+              "age": 60,
+              "totalIncome": 10000,
+              "expenses": 10001,
+              "surplus": -1
+            },
+            {
+              "age": 61,
+              "totalIncome": 10000,
+              "expenses": 10001,
+              "surplus": -1
+            },
+            {
+              "age": 62,
+              "totalIncome": 10000,
+              "expenses": 10001,
+              "surplus": -1
+            }
+          ]
+        }
+      },
+      {
+        "id": "deferred-negative-midpoint-two-fifty",
+        "kind": "deferred",
+        "description": "A $2.50 annual shortfall, the midpoint where the two platforms' rounding rules differed by a whole dollar.",
+        "derivation": "Flat plan, chosen so every intermediate value is exact and the surplus can be derived by hand. inflationRate is 0, so inflationMultiplier = (1+0)^k = 1 for every year and expenses = annualExpenses exactly. There are no accounts, so deferredIncome and portfolioWithdrawals are both 0 and totalIncome is the pension alone. The pension is after-tax with annualGrowth 0 and is active across the whole span, so its nominal amount is 10000*(1+0)^k = 10000 exactly every year. Therefore surplus = 10000 - annualExpenses, identically in each of the three projected years. annualExpenses = 10002.50, so surplus = 10000 - 10002.50 = -2.50 exactly; both operands are exactly representable in binary64 (10002.5 = 20005/2). Rounded away from zero, -2.50 becomes -3; the bare JS Math.round web used before issue #63 rounds half toward +Infinity and produced -2. The verdict is unaffected by which of the two a platform picked, since -2.50 <= -0.50 either way: all three years are short, so fundedYears 0, firstShortfallAge 60, yearsFullyCovered 0. expenses displays as round(10002.50) = 10003.",
+        "inputs": {
+          "currentAge": 60,
+          "semiRetirementAge": 60,
+          "planThroughAge": 62,
+          "annualExpenses": 10002.5,
+          "inflationRate": 0,
+          "withdrawOnlyAfterRetirement": false,
+          "reinvestSurplus": false,
+          "accounts": [],
+          "incomeSources": [
+            {
+              "id": "pension",
+              "name": "Pension",
+              "type": "pension",
+              "annualAmount": 10000,
+              "startAge": 0,
+              "endAge": 200,
+              "annualGrowth": 0,
+              "isAfterTax": true,
+              "taxRate": 0
+            }
+          ],
+          "additionalExpenses": []
+        },
+        "expected": {
+          "projectionCount": 3,
+          "currentBalance": 0,
+          "balanceAtSemiRetirement": 0,
+          "endingBalance": 0,
+          "firstYearIncome": 10000,
+          "firstYearSurplus": -3,
+          "retirementYears": 3,
+          "fundedYears": 0,
+          "yearsFullyCovered": 0,
+          "firstShortfallAge": 60,
+          "annualSamples": [
+            {
+              "age": 60,
+              "totalIncome": 10000,
+              "expenses": 10003,
+              "surplus": -3
+            },
+            {
+              "age": 61,
+              "totalIncome": 10000,
+              "expenses": 10003,
+              "surplus": -3
+            },
+            {
+              "age": 62,
+              "totalIncome": 10000,
+              "expenses": 10003,
+              "surplus": -3
+            }
+          ]
+        }
+      },
+      {
+        "id": "deferred-positive-midpoint",
+        "kind": "deferred",
+        "description": "A $2.50 annual surplus: the positive midpoint, where the two rounding rules always agreed.",
+        "derivation": "Flat plan, chosen so every intermediate value is exact and the surplus can be derived by hand. inflationRate is 0, so inflationMultiplier = (1+0)^k = 1 for every year and expenses = annualExpenses exactly. There are no accounts, so deferredIncome and portfolioWithdrawals are both 0 and totalIncome is the pension alone. The pension is after-tax with annualGrowth 0 and is active across the whole span, so its nominal amount is 10000*(1+0)^k = 10000 exactly every year. Therefore surplus = 10000 - annualExpenses, identically in each of the three projected years. annualExpenses = 9997.50, so surplus = 10000 - 9997.50 = +2.50 exactly (9997.5 = 19995/2, exactly representable). Math.round(2.5) is 3 and MidpointRounding.AwayFromZero also gives 3 — the two rules differ only on negatives, which is why issue #63 went unnoticed for so long. +2.50 > -0.50, so no year is short: fundedYears 3, firstShortfallAge null, yearsFullyCovered 3. expenses displays as round(9997.50) = 9998.",
+        "inputs": {
+          "currentAge": 60,
+          "semiRetirementAge": 60,
+          "planThroughAge": 62,
+          "annualExpenses": 9997.5,
+          "inflationRate": 0,
+          "withdrawOnlyAfterRetirement": false,
+          "reinvestSurplus": false,
+          "accounts": [],
+          "incomeSources": [
+            {
+              "id": "pension",
+              "name": "Pension",
+              "type": "pension",
+              "annualAmount": 10000,
+              "startAge": 0,
+              "endAge": 200,
+              "annualGrowth": 0,
+              "isAfterTax": true,
+              "taxRate": 0
+            }
+          ],
+          "additionalExpenses": []
+        },
+        "expected": {
+          "projectionCount": 3,
+          "currentBalance": 0,
+          "balanceAtSemiRetirement": 0,
+          "endingBalance": 0,
+          "firstYearIncome": 10000,
+          "firstYearSurplus": 3,
+          "retirementYears": 3,
+          "fundedYears": 3,
+          "yearsFullyCovered": 3,
+          "firstShortfallAge": null,
+          "annualSamples": [
+            {
+              "age": 60,
+              "totalIncome": 10000,
+              "expenses": 9998,
+              "surplus": 3
+            },
+            {
+              "age": 61,
+              "totalIncome": 10000,
+              "expenses": 9998,
+              "surplus": 3
+            },
+            {
+              "age": 62,
+              "totalIncome": 10000,
+              "expenses": 9998,
+              "surplus": 3
+            }
+          ]
+        }
+      },
+      {
+        "id": "deferred-sub-tolerance-gap",
+        "kind": "deferred",
+        "description": "A forty-cent annual gap: inside the half-dollar tolerance, so it displays as $0 and reads as funded on both platforms.",
+        "derivation": "Flat plan, chosen so every intermediate value is exact and the surplus can be derived by hand. inflationRate is 0, so inflationMultiplier = (1+0)^k = 1 for every year and expenses = annualExpenses exactly. There are no accounts, so deferredIncome and portfolioWithdrawals are both 0 and totalIncome is the pension alone. The pension is after-tax with annualGrowth 0 and is active across the whole span, so its nominal amount is 10000*(1+0)^k = 10000 exactly every year. Therefore surplus = 10000 - annualExpenses, identically in each of the three projected years. annualExpenses = 10000.40, so surplus = 10000 - 10000.40 = -0.40. Unlike the other three cases this is NOT an exact midpoint: 10000.4 has no exact binary64 representation, so the stored surplus is about -0.4000000000000909. That representation error is around 9e-14 and the conclusion is insensitive to it, because the value is a tenth of a dollar clear of the -0.50 tolerance on one side and of the -0.50 rounding boundary on the other. Rounded away from zero, -0.40 becomes NEGATIVE zero, which C# ToString(\"C0\") renders as \"-$0\" and Intl.NumberFormat renders as \"-$0\"; both platforms now normalise it to positive zero, so surplus is 0 and not -0. -0.40 > -0.50, so no year is short: fundedYears 3, firstShortfallAge null, yearsFullyCovered 3. This case pins the documented cost of a whole-dollar calculator — a sub-fifty-cent gap is reported as funded — and pins it as agreement rather than per-platform behaviour. expenses displays as round(10000.40) = 10000.",
+        "inputs": {
+          "currentAge": 60,
+          "semiRetirementAge": 60,
+          "planThroughAge": 62,
+          "annualExpenses": 10000.4,
+          "inflationRate": 0,
+          "withdrawOnlyAfterRetirement": false,
+          "reinvestSurplus": false,
+          "accounts": [],
+          "incomeSources": [
+            {
+              "id": "pension",
+              "name": "Pension",
+              "type": "pension",
+              "annualAmount": 10000,
+              "startAge": 0,
+              "endAge": 200,
+              "annualGrowth": 0,
+              "isAfterTax": true,
+              "taxRate": 0
+            }
+          ],
+          "additionalExpenses": []
+        },
+        "expected": {
+          "projectionCount": 3,
+          "currentBalance": 0,
+          "balanceAtSemiRetirement": 0,
+          "endingBalance": 0,
+          "firstYearIncome": 10000,
+          "firstYearSurplus": 0,
+          "retirementYears": 3,
+          "fundedYears": 3,
+          "yearsFullyCovered": 3,
+          "firstShortfallAge": null,
+          "annualSamples": [
+            {
+              "age": 60,
+              "totalIncome": 10000,
+              "expenses": 10000,
+              "surplus": 0
+            },
+            {
+              "age": 61,
+              "totalIncome": 10000,
+              "expenses": 10000,
+              "surplus": 0
+            },
+            {
+              "age": 62,
+              "totalIncome": 10000,
+              "expenses": 10000,
+              "surplus": 0
+            }
+          ]
+        }
+      }
   ]
 }

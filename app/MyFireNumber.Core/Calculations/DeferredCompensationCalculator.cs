@@ -11,6 +11,9 @@ public static class DeferredCompensationCalculator
         var balances = inputs.Accounts.ToDictionary(account => account.Id, account => Math.Max(0, account.Balance));
         var projections = new List<RetirementCashFlowPoint>();
 
+        // The verdict below reads these, not the rounded Surplus on the projection points. See #63.
+        var exactSurplusByAge = new Dictionary<int, double>();
+
         for (var age = startAge; age <= endAge; age++)
         {
             var yearsFromNow = age - startAge;
@@ -119,6 +122,7 @@ public static class DeferredCompensationCalculator
 
             var totalIncome = outsideIncome + deferredIncome + portfolioWithdrawals;
             var surplus = totalIncome - expenses;
+            exactSurplusByAge[age] = surplus;
             if (inputs.ReinvestSurplus && surplus > 0)
             {
                 DistributeSurplus(balances, inputs.Accounts, surplus);
@@ -139,7 +143,7 @@ public static class DeferredCompensationCalculator
                 RoundNonNegative(portfolioWithdrawals),
                 RoundNonNegative(totalIncome),
                 RoundNonNegative(expenses),
-                Round(surplus),
+                RoundSigned(surplus),
                 withdrawals,
                 accountBalances,
                 incomeBySource,
@@ -152,7 +156,9 @@ public static class DeferredCompensationCalculator
 
         var retirementProjection = projections.FirstOrDefault(point => point.Age == retirementAge) ?? projections[0];
         var retirementProjections = projections.Where(point => point.Age >= retirementAge).ToArray();
-        var firstShortfallIndex = Array.FindIndex(retirementProjections, point => point.Surplus < 0);
+        var firstShortfallIndex = Array.FindIndex(
+            retirementProjections,
+            point => IsShortfall(exactSurplusByAge.GetValueOrDefault(point.Age)));
 
         return new DeferredCompensationResult(
             projections,
@@ -162,7 +168,7 @@ public static class DeferredCompensationCalculator
             retirementProjection.Surplus,
             projections[^1].TotalBalance,
             firstShortfallIndex < 0 ? retirementProjections.Length : firstShortfallIndex,
-            retirementProjections.Count(point => point.Surplus >= 0),
+            retirementProjections.Count(point => !IsShortfall(exactSurplusByAge.GetValueOrDefault(point.Age))),
             firstShortfallIndex < 0 ? null : retirementProjections[firstShortfallIndex].Age,
             retirementProjections.Length);
     }
@@ -190,8 +196,54 @@ public static class DeferredCompensationCalculator
         return Math.Round(Math.Max(0, value), MidpointRounding.AwayFromZero);
     }
 
-    private static double Round(double value)
+    /// <summary>
+    /// Rounds a value that is allowed to be negative, for display only.
+    ///
+    /// <para><c>Surplus</c> is the one field <see cref="RoundNonNegative"/> cannot serve, because
+    /// clamping at zero would hide every shortfall. The web mirror previously paired this with bare
+    /// <c>Math.round</c>, which rounds half toward +Infinity, so <c>Math.round(-2.5)</c> was <c>-2</c>
+    /// against this side's <c>-3</c>. That pairing was issue #63; both platforms now round signed
+    /// money away from zero.</para>
+    ///
+    /// <para>The <c>+ 0d</c> normalizes negative zero to positive zero.
+    /// <c>Math.Round(-0.4, MidpointRounding.AwayFromZero)</c> is <c>-0.0</c>, which
+    /// <c>ToString("C0")</c> renders as <c>-$0</c> — a negative surplus displayed for a year that is
+    /// not short. IEEE 754 gives <c>-0.0 + 0.0 == +0.0</c> while leaving every other value — including
+    /// <c>NaN</c> and both infinities — untouched, so the web mirror applies the identical
+    /// <c>+ 0</c>.</para>
+    /// </summary>
+    private static double RoundSigned(double value)
     {
-        return Math.Round(value, MidpointRounding.AwayFromZero);
+        return Math.Round(value, MidpointRounding.AwayFromZero) + 0d;
+    }
+
+    /// <summary>
+    /// Half of the whole-dollar unit the surplus is displayed in.
+    ///
+    /// <para>The funded/shortfall verdict is a tolerance question, not an exact comparison:
+    /// <c>surplus</c> is <c>totalIncome - expenses</c>, and both operands accumulate floating-point
+    /// error over as many as sixty compounding steps, so a bare <c>surplus &lt; 0</c> would report a
+    /// shortfall for a residue of a millionth of a cent. Half a dollar sits roughly thirteen orders of
+    /// magnitude above that residue at realistic balances.</para>
+    ///
+    /// <para>It is exactly half a display unit for a second reason: <c>exact &lt;= -0.5</c> is
+    /// equivalent to <c>RoundSigned(exact) &lt; 0</c> for every double, so the figure shown to the user
+    /// and the verdict about it can never contradict each other.</para>
+    /// </summary>
+    private const double ShortfallTolerance = 0.5;
+
+    /// <summary>
+    /// Decides whether a year is short, from the UNROUNDED surplus.
+    ///
+    /// <para>Reading the rounded field instead is what made issue #63 severe. The web mirror's
+    /// <c>Math.round(-0.5)</c> is <c>-0</c> and <c>-0 &lt; 0</c> is <c>false</c>, so it reported a
+    /// fifty-cent shortfall as a fully funded year while this side — rounding to <c>-1</c> — reported
+    /// failure at the first retirement age, from identical inputs. Keeping the verdict on the exact
+    /// value means no display rounding rule can move a headline again, and a negative zero can never
+    /// enter the comparison.</para>
+    /// </summary>
+    private static bool IsShortfall(double exactSurplus)
+    {
+        return exactSurplus <= -ShortfallTolerance;
     }
 }
