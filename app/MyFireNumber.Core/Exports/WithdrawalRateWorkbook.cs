@@ -1,3 +1,4 @@
+using System;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -50,7 +51,7 @@ public static class WithdrawalRateWorkbook
             new(CreateTextCell("A6", "Withdrawal rate"), CreateNumberCell("B6", draft.WithdrawalRate, PercentageStyleIndex)),
             new(CreateTextCell("A7", "Expected return"), CreateNumberCell("B7", draft.ExpectedReturn, PercentageStyleIndex)),
             new(CreateTextCell("A8", "Inflation rate"), CreateNumberCell("B8", draft.InflationRate, PercentageStyleIndex)),
-            new(CreateTextCell("A9", "Retirement duration"), CreateNumberCell("B9", draft.RetirementYears, IntegerStyleIndex))
+            new(CreateTextCell("A9", "Retirement duration"), CreateNumberCell("B9", draft.RetirementYears, IntegerFormat.Grouped))
         };
 
         AddWorksheet(workbookPart, sheets, "Inputs", 1, rows, 32, 20);
@@ -136,6 +137,21 @@ public static class WithdrawalRateWorkbook
 
     // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
     // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
+    // This overload exists solely to be un-callable. Without it, CreateNumberCell("B5", someInt,
+    // DecimalStyleIndex) would bind to the (double, uint) overload via int->double widening and
+    // silently reintroduce #69. Making the (int, uint) shape a compile error (error: true) forces
+    // every integer cell through the IntegerFormat overload, so an int can never carry a fractional
+    // format. This is what makes the guarantee hold at compile time rather than merely by convention.
+    [Obsolete("An int cell must use IntegerFormat, never a raw style index (issue #69).", error: true)]
+    private static Cell CreateNumberCell(string reference, int value, uint styleIndex) =>
+        throw new InvalidOperationException();
+
+    // Integer cells route through IntegerFormat, never a raw style index, so an int can never be
+    // written with the fractional DecimalStyleIndex (issue #69). Overload resolution prefers this
+    // exact-type method over widening the int to the double overload.
+    private static Cell CreateNumberCell(string reference, int value, IntegerFormat format) =>
+        CreateNumberCell(reference, (double)value, WorkbookStyles.StyleIndexFor(format));
+
     private static Cell CreateNumberCell(string reference, double value, uint styleIndex) => double.IsFinite(value)
         ? new() { CellReference = reference, StyleIndex = styleIndex, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) }
         : CreateTextCell(reference, WorkbookValues.Unreachable);

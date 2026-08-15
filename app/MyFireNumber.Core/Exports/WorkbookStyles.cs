@@ -62,4 +62,36 @@ public static class WorkbookStyles
                 new CellFormat { NumberFormatId = 167U, ApplyNumberFormat = true },
                 new CellFormat { NumberFormatId = 168U, ApplyNumberFormat = true }));
     }
+
+    /// <summary>
+    /// Resolves the style index for an integer cell. The only inputs are the two integer formats, so an
+    /// <c>int</c> routed through this helper can never land on <see cref="DecimalStyleIndex"/>.
+    ///
+    /// On its own the enum makes the correct call the easy one but not the only one: because <c>int</c>
+    /// widens implicitly to <c>double</c>, a raw <c>CreateNumberCell(reference, someInt, DecimalStyleIndex)</c>
+    /// would otherwise bind to the <c>(double, uint)</c> overload and silently reintroduce #69. Each
+    /// exporter therefore also declares an <c>[Obsolete(error: true)]</c> <c>(int, uint)</c> overload whose
+    /// sole purpose is to be un-callable, turning that shape into a compile error. Enum plus poison
+    /// overload together make the defect genuinely unrepresentable at compile time, not merely unlikely.
+    /// </summary>
+    public static uint StyleIndexFor(IntegerFormat format) => format switch
+    {
+        IntegerFormat.Plain => PlainIntegerStyleIndex,
+        IntegerFormat.Grouped => IntegerStyleIndex,
+        _ => throw new ArgumentOutOfRangeException(nameof(format))
+    };
+}
+
+/// <summary>
+/// How a whole-number (<c>int</c>) cell should render. There is deliberately no "decimal" member: an
+/// <c>int</c> must never carry a fractional format (issue #69), and forcing every integer cell through
+/// this enum makes that mistake impossible to express at a call site.
+/// </summary>
+public enum IntegerFormat
+{
+    /// <summary><c>0</c> — an identifier or small count (a calendar year or an age); no separator.</summary>
+    Plain,
+
+    /// <summary><c>#,##0</c> — a magnitude where a thousands separator can help (a month or year count).</summary>
+    Grouped
 }

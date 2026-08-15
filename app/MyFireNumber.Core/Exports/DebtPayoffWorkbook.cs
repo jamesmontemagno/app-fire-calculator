@@ -1,3 +1,4 @@
+using System;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -49,7 +50,7 @@ public static class DebtPayoffWorkbook
             new Row(CreateTextCell("A6", "Strategy"), CreateTextCell("B6", draft.Strategy.ToString())),
             new Row(CreateTextCell("A7", "Monthly budget"), CreateNumberCell("B7", draft.MonthlyBudget, CurrencyStyleIndex)),
             new Row(CreateTextCell("A8", "Extra payment"), CreateNumberCell("B8", draft.ExtraPayment, CurrencyStyleIndex)),
-            new Row(CreateTextCell("A9", "Target months"), CreateNumberCell("B9", draft.TargetMonths, IntegerStyleIndex))
+            new Row(CreateTextCell("A9", "Target months"), CreateNumberCell("B9", draft.TargetMonths, IntegerFormat.Grouped))
         ], 28, 20);
     }
 
@@ -60,7 +61,7 @@ public static class DebtPayoffWorkbook
             new Row(CreateTextCell("A1", "Debt Payoff Results")),
             new Row(CreateTextCell("A2", "Generated UTC"), CreateTextCell("B2", generatedAt.UtcDateTime.ToString("O", CultureInfo.InvariantCulture))),
             new Row(CreateTextCell("A4", "Result"), CreateTextCell("B4", "Value")),
-            new Row(CreateTextCell("A5", "Total months"), CreateNumberCell("B5", result.TotalMonths, IntegerStyleIndex)),
+            new Row(CreateTextCell("A5", "Total months"), CreateNumberCell("B5", result.TotalMonths, IntegerFormat.Grouped)),
             new Row(CreateTextCell("A6", "Total interest"), CreateNumberCell("B6", result.TotalInterest, CurrencyStyleIndex)),
             new Row(CreateTextCell("A7", "Total principal"), CreateNumberCell("B7", result.TotalPrincipal, CurrencyStyleIndex)),
             new Row(CreateTextCell("A8", "Monthly payment"), CreateNumberCell("B8", result.MonthlyPayment, CurrencyStyleIndex)),
@@ -92,7 +93,7 @@ public static class DebtPayoffWorkbook
         foreach (var point in projections)
         {
             var row = point.Month + 1;
-            rows.Add(new Row(CreateNumberCell($"A{row}", point.Month, IntegerStyleIndex), CreateNumberCell($"B{row}", point.TotalBalance, CurrencyStyleIndex), CreateNumberCell($"C{row}", point.PrincipalPaid, CurrencyStyleIndex), CreateNumberCell($"D{row}", point.InterestPaid, CurrencyStyleIndex), CreateNumberCell($"E{row}", point.CumulativeInterest, CurrencyStyleIndex)));
+            rows.Add(new Row(CreateNumberCell($"A{row}", point.Month, IntegerFormat.Grouped), CreateNumberCell($"B{row}", point.TotalBalance, CurrencyStyleIndex), CreateNumberCell($"C{row}", point.PrincipalPaid, CurrencyStyleIndex), CreateNumberCell($"D{row}", point.InterestPaid, CurrencyStyleIndex), CreateNumberCell($"E{row}", point.CumulativeInterest, CurrencyStyleIndex)));
         }
         AddWorksheet(workbookPart, sheets, "Payoff Projection", 4, rows, 12, 20, 20, 20, 22);
     }
@@ -108,6 +109,21 @@ public static class DebtPayoffWorkbook
     private static Cell CreateTextCell(string reference, string value) => new() { CellReference = reference, DataType = CellValues.InlineString, InlineString = new InlineString(new Text(value)) };
     // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
     // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
+    // This overload exists solely to be un-callable. Without it, CreateNumberCell("B5", someInt,
+    // DecimalStyleIndex) would bind to the (double, uint) overload via int->double widening and
+    // silently reintroduce #69. Making the (int, uint) shape a compile error (error: true) forces
+    // every integer cell through the IntegerFormat overload, so an int can never carry a fractional
+    // format. This is what makes the guarantee hold at compile time rather than merely by convention.
+    [Obsolete("An int cell must use IntegerFormat, never a raw style index (issue #69).", error: true)]
+    private static Cell CreateNumberCell(string reference, int value, uint styleIndex) =>
+        throw new InvalidOperationException();
+
+    // Integer cells route through IntegerFormat, never a raw style index, so an int can never be
+    // written with the fractional DecimalStyleIndex (issue #69). Overload resolution prefers this
+    // exact-type method over widening the int to the double overload.
+    private static Cell CreateNumberCell(string reference, int value, IntegerFormat format) =>
+        CreateNumberCell(reference, (double)value, WorkbookStyles.StyleIndexFor(format));
+
     private static Cell CreateNumberCell(string reference, double value, uint styleIndex) => double.IsFinite(value)
         ? new() { CellReference = reference, StyleIndex = styleIndex, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) }
         : CreateTextCell(reference, WorkbookValues.Unreachable);

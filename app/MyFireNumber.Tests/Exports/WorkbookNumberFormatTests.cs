@@ -40,6 +40,11 @@ public sealed class WorkbookNumberFormatTests : IDisposable
         var result = FinancialCalculator.CalculateStandardFire(draft.ToFireInputs(2026));
         StandardFireWorkbook.Create(workbookPath, draft, result, GeneratedAt);
 
+        // Draft ages on the Inputs sheet are int and were the omission the reviewer caught (#69) — they
+        // must be plain integers, not "45.0".
+        Assert.Equal("0", ResolveFormat(0, "B5"));      // StandardFireDraft.CurrentAge (int)
+        Assert.Equal("0", ResolveFormat(0, "B6"));      // StandardFireDraft.RetirementAge (int)
+
         // A calendar year must have no thousands separator, or 2026 renders as "2,026".
         Assert.Equal("0", ResolveFormat(2, "B2"));      // ProjectionPoint.Year (int) -> "0"
         Assert.Equal("2026", ReadCellValue(2, "B2"));
@@ -49,6 +54,27 @@ public sealed class WorkbookNumberFormatTests : IDisposable
         Assert.Equal("0.0", ResolveFormat(1, "B6"));    // YearsToFire (double)
         // RetirementGoalAssessment.TargetRetirementAge is double, not int, so it stays decimal.
         Assert.Equal("0.0", ResolveFormat(1, "B11"));
+    }
+
+    [Fact]
+    public void BaristaFire_DraftAgeIsPlainInteger()
+    {
+        var draft = BaristaFireDraft.Default;
+        var result = FinancialCalculator.CalculateBaristaFire(draft.ToFireInputs(2026), draft.PartTimeAnnualIncome);
+        BaristaFireWorkbook.Create(workbookPath, draft, result, GeneratedAt);
+
+        Assert.Equal("0", ResolveFormat(0, "B5"));      // BaristaFireDraft.CurrentAge (int)
+    }
+
+    [Fact]
+    public void CoastFire_DraftAgesArePlainIntegers()
+    {
+        var draft = CoastFireDraft.Default;
+        var result = FinancialCalculator.CalculateCoastFire(draft.ToFireInputs(2026));
+        CoastFireWorkbook.Create(workbookPath, draft, result, GeneratedAt);
+
+        Assert.Equal("0", ResolveFormat(0, "B5"));      // CoastFireDraft.CurrentAge (int)
+        Assert.Equal("0", ResolveFormat(0, "B6"));      // CoastFireDraft.RetirementAge (int)
     }
 
     [Fact]

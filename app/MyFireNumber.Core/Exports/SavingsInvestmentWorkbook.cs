@@ -1,3 +1,4 @@
+using System;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -47,11 +48,11 @@ public static class SavingsInvestmentWorkbook
             new(CreateTextCell("A5", "Starting amount"), CreateNumberCell("B5", draft.StartingAmount, CurrencyStyleIndex)),
             new(CreateTextCell("A6", "Contribution amount"), CreateNumberCell("B6", draft.ContributionAmount, CurrencyStyleIndex)),
             new(CreateTextCell("A7", "Contribution frequency"), CreateTextCell("B7", draft.ContributionFrequency.ToString())),
-            new(CreateTextCell("A8", "Years investing"), CreateNumberCell("B8", draft.YearsInvesting, IntegerStyleIndex)),
+            new(CreateTextCell("A8", "Years investing"), CreateNumberCell("B8", draft.YearsInvesting, IntegerFormat.Grouped)),
             new(CreateTextCell("A9", "Expected return"), CreateNumberCell("B9", draft.ExpectedReturn, PercentageStyleIndex)),
             new(CreateTextCell("A10", "Inflation rate"), CreateNumberCell("B10", draft.InflationRate, PercentageStyleIndex)),
             new(CreateTextCell("A11", "Annual take-home income (after tax)"), CreateNumberCell("B11", draft.AnnualIncome, CurrencyStyleIndex)),
-            new(CreateTextCell("A12", "Current age"), CreateNumberCell("B12", draft.CurrentAge, PlainIntegerStyleIndex))
+            new(CreateTextCell("A12", "Current age"), CreateNumberCell("B12", draft.CurrentAge, IntegerFormat.Plain))
         };
         AddWorksheet(workbookPart, sheets, "Inputs", 1, rows, 32, 20);
     }
@@ -88,9 +89,9 @@ public static class SavingsInvestmentWorkbook
             {
                 rows.Add(new Row(
                     CreateNumberCell($"A{rowNumber}", point.Age, DecimalStyleIndex),
-                    CreateNumberCell($"B{rowNumber}", point.Year, PlainIntegerStyleIndex),
+                    CreateNumberCell($"B{rowNumber}", point.Year, IntegerFormat.Plain),
                     CreateNumberCell($"C{rowNumber}", point.Portfolio, CurrencyStyleIndex),
-                    CreateNumberCell($"D{rowNumber}", 0, CurrencyStyleIndex),
+                    CreateNumberCell($"D{rowNumber}", 0d, CurrencyStyleIndex),
                     CreateNumberCell($"E{rowNumber}", point.TotalContributions, CurrencyStyleIndex),
                     CreateNumberCell($"F{rowNumber}", point.InflationAdjusted, CurrencyStyleIndex)));
                 continue;
@@ -99,7 +100,7 @@ public static class SavingsInvestmentWorkbook
             var previousRowNumber = rowNumber - 1;
             rows.Add(new Row(
                 CreateNumberCell($"A{rowNumber}", point.Age, DecimalStyleIndex),
-                CreateNumberCell($"B{rowNumber}", point.Year, PlainIntegerStyleIndex),
+                CreateNumberCell($"B{rowNumber}", point.Year, IntegerFormat.Plain),
                 CreateFormulaCell($"C{rowNumber}", $"C{previousRowNumber}*(1+Inputs!$B$9)+D{rowNumber}", CurrencyStyleIndex),
                 CreateFormulaCell($"D{rowNumber}", "Results!B5", CurrencyStyleIndex),
                 CreateFormulaCell($"E{rowNumber}", $"E{previousRowNumber}+D{rowNumber}", CurrencyStyleIndex),
@@ -120,6 +121,21 @@ public static class SavingsInvestmentWorkbook
 
     // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
     // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
+    // This overload exists solely to be un-callable. Without it, CreateNumberCell("B5", someInt,
+    // DecimalStyleIndex) would bind to the (double, uint) overload via int->double widening and
+    // silently reintroduce #69. Making the (int, uint) shape a compile error (error: true) forces
+    // every integer cell through the IntegerFormat overload, so an int can never carry a fractional
+    // format. This is what makes the guarantee hold at compile time rather than merely by convention.
+    [Obsolete("An int cell must use IntegerFormat, never a raw style index (issue #69).", error: true)]
+    private static Cell CreateNumberCell(string reference, int value, uint styleIndex) =>
+        throw new InvalidOperationException();
+
+    // Integer cells route through IntegerFormat, never a raw style index, so an int can never be
+    // written with the fractional DecimalStyleIndex (issue #69). Overload resolution prefers this
+    // exact-type method over widening the int to the double overload.
+    private static Cell CreateNumberCell(string reference, int value, IntegerFormat format) =>
+        CreateNumberCell(reference, (double)value, WorkbookStyles.StyleIndexFor(format));
+
     private static Cell CreateNumberCell(string reference, double value, uint styleIndex) => double.IsFinite(value)
         ? new() { CellReference = reference, StyleIndex = styleIndex, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) }
         : CreateTextCell(reference, WorkbookValues.Unreachable);

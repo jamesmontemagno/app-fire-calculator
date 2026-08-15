@@ -1,3 +1,4 @@
+using System;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -44,9 +45,9 @@ public static class HealthcareGapWorkbook
             new(CreateTextCell("A1", "Healthcare Gap Inputs")),
             new(CreateTextCell("A2", "Generated UTC"), CreateTextCell("B2", generatedAt.UtcDateTime.ToString("O", CultureInfo.InvariantCulture))),
             new(CreateTextCell("A4", "Input"), CreateTextCell("B4", "Value")),
-            new(CreateTextCell("A5", "Current age"), CreateNumberCell("B5", draft.CurrentAge, PlainIntegerStyleIndex)),
-            new(CreateTextCell("A6", "Early retirement age"), CreateNumberCell("B6", draft.EarlyRetirementAge, PlainIntegerStyleIndex)),
-            new(CreateTextCell("A7", "Medicare age"), CreateNumberCell("B7", draft.MedicareAge, PlainIntegerStyleIndex)),
+            new(CreateTextCell("A5", "Current age"), CreateNumberCell("B5", draft.CurrentAge, IntegerFormat.Plain)),
+            new(CreateTextCell("A6", "Early retirement age"), CreateNumberCell("B6", draft.EarlyRetirementAge, IntegerFormat.Plain)),
+            new(CreateTextCell("A7", "Medicare age"), CreateNumberCell("B7", draft.MedicareAge, IntegerFormat.Plain)),
             new(CreateTextCell("A8", "Monthly premium"), CreateNumberCell("B8", draft.MonthlyPremium, CurrencyStyleIndex)),
             new(CreateTextCell("A9", "Annual deductible"), CreateNumberCell("B9", draft.AnnualDeductible, CurrencyStyleIndex)),
             new(CreateTextCell("A10", "Annual out-of-pocket"), CreateNumberCell("B10", draft.AnnualOutOfPocket, CurrencyStyleIndex)),
@@ -81,8 +82,8 @@ public static class HealthcareGapWorkbook
             var rowNumber = index + 2;
             var year = years[index];
             rows.Add(new Row(
-                CreateNumberCell($"A{rowNumber}", year.Age, PlainIntegerStyleIndex),
-                CreateNumberCell($"B{rowNumber}", year.Year, PlainIntegerStyleIndex),
+                CreateNumberCell($"A{rowNumber}", year.Age, IntegerFormat.Plain),
+                CreateNumberCell($"B{rowNumber}", year.Year, IntegerFormat.Plain),
                 CreateFormulaCell($"C{rowNumber}", $"D{rowNumber}+E{rowNumber}+F{rowNumber}", CurrencyStyleIndex),
                 CreateFormulaCell($"D{rowNumber}", $"Inputs!$B$8*12*((1+Inputs!$B$11)^(A{rowNumber}-Inputs!$B$6))", CurrencyStyleIndex),
                 CreateFormulaCell($"E{rowNumber}", $"Inputs!$B$9*((1+Inputs!$B$11)^(A{rowNumber}-Inputs!$B$6))", CurrencyStyleIndex),
@@ -103,6 +104,21 @@ public static class HealthcareGapWorkbook
 
     // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
     // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
+    // This overload exists solely to be un-callable. Without it, CreateNumberCell("B5", someInt,
+    // DecimalStyleIndex) would bind to the (double, uint) overload via int->double widening and
+    // silently reintroduce #69. Making the (int, uint) shape a compile error (error: true) forces
+    // every integer cell through the IntegerFormat overload, so an int can never carry a fractional
+    // format. This is what makes the guarantee hold at compile time rather than merely by convention.
+    [Obsolete("An int cell must use IntegerFormat, never a raw style index (issue #69).", error: true)]
+    private static Cell CreateNumberCell(string reference, int value, uint styleIndex) =>
+        throw new InvalidOperationException();
+
+    // Integer cells route through IntegerFormat, never a raw style index, so an int can never be
+    // written with the fractional DecimalStyleIndex (issue #69). Overload resolution prefers this
+    // exact-type method over widening the int to the double overload.
+    private static Cell CreateNumberCell(string reference, int value, IntegerFormat format) =>
+        CreateNumberCell(reference, (double)value, WorkbookStyles.StyleIndexFor(format));
+
     private static Cell CreateNumberCell(string reference, double value, uint styleIndex) => double.IsFinite(value)
         ? new() { CellReference = reference, StyleIndex = styleIndex, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) }
         : CreateTextCell(reference, WorkbookValues.Unreachable);
