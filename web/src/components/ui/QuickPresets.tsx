@@ -1,6 +1,9 @@
+import type { LucideIcon } from 'lucide-react'
+import { Gauge, Rabbit, Rocket, Gem, Zap } from 'lucide-react'
+
 interface Preset {
   name: string
-  icon: string
+  icon: LucideIcon
   description: string
   values: Record<string, number>
 }
@@ -13,7 +16,7 @@ interface QuickPresetsProps {
 const defaultPresets: Preset[] = [
   {
     name: 'Conservative',
-    icon: '🐢',
+    icon: Gauge,
     description: '15% savings rate, 6% return',
     values: {
       currentAge: 30,
@@ -28,7 +31,7 @@ const defaultPresets: Preset[] = [
   },
   {
     name: 'Moderate',
-    icon: '🏃',
+    icon: Rabbit,
     description: '25% savings rate, 7% return',
     values: {
       currentAge: 30,
@@ -43,7 +46,7 @@ const defaultPresets: Preset[] = [
   },
   {
     name: 'Aggressive',
-    icon: '🚀',
+    icon: Rocket,
     description: '50% savings rate, 7% return',
     values: {
       currentAge: 30,
@@ -58,7 +61,7 @@ const defaultPresets: Preset[] = [
   },
   {
     name: 'Fat FIRE',
-    icon: '💎',
+    icon: Gem,
     description: 'High income, high expenses',
     values: {
       currentAge: 35,
@@ -75,26 +78,30 @@ const defaultPresets: Preset[] = [
 
 export default function QuickPresets({ onApply, presets = defaultPresets }: QuickPresetsProps) {
   return (
-    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4">
-      <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center gap-2">
-        ⚡ Quick Presets
+    <div className="bg-surface-sunken rounded-container p-4">
+      <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold text-content-muted">
+        <Zap className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
+        Quick Presets
       </h3>
       <div className="flex flex-wrap gap-2">
-        {presets.map((preset) => (
+        {presets.map((preset) => {
+          const Icon = preset.icon
+          return (
           <button
             key={preset.name}
             onClick={() => onApply(preset.values)}
-            className="group flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-fire-400 dark:hover:border-fire-500 hover:shadow-sm transition-all text-left"
+            className="group flex items-center gap-2 rounded-control border border-border-subtle bg-surface-raised px-3 py-2 text-left transition-colors duration-150 hover:border-accent motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
-            <span className="text-lg">{preset.icon}</span>
+            <Icon className="h-4 w-4 shrink-0 text-content-subtle group-hover:text-accent" aria-hidden="true" strokeWidth={1.5} />
             <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-fire-600 dark:group-hover:text-fire-400">
+              <p className="text-sm font-medium text-content group-hover:text-accent">
                 {preset.name}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">{preset.description}</p>
+              <p className="text-xs text-content-subtle">{preset.description}</p>
             </div>
           </button>
-        ))}
+          )
+        })}
       </div>
     </div>
   )

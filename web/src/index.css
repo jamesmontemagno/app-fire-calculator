@@ -6,19 +6,169 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-@theme {
+/*
+ * Semantic token layer.
+ *
+ * `@theme inline` is required, not stylistic: a plain `@theme` block resolves each
+ * var to its literal value at build time, so the `.dark` override below would never
+ * be read. With `inline`, `bg-surface` compiles to `var(--app-surface)` and the
+ * theme flip happens in the cascade, which is why no `dark:` variant is needed on
+ * any token utility.
+ */
+@theme inline {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  
-  --color-fire-50: #fff7ed;
-  --color-fire-100: #ffedd5;
-  --color-fire-200: #fed7aa;
-  --color-fire-300: #fdba74;
-  --color-fire-400: #fb923c;
-  --color-fire-500: #f97316;
-  --color-fire-600: #ea580c;
-  --color-fire-700: #c2410c;
-  --color-fire-800: #9a3412;
-  --color-fire-900: #7c2d12;
+
+  --color-surface: var(--app-surface);
+  --color-surface-raised: var(--app-surface-raised);
+  --color-surface-sunken: var(--app-surface-sunken);
+
+  --color-border-subtle: var(--app-border-subtle);
+  --color-border-strong: var(--app-border-strong);
+
+  --color-content: var(--app-content);
+  --color-content-muted: var(--app-content-muted);
+  --color-content-subtle: var(--app-content-subtle);
+
+  --color-accent: var(--app-accent);
+  --color-accent-hover: var(--app-accent-hover);
+  --color-accent-contrast: var(--app-accent-contrast);
+  --color-accent-subtle: var(--app-accent-subtle);
+  --color-accent-subtle-hover: var(--app-accent-subtle-hover);
+  --color-ring: var(--app-ring);
+
+  --color-success: var(--app-success);
+  --color-success-subtle: var(--app-success-subtle);
+  --color-warning: var(--app-warning);
+  --color-warning-subtle: var(--app-warning-subtle);
+  --color-danger: var(--app-danger);
+  --color-danger-subtle: var(--app-danger-subtle);
+  --color-info: var(--app-info);
+  --color-info-subtle: var(--app-info-subtle);
+
+  /* Calculator identity. One fixed lightness and chroma, hue alone varies, so the
+     twelve read as one family. Used on the icon glyph only - never on borders,
+     backgrounds or cards. Every value clears 3:1 on both surfaces in both themes. */
+  --color-calc-debt: var(--app-calc-debt);
+  --color-calc-standard: var(--app-calc-standard);
+  --color-calc-barista: var(--app-calc-barista);
+  --color-calc-quiz: var(--app-calc-quiz);
+  --color-calc-lean: var(--app-calc-lean);
+  --color-calc-cashflow: var(--app-calc-cashflow);
+  --color-calc-reverse: var(--app-calc-reverse);
+  --color-calc-coast: var(--app-calc-coast);
+  --color-calc-withdrawal: var(--app-calc-withdrawal);
+  --color-calc-savings: var(--app-calc-savings);
+  --color-calc-fat: var(--app-calc-fat);
+  --color-calc-healthcare: var(--app-calc-healthcare);
+
+  /* Three radii, not five: controls, containers, pills. */
+  --radius-control: 0.375rem;
+  --radius-container: 0.75rem;
+}
+
+/* Ember ramp, re-anchored onto a single hue so the accent is AA-safe as both a
+   button background and as body-size text. The previous fire-500 gave 2.80:1
+   under white, which failed AA. */
+@theme {
+  --color-fire-50: #fef3ef;
+  --color-fire-100: #ffe4d9;
+  --color-fire-200: #fdcab6;
+  --color-fire-300: #faa685;
+  --color-fire-400: #fc8b5d;
+  --color-fire-500: #fd6e2d;
+  --color-fire-600: #e65d19;
+  --color-fire-700: #b54100;
+  --color-fire-800: #9e3e0e;
+  --color-fire-900: #7b2f0b;
+  --color-fire-950: #4f1b04;
+}
+
+:root {
+  color-scheme: light;
+
+  --app-surface: #fbfaf9;
+  --app-surface-raised: #ffffff;
+  --app-surface-sunken: #f4f2f0;
+
+  --app-border-subtle: #e3e1df;
+  --app-border-strong: #837f7a;
+
+  --app-content: #252220;
+  --app-content-muted: #66635e;
+  --app-content-subtle: #706d68;
+
+  --app-accent: #b54100;
+  --app-accent-hover: #9e3e0e;
+  --app-accent-contrast: #ffffff;
+  --app-accent-subtle: #fef3ef;
+  --app-accent-subtle-hover: #ffe4d9;
+  --app-ring: #e65d19;
+
+  --app-success: #1d7d3e;
+  --app-success-subtle: #eaf6ed;
+  --app-warning: #976200;
+  --app-warning-subtle: #fdf3e3;
+  --app-danger: #ba2b2e;
+  --app-danger-subtle: #fdeeee;
+  --app-info: #1f6cb0;
+  --app-info-subtle: #eaf2fa;
+
+  --app-calc-debt: #b24b58;
+  --app-calc-standard: #b15229;
+  --app-calc-barista: #a16100;
+  --app-calc-quiz: #7e7400;
+  --app-calc-lean: #34853b;
+  --app-calc-cashflow: #008a72;
+  --app-calc-reverse: #008697;
+  --app-calc-coast: #0079b8;
+  --app-calc-withdrawal: #506cc0;
+  --app-calc-savings: #7a5eb6;
+  --app-calc-fat: #9354a2;
+  --app-calc-healthcare: #a94c7d;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --app-surface: #0f0e0c;
+  --app-surface-raised: #1a1816;
+  --app-surface-sunken: #080706;
+
+  --app-border-subtle: #2d2a28;
+  --app-border-strong: #6f6b66;
+
+  --app-content: #f1f0ee;
+  --app-content-muted: #ada8a3;
+  --app-content-subtle: #94908b;
+
+  --app-accent: #fd6e2d;
+  --app-accent-hover: #fc8b5d;
+  --app-accent-contrast: #19130a;
+  --app-accent-subtle: #381b10;
+  --app-accent-subtle-hover: #492517;
+  --app-ring: #fc8b5d;
+
+  --app-success: #67d283;
+  --app-success-subtle: #10261a;
+  --app-warning: #f5b75b;
+  --app-warning-subtle: #2a1f0c;
+  --app-danger: #f97770;
+  --app-danger-subtle: #2c1312;
+  --app-info: #70b3f7;
+  --app-info-subtle: #10202f;
+
+  --app-calc-debt: #f68f97;
+  --app-calc-standard: #f49570;
+  --app-calc-barista: #e2a34f;
+  --app-calc-quiz: #bdb54e;
+  --app-calc-lean: #7cc67f;
+  --app-calc-cashflow: #3bcbb1;
+  --app-calc-reverse: #21c7d7;
+  --app-calc-coast: #5ebbf8;
+  --app-calc-withdrawal: #8faeff;
+  --app-calc-savings: #b8a0f7;
+  --app-calc-fat: #d496e2;
+  --app-calc-healthcare: #ec8fbc;
 }
 
 * {
@@ -27,34 +177,26 @@
 
 html {
   font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  @apply bg-gray-50 text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+  background-color: var(--app-surface);
+  color: var(--app-content);
 }
 
 #root {
   min-height: 100vh;
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-gray-100 dark:bg-gray-800;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-gray-400 dark:bg-gray-500;
+/* Financial figures are read by comparison down a column, so digits must not
+   change width as values update. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 /* Input number spinners removal */
@@ -66,4 +208,15 @@ input[type="number"]::-webkit-outer-spin-button {
 
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

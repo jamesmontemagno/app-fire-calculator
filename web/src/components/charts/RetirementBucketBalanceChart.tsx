@@ -14,22 +14,13 @@ import type {
 } from '../../utils/deferredCompensation'
 import { formatCurrency } from '../../utils/calculations'
 import { useTheme } from '../../context/ThemeContext'
+import { categorical, chartTheme } from './chartTheme'
 
 interface RetirementBucketBalanceChartProps {
   data: RetirementCashFlowPoint[]
   accounts: RetirementAccount[]
 }
 
-const COLORS = [
-  '#8b5cf6',
-  '#0ea5e9',
-  '#14b8a6',
-  '#f59e0b',
-  '#ec4899',
-  '#84cc16',
-  '#f97316',
-  '#6366f1',
-]
 
 const compactCurrency = (value: number) => {
   if (Math.abs(value) >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`
@@ -41,26 +32,27 @@ interface ChartTooltipProps {
   active?: boolean
   payload?: Array<{ payload: RetirementCashFlowPoint }>
   accounts: RetirementAccount[]
+  colors: string[]
 }
 
-function ChartTooltip({ active, payload, accounts }: ChartTooltipProps) {
+function ChartTooltip({ active, payload, accounts, colors }: ChartTooltipProps) {
   if (!active || !payload?.length) return null
   const point = payload[0].payload
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
-      <p className="font-semibold text-gray-900 dark:text-gray-100">
+    <div className="rounded-container border border-border-subtle bg-surface-raised p-3 shadow-lg">
+      <p className="font-semibold text-content">
         Age {point.age} · {point.year}
       </p>
       <div className="space-y-1 text-sm mt-2">
         {accounts.map((account, index) => (
-          <p key={account.id} className="text-gray-600 dark:text-gray-400">
+          <p key={account.id} className="text-content-muted">
             <span
               className="inline-block w-2 h-2 rounded-full mr-1.5"
-              style={{ backgroundColor: COLORS[index % COLORS.length] }}
+              style={{ backgroundColor: colors[index % colors.length] }}
             />
             {account.name || `Account ${index + 1}`}:{' '}
-            <strong className="text-gray-900 dark:text-gray-100">
+            <strong className="tabular font-medium text-content">
               {formatCurrency(point.balances[account.id] ?? 0)}
             </strong>
           </p>
@@ -76,8 +68,10 @@ export default function RetirementBucketBalanceChart({
 }: RetirementBucketBalanceChartProps) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
-  const axisColor = isDark ? '#9ca3af' : '#6b7280'
-  const gridColor = isDark ? '#374151' : '#e5e7eb'
+  const c = chartTheme(isDark)
+  const axisColor = c.axisText
+  const gridColor = c.grid
+  const colors = categorical(isDark)
   const chartData = data.map(point => ({ ...point, ...point.balances }))
 
   return (
@@ -98,7 +92,7 @@ export default function RetirementBucketBalanceChart({
           tickFormatter={compactCurrency}
           width={66}
         />
-        <Tooltip content={<ChartTooltip accounts={accounts} />} />
+        <Tooltip content={<ChartTooltip accounts={accounts} colors={colors} />} />
         <Legend wrapperStyle={{ fontSize: 12 }} />
         {accounts.map((account, index) => (
           <Line
@@ -106,7 +100,7 @@ export default function RetirementBucketBalanceChart({
             type="monotone"
             dataKey={account.id}
             name={account.name || `Account ${index + 1}`}
-            stroke={COLORS[index % COLORS.length]}
+            stroke={colors[index % colors.length]}
             strokeWidth={2}
             dot={false}
           />

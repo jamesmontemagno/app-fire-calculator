@@ -25,13 +25,13 @@ export default function PeriodToggle({
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <span className="text-xs text-gray-600 dark:text-gray-400" id={labelId}>
+      <span className="text-xs text-content-muted" id={labelId}>
         {label}
       </span>
       <div
         role="group"
         aria-labelledby={labelId}
-        className="inline-flex rounded-lg border border-gray-300 p-0.5 dark:border-gray-600"
+        className="inline-flex rounded-control border border-border-subtle bg-surface-sunken p-0.5"
       >
         {OPTIONS.map(option => {
           const isSelected = option.value === period
@@ -42,11 +42,11 @@ export default function PeriodToggle({
               aria-pressed={isSelected}
               onClick={() => setPeriod(option.value)}
               className={`
-                rounded-md px-2.5 py-1 text-xs font-medium transition-colors
-                focus:outline-none focus-visible:ring-2 focus-visible:ring-fire-500
+                rounded-control px-2.5 py-1 text-xs font-medium transition-colors
+                focus:outline-none focus-visible:ring-2 focus-visible:ring-ring
                 ${isSelected
-                  ? 'bg-fire-600 text-white dark:bg-fire-500'
-                  : 'text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700'
+                  ? 'bg-accent text-accent-contrast'
+                  : 'text-content-muted hover:text-content'
                 }
               `}
             >

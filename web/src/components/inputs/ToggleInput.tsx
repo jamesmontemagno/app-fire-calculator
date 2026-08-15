@@ -34,9 +34,8 @@ export default function ToggleInput({
           className={`
             relative mt-0.5 inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full
             transition-colors motion-reduce:transition-none
-            focus:outline-none focus-visible:ring-2 focus-visible:ring-fire-500 focus-visible:ring-offset-2
-            dark:focus-visible:ring-fire-400 dark:focus-visible:ring-offset-gray-950
-            ${checked ? 'bg-fire-600 dark:bg-fire-500' : 'bg-gray-300 dark:bg-gray-600'}
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2
+            ${checked ? 'bg-accent' : 'bg-border-strong'}
           `}
         >
           <span
@@ -51,13 +50,13 @@ export default function ToggleInput({
         <div className="min-w-0">
           <label
             htmlFor={id}
-            className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300"
+            className="flex items-center gap-1.5 text-sm font-medium text-content-muted"
           >
             {label}
             {tooltip && <Tooltip content={tooltip} />}
           </label>
           {description && (
-            <p id={descriptionId} className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <p id={descriptionId} className="mt-1 text-sm text-content-muted">
               {description}
             </p>
           )}

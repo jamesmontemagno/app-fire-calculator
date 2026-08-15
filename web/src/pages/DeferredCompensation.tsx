@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react'
 import { Fragment, useMemo, useState } from 'react'
 import {
   AgeInput,
@@ -133,11 +134,11 @@ export default function DeferredCompensation() {
       <SEO {...calculatorSEO['retirement-cash-flow']} />
       <div className="space-y-6">
         <header>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100">Retirement Cash Flow</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">
+          <h1 className="text-2xl sm:text-3xl font-bold text-content">Retirement Cash Flow</h1>
+          <p className="mt-1 text-content-muted">
             See how after-tax income offsets today-dollar retirement spending before your portfolio fills the remaining gap.
           </p>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <p className="mt-1 text-sm text-content-subtle">
             Withdrawals are shown after an estimated flat tax you set per account. Results are shown in
             future dollars for the age listed on each card.
           </p>
@@ -145,7 +146,7 @@ export default function DeferredCompensation() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your retirement scenario</h2>
+            <h2 className="text-lg font-semibold text-content">Start with your retirement scenario</h2>
             <PeriodToggle className="mt-3" />
           </CardHeader>
           <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -187,7 +188,7 @@ export default function DeferredCompensation() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Income sources</h2>
+            <h2 className="text-lg font-semibold text-content">Income sources</h2>
           </CardHeader>
           <CardContent>
             <RetirementIncomeListInput
@@ -200,7 +201,7 @@ export default function DeferredCompensation() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Accounts and withdrawal limits</h2>
+            <h2 className="text-lg font-semibold text-content">Accounts and withdrawal limits</h2>
           </CardHeader>
           <CardContent>
             <RetirementAccountListInput
@@ -214,7 +215,7 @@ export default function DeferredCompensation() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Additional expenses</h2>
+            <h2 className="text-lg font-semibold text-content">Additional expenses</h2>
           </CardHeader>
           <CardContent>
             <RetirementExpenseListInput
@@ -236,28 +237,28 @@ export default function DeferredCompensation() {
             max={0.15}
           />
           <div className="space-y-4">
-            <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+            <label className="flex items-start gap-2 text-sm text-content-muted">
               <input
                 type="checkbox"
                 checked={params.withdrawOnlyAfterRetirement}
                 onChange={event => setParam('withdrawOnlyAfterRetirement', event.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus:ring-fire-500"
+                className="mt-0.5 h-4 w-4 rounded border-border-strong text-accent focus-visible:ring-ring"
               />
               <span>
                 <span className="font-medium">Wait until retirement to withdraw</span>
-                <span className="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">Leave this off to let accounts cover a gap as soon as each is available.</span>
+                <span className="mt-0.5 block text-xs text-content-subtle">Leave this off to let accounts cover a gap as soon as each is available.</span>
               </span>
             </label>
-            <label className="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+            <label className="flex items-start gap-2 text-sm text-content-muted">
               <input
                 type="checkbox"
                 checked={params.reinvestSurplus}
                 onChange={event => setParam('reinvestSurplus', event.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus:ring-fire-500"
+                className="mt-0.5 h-4 w-4 rounded border-border-strong text-accent focus-visible:ring-ring"
               />
               <span>
                 <span className="font-medium">Reinvest income surplus</span>
-                <span className="mt-0.5 block text-xs text-gray-500 dark:text-gray-400">Add income above spending back into accounts proportionally.</span>
+                <span className="mt-0.5 block text-xs text-content-subtle">Add income above spending back into accounts proportionally.</span>
               </span>
             </label>
           </div>
@@ -265,8 +266,8 @@ export default function DeferredCompensation() {
 
         <section aria-labelledby="cash-flow-outlook-heading" className="space-y-4">
           <div>
-            <h2 id="cash-flow-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Results update from the scenario, income sources, accounts, and additional spending above.</p>
+            <h2 id="cash-flow-outlook-heading" className="text-xl font-semibold text-content">Your outlook</h2>
+            <p className="mt-1 text-sm text-content-muted">Results update from the scenario, income sources, accounts, and additional spending above.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
             <ResultCard
@@ -305,7 +306,7 @@ export default function DeferredCompensation() {
             />
           </div>
           {firstPolicyExcessPoint && (
-            <p className="text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
+            <p className="text-sm text-warning bg-warning-subtle border border-warning/30 rounded-control p-3">
               To stay funded, this plan withdraws more than your withdrawal-rate limits allow in{' '}
               {policyExcessPoints.length} of {results.retirementYears} retirement years, starting at age{' '}
               {firstPolicyExcessPoint.age} — {formatCurrency(firstPolicyExcessPoint.policyExcessWithdrawals)} above
@@ -319,8 +320,8 @@ export default function DeferredCompensation() {
           <Card>
             <CardHeader>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Retirement cash flow</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <h2 className="text-lg font-semibold text-content">Retirement cash flow</h2>
+                <p className="text-sm text-content-subtle mt-1">
                   Compare income, spending, gap withdrawals, and portfolio value in one view.
                 </p>
               </div>
@@ -332,7 +333,7 @@ export default function DeferredCompensation() {
 
           <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Bucket balances over time</h2>
+              <h2 className="text-lg font-semibold text-content">Bucket balances over time</h2>
             </CardHeader>
             <CardContent>
               <RetirementBucketBalanceChart data={results.projections} accounts={params.accounts} />
@@ -342,16 +343,17 @@ export default function DeferredCompensation() {
 
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Annual cash-flow detail</h2>
+            <h2 className="text-lg font-semibold text-content">Annual cash-flow detail</h2>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <tr className="border-b border-border-subtle">
                     {['Age / year', 'Income & required payouts (after tax)', 'Gap withdrawals (after tax)', 'Expenses', 'Surplus / gap', 'Portfolio'].map(label => (
-                      <th key={label} className="text-left py-3 px-3 font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap">{label}</th>
-                    ))}                  </tr>
+                      <th key={label} className="text-left py-3 px-3 font-semibold text-content whitespace-nowrap">{label}</th>
+                    ))}
+                  </tr>
                 </thead>
                 <tbody>
                   {results.projections.map(point => {
@@ -361,19 +363,17 @@ export default function DeferredCompensation() {
                     const activeAdditionalExpenses = Object.entries(point.expensesByItem).filter(([, amount]) => amount > 0)
                     return (
                       <Fragment key={point.age}>
-                        <tr className="border-b border-gray-100 dark:border-gray-800">
-                          <td className="py-3 px-3 text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                        <tr className="border-b border-border-subtle">
+                          <td className="py-3 px-3 text-content whitespace-nowrap">
                             <button
                               type="button"
                               onClick={() => toggleAnnualDetail(point.age)}
-                              className="inline-flex items-center gap-2 text-left hover:text-fire-600 dark:hover:text-fire-400"
+                              className="inline-flex items-center gap-2 text-left hover:text-accent"
                               aria-expanded={expanded}
                               aria-label={`${expanded ? 'Hide' : 'Show'} income and withdrawals for age ${point.age}`}
                             >
-                              <svg className={`w-4 h-4 text-gray-500 transition-transform ${expanded ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                              <span>{point.age} <span className="text-gray-500">/ {point.year}</span></span>
+                              <ChevronRight className={`h-4 w-4 text-content-subtle transition-transform motion-reduce:transition-none ${expanded ? 'rotate-90' : ''}`} strokeWidth={1.5} aria-hidden="true" />
+                              <span>{point.age} <span className="text-content-subtle">/ {point.year}</span></span>
                             </button>
                           </td>
                           <td className="py-3 px-3">{formatCurrency(point.outsideIncome + point.deferredIncome)}</td>
@@ -387,21 +387,21 @@ export default function DeferredCompensation() {
                             the calculator would let this cell render a green `+$0` for a year the
                             headline calls a shortfall. See issue #63.
                           */}
-                          <td className={`py-3 px-3 font-medium ${point.surplus >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                          <td className={`py-3 px-3 font-medium ${point.surplus >= 0 ? 'text-success' : 'text-danger'}`}>
                             {point.surplus >= 0 ? '+' : '−'}{formatCurrency(Math.abs(point.surplus))}
                           </td>
-                          <td className="py-3 px-3 font-medium text-gray-900 dark:text-gray-100">{formatCurrency(point.totalBalance)}</td>
+                          <td className="py-3 px-3 font-medium text-content">{formatCurrency(point.totalBalance)}</td>
                         </tr>
                         {expanded && (
-                          <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50">
+                          <tr className="border-b border-border-subtle bg-surface-sunken">
                             <td colSpan={6} className="p-4">
                               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                                 {activeSources.map(([id, amount]) => (
-                                  <div key={id} className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-                                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                  <div key={id} className="rounded-control bg-surface-raised border border-border-subtle p-3">
+                                    <p className="text-xs font-semibold text-content-muted">
                                       {incomeSourcesById.get(id)?.source.name || `Income source ${(incomeSourcesById.get(id)?.index ?? 0) + 1}`}
                                     </p>
-                                    <p className="mt-1 font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(amount)}</p>
+                                    <p className="mt-1 tabular font-semibold text-success">{formatCurrency(amount)}</p>
                                   </div>
                                 ))}
                                 {activeAccountWithdrawals.map(([id, amount]) => {
@@ -409,43 +409,43 @@ export default function DeferredCompensation() {
                                   const accountName = accountDetails?.account.name
                                     || (accountDetails ? `Account ${accountDetails.index + 1}` : 'Account')
                                   return (
-                                    <div key={id} className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-                                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    <div key={id} className="rounded-control bg-surface-raised border border-border-subtle p-3">
+                                      <p className="text-xs font-semibold text-content-muted">
                                         {accountName} withdrawal (gross)
                                       </p>
-                                      <p className="mt-1 font-semibold text-violet-600 dark:text-violet-400">{formatCurrency(amount)}</p>
+                                      <p className="mt-1 tabular font-semibold text-info">{formatCurrency(amount)}</p>
                                     </div>
                                   )
                                 })}
                                 {point.withdrawalTaxes > 0 && (
-                                  <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-                                    <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                  <div className="rounded-control bg-surface-raised border border-border-subtle p-3">
+                                    <p className="text-xs font-semibold text-content-muted">
                                       Estimated withdrawal tax
                                     </p>
-                                    <p className="mt-1 font-semibold text-rose-600 dark:text-rose-400">−{formatCurrency(point.withdrawalTaxes)}</p>
+                                    <p className="mt-1 tabular font-semibold text-danger">−{formatCurrency(point.withdrawalTaxes)}</p>
                                   </div>
                                 )}
-                                <div className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-                                  <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                <div className="rounded-control bg-surface-raised border border-border-subtle p-3">
+                                  <p className="text-xs font-semibold text-content-muted">
                                     Core spending
                                   </p>
-                                  <p className="mt-1 font-semibold text-amber-600 dark:text-amber-400">{formatCurrency(point.coreExpenses)}</p>
+                                  <p className="mt-1 font-semibold text-warning">{formatCurrency(point.coreExpenses)}</p>
                                 </div>
                                 {activeAdditionalExpenses.map(([id, amount]) => {
                                   const expenseDetails = expensesById.get(id)
                                   const expenseName = expenseDetails?.expense.name
                                     || (expenseDetails ? `Additional expense ${expenseDetails.index + 1}` : 'Additional expense')
                                   return (
-                                    <div key={id} className="rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 p-3">
-                                      <p className="text-xs font-semibold text-gray-700 dark:text-gray-300">
+                                    <div key={id} className="rounded-control bg-surface-raised border border-border-subtle p-3">
+                                      <p className="text-xs font-semibold text-content-muted">
                                         {expenseName}
                                       </p>
-                                      <p className="mt-1 font-semibold text-amber-600 dark:text-amber-400">{formatCurrency(amount)}</p>
+                                      <p className="mt-1 font-semibold text-warning">{formatCurrency(amount)}</p>
                                     </div>
                                   )
                                 })}
                                 {activeSources.length === 0 && activeAccountWithdrawals.length === 0 && activeAdditionalExpenses.length === 0 && (
-                                  <p className="text-sm text-gray-500 dark:text-gray-400">No income or account withdrawals this year.</p>
+                                  <p className="text-sm text-content-subtle">No income or account withdrawals this year.</p>
                                 )}
                               </div>
                             </td>

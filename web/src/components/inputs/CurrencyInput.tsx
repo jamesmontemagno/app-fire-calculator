@@ -104,11 +104,11 @@ export default function CurrencyInput({
       <div className="flex items-center justify-between mb-1.5">
         <label 
           htmlFor={id} 
-          className="flex items-center gap-1.5 text-sm font-medium text-gray-700 dark:text-gray-300"
+          className="flex items-center gap-1.5 text-sm font-medium text-content-muted"
         >
           {label}
           {periodic && (
-            <span className="text-xs font-normal text-gray-500 dark:text-gray-400">
+            <span className="text-xs font-normal text-content-subtle">
               ({periodQualifier(displayPeriod)})
             </span>
           )}
@@ -116,7 +116,7 @@ export default function CurrencyInput({
         </label>
       </div>
       <div className="relative">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 pointer-events-none font-medium">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none font-medium">
           $
         </span>
         <input
@@ -129,19 +129,19 @@ export default function CurrencyInput({
           aria-invalid={isInvalid || undefined}
           className={`
             w-full pl-8 ${periodic ? 'pr-12' : 'pr-3'} py-2.5 
-            bg-white dark:bg-gray-800 
-            border rounded-lg 
-            text-gray-900 dark:text-gray-100
-            placeholder-gray-400 dark:placeholder-gray-500
+            bg-surface-raised 
+            border rounded-control 
+            text-content
+            placeholder-content-subtle
             transition-colors
             ${isInvalid 
-              ? 'border-red-500 dark:border-red-400 focus:ring-2 focus:ring-red-500 focus:border-red-500 dark:focus:ring-red-400 dark:focus:border-red-400' 
-              : 'border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-fire-500 focus:border-fire-500 dark:focus:ring-fire-400 dark:focus:border-fire-400'
+              ? 'border-danger focus:ring-2 focus-visible:ring-danger focus-visible:border-danger' 
+              : 'border-border-strong focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-accent'
             }
           `}
         />
         {periodic && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-content-subtle pointer-events-none">
             {periodSuffix(displayPeriod)}
           </span>
         )}

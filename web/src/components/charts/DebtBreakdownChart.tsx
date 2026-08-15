@@ -10,6 +10,7 @@ import {
 } from 'recharts'
 import { formatCurrency } from '../../utils/calculations'
 import { useTheme } from '../../context/ThemeContext'
+import { chartTheme } from './chartTheme'
 import type { DebtPayoffMonth } from '../../utils/calculations'
 
 interface DebtBreakdownChartProps {
@@ -23,6 +24,7 @@ export default function DebtBreakdownChart({
 }: DebtBreakdownChartProps) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
+  const c = chartTheme(isDark)
 
   const formatYAxis = (value: number) => {
     if (value >= 1000000) {
@@ -39,19 +41,19 @@ export default function DebtBreakdownChart({
       const point = payload[0].payload
       const totalPaid = point.cumulativePrincipal + point.cumulativeInterest
       return (
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
-          <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <div className="rounded-container border border-border-subtle bg-surface-raised p-3 shadow-lg">
+          <p className="mb-2 font-semibold text-content">
             Month {point.month}
           </p>
           <div className="space-y-1 text-sm">
-            <p className="text-gray-600 dark:text-gray-400">
-              Total Paid: <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(totalPaid)}</span>
+            <p className="text-content-muted">
+              Total Paid: <span className="tabular font-medium text-content">{formatCurrency(totalPaid)}</span>
             </p>
-            <p className="text-gray-600 dark:text-gray-400">
-              Principal: <span className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(point.cumulativePrincipal)}</span>
+            <p className="text-content-muted">
+              Principal: <span className="tabular font-medium text-success">{formatCurrency(point.cumulativePrincipal)}</span>
             </p>
-            <p className="text-gray-600 dark:text-gray-400">
-              Interest: <span className="font-medium text-red-600 dark:text-red-400">{formatCurrency(point.cumulativeInterest)}</span>
+            <p className="text-content-muted">
+              Interest: <span className="tabular font-medium text-danger">{formatCurrency(point.cumulativeInterest)}</span>
             </p>
           </div>
         </div>
@@ -65,30 +67,30 @@ export default function DebtBreakdownChart({
       <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="gradient-principal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#10b981" stopOpacity={0.6} />
-            <stop offset="95%" stopColor="#10b981" stopOpacity={0.3} />
+            <stop offset="5%" stopColor={c.positive} stopOpacity={0.6} />
+            <stop offset="95%" stopColor={c.positive} stopOpacity={0.3} />
           </linearGradient>
           <linearGradient id="gradient-interest" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.6} />
-            <stop offset="95%" stopColor="#ef4444" stopOpacity={0.3} />
+            <stop offset="5%" stopColor={c.negative} stopOpacity={0.6} />
+            <stop offset="95%" stopColor={c.negative} stopOpacity={0.3} />
           </linearGradient>
         </defs>
         <CartesianGrid 
           strokeDasharray="3 3" 
-          stroke={isDark ? '#374151' : '#e5e7eb'} 
+          stroke={c.grid} 
           vertical={false}
         />
         <XAxis 
           dataKey="month" 
-          tick={{ fill: isDark ? '#9ca3af' : '#6b7280', fontSize: 12 }}
-          tickLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
-          axisLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
-          label={{ value: 'Months', position: 'insideBottom', offset: -5, fill: isDark ? '#9ca3af' : '#6b7280' }}
+          tick={{ fill: c.axisText, fontSize: 12 }}
+          tickLine={{ stroke: c.axisLine }}
+          axisLine={{ stroke: c.axisLine }}
+          label={{ value: 'Months', position: 'insideBottom', offset: -5, fill: c.axisText }}
         />
         <YAxis 
-          tick={{ fill: isDark ? '#9ca3af' : '#6b7280', fontSize: 12 }}
-          tickLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
-          axisLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
+          tick={{ fill: c.axisText, fontSize: 12 }}
+          tickLine={{ stroke: c.axisLine }}
+          axisLine={{ stroke: c.axisLine }}
           tickFormatter={formatYAxis}
           width={65}
         />
@@ -96,7 +98,7 @@ export default function DebtBreakdownChart({
         <Legend 
           wrapperStyle={{ paddingTop: '10px' }}
           iconType="square"
-          formatter={(value) => <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>{value}</span>}
+          formatter={(value) => <span className="text-content">{value}</span>}
         />
         
         <Area
@@ -104,7 +106,7 @@ export default function DebtBreakdownChart({
           dataKey="cumulativePrincipal"
           stackId="1"
           name="Principal Paid"
-          stroke="#10b981"
+          stroke={c.positive}
           strokeWidth={2}
           fill="url(#gradient-principal)"
         />
@@ -114,7 +116,7 @@ export default function DebtBreakdownChart({
           dataKey="cumulativeInterest"
           stackId="1"
           name="Interest Paid"
-          stroke="#ef4444"
+          stroke={c.negative}
           strokeWidth={2}
           fill="url(#gradient-interest)"
         />

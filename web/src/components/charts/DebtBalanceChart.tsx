@@ -8,8 +8,10 @@ import {
   ReferenceLine,
   ComposedChart,
 } from 'recharts'
+import { Check } from 'lucide-react'
 import { formatCurrency } from '../../utils/calculations'
 import { useTheme } from '../../context/ThemeContext'
+import { chartTheme } from './chartTheme'
 import type { DebtPayoffMonth } from '../../utils/calculations'
 
 interface DebtBalanceChartProps {
@@ -17,6 +19,36 @@ interface DebtBalanceChartProps {
   milestones?: { month: number; debtName: string }[]
   comparisonData?: DebtPayoffMonth[]
   height?: number
+}
+
+/**
+ * Recharts' `label` accepts a render function returning an SVG element, not only
+ * the `{ value }` object form, so the milestone marker is drawn as a real check
+ * mark on the chart's own canvas. The mark is decorative: the dashed rule and
+ * the debt name beside it already carry the meaning, and the whole chart is
+ * exposed through the data table rather than through its SVG internals.
+ */
+function renderMilestoneLabel(debtName: string, color: string) {
+  return (props: any) => {
+    const { viewBox } = props
+    const x = (viewBox?.x ?? 0) + 6
+    const y = (viewBox?.y ?? 0) + 10
+    return (
+      <g aria-hidden="true">
+        <path
+          d={`M${x} ${y + 3.5}l2.6 2.6 5-5.4`}
+          fill="none"
+          stroke={color}
+          strokeWidth={1.8}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+        <text x={x + 11} y={y + 7} fill={color} fontSize={10} fontWeight={600}>
+          {debtName}
+        </text>
+      </g>
+    )
+  }
 }
 
 export default function DebtBalanceChart({
@@ -27,6 +59,7 @@ export default function DebtBalanceChart({
 }: DebtBalanceChartProps) {
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
+  const c = chartTheme(isDark)
 
   const formatYAxis = (value: number) => {
     if (value >= 1000000) {
@@ -48,22 +81,23 @@ export default function DebtBalanceChart({
     if (active && payload && payload.length) {
       const point = payload[0].payload
       return (
-        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
-          <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        <div className="rounded-container border border-border-subtle bg-surface-raised p-3 shadow-lg">
+          <p className="mb-2 font-semibold text-content">
             Month {point.month}
           </p>
           <div className="space-y-1 text-sm">
-            <p className="text-gray-600 dark:text-gray-400">
-              Remaining: <span className="font-medium text-red-600 dark:text-red-400">{formatCurrency(point.totalBalance)}</span>
+            <p className="text-content-muted">
+              Remaining: <span className="tabular font-medium text-danger">{formatCurrency(point.totalBalance)}</span>
             </p>
             {point.comparisonBalance !== undefined && (
-              <p className="text-gray-600 dark:text-gray-400">
-                With Extra: <span className="font-medium text-orange-600 dark:text-orange-400">{formatCurrency(point.comparisonBalance)}</span>
+              <p className="text-content-muted">
+                With Extra: <span className="tabular font-medium text-accent">{formatCurrency(point.comparisonBalance)}</span>
               </p>
             )}
             {point.debtsPaidOff && point.debtsPaidOff.length > 0 && (
-              <p className="text-green-600 dark:text-green-400 font-medium mt-2">
-                ✓ Paid off: {point.debtsPaidOff.join(', ')}
+              <p className="mt-2 flex items-start gap-1.5 font-medium text-success">
+                <Check className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" strokeWidth={2} />
+                <span>Paid off: {point.debtsPaidOff.join(', ')}</span>
               </p>
             )}
           </div>
@@ -78,30 +112,26 @@ export default function DebtBalanceChart({
       <ComposedChart data={chartData} margin={{ top: 30, right: 10, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="gradient-debt" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+            <stop offset="5%" stopColor={c.negative} stopOpacity={0.24} />
+            <stop offset="95%" stopColor={c.negative} stopOpacity={0} />
           </linearGradient>
           <linearGradient id="gradient-comparison" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#f97316" stopOpacity={0.2} />
-            <stop offset="95%" stopColor="#f97316" stopOpacity={0} />
+            <stop offset="5%" stopColor={c.primary} stopOpacity={0.18} />
+            <stop offset="95%" stopColor={c.primary} stopOpacity={0} />
           </linearGradient>
         </defs>
-        <CartesianGrid 
-          strokeDasharray="3 3" 
-          stroke={isDark ? '#374151' : '#e5e7eb'} 
-          vertical={false}
-        />
+        <CartesianGrid strokeDasharray="3 3" stroke={c.grid} vertical={false} />
         <XAxis 
           dataKey="month" 
-          tick={{ fill: isDark ? '#9ca3af' : '#6b7280', fontSize: 12 }}
-          tickLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
-          axisLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
-          label={{ value: 'Months', position: 'insideBottom', offset: -5, fill: isDark ? '#9ca3af' : '#6b7280' }}
+          tick={{ fill: c.axisText, fontSize: 12 }}
+          tickLine={{ stroke: c.axisLine }}
+          axisLine={{ stroke: c.axisLine }}
+          label={{ value: 'Months', position: 'insideBottom', offset: -5, fill: c.axisText }}
         />
         <YAxis 
-          tick={{ fill: isDark ? '#9ca3af' : '#6b7280', fontSize: 12 }}
-          tickLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
-          axisLine={{ stroke: isDark ? '#4b5563' : '#d1d5db' }}
+          tick={{ fill: c.axisText, fontSize: 12 }}
+          tickLine={{ stroke: c.axisLine }}
+          axisLine={{ stroke: c.axisLine }}
           tickFormatter={formatYAxis}
           width={65}
         />
@@ -112,7 +142,7 @@ export default function DebtBalanceChart({
             type="monotone"
             dataKey="comparisonBalance"
             name="With Extra Payment"
-            stroke="#f97316"
+            stroke={c.primary}
             strokeWidth={2}
             strokeDasharray="5 5"
             fill="url(#gradient-comparison)"
@@ -123,8 +153,8 @@ export default function DebtBalanceChart({
           type="monotone"
           dataKey="totalBalance"
           name="Debt Balance"
-          stroke="#ef4444"
-          strokeWidth={3}
+          stroke={c.negative}
+          strokeWidth={2.5}
           fill="url(#gradient-debt)"
         />
         
@@ -133,28 +163,21 @@ export default function DebtBalanceChart({
           <ReferenceLine
             key={`milestone-${milestone.month}`}
             x={milestone.month}
-            stroke={isDark ? '#10b981' : '#059669'}
+            stroke={c.positive}
             strokeWidth={2}
             strokeDasharray="3 3"
-            label={{
-              value: `✓ ${milestone.debtName}`,
-              position: 'insideTopRight',
-              fill: isDark ? '#10b981' : '#059669',
-              fontSize: 10,
-              fontWeight: 600,
-              offset: 5,
-            }}
+            label={renderMilestoneLabel(milestone.debtName, c.positive)}
           />
         ))}
         
         <ReferenceLine
           y={0}
-          stroke={isDark ? '#10b981' : '#059669'}
+          stroke={c.positive}
           strokeWidth={2}
           label={{
-            value: 'Debt Free!',
+            value: 'Debt free',
             position: 'right',
-            fill: isDark ? '#10b981' : '#059669',
+            fill: c.positive,
             fontSize: 12,
             fontWeight: 600,
           }}

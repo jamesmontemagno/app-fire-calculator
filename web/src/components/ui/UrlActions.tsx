@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Save, Check, Copy, Clock, RotateCcw } from 'lucide-react'
 import Button from './Button'
 import ConfirmationDialog from './ConfirmationDialog'
 
@@ -66,9 +67,7 @@ export default function UrlActions({
           className="gap-1.5"
           aria-label={hasUnsavedChanges ? 'Save changes in this browser' : 'Save current values in this browser'}
         >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 4h11l3 3v13H5V4Zm3 0v6h7V4m-7 16v-6h8v6" />
-          </svg>
+          <Save className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
           Save
           {hasUnsavedChanges && <span className="w-2 h-2 rounded-full bg-current" aria-label="Unsaved changes" />}
         </Button>
@@ -80,16 +79,12 @@ export default function UrlActions({
         >
         {copied ? (
           <>
-            <svg className="w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-            Copied!
+            <Check className="h-4 w-4 text-success" aria-hidden="true" strokeWidth={2} />
+            Copied
           </>
         ) : (
           <>
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-            </svg>
+            <Copy className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
             Copy Link
           </>
         )}
@@ -103,9 +98,7 @@ export default function UrlActions({
             title={savedAt ? `Saved ${savedDate}` : 'Saved date unavailable'}
             aria-label={savedAt ? `Load calculation saved ${savedDate}` : 'Load saved calculation'}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+            <Clock className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
             Load
           </Button>
         )}
@@ -118,9 +111,7 @@ export default function UrlActions({
             className="gap-1.5"
             title="Reset values and clear saved data"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <RotateCcw className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
             Reset
           </Button>
         )}

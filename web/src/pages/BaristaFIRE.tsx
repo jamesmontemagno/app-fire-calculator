@@ -41,15 +41,15 @@ export default function BaristaFIRE() {
       <SEO {...calculatorSEO.barista} />
       <div className="space-y-8">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Barista FIRE Calculator</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">See how part-time take-home income can reduce the portfolio needed for retirement.</p>
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Barista FIRE Calculator</h1>
+          <p className="mt-1 text-content-muted">See how part-time take-home income can reduce the portfolio needed for retirement.</p>
         </header>
 
         <section aria-labelledby="barista-plan-heading">
           <Card>
             <CardHeader>
-              <h2 id="barista-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Pair today-dollar spending with the income you expect from flexible work.</p>
+              <h2 id="barista-plan-heading" className="text-lg font-semibold text-content">Start with your plan</h2>
+              <p className="mt-1 text-sm text-content-muted">Pair today-dollar spending with the income you expect from flexible work.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -64,8 +64,8 @@ export default function BaristaFIRE() {
 
         <section aria-labelledby="barista-outlook-heading" className="space-y-4">
           <div>
-            <h2 id="barista-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">Your outlook</h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{formatCurrency(portfolioReduction)} less portfolio is needed than a plan without part-time income.</p>
+            <h2 id="barista-outlook-heading" className="text-xl font-semibold text-content">Your outlook</h2>
+            <p className="mt-1 text-sm text-content-muted">{formatCurrency(portfolioReduction)} less portfolio is needed than a plan without part-time income.</p>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             <ResultCard label="Barista FIRE number" value={results.baristaNumber} format="currency" highlight subtext="Portfolio target with part-time income" />
@@ -90,12 +90,12 @@ export default function BaristaFIRE() {
 
         <section aria-labelledby="barista-projection-heading">
           <Card>
-            <CardHeader><h2 id="barista-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2></CardHeader>
+            <CardHeader><h2 id="barista-projection-heading" className="text-lg font-semibold text-content">Portfolio projection</h2></CardHeader>
             <CardContent><ProjectionChart data={results.projections} fireNumber={results.baristaNumber} inflationRate={params.inflationRate} colorScheme="amber" height={350} /></CardContent>
           </Card>
         </section>
 
-        <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">This estimate assumes part-time income continues to cover the stated share of spending. Health coverage, taxes, and the reliability of that income deserve separate planning.</p>
+        <p className="max-w-3xl text-sm text-content-muted">This estimate assumes part-time income continues to cover the stated share of spending. Health coverage, taxes, and the reliability of that income deserve separate planning.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
     </CurrencyPeriodProvider>

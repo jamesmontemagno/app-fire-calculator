@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { FileSpreadsheet, Check, LoaderCircle } from 'lucide-react'
 import Button from './Button'
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 
 interface ExportButtonProps {
   onExport: () => void | Promise<void>
@@ -14,6 +16,7 @@ interface ExportButtonProps {
 export default function ExportButton({ onExport, disabled = false, className = '' }: ExportButtonProps) {
   const [isExporting, setIsExporting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const prefersReducedMotion = usePrefersReducedMotion()
 
   const handleExport = async () => {
     setIsExporting(true)
@@ -42,18 +45,22 @@ export default function ExportButton({ onExport, disabled = false, className = '
     >
       {isExporting ? (
         <>
-          <span className="animate-spin">⏳</span>
-          <span className="ml-2">Exporting...</span>
+          <LoaderCircle
+            className={`h-4 w-4 ${prefersReducedMotion ? '' : 'animate-spin'}`}
+            aria-hidden="true"
+            strokeWidth={1.5}
+          />
+          <span>Exporting...</span>
         </>
       ) : showSuccess ? (
         <>
-          <span>✅</span>
-          <span className="ml-2">Exported!</span>
+          <Check className="h-4 w-4 text-success" aria-hidden="true" strokeWidth={2} />
+          <span>Exported</span>
         </>
       ) : (
         <>
-          <span>📊</span>
-          <span className="ml-2">Export to Excel</span>
+          <FileSpreadsheet className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
+          <span>Export to Excel</span>
         </>
       )}
     </Button>

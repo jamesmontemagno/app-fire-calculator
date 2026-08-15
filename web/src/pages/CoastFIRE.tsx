@@ -38,15 +38,15 @@ export default function CoastFIRE() {
       <SEO {...calculatorSEO.coast} />
       <div className="space-y-8">
         <header>
-          <h1 className="text-2xl font-bold text-gray-900 sm:text-3xl dark:text-gray-100">Coast FIRE Calculator</h1>
-          <p className="mt-1 text-gray-600 dark:text-gray-400">Find the balance that can grow to your retirement target without more contributions.</p>
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Coast FIRE Calculator</h1>
+          <p className="mt-1 text-content-muted">Find the balance that can grow to your retirement target without more contributions.</p>
         </header>
 
         <section aria-labelledby="coast-plan-heading">
           <Card>
             <CardHeader>
-              <h2 id="coast-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Your target age and today-dollar retirement spending set the Coast FIRE threshold.</p>
+              <h2 id="coast-plan-heading" className="text-lg font-semibold text-content">Start with your plan</h2>
+              <p className="mt-1 text-sm text-content-muted">Your target age and today-dollar retirement spending set the Coast FIRE threshold.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -61,8 +61,8 @@ export default function CoastFIRE() {
 
         <section aria-labelledby="coast-outlook-heading" className="space-y-4">
           <div>
-            <h2 id="coast-outlook-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-100">{results.alreadyCoasting ? 'You are already Coast FIRE' : 'Your Coast FIRE outlook'}</h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            <h2 id="coast-outlook-heading" className="text-xl font-semibold text-content">{results.alreadyCoasting ? 'You are already Coast FIRE' : 'Your Coast FIRE outlook'}</h2>
+            <p className="mt-1 text-sm text-content-muted">
               {results.alreadyCoasting ? 'Your current investments can reach the full FIRE target through projected growth alone.' : `Continue contributing to close the ${formatCurrency(Math.max(0, results.coastNumber - params.currentSavings))} Coast FIRE gap.`}
             </p>
           </div>
@@ -90,14 +90,14 @@ export default function CoastFIRE() {
         <section aria-labelledby="coast-projection-heading">
           <Card>
             <CardHeader>
-              <h2 id="coast-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Continue contributing</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">The projection includes your stated contributions. The FIRE line represents the retirement target in today&apos;s dollars.</p>
+              <h2 id="coast-projection-heading" className="text-lg font-semibold text-content">Continue contributing</h2>
+              <p className="mt-1 text-sm text-content-muted">The projection includes your stated contributions. The FIRE line represents the retirement target in today&apos;s dollars.</p>
             </CardHeader>
             <CardContent><ProjectionChart data={results.projectionsWithContributions} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="blue" height={350} /></CardContent>
           </Card>
         </section>
 
-        <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">Coast FIRE does not mean you can cover current living costs without work. It means your retirement savings could grow to the future target if the assumed return and inflation rates hold.</p>
+        <p className="max-w-3xl text-sm text-content-muted">Coast FIRE does not mean you can cover current living costs without work. It means your retirement savings could grow to the future target if the assumed return and inflation rates hold.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
     </CurrencyPeriodProvider>

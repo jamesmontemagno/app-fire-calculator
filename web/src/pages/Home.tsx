@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
-import { Card, CardContent } from '../components/ui'
+import { ArrowRight, Check, EyeOff, Link2, ShieldCheck, Wallet, Wifi } from 'lucide-react'
+import { Card, CardContent, Disclaimer } from '../components/ui'
 import { calculators } from '../config/calculators'
 import SEO from '../components/SEO'
 
@@ -13,121 +14,99 @@ export default function Home() {
         canonicalPath="/"
       />
       <div className="space-y-12">
-        {/* Hero Section */}
-        <header className="text-center py-8">
-          <div className="flex justify-center mb-6">
-            <span className="text-5xl animate-pulse" role="img" aria-label="Fire emoji">🔥</span>
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+        <header className="border-b border-border-subtle pb-10">
+          <h1 className="text-3xl font-semibold tracking-tight text-content sm:text-4xl">
             FIRE Calculators
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-6">
-            Plan your path to <strong>Financial Independence, Retire Early</strong>. 
+          <p className="mt-3 max-w-2xl text-lg text-content-muted">
+            Plan your path to <strong className="font-semibold text-content">Financial Independence, Retire Early</strong>.
             Free, private, and works completely offline.
           </p>
-        
-        {/* Privacy badges */}
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-medium">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            100% Private
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" />
-            </svg>
-            Works Offline
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-            </svg>
-            No Tracking
-          </span>
-          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full text-sm font-medium">
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-            </svg>
-            Shareable URLs
-          </span>
-        </div>
-      </header>
+          <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-content-muted">
+            {[
+              { icon: ShieldCheck, label: '100% Private' },
+              { icon: Wifi, label: 'Works Offline' },
+              { icon: EyeOff, label: 'No Tracking' },
+              { icon: Link2, label: 'Shareable URLs' },
+            ].map(({ icon: Icon, label }) => (
+              <li key={label} className="flex items-center gap-2">
+                <Icon className="h-4 w-4 shrink-0 text-content-subtle" aria-hidden="true" strokeWidth={1.5} />
+                {label}
+              </li>
+            ))}
+          </ul>
+        </header>
 
       {/* Quiz CTA */}
-      <div className="bg-gradient-to-br from-fire-50 via-orange-50 to-amber-50 dark:from-fire-900/20 dark:via-orange-900/20 dark:to-amber-900/20 rounded-2xl p-6 border-2 border-fire-200 dark:border-fire-800">
-        <div className="max-w-3xl mx-auto text-center">
-          <span className="text-3xl mb-2 block">🧭</span>
-          <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+      <section className="rounded-container border border-border-subtle bg-surface-raised p-6 sm:flex sm:items-center sm:justify-between sm:gap-8">
+        <div className="max-w-2xl">
+          <h2 className="text-lg font-semibold text-content">
             Not sure which calculator to use?
           </h2>
-          <p className="text-base text-gray-600 dark:text-gray-400 mb-4">
+          <p className="mt-2 text-sm text-content-muted">
             Take our quick quiz to find a FIRE starting point and compare nearby alternatives.
-            Answer a few questions and we'll recommend the best calculator with your information pre-filled.
+            Answer a few questions and we&apos;ll recommend the best calculator with your information pre-filled.
           </p>
-          <Link
-            to="/quiz"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-fire-600 hover:bg-fire-700 text-white text-base font-semibold rounded-lg transition-colors shadow-lg hover:shadow-xl"
-          >
-            Find Your FIRE Path
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
+          <p className="mt-2 text-xs text-content-subtle">
             Takes 2-3 minutes · Personalized recommendation
           </p>
         </div>
-      </div>
+        <Link
+          to="/quiz"
+          className="mt-5 inline-flex h-10 shrink-0 items-center gap-2 rounded-control bg-accent px-5 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent-hover motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface sm:mt-0"
+        >
+          Find Your FIRE Path
+          <ArrowRight className="h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
+        </Link>
+      </section>
 
       {/* Calculator Grid */}
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">
+        <h2 className="mb-6 text-xl font-semibold text-content">
           Choose Your Calculator
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {calculators.map((calc) => (
+          {calculators.map((calc) => {
+            const Icon = calc.icon
+            return (
             <Link key={calc.path} to={calc.path} className="group">
-              <Card className={`h-full transition-all duration-200 hover:shadow-lg hover:scale-[1.02] ${calc.borderColor} border-2`}>
-                <CardContent className="p-6">
+              <Card className="flex h-full flex-col border border-border-subtle transition-colors duration-200 hover:border-border-strong motion-reduce:transition-none">
+                <CardContent className="flex flex-1 flex-col p-6">
                   <div className="flex items-start gap-4">
-                    <div className={`p-3 rounded-xl ${calc.bgColor}`}>
-                      <span className="text-3xl">{calc.icon}</span>
+                    <div className="rounded-container bg-surface-sunken p-3">
+                      <Icon className={`h-6 w-6 ${calc.accent}`} aria-hidden="true" strokeWidth={1.5} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 group-hover:text-fire-600 dark:group-hover:text-fire-400 transition-colors">
+                      <h3 className="text-lg font-semibold text-content group-hover:text-accent transition-colors">
                         {calc.name}
                       </h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                      <p className="text-sm text-content-muted mt-1">
                         {calc.description}
                       </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-3 font-medium">
+                      <p className="text-xs text-content-subtle mt-3 font-medium">
                         {calc.audience}
                       </p>
                     </div>
                   </div>
-                  <div className="mt-4 flex items-center text-sm font-medium text-fire-600 dark:text-fire-400 group-hover:translate-x-1 transition-transform">
+                  <div className="mt-auto flex items-center pt-5 text-sm font-medium text-accent transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">
                     Start calculating
-                    <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
+                    <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
                   </div>
                 </CardContent>
               </Card>
             </Link>
-          ))}
+            )
+          })}
         </div>
       </div>
 
       {/* Recommended Books Section */}
-      <div className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-2xl p-8">
-        <div className="text-center mb-8">
-          <span className="text-4xl mb-4 block">📚</span>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+      <section className="rounded-container border border-border-subtle bg-surface-raised p-6 sm:p-8">
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-content">
             Recommended FIRE Books
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-sm text-content-muted">
             Essential reading to accelerate your financial independence journey.
           </p>
         </div>
@@ -149,18 +128,18 @@ export default function Home() {
               rel="noopener noreferrer"
               className="group"
             >
-              <div className="aspect-[2/3] rounded-lg overflow-hidden shadow-md group-hover:shadow-xl transition-shadow duration-200 bg-white dark:bg-gray-800">
+              <div className="aspect-[2/3] rounded-control overflow-hidden shadow-md group-hover:shadow-xl transition-shadow duration-200 bg-surface-raised">
                 <img
                   src={book.image}
                   alt={book.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
                   loading="lazy"
                 />
               </div>
-              <p className="mt-2 text-xs font-medium text-gray-700 dark:text-gray-300 line-clamp-1 group-hover:text-fire-600 dark:group-hover:text-fire-400 transition-colors">
+              <p className="mt-2 text-xs font-medium text-content-muted line-clamp-1 group-hover:text-accent transition-colors">
                 {book.title}
               </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
+              <p className="text-xs text-content-subtle line-clamp-1">
                 {book.author}
               </p>
             </a>
@@ -170,135 +149,119 @@ export default function Home() {
         <div className="text-center">
           <Link
             to="/books"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-fire-600 hover:bg-fire-700 text-white font-medium rounded-lg transition-colors"
+            className="inline-flex h-10 items-center gap-2 rounded-control bg-accent px-5 text-sm font-medium text-accent-contrast transition-colors hover:bg-accent-hover motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
           >
             View All Books & Details
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
+            <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
           </Link>
         </div>
         
-        <p className="text-xs text-gray-500 dark:text-gray-400 text-center mt-4">
+        <p className="text-xs text-content-subtle text-center mt-4">
           Affiliate links — purchases support this free calculator at no extra cost to you.
         </p>
-      </div>
+      </section>
 
       {/* Privacy Section */}
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 rounded-2xl p-8">
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+      <section className="rounded-container border border-border-subtle bg-surface-raised p-6 sm:p-8">
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-content">
             Your Privacy is Our Priority
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="mt-1 text-sm text-content-muted">
             We built this calculator with privacy-first principles.
           </p>
         </div>
         
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-surface-sunken">
+              <Check className="h-4 w-4 text-success" aria-hidden="true" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">No Financial Data Storage</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Your financial data stays in URLs only—never stored. Only UI preferences (theme, layout) stored locally.</p>
+              <h3 className="font-semibold text-content">No Financial Data Storage</h3>
+              <p className="text-sm text-content-muted">Your financial data stays in URLs only—never stored. Only UI preferences (theme, layout) stored locally.</p>
             </div>
           </div>
           
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-surface-sunken">
+              <Check className="h-4 w-4 text-success" aria-hidden="true" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">No Analytics</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Zero tracking scripts. No Google Analytics, no third-party code.</p>
+              <h3 className="font-semibold text-content">No Analytics</h3>
+              <p className="text-sm text-content-muted">Zero tracking scripts. No Google Analytics, no third-party code.</p>
             </div>
           </div>
           
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-surface-sunken">
+              <Check className="h-4 w-4 text-success" aria-hidden="true" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">URL-Based Sharing</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Save your calculations in the URL. Bookmark or share — your choice.</p>
+              <h3 className="font-semibold text-content">URL-Based Sharing</h3>
+              <p className="text-sm text-content-muted">Save your calculations in the URL. Bookmark or share — your choice.</p>
             </div>
           </div>
           
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-surface-sunken">
+              <Check className="h-4 w-4 text-success" aria-hidden="true" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Works Offline</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">After first load, works without internet. Install as an app on your device.</p>
+              <h3 className="font-semibold text-content">Works Offline</h3>
+              <p className="text-sm text-content-muted">After first load, works without internet. Install as an app on your device.</p>
             </div>
           </div>
           
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-surface-sunken">
+              <Check className="h-4 w-4 text-success" aria-hidden="true" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Open Source</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Verify everything yourself. All code is available on GitHub.</p>
+              <h3 className="font-semibold text-content">Open Source</h3>
+              <p className="text-sm text-content-muted">Verify everything yourself. All code is available on GitHub.</p>
             </div>
           </div>
           
           <div className="flex gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-surface-sunken">
+              <Check className="h-4 w-4 text-success" aria-hidden="true" strokeWidth={2} />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-gray-100">Client-Side Only</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">All calculations run in your browser. No server processing.</p>
+              <h3 className="font-semibold text-content">Client-Side Only</h3>
+              <p className="text-sm text-content-muted">All calculations run in your browser. No server processing.</p>
             </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* What is FIRE Section */}
-      <div className="prose dark:prose-invert max-w-none">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">What is FIRE?</h2>
-        <p className="text-gray-600 dark:text-gray-400">
+      <section className="max-w-3xl">
+        <h2 className="mb-3 text-xl font-semibold text-content">What is FIRE?</h2>
+        <p className="text-content-muted">
           <strong>FIRE</strong> stands for <strong>Financial Independence, Retire Early</strong>. It's a financial movement 
           focused on extreme savings and investment to retire much earlier than traditional retirement age. 
           The core principle is simple: save aggressively, invest wisely, and once your investments can 
           cover your living expenses indefinitely, you achieve financial independence.
         </p>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-content-muted">
           The most common FIRE calculation uses the <strong>4% rule</strong> (or 25x rule): if you can live on 4% of 
           your portfolio per year, you need to save 25 times your annual expenses. For example, if you 
           spend $40,000 per year, you need $1,000,000 to be financially independent.
         </p>
-      </div>
+      </section>
 
       {/* TallyAI Ad Section */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-blue-200 dark:border-blue-800">
-        <div className="flex flex-col sm:flex-row items-center gap-6">
-          <div className="flex-shrink-0">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
-              <span className="text-3xl" role="img" aria-label="Money emoji">💰</span>
-            </div>
+      <section className="rounded-container border border-border-subtle bg-surface-raised p-6">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-container border border-border-subtle bg-surface-sunken">
+            <Wallet className="h-6 w-6 text-content-muted" aria-hidden="true" strokeWidth={1.5} />
           </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
+          <div className="flex-1">
+            <h3 className="mb-2 text-lg font-semibold text-content">
               Track Your Progress with Tally AI
             </h3>
-            <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
+            <p className="text-content-muted text-sm mb-4">
               Smart financial companion that helps you track spending, manage budgets, and achieve your FIRE goals 
               with AI-powered insights. Perfect complement to these calculators.
             </p>
@@ -306,37 +269,29 @@ export default function Home() {
               href="https://tallyai.money/"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-semibold rounded-lg transition-all shadow-md hover:shadow-lg"
+              className="inline-flex h-9 items-center gap-2 rounded-control border border-border-strong px-4 text-sm font-medium text-content transition-colors hover:bg-surface-sunken motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               Learn More About Tally AI
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-              </svg>
+              <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
             </a>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Footer */}
-      <footer className="text-center text-sm text-gray-500 dark:text-gray-400 pt-8 border-t border-gray-200 dark:border-gray-800">
-        <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 text-xs text-left mb-6">
-          <p className="font-semibold text-gray-600 dark:text-gray-300 mb-2">⚠️ Disclaimer</p>
-          <p>
-            This calculator is provided for <strong>educational and informational purposes only</strong>. 
-            It is not financial, investment, tax, or legal advice. Results are hypothetical projections 
-            and <strong>actual results will vary</strong>. Please consult a qualified financial advisor 
-            before making any financial decisions.
-          </p>
+      <footer className="text-center text-sm text-content-subtle pt-8 border-t border-border-subtle">
+        <div className="mb-6 text-left">
+          <Disclaimer />
         </div>
         <p>
           Built with privacy in mind. No data ever leaves your browser.
         </p>
         <p className="mt-2">
-          <Link to="/legal#terms" className="text-fire-600 dark:text-fire-400 hover:underline">
+          <Link to="/legal#terms" className="text-accent hover:underline">
             Terms of use
           </Link>
           {' · '}
-          <Link to="/legal#privacy" className="text-fire-600 dark:text-fire-400 hover:underline">
+          <Link to="/legal#privacy" className="text-accent hover:underline">
             Privacy policy
           </Link>
         </p>
@@ -344,7 +299,7 @@ export default function Home() {
           Find more tiny tools like this at{' '}
           <a
             href="https://www.tinytooltown.com/"
-            className="text-fire-600 dark:text-fire-400 hover:underline"
+            className="text-accent hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -355,7 +310,7 @@ export default function Home() {
         <p className="mt-2">
           <a 
             href="https://github.com/jamesmontemagno/app-fire-calculator" 
-            className="text-fire-600 dark:text-fire-400 hover:underline"
+            className="text-accent hover:underline"
             target="_blank"
             rel="noopener noreferrer"
           >

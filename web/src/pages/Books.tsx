@@ -1,3 +1,4 @@
+import { ArrowRight, Lightbulb } from 'lucide-react'
 import { Card, CardHeader, CardContent } from '../components/ui'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -69,22 +70,20 @@ export default function Books() {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
-            <span className="text-3xl" role="img" aria-label="Books emoji">📚</span>
-            Recommended FIRE Books
+          <h1 className="text-2xl font-bold text-content sm:text-3xl">Recommended FIRE Books
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <p className="text-content-muted mt-1">
             Essential reading for your financial independence journey.
           </p>
         </div>
 
         {/* Info Banner */}
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4">
+        <div className="bg-warning-subtle border border-warning/30 rounded-container p-4">
           <div className="flex gap-3">
-            <span className="text-2xl" role="img" aria-label="Light bulb emoji">💡</span>
+            <Lightbulb className="h-5 w-5 shrink-0 text-warning" aria-hidden="true" />
             <div>
-            <h3 className="font-semibold text-amber-900 dark:text-amber-100">Knowledge is Power</h3>
-            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+            <h3 className="font-semibold text-content">Knowledge is Power</h3>
+            <p className="text-sm text-warning mt-1">
               These books have helped millions achieve financial independence. Whether you're just starting out 
               or optimizing your FIRE strategy, there's something here for everyone.
             </p>
@@ -102,9 +101,9 @@ export default function Books() {
             rel="noopener noreferrer"
             className="group"
           >
-            <Card className="h-full hover:shadow-lg transition-shadow duration-200 hover:border-fire-300 dark:hover:border-fire-700">
-              <CardContent className="p-4">
-                <div className="aspect-[2/3] mb-4 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+            <Card className="flex h-full flex-col transition-colors duration-200 hover:border-border-strong motion-reduce:transition-none">
+              <CardContent className="flex flex-1 flex-col p-4">
+                <div className="aspect-[2/3] mb-4 overflow-hidden rounded-control bg-surface-sunken">
                   <img
                     src={book.imageUrl}
                     alt={`${book.title} book cover`}
@@ -112,20 +111,18 @@ export default function Books() {
                     loading="lazy"
                   />
                 </div>
-                <h3 className="font-semibold text-gray-900 dark:text-gray-100 group-hover:text-fire-600 dark:group-hover:text-fire-400 transition-colors line-clamp-2">
+                <h3 className="font-semibold text-content group-hover:text-accent transition-colors line-clamp-2">
                   {book.title}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                <p className="text-sm text-content-subtle mt-1">
                   {book.author}
                 </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-2 line-clamp-3">
+                <p className="text-sm text-content-muted mt-2 line-clamp-3">
                   {book.description}
                 </p>
-                <div className="mt-4 flex items-center gap-2 text-fire-600 dark:text-fire-400 text-sm font-medium">
+                <div className="mt-auto flex items-center gap-2 pt-4 text-sm font-medium text-accent">
                   <span>View on Amazon</span>
-                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" strokeWidth={1.5} aria-hidden="true" />
                 </div>
               </CardContent>
             </Card>
@@ -134,12 +131,12 @@ export default function Books() {
       </div>
 
       {/* Disclaimer */}
-      <Card className="bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700">
+      <Card className="bg-surface-sunken border-border-subtle">
         <CardHeader>
-          <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Affiliate Disclosure</h2>
+          <h2 className="text-sm font-semibold text-content-muted">Affiliate Disclosure</h2>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-content-muted">
             The links above are Amazon affiliate links. If you purchase through these links, we may earn a small 
             commission at no additional cost to you. This helps support the development of this free calculator. 
             We only recommend books we genuinely believe will help you on your FIRE journey.

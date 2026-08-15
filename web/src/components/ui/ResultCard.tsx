@@ -15,7 +15,6 @@ interface ResultCardProps {
   format?: 'currency' | 'years' | 'percent' | 'none'
   highlight?: boolean
   subtext?: string
-  icon?: string
   unreachableText?: string
   unreachableSubtext?: string
 }
@@ -26,7 +25,6 @@ export default function ResultCard({
   format = 'none',
   highlight = false,
   subtext,
-  icon,
   unreachableText = UNREACHABLE_VALUE,
   unreachableSubtext = UNREACHABLE_SUBTEXT,
 }: ResultCardProps) {
@@ -52,28 +50,21 @@ export default function ResultCard({
 
   return (
     <div className={`
-      p-4 rounded-xl
-      ${highlight 
-        ? 'bg-fire-50 dark:bg-fire-900/20 border-2 border-fire-200 dark:border-fire-800' 
-        : 'bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700'
+      rounded-container p-4 border
+      ${highlight
+        ? 'bg-accent-subtle border-accent/30'
+        : 'bg-surface-sunken border-border-subtle'
       }
     `}>
-      <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{label}</p>
-          <p className={`text-2xl font-bold ${
-            highlight 
-              ? 'text-fire-600 dark:text-fire-400' 
-              : 'text-gray-900 dark:text-gray-100'
-          }`}>
-            {formatValue()}
-          </p>
-          {displaySubtext && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{displaySubtext}</p>
-          )}
-        </div>
-        {icon && <span className="text-2xl">{icon}</span>}
-      </div>
+      <p className="text-sm text-content-muted mb-1">{label}</p>
+      <p className={`tabular text-2xl font-semibold tracking-tight ${
+        highlight ? 'text-accent' : 'text-content'
+      }`}>
+        {formatValue()}
+      </p>
+      {displaySubtext && (
+        <p className="text-xs text-content-subtle mt-1">{displaySubtext}</p>
+      )}
     </div>
   )
 }
