@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+             x:Class="MyFireNumber.Views.Controls.PeriodToggleView"
+             x:Name="Root"
+             IsVisible="{Binding HasPeriodicFields}">
+    <VerticalStackLayout Spacing="6">
+        <controls:FieldHelpView Header="Show recurring amounts as"
+                                HelpText="Switches how recurring dollar amounts are displayed. This does not change any result — the same amount is used either way." />
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+            <Button Text="Monthly"
+                    Command="{Binding SetDisplayPeriodCommand}"
+                    CommandParameter="Monthly"
+                    Background="{StaticResource Secondary}"
+                    TextColor="{StaticResource PrimaryDarkText}"
+                    SemanticProperties.Description="Show recurring amounts per month. Results do not change.">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsMonthlyDisplay}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource Primary}" />
+                        <Setter Property="TextColor" Value="{StaticResource White}" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+            <Button Grid.Column="1"
+                    Text="Annual"
+                    Command="{Binding SetDisplayPeriodCommand}"
+                    CommandParameter="Annual"
+                    Background="{StaticResource Secondary}"
+                    TextColor="{StaticResource PrimaryDarkText}"
+                    SemanticProperties.Description="Show recurring amounts per year. Results do not change.">
+                <Button.Triggers>
+                    <DataTrigger TargetType="Button" Binding="{Binding IsAnnualDisplay}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource Primary}" />
+                        <Setter Property="TextColor" Value="{StaticResource White}" />
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+        </Grid>
+    </VerticalStackLayout>
+</ContentView>

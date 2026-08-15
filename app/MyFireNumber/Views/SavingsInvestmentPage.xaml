@@ -31,11 +31,12 @@
             <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="14">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><Label Text="Your investment details" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Savings and Investment Rate values to their defaults." /></Grid>
+                    <controls:PeriodToggleView />
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                         <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="30" Text="{Binding CurrentAgeText}" />
                         <controls:NumericInputView Grid.Column="1" Header="Years investing" HelpText="How long contributions and growth should be modeled." Placeholder="30" Text="{Binding YearsInvestingText}" />
                         <controls:NumericInputView Grid.Row="1" Header="Starting amount" HelpText="Current invested balance, in dollars." Placeholder="100000" Text="{Binding StartingAmountText}" />
-                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="Annual after-tax take-home income" HelpText="Yearly income after taxes, used to calculate the savings rate, in dollars." Placeholder="72000" Text="{Binding InvestmentAnnualIncomeText}" />
+                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="After-tax take-home income" HelpText="Income after taxes, used to calculate the savings rate, in dollars." Placeholder="72000" Text="{Binding InvestmentAnnualIncomeText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                     </Grid>
                     <VerticalStackLayout Spacing="6">
                         <controls:FieldHelpView Header="Contribution frequency" HelpText="Choose whether the contribution amount represents a monthly or yearly amount." />

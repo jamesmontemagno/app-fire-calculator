@@ -31,11 +31,12 @@
             <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="14">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><Label Text="Your FIRE goal" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Reverse FIRE values to their defaults." /></Grid>
+                    <controls:PeriodToggleView />
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                         <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="30" Text="{Binding CurrentAgeText}" />
                         <controls:NumericInputView Grid.Column="1" Header="Target FIRE age" HelpText="The age at which you want to be financially independent." Placeholder="55" Text="{Binding RetirementAgeText}" />
                         <controls:NumericInputView Grid.Row="1" Header="Current savings" HelpText="Invested assets available for this goal, in dollars." Placeholder="100000" Text="{Binding CurrentSavingsText}" />
-                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="Annual retirement expenses" HelpText="Expected annual spending after retirement, in today’s dollars." Placeholder="48000" Text="{Binding AnnualExpensesText}" />
+                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="Retirement expenses" HelpText="Expected spending after retirement, in today’s dollars." Placeholder="48000" Text="{Binding AnnualExpensesText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                     </Grid>
                     <controls:AdvancedAssumptionsExpander>
                         <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">

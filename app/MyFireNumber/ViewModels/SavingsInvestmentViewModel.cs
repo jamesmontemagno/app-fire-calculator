@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.Services;
 using SkiaSharp;
 using System.Globalization;
@@ -10,6 +11,16 @@ namespace MyFireNumber.ViewModels;
 public sealed partial class SavingsInvestmentViewModel : CalculatorViewModelBase<SavingsInvestmentDraft>
 {
     private readonly ISavingsInvestmentExportService exportService;
+
+    // Recurring amounts. These delegate to Core periodic fields instead of holding their own text, so
+    // the canonical amount is the single source of truth and the monthly/annual toggle only changes
+    // how it is rendered.
+
+    public string InvestmentAnnualIncomeText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.AnnualIncome);
+        set => SetPeriodicText(PeriodicFieldCatalog.AnnualIncome, value);
+    }
 
     public SavingsInvestmentViewModel(
         CalculatorViewModelServices services,
@@ -30,9 +41,6 @@ public sealed partial class SavingsInvestmentViewModel : CalculatorViewModelBase
 
     [ObservableProperty]
     private string investmentContributionText = string.Empty;
-
-    [ObservableProperty]
-    private string investmentAnnualIncomeText = string.Empty;
 
     [ObservableProperty]
     private string expectedReturnText = string.Empty;
@@ -94,7 +102,6 @@ public sealed partial class SavingsInvestmentViewModel : CalculatorViewModelBase
     partial void OnYearsInvestingTextChanged(string value) => OnDraftInputChanged();
     partial void OnStartingAmountTextChanged(string value) => OnDraftInputChanged();
     partial void OnInvestmentContributionTextChanged(string value) => OnDraftInputChanged();
-    partial void OnInvestmentAnnualIncomeTextChanged(string value) => OnDraftInputChanged();
     partial void OnExpectedReturnTextChanged(string value) => OnDraftInputChanged();
     partial void OnInflationRateTextChanged(string value) => OnDraftInputChanged();
     partial void OnContributionFrequencyChanged(ContributionFrequency value) => OnDraftInputChanged();
@@ -115,7 +122,7 @@ public sealed partial class SavingsInvestmentViewModel : CalculatorViewModelBase
         YearsInvestingText = draft.YearsInvesting.ToString(CultureInfo.CurrentCulture);
         ExpectedReturnText = FormatNumber(draft.ExpectedReturn * 100);
         InflationRateText = FormatNumber(draft.InflationRate * 100);
-        InvestmentAnnualIncomeText = FormatNumber(draft.AnnualIncome);
+        LoadPeriodicValue(PeriodicFieldCatalog.AnnualIncome, draft.AnnualIncome, nameof(InvestmentAnnualIncomeText));
         CurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
     }
 
@@ -136,7 +143,7 @@ public sealed partial class SavingsInvestmentViewModel : CalculatorViewModelBase
 
         if (!TryParseNonNegative(StartingAmountText, out var startingAmount)
             || !TryParseNonNegative(InvestmentContributionText, out var contributionAmount)
-            || !TryParseNonNegative(InvestmentAnnualIncomeText, out var annualIncome))
+            || !TryGetPeriodicValue(PeriodicFieldCatalog.AnnualIncome, out var annualIncome))
         {
             ValidationMessage = "Enter zero or a positive amount for each dollar value.";
             return false;

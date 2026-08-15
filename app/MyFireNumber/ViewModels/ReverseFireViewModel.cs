@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.Services;
 using SkiaSharp;
 using System.Globalization;
@@ -9,6 +10,16 @@ namespace MyFireNumber.ViewModels;
 public sealed partial class ReverseFireViewModel : CalculatorViewModelBase<ReverseFireDraft>
 {
     private readonly IReverseFireExportService exportService;
+
+    // Recurring amounts. These delegate to Core periodic fields instead of holding their own text, so
+    // the canonical amount is the single source of truth and the monthly/annual toggle only changes
+    // how it is rendered.
+
+    public string AnnualExpensesText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.AnnualExpenses);
+        set => SetPeriodicText(PeriodicFieldCatalog.AnnualExpenses, value);
+    }
 
     public ReverseFireViewModel(
         CalculatorViewModelServices services,
@@ -26,9 +37,6 @@ public sealed partial class ReverseFireViewModel : CalculatorViewModelBase<Rever
 
     [ObservableProperty]
     private string currentSavingsText = string.Empty;
-
-    [ObservableProperty]
-    private string annualExpensesText = string.Empty;
 
     [ObservableProperty]
     private string expectedReturnText = string.Empty;
@@ -72,7 +80,6 @@ public sealed partial class ReverseFireViewModel : CalculatorViewModelBase<Rever
     partial void OnCurrentAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnCurrentSavingsTextChanged(string value) => OnDraftInputChanged();
-    partial void OnAnnualExpensesTextChanged(string value) => OnDraftInputChanged();
     partial void OnExpectedReturnTextChanged(string value) => OnDraftInputChanged();
     partial void OnInflationRateTextChanged(string value) => OnDraftInputChanged();
     partial void OnWithdrawalRateTextChanged(string value) => OnDraftInputChanged();
@@ -82,7 +89,7 @@ public sealed partial class ReverseFireViewModel : CalculatorViewModelBase<Rever
         CurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
         RetirementAgeText = draft.TargetRetirementAge.ToString(CultureInfo.CurrentCulture);
         CurrentSavingsText = FormatNumber(draft.CurrentSavings);
-        AnnualExpensesText = FormatNumber(draft.AnnualExpenses);
+        LoadPeriodicValue(PeriodicFieldCatalog.AnnualExpenses, draft.AnnualExpenses, nameof(AnnualExpensesText));
         ExpectedReturnText = FormatNumber(draft.ExpectedReturn * 100);
         InflationRateText = FormatNumber(draft.InflationRate * 100);
         WithdrawalRateText = FormatNumber(draft.WithdrawalRate * 100);
@@ -108,7 +115,7 @@ public sealed partial class ReverseFireViewModel : CalculatorViewModelBase<Rever
         }
 
         if (!TryParseNonNegative(CurrentSavingsText, out var currentSavings)
-            || !TryParseNonNegative(AnnualExpensesText, out var annualExpenses))
+            || !TryGetPeriodicValue(PeriodicFieldCatalog.AnnualExpenses, out var annualExpenses))
         {
             ValidationMessage = "Enter zero or a positive amount for each dollar value.";
             return false;

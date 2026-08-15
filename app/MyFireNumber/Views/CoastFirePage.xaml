@@ -36,12 +36,13 @@
                         <Label Text="Your starting point" Style="{StaticResource CalculatorSectionHeading}" />
                         <Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Coast FIRE values to their defaults." />
                     </Grid>
+                    <controls:PeriodToggleView />
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                         <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="30" Text="{Binding CurrentAgeText}" />
                         <controls:NumericInputView Grid.Column="1" Header="Retirement age" HelpText="The age when your portfolio should be ready to fund retirement." Placeholder="55" Text="{Binding RetirementAgeText}" />
                         <controls:NumericInputView Grid.Row="1" Grid.ColumnSpan="2" Header="Current savings" HelpText="Invested assets available for this goal, in dollars." Placeholder="100000" Text="{Binding CurrentSavingsText}" />
-                        <controls:NumericInputView Grid.Row="2" Header="Annual contribution" HelpText="How much you expect to invest each year, in dollars." Placeholder="24000" Text="{Binding AnnualContributionText}" />
-                        <controls:NumericInputView Grid.Row="2" Grid.Column="1" Header="Annual retirement expenses" HelpText="Expected annual spending after retirement, in today’s dollars." Placeholder="48000" Text="{Binding AnnualExpensesText}" />
+                        <controls:NumericInputView Grid.Row="2" Header="Contribution" HelpText="How much you expect to invest, in dollars." Placeholder="24000" Text="{Binding AnnualContributionText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
+                        <controls:NumericInputView Grid.Row="2" Grid.Column="1" Header="Retirement expenses" HelpText="Expected spending after retirement, in today’s dollars." Placeholder="48000" Text="{Binding AnnualExpensesText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                     </Grid>
                     <controls:AdvancedAssumptionsExpander>
                         <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">

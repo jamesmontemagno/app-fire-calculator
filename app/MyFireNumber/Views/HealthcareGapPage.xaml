@@ -25,22 +25,23 @@
 
             <controls:CalculatorInfoView Title="What is the healthcare gap?"
                                          Summary="Estimate health insurance costs between early retirement and Medicare eligibility."
-                                         Details="Leaving employer coverage before Medicare can create a major retirement expense. This estimate includes premiums, deductibles, out-of-pocket costs, and medical inflation. Premiums are entered monthly; deductibles and out-of-pocket costs are entered annually. It does not estimate ACA premium tax credits, which depend on household size and the federal poverty level."
+                                         Details="Leaving employer coverage before Medicare can create a major retirement expense. This estimate includes premiums, deductibles, out-of-pocket costs, and medical inflation. It does not estimate ACA premium tax credits, which depend on household size and the federal poverty level."
                                          IconGlyph="&#xf0f9;" />
 
             <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="14">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><Label Text="Coverage basics" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Healthcare Gap values to their defaults." /></Grid>
+                    <controls:PeriodToggleView />
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                         <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="30" Text="{Binding HealthcareCurrentAgeText}" />
                         <controls:NumericInputView Grid.Column="1" Header="Retire at age" HelpText="The age when employer health coverage ends." Placeholder="55" Text="{Binding EarlyRetirementAgeText}" />
-                        <controls:NumericInputView Grid.Row="1" Grid.ColumnSpan="2" Header="Monthly health insurance premium" HelpText="Expected monthly health insurance premium, in dollars." Placeholder="600" Text="{Binding MonthlyPremiumText}" />
+                        <controls:NumericInputView Grid.Row="1" Grid.ColumnSpan="2" Header="Health insurance premium" HelpText="Expected health insurance premium, in dollars." Placeholder="600" Text="{Binding MonthlyPremiumText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                     </Grid>
                     <controls:AdvancedAssumptionsExpander>
                         <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
                             <controls:NumericInputView Header="Medicare age" HelpText="The expected age when Medicare coverage begins." Placeholder="65" Text="{Binding MedicareAgeText}" />
-                            <controls:NumericInputView Grid.Column="1" Header="Annual deductible" HelpText="Expected annual deductible, in dollars." Placeholder="2500" Text="{Binding AnnualDeductibleText}" />
-                            <controls:NumericInputView Grid.Row="1" Header="Annual out-of-pocket costs" HelpText="Expected annual medical costs beyond premiums and deductibles, in dollars." Placeholder="2000" Text="{Binding AnnualOutOfPocketText}" />
+                            <controls:NumericInputView Grid.Column="1" Header="Deductible" HelpText="Expected deductible, in dollars." Placeholder="2500" Text="{Binding AnnualDeductibleText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
+                            <controls:NumericInputView Grid.Row="1" Header="Out-of-pocket costs" HelpText="Expected medical costs beyond premiums and deductibles, in dollars." Placeholder="2000" Text="{Binding AnnualOutOfPocketText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                             <controls:PercentageInputView Grid.Row="1" Grid.Column="1" Header="Medical inflation (%)" HelpText="Expected annual increase in medical costs." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding InflationRateText}" />
                         </Grid>
                     </controls:AdvancedAssumptionsExpander>

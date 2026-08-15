@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.Services;
 using SkiaSharp;
 using System.Globalization;
@@ -9,6 +10,28 @@ namespace MyFireNumber.ViewModels;
 public sealed partial class HealthcareGapViewModel : CalculatorViewModelBase<HealthcareGapDraft>
 {
     private readonly IHealthcareGapExportService exportService;
+
+    // Recurring amounts. These delegate to Core periodic fields instead of holding their own text, so
+    // the canonical amount is the single source of truth and the monthly/annual toggle only changes
+    // how it is rendered.
+
+    public string MonthlyPremiumText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.HealthcareMonthlyPremium);
+        set => SetPeriodicText(PeriodicFieldCatalog.HealthcareMonthlyPremium, value);
+    }
+
+    public string AnnualDeductibleText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.HealthcareAnnualDeductible);
+        set => SetPeriodicText(PeriodicFieldCatalog.HealthcareAnnualDeductible, value);
+    }
+
+    public string AnnualOutOfPocketText
+    {
+        get => PeriodicText(PeriodicFieldCatalog.HealthcareAnnualOutOfPocket);
+        set => SetPeriodicText(PeriodicFieldCatalog.HealthcareAnnualOutOfPocket, value);
+    }
 
     public HealthcareGapViewModel(
         CalculatorViewModelServices services,
@@ -26,15 +49,6 @@ public sealed partial class HealthcareGapViewModel : CalculatorViewModelBase<Hea
 
     [ObservableProperty]
     private string medicareAgeText = string.Empty;
-
-    [ObservableProperty]
-    private string monthlyPremiumText = string.Empty;
-
-    [ObservableProperty]
-    private string annualDeductibleText = string.Empty;
-
-    [ObservableProperty]
-    private string annualOutOfPocketText = string.Empty;
 
     [ObservableProperty]
     private string inflationRateText = string.Empty;
@@ -69,9 +83,6 @@ public sealed partial class HealthcareGapViewModel : CalculatorViewModelBase<Hea
     partial void OnHealthcareCurrentAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnEarlyRetirementAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnMedicareAgeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnMonthlyPremiumTextChanged(string value) => OnDraftInputChanged();
-    partial void OnAnnualDeductibleTextChanged(string value) => OnDraftInputChanged();
-    partial void OnAnnualOutOfPocketTextChanged(string value) => OnDraftInputChanged();
     partial void OnInflationRateTextChanged(string value) => OnDraftInputChanged();
 
     protected override void ApplyDraft(HealthcareGapDraft draft)
@@ -79,9 +90,9 @@ public sealed partial class HealthcareGapViewModel : CalculatorViewModelBase<Hea
         HealthcareCurrentAgeText = draft.CurrentAge.ToString(CultureInfo.CurrentCulture);
         EarlyRetirementAgeText = draft.EarlyRetirementAge.ToString(CultureInfo.CurrentCulture);
         MedicareAgeText = draft.MedicareAge.ToString(CultureInfo.CurrentCulture);
-        MonthlyPremiumText = FormatNumber(draft.MonthlyPremium);
-        AnnualDeductibleText = FormatNumber(draft.AnnualDeductible);
-        AnnualOutOfPocketText = FormatNumber(draft.AnnualOutOfPocket);
+        LoadPeriodicValue(PeriodicFieldCatalog.HealthcareMonthlyPremium, draft.MonthlyPremium, nameof(MonthlyPremiumText));
+        LoadPeriodicValue(PeriodicFieldCatalog.HealthcareAnnualDeductible, draft.AnnualDeductible, nameof(AnnualDeductibleText));
+        LoadPeriodicValue(PeriodicFieldCatalog.HealthcareAnnualOutOfPocket, draft.AnnualOutOfPocket, nameof(AnnualOutOfPocketText));
         InflationRateText = FormatNumber(draft.InflationRate * 100);
     }
 
@@ -110,9 +121,9 @@ public sealed partial class HealthcareGapViewModel : CalculatorViewModelBase<Hea
             return false;
         }
 
-        if (!TryParseNonNegative(MonthlyPremiumText, out var monthlyPremium)
-            || !TryParseNonNegative(AnnualDeductibleText, out var annualDeductible)
-            || !TryParseNonNegative(AnnualOutOfPocketText, out var annualOutOfPocket))
+        if (!TryGetPeriodicValue(PeriodicFieldCatalog.HealthcareMonthlyPremium, out var monthlyPremium)
+            || !TryGetPeriodicValue(PeriodicFieldCatalog.HealthcareAnnualDeductible, out var annualDeductible)
+            || !TryGetPeriodicValue(PeriodicFieldCatalog.HealthcareAnnualOutOfPocket, out var annualOutOfPocket))
         {
             ValidationMessage = "Enter zero or a positive amount for each healthcare cost.";
             return false;
