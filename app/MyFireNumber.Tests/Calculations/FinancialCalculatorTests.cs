@@ -175,10 +175,35 @@ public class FinancialCalculatorTests
         var result = FinancialCalculator.CalculateWithdrawal(1_000_000, 0.04, 0.07, 0.03, 30);
 
         Assert.Equal(30, result.PortfolioLongevity);
-        Assert.Equal(1, result.SuccessRate);
+        Assert.Equal(1, result.HorizonFundedRatio);
         Assert.Equal(40_000, result.AnnualWithdrawal);
         Assert.Equal(2_427_262, result.EndingBalance);
         Assert.Equal(new WithdrawalProjection(30, 2_427_262, 97_090), result.WithdrawalProjections[^1]);
+    }
+
+    [Fact]
+    public void Withdrawal_RateAnalysisUsesSameYearConventionAsHeadline()
+    {
+        const double portfolioValue = 1_000_000;
+        const double rate = 0.05;
+
+        // A 5% start rate on a 2% real return depletes the portfolio, so both the headline and the
+        // comparison row report a partial horizon and must land on the same year.
+        var headline = FinancialCalculator.CalculateWithdrawal(portfolioValue, rate, 0.05, 0.03, 60);
+        var comparison = headline.RateAnalysis.Single(analysis => analysis.Rate == rate);
+
+        Assert.True(headline.PortfolioLongevity < 60);
+        Assert.Equal(headline.PortfolioLongevity, comparison.Years);
+    }
+
+    [Fact]
+    public void Withdrawal_WhenPortfolioIsEmpty_ReportsZeroYearsFunded()
+    {
+        var result = FinancialCalculator.CalculateWithdrawal(0, 0.04, 0.07, 0.03, 30);
+
+        Assert.Equal(0, result.PortfolioLongevity);
+        Assert.Equal(0, result.HorizonFundedRatio);
+        Assert.All(result.RateAnalysis, analysis => Assert.Equal(0, analysis.Years));
     }
 
     [Fact]
@@ -322,7 +347,7 @@ public class FinancialCalculatorTests
     }
 
     [Fact]
-    public void HealthcareGap_MatchesWebInflationAndSubsidyRules()
+    public void HealthcareGap_MatchesWebInflationRules()
     {
         var result = FinancialCalculator.CalculateHealthcareGap(new HealthcareGapInputs(
             CurrentAge: 30,
@@ -338,9 +363,6 @@ public class FinancialCalculatorTests
         Assert.Equal(11_700, result.AnnualCost);
         Assert.Equal(134_127, result.TotalCost);
         Assert.Equal(13_413, result.AverageAnnualCost);
-        Assert.Equal(5_850, result.EstimatedSubsidy30k);
-        Assert.Equal(3_510, result.EstimatedSubsidy50k);
-        Assert.Equal(1_755, result.EstimatedSubsidy75k);
         Assert.Equal(new HealthcareYear(64, 2060, 15_266, 9_394, 3_262, 2_610), result.YearlyBreakdown[^1]);
     }
 

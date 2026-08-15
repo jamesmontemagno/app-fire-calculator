@@ -104,7 +104,8 @@ const NUMERIC_BOUNDS: Partial<Record<keyof CalculatorParams, NumericBounds>> = {
   annualIncome: { min: 0 },
   expectedReturn: { min: 0, max: 0.15 },
   inflationRate: { min: 0, max: 0.1 },
-  withdrawalRate: { min: 0.025, max: 0.06 },
+  // Matches the slider range every calculator renders and the MAUI 2%-6% parse bounds.
+  withdrawalRate: { min: 0.02, max: 0.06 },
   annualExpenses: { min: 0 },
   partTimeIncome: { min: 0 },
   portfolioValue: { min: 0 },
@@ -120,9 +121,6 @@ const NUMERIC_BOUNDS: Partial<Record<keyof CalculatorParams, NumericBounds>> = {
 }
 
 const ROUTE_NUMERIC_BOUNDS: Record<string, Partial<Record<keyof CalculatorParams, NumericBounds>>> = {
-  '/standard': {
-    withdrawalRate: { min: 0.02, max: 0.06 },
-  },
   '/withdrawal': {
     withdrawalRate: { min: 0.02, max: 0.08 },
   },
@@ -292,9 +290,9 @@ export function useCalculatorParams() {
 
     const currentAge = getParam('currentAge') as number
     const maximumRetirementAge = location.pathname === '/healthcare' ? 64 : 90
-    const minimumRetirementAge = location.pathname === '/healthcare'
-      ? currentAge
-      : currentAge + 1
+    // Retiring at your current age is a valid scenario to model ("what if I stopped today?"),
+    // so equality is allowed on every calculator and on both platforms.
+    const minimumRetirementAge = currentAge
 
     return {
       currentAge,

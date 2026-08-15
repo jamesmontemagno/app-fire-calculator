@@ -181,20 +181,20 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void SaveCalculatorDefaults()
     {
-        if (!TryParsePercent(ExpectedReturnPercent, out var expectedReturn)
-            || !TryParsePercent(InflationRatePercent, out var inflationRate, allowZero: true)
-            || !TryParsePercent(WithdrawalRatePercent, out var withdrawalRate)
+        if (!TryParsePercent(ExpectedReturnPercent, out var expectedReturn, 0, 15)
+            || !TryParsePercent(InflationRatePercent, out var inflationRate, 0, 10)
+            || !TryParsePercent(WithdrawalRatePercent, out var withdrawalRate, 2, 6)
             || !int.TryParse(DefaultCurrentAge, NumberStyles.Integer, CultureInfo.CurrentCulture, out var currentAge)
             || !int.TryParse(DefaultRetirementAge, NumberStyles.Integer, CultureInfo.CurrentCulture, out var retirementAge)
             || !double.TryParse(DefaultAnnualIncome, NumberStyles.Number, CultureInfo.CurrentCulture, out var annualIncome)
             || !double.TryParse(DefaultAnnualExpenses, NumberStyles.Number, CultureInfo.CurrentCulture, out var annualExpenses)
             || currentAge is < 18 or > 100
-            || retirementAge <= currentAge
+            || retirementAge < currentAge
             || retirementAge > 100
             || annualIncome < 0
             || annualExpenses < 0)
         {
-            DefaultsStatus = "Enter valid percentages, ages from 18 to 100, and non-negative annual income and expenses. Retirement age must be later.";
+            DefaultsStatus = "Enter an expected return of 0% to 15%, inflation of 0% to 10%, a withdrawal rate of 2% to 6%, ages from 18 to 100, and non-negative annual income and expenses. Retirement age cannot be earlier than your current age.";
             return;
         }
 
@@ -402,11 +402,15 @@ public partial class SettingsViewModel : ObservableObject
         DefaultsStatus = string.Empty;
     }
 
-    private static bool TryParsePercent(string text, out double value, bool allowZero = false)
+    /// <summary>
+    /// Parses a default percentage against the same bounds the calculators enforce, so a saved
+    /// default can never be rejected by the calculator that consumes it.
+    /// </summary>
+    private static bool TryParsePercent(string text, out double value, double minimumPercent, double maximumPercent)
     {
         if (double.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out var percent)
-            && percent < 100
-            && (allowZero ? percent >= 0 : percent > 0))
+            && percent >= minimumPercent
+            && percent <= maximumPercent)
         {
             value = percent / 100;
             return true;

@@ -97,7 +97,7 @@ public sealed class StandardFireDraftTests
         Assert.Equal(500, inputs.ContributionAmount);
         Assert.Equal(ContributionFrequency.Monthly, inputs.ContributionFrequency);
         Assert.Equal(30, inputs.YearsInvesting);
-        Assert.Equal(75_000, inputs.AnnualIncome);
+        Assert.Equal(72_000, inputs.AnnualIncome);
         Assert.Equal(30, inputs.CurrentAge);
         Assert.Equal(2026, inputs.ProjectionStartYear);
     }

@@ -5,6 +5,9 @@ public static class FinancialCalculator
     public const double LeanFireThreshold = 40_000;
     public const double FatFireThreshold = 100_000;
 
+    /// <summary>Horizon used by the withdrawal-rate comparison before a plan is treated as open-ended.</summary>
+    private const int RateAnalysisMaxYears = 50;
+
     public static double FutureValue(double presentValue, double annualContribution, double rate, double years)
     {
         if (rate == 0)
@@ -154,6 +157,13 @@ public static class FinancialCalculator
             Round(fullFireNumber - baristaNumber));
     }
 
+    /// <summary>
+    /// Projects a single deterministic drawdown path at a fixed return with inflation-adjusted
+    /// withdrawals. This is not a historical or Monte Carlo simulation, so it cannot produce a
+    /// probability of success. <see cref="WithdrawalResult.PortfolioLongevity"/> and every
+    /// <see cref="WithdrawalRateAnalysis.Years"/> use the same convention: full years funded while
+    /// a positive balance remained, so the headline and the comparison table always agree.
+    /// </summary>
     public static WithdrawalResult CalculateWithdrawal(double portfolioValue, double withdrawalRate, double expectedReturn, double inflationRate, int retirementYears)
     {
         var annualWithdrawal = portfolioValue * withdrawalRate;
@@ -169,14 +179,14 @@ public static class FinancialCalculator
             year++;
         }
 
-        var portfolioLongevity = year - 1;
+        var portfolioLongevity = Math.Max(0, year - 1);
         var rateAnalysis = new[] { 0.03, 0.035, 0.04, 0.045, 0.05 }
             .Select(rate => CalculateRateAnalysis(portfolioValue, rate, expectedReturn, inflationRate))
             .ToArray();
 
         return new WithdrawalResult(
             portfolioLongevity,
-            portfolioLongevity >= retirementYears ? 1 : (double)portfolioLongevity / retirementYears,
+            retirementYears <= 0 || portfolioLongevity >= retirementYears ? 1 : (double)portfolioLongevity / retirementYears,
             Round(annualWithdrawal),
             Round(annualWithdrawal / 12),
             Math.Max(0, projections.LastOrDefault()?.Balance ?? 0),
@@ -320,10 +330,7 @@ public static class FinancialCalculator
             annualCost,
             Round(totalCost),
             gapYears > 0 ? Round(totalCost / gapYears) : 0,
-            yearlyBreakdown,
-            Round(CalculateHealthcareSubsidy(30_000, annualCost)),
-            Round(CalculateHealthcareSubsidy(50_000, annualCost)),
-            Round(CalculateHealthcareSubsidy(75_000, annualCost)));
+            yearlyBreakdown);
     }
 
     /// <summary>
@@ -423,14 +430,16 @@ public static class FinancialCalculator
         var balance = portfolioValue;
         var year = 0;
         var withdrawal = portfolioValue * rate;
-        while (balance > 0 && year < 50)
+        while (balance > 0 && year < RateAnalysisMaxYears)
         {
             balance = (balance * (1 + expectedReturn)) - withdrawal;
             withdrawal *= 1 + inflationRate;
             year++;
         }
 
-        return new WithdrawalRateAnalysis(rate, year, Math.Max(0, Round(balance)));
+        // Match PortfolioLongevity: count the full years funded while a positive balance remained.
+        var yearsFunded = Math.Max(0, balance > 0 ? year : year - 1);
+        return new WithdrawalRateAnalysis(rate, yearsFunded, Math.Max(0, Round(balance)));
     }
 
     private static void MarkPaidOff(MutableDebt debt, int month, ICollection<string> paidOffThisMonth, ICollection<string> payoffOrder, ICollection<DebtMilestone> debtMilestones)
@@ -454,15 +463,6 @@ public static class FinancialCalculator
     private static double RealReturn(double expectedReturn, double inflationRate)
     {
         return ((1 + expectedReturn) / (1 + inflationRate)) - 1;
-    }
-
-    private static double CalculateHealthcareSubsidy(double income, double annualCost)
-    {
-        return income < 30_000 ? annualCost * 0.7
-            : income < 50_000 ? annualCost * 0.5
-            : income < 75_000 ? annualCost * 0.3
-            : income < 100_000 ? annualCost * 0.15
-            : 0;
     }
 
     private static string SavingsCategory(double savingsRate)

@@ -364,7 +364,7 @@ export function prepareResultsForExport(results: any): {
   
   // Define patterns for different value types
   const currencyKeys = ['number', 'value', 'balance', 'withdrawal', 'income', 'interest', 'payment', 'savings', 'cost', 'total', 'principal']
-  const percentKeys = ['rate', 'savingsrate', 'successrate', 'percent', 'progress']
+  const percentKeys = ['rate', 'savingsrate', 'ratio', 'percent', 'progress']
   const timeKeys = ['years', 'months', 'age', 'longevity']
   
   for (const [key, value] of Object.entries(results)) {
@@ -442,7 +442,7 @@ export function formatResultsForExport(results: any): Record<string, any> {
   
   // Define patterns for different value types
   const currencyKeys = ['number', 'value', 'balance', 'withdrawal', 'income', 'interest', 'payment', 'savings', 'cost', 'total', 'principal']
-  const percentKeys = ['rate', 'savingsrate', 'successrate', 'percent', 'progress']
+  const percentKeys = ['rate', 'savingsrate', 'ratio', 'percent', 'progress']
   const timeKeys = ['years', 'months', 'age', 'longevity']
   
   for (const [key, value] of Object.entries(results)) {

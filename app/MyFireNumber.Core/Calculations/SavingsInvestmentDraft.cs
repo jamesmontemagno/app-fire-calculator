@@ -19,7 +19,7 @@ public sealed record SavingsInvestmentDraft(
         YearsInvesting: 30,
         ExpectedReturn: 0.07,
         InflationRate: 0.03,
-        AnnualIncome: 75_000,
+        AnnualIncome: 72_000,
         CurrentAge: 30);
 
     public InvestmentGrowthInputs ToInputs(int projectionStartYear = 0)
