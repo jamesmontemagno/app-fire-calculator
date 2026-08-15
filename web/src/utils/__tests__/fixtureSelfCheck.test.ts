@@ -61,6 +61,19 @@ describe('fire cases match closed-form algebra', () => {
   )
 
   it.each(fireCases.map((c) => [c.id, c] as const))(
+    '%s reverse fireNumber is the same rounded target the forward calculators use',
+    (_id, testCase) => {
+      // Derived from the inputs here, not copied from expected.fireNumber, so this stays an
+      // independent check. Rounding is part of the expectation: the reverse page reports a display
+      // dollar figure, and issue #75 was it alone shipping the raw quotient. On the non-default
+      // cases 70000/0.035 is 1999999.9999999998, so `toBe` separates the two.
+      const { annualExpenses, withdrawalRate } = testCase.inputs
+      expect(testCase.expected.reverse.fireNumber).toBe(Math.round(annualExpenses / withdrawalRate))
+      expect(testCase.expected.reverse.fireNumber).toBe(testCase.expected.fireNumber)
+    },
+  )
+
+  it.each(fireCases.map((c) => [c.id, c] as const))(
     '%s yearsToFire matches n = ln((C + T*rho)/(C + PV*rho)) / ln(1+rho)',
     (_id, testCase) => {
       const { currentSavings, annualContribution, expectedReturn, inflationRate, contributionGrowth } =

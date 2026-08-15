@@ -69,6 +69,12 @@ describe('standard FIRE parity', () => {
       i.contributionGrowth,
     )
     const expected = testCase.expected.reverse
+    // Rounded for display, so pinned exactly rather than with a tolerance: a tolerance wide enough
+    // for float noise would also swallow the raw-vs-rounded gap this pins (issue #75), which on the
+    // non-default cases is only 70000/0.035 = 1999999.9999999998 against 2000000.
+    expect(result.fireNumber).toBe(expected.fireNumber)
+    // Reverse must solve for the same target the forward calculators report, not its own.
+    expect(result.fireNumber).toBe(testCase.expected.fireNumber)
     expect(result.requiredAnnualSavings).toBeCloseTo(expected.requiredAnnualSavings, 6)
     expect(result.requiredMonthlySavings).toBeCloseTo(expected.requiredMonthlySavings, 6)
     expect(result.currentWillGrowTo).toBe(expected.currentWillGrowTo)

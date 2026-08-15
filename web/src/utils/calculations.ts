@@ -1044,7 +1044,7 @@ export function calculateReverseFIRE(
   const safeAnnualSavings = Math.max(0, requiredAnnualSavings)
 
   return {
-    fireNumber,
+    fireNumber: Math.round(fireNumber),
     yearsToFIRE,
     requiredAnnualSavings: safeAnnualSavings,
     requiredMonthlySavings: safeAnnualSavings / 12,

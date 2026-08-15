@@ -600,10 +600,14 @@ const SCENARIOS: Array<{ id: string; why: string; params: CalculatorParams }> = 
 type Agreement = 'exact' | 'whole'
 
 /**
- * Keyed by page and field, not by field name, because the same name does not round the same way
- * everywhere: `fireNumber` is `Math.round`ed by calculateStandardFIRE and calculateCoastFIRE but
- * returned raw by calculateReverseFIRE. Keying on the name alone quietly mis-declared it, and this
- * suite's own self-check is what caught that on its first run.
+ * Keyed by page and field, not by field name, because nothing guarantees that the same name rounds
+ * the same way on every page. That used to be demonstrable rather than hypothetical: `fireNumber`
+ * was `Math.round`ed by calculateStandardFIRE and calculateCoastFIRE but returned raw by
+ * calculateReverseFIRE, keying on the name alone quietly mis-declared it, and this suite's own
+ * self-check is what caught that on its first run. Issue #75 then fixed the calculator rather than
+ * the declaration, so every `fireNumber` below now agrees on 'whole' and the example is historical.
+ * The per-page keying stays: it is what made the divergence expressible instead of averaging it
+ * away, and it is what a future one-page-rounds-differently change would need again.
  */
 const AGREEMENT: Record<string, Agreement> = {
   // Rounded by calculations.ts at the line noted, so the unrounded formula is compared through the
@@ -613,6 +617,7 @@ const AGREEMENT: Record<string, Agreement> = {
   'CoastFIRE.tsx::fireNumber': 'whole', //            :550
   'FatFIRE.tsx::fireNumber': 'whole', //              :433 via calculateStandardFIRE
   'LeanFIRE.tsx::fireNumber': 'whole', //             :433 via calculateStandardFIRE
+  'ReverseFIRE.tsx::fireNumber': 'whole', //          :1047
   'StandardFIRE.tsx::fireNumber': 'whole', //         :433
   'WithdrawalRate.tsx::annualWithdrawal': 'whole', // :767
   'WithdrawalRate.tsx::monthlyWithdrawal': 'whole', //:768
@@ -621,7 +626,6 @@ const AGREEMENT: Record<string, Agreement> = {
   'HealthcareGap.tsx::annualCost': 'exact', //        :1191
   'HealthcareGap.tsx::gapYears': 'exact', //          :1190
   'LeanFIRE.tsx::savingsRate': 'exact', //            :437
-  'ReverseFIRE.tsx::fireNumber': 'exact', //          :1047 — raw, unlike every other page
   'SavingsRate.tsx::savingsRate': 'exact', //         :1109
   'StandardFIRE.tsx::monthlyContribution': 'exact', //:438
   'StandardFIRE.tsx::savingsRate': 'exact', //        :437

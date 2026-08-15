@@ -173,6 +173,12 @@ public class SharedParityFixtureTests
 
         var result = FinancialCalculator.CalculateReverseFire(ToFireInputs(parityCase.Inputs));
 
+        // ExactTolerance is 0.0 deliberately. A currency tolerance would also hide the raw-vs-rounded
+        // gap this pins (issue #75): on the non-default cases 70000/0.035 is 1999999.9999999998, so
+        // anything looser than exact equality passes with the rounding removed.
+        Assert.Equal(Number(expected, "fireNumber"), result.FireNumber, ExactTolerance);
+        // Reverse must solve for the same target the forward calculators report, not its own.
+        Assert.Equal(Number(parityCase.Expected, "fireNumber"), result.FireNumber, ExactTolerance);
         Assert.Equal(Number(expected, "requiredAnnualSavings"), result.RequiredAnnualSavings, CurrencyTolerance);
         Assert.Equal(Number(expected, "requiredMonthlySavings"), result.RequiredMonthlySavings, CurrencyTolerance);
         Assert.Equal(Number(expected, "currentWillGrowTo"), result.CurrentWillGrowTo, ExactTolerance);
