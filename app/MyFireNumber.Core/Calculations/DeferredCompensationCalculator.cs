@@ -9,12 +9,12 @@ public static class DeferredCompensationCalculator
         var endAge = Math.Max(retirementAge, inputs.PlanThroughAge);
         var currentYear = inputs.CurrentYear == 0 ? DateTime.Now.Year : inputs.CurrentYear;
         var balances = inputs.Accounts.ToDictionary(account => account.Id, account => Math.Max(0, account.Balance));
-        var deferredAnnualPayouts = new Dictionary<string, double>();
         var projections = new List<RetirementCashFlowPoint>();
 
         for (var age = startAge; age <= endAge; age++)
         {
             var yearsFromNow = age - startAge;
+            var inflationMultiplier = Math.Pow(1 + Math.Max(-1, inputs.InflationRate), yearsFromNow);
             var canWithdraw = !inputs.WithdrawOnlyAfterRetirement || age >= retirementAge;
             var withdrawals = new Dictionary<string, double>();
             var accountBalances = new Dictionary<string, double>();
@@ -26,16 +26,13 @@ public static class DeferredCompensationCalculator
                 var balance = balances.GetValueOrDefault(account.Id);
                 if (age > startAge)
                 {
-                    var payoutHasStarted = account.Type == RetirementAccountType.Deferred
-                        && age >= account.AvailableAge;
-                    if (!payoutHasStarted)
-                    {
-                        balance *= 1 + Math.Max(-1, account.AnnualReturn);
-                    }
+                    balance *= 1 + Math.Max(-1, account.AnnualReturn);
 
+                    // Contributions are entered in today's dollars, so the nominal amount paid in
+                    // year k is the entered amount escalated by inflation, matching expenses.
                     if (age < retirementAge)
                     {
-                        balance += Math.Max(0, account.AnnualContribution);
+                        balance += Math.Max(0, account.AnnualContribution) * inflationMultiplier;
                     }
                 }
 
@@ -56,7 +53,6 @@ public static class DeferredCompensationCalculator
                 outsideIncome += netAmount;
             }
 
-            var inflationMultiplier = Math.Pow(1 + Math.Max(-1, inputs.InflationRate), yearsFromNow);
             var coreExpenses = Math.Max(0, inputs.AnnualExpenses) * inflationMultiplier;
             var additionalExpenseTotal = 0d;
             foreach (var expense in inputs.AdditionalExpenses)
@@ -68,6 +64,7 @@ public static class DeferredCompensationCalculator
 
             var expenses = coreExpenses + additionalExpenseTotal;
             var deferredIncome = 0d;
+            var withdrawalTaxes = 0d;
             foreach (var account in inputs.Accounts.Where(account => account.Type == RetirementAccountType.Deferred))
             {
                 var payoutStartAge = account.AvailableAge;
@@ -78,30 +75,45 @@ public static class DeferredCompensationCalculator
                 }
 
                 var balance = balances.GetValueOrDefault(account.Id);
-                if (!deferredAnnualPayouts.TryGetValue(account.Id, out var annualPayout))
-                {
-                    annualPayout = balance / (payoutEndAge - age + 1);
-                    deferredAnnualPayouts[account.Id] = annualPayout;
-                }
 
-                var withdrawal = Math.Min(balance, annualPayout);
+                // The undistributed balance keeps earning, so each year distributes the remaining
+                // balance over the remaining payout years. That honors the payout period exactly
+                // and leaves nothing stranded in an account gap withdrawals can never reach.
+                var withdrawal = Math.Min(balance, balance / (payoutEndAge - age + 1));
+                var deferredTaxRate = account.EffectiveWithdrawalTaxRate;
                 balances[account.Id] = balance - withdrawal;
                 withdrawals[account.Id] = withdrawal;
-                deferredIncome += withdrawal;
+                withdrawalTaxes += withdrawal * deferredTaxRate;
+                deferredIncome += withdrawal * (1 - deferredTaxRate);
             }
 
             var remainingGap = Math.Max(0, expenses - outsideIncome - deferredIncome);
             var portfolioWithdrawals = 0d;
+            var policyLimitedWithdrawals = 0d;
             if (canWithdraw)
             {
                 foreach (var account in inputs.Accounts.Where(account => account.Type != RetirementAccountType.Deferred && age >= account.AvailableAge))
                 {
                     var balance = balances.GetValueOrDefault(account.Id);
-                    var withdrawal = Math.Min(balance, Math.Min(remainingGap, balance * Math.Clamp(account.WithdrawalRate, 0, 1)));
+                    var taxRate = account.EffectiveWithdrawalTaxRate;
+                    var netFactor = 1 - taxRate;
+
+                    // Withdrawals are grossed up so the spendable remainder covers the gap.
+                    var grossNeeded = netFactor > 0 ? remainingGap / netFactor : double.PositiveInfinity;
+                    var policyLimit = balance * Math.Clamp(account.WithdrawalRate, 0, 1);
+                    var affordable = Math.Min(balance, grossNeeded);
+                    var withdrawal = Math.Min(affordable, policyLimit);
+                    if (policyLimit < affordable)
+                    {
+                        policyLimitedWithdrawals += affordable - policyLimit;
+                    }
+
                     balances[account.Id] = balance - withdrawal;
                     withdrawals[account.Id] = withdrawal;
-                    portfolioWithdrawals += withdrawal;
-                    remainingGap -= withdrawal;
+                    withdrawalTaxes += withdrawal * taxRate;
+                    var spendable = withdrawal * netFactor;
+                    portfolioWithdrawals += spendable;
+                    remainingGap -= spendable;
                 }
             }
 
@@ -133,11 +145,14 @@ public static class DeferredCompensationCalculator
                 incomeBySource,
                 RoundNonNegative(coreExpenses),
                 RoundNonNegative(additionalExpenseTotal),
-                expensesByItem));
+                expensesByItem,
+                RoundNonNegative(withdrawalTaxes),
+                RoundNonNegative(policyLimitedWithdrawals)));
         }
 
         var retirementProjection = projections.FirstOrDefault(point => point.Age == retirementAge) ?? projections[0];
         var retirementProjections = projections.Where(point => point.Age >= retirementAge).ToArray();
+        var firstShortfallIndex = Array.FindIndex(retirementProjections, point => point.Surplus < 0);
 
         return new DeferredCompensationResult(
             projections,
@@ -146,7 +161,10 @@ public static class DeferredCompensationCalculator
             retirementProjection.TotalIncome,
             retirementProjection.Surplus,
             projections[^1].TotalBalance,
-            retirementProjections.Count(point => point.Surplus >= 0));
+            firstShortfallIndex < 0 ? retirementProjections.Length : firstShortfallIndex,
+            retirementProjections.Count(point => point.Surplus >= 0),
+            firstShortfallIndex < 0 ? null : retirementProjections[firstShortfallIndex].Age,
+            retirementProjections.Length);
     }
 
     private static void DistributeSurplus(

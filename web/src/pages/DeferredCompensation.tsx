@@ -89,7 +89,19 @@ export default function DeferredCompensation() {
       accountCount: params.accounts.length,
       additionalExpenseCount: params.additionalExpenses.length,
     })
-    const { values: resultValues, formats: resultFormats } = prepareResultsForExport(results)
+    // prepareResultsForExport enumerates every scalar key, so a null firstShortfallAge would emit
+    // a blank row. Pass a curated shape instead of the raw result.
+    const { values: resultValues, formats: resultFormats } = prepareResultsForExport({
+      currentBalance: results.currentBalance,
+      balanceAtSemiRetirement: results.balanceAtSemiRetirement,
+      firstYearIncomeAfterTax: results.firstYearIncome,
+      firstYearSurplus: results.firstYearSurplus,
+      endingBalance: results.endingBalance,
+      consecutiveFundedYears: results.fundedYears,
+      retirementYears: results.retirementYears,
+      yearsFullyCovered: results.yearsFullyCovered,
+      firstShortfallAge: results.firstShortfallAge ?? 0,
+    })
 
     exportToExcel({
       calculatorName: 'Retirement Cash Flow',
