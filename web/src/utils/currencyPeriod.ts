@@ -58,12 +58,31 @@ export function resolveEditedAmount(
 }
 
 /**
+ * A rendering that carries a minus sign in front of nothing but zeros.
+ *
+ * Matched against the *formatted* text rather than the input number on purpose. Two different inputs
+ * produce it and only one of them is negative zero: `Intl` keeps the sign while
+ * `maximumFractionDigits` rounds the magnitude away, so every negative under half a cent — `-0.001`,
+ * `-1e-7` — renders `"-0"` too, and those are ordinary negative numbers that `Object.is(value, -0)`
+ * does not catch. Testing the output catches both without having to enumerate the inputs. The
+ * optional fraction covers a future `minimumFractionDigits`, which would render `"-0.00"`.
+ */
+const NEGATIVE_ZERO_RENDERING = /^-0(?:\.0+)?$/
+
+/**
  * Format an amount for a currency field. Cents are shown only when the amount has them, so annual
  * figures stay clean while monthly conversions keep the precision needed to edit them accurately.
+ *
+ * Zero is always rendered unsigned, matching `CurrencyPeriodMath.RoundHalfUp` on the MAUI side, which
+ * returns positive zero where the JS `Math.round` this module was written against returns `-0`. Only
+ * a rendering that is entirely zeros is rewritten, so a real fraction of a cent keeps its sign:
+ * `-0.005` still renders `"-0.01"`.
  */
 export function formatPeriodAmount(value: number): string {
   if (!Number.isFinite(value)) return '0'
-  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
+
+  const formatted = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
+  return NEGATIVE_ZERO_RENDERING.test(formatted) ? formatted.slice(1) : formatted
 }
 
 /**
