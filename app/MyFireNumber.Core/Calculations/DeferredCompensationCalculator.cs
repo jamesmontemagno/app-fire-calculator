@@ -92,10 +92,16 @@ public static class DeferredCompensationCalculator
 
             var remainingGap = Math.Max(0, expenses - outsideIncome - deferredIncome);
             var portfolioWithdrawals = 0d;
-            var policyLimitedWithdrawals = 0d;
+            var policyExcessWithdrawals = 0d;
             if (canWithdraw)
             {
-                foreach (var account in inputs.Accounts.Where(account => account.Type != RetirementAccountType.Deferred && age >= account.AvailableAge))
+                // Materialized once so both passes see the same accounts in the same order, exactly
+                // as the web mirror's `.filter()` does.
+                var reachable = inputs.Accounts
+                    .Where(account => account.Type != RetirementAccountType.Deferred && age >= account.AvailableAge)
+                    .ToArray();
+
+                foreach (var account in reachable)
                 {
                     var balance = balances.GetValueOrDefault(account.Id);
                     var taxRate = account.EffectiveWithdrawalTaxRate;
@@ -104,12 +110,7 @@ public static class DeferredCompensationCalculator
                     // Withdrawals are grossed up so the spendable remainder covers the gap.
                     var grossNeeded = netFactor > 0 ? remainingGap / netFactor : double.PositiveInfinity;
                     var policyLimit = balance * Math.Clamp(account.WithdrawalRate, 0, 1);
-                    var affordable = Math.Min(balance, grossNeeded);
-                    var withdrawal = Math.Min(affordable, policyLimit);
-                    if (policyLimit < affordable)
-                    {
-                        policyLimitedWithdrawals += affordable - policyLimit;
-                    }
+                    var withdrawal = Math.Min(Math.Min(balance, grossNeeded), policyLimit);
 
                     balances[account.Id] = balance - withdrawal;
                     withdrawals[account.Id] = withdrawal;
@@ -117,6 +118,54 @@ public static class DeferredCompensationCalculator
                     var spendable = withdrawal * netFactor;
                     portfolioWithdrawals += spendable;
                     remainingGap -= spendable;
+                }
+
+                // The withdrawal rate is a spending *policy*, not the amount of money that exists, so
+                // a year the policy cannot fund is allowed to exceed it rather than report a
+                // shortfall next to an untouched balance. That contradiction was issue #56, and the
+                // throttle had a worse consequence: while the cap bound, the withdrawal was
+                // min(cap, need) = cap, so the whole balance path stopped depending on AnnualExpenses
+                // and the spending input silently did nothing.
+                //
+                // The gate reads the UNFLEXED gap through the same predicate the headline verdict
+                // uses, so "would this year have been short" and "is this year short" can never drift
+                // apart. It runs as a second pass rather than inline above because an early account
+                // must not blow past its cap while a later one still has capped headroom left.
+                if (IsShortfall(-remainingGap))
+                {
+                    // Each account's spendable capacity, which is what the gap is denominated in.
+                    var netCapacity = 0d;
+                    foreach (var account in reachable)
+                    {
+                        netCapacity += balances.GetValueOrDefault(account.Id) * (1 - account.EffectiveWithdrawalTaxRate);
+                    }
+
+                    if (netCapacity > 0)
+                    {
+                        // Prorating the net need by net capacity makes the gross withdrawal exactly
+                        // proportional to the remaining balance — gross = need * balance / netCapacity
+                        // — the same convention DistributeSurplus uses in the other direction: a
+                        // surplus prorates in by balance, a shortfall prorates out by balance.
+                        //
+                        // Taking the scale from Math.Min(need, capacity) bounds it at 1, which is what
+                        // guarantees gross <= balance for every account in a single pass: no
+                        // iteration, no clamping, and no way to overdraw. When capacity is exhausted
+                        // the scale is exactly 1 and every reachable balance lands on exactly 0.
+                        var flexScale = Math.Min(remainingGap, netCapacity) / netCapacity;
+                        foreach (var account in reachable)
+                        {
+                            var balance = balances.GetValueOrDefault(account.Id);
+                            var taxRate = account.EffectiveWithdrawalTaxRate;
+                            var withdrawal = balance * flexScale;
+                            balances[account.Id] = balance - withdrawal;
+                            withdrawals[account.Id] = withdrawals.GetValueOrDefault(account.Id) + withdrawal;
+                            withdrawalTaxes += withdrawal * taxRate;
+                            var spendable = withdrawal * (1 - taxRate);
+                            portfolioWithdrawals += spendable;
+                            remainingGap -= spendable;
+                            policyExcessWithdrawals += withdrawal;
+                        }
+                    }
                 }
             }
 
@@ -151,7 +200,7 @@ public static class DeferredCompensationCalculator
                 RoundNonNegative(additionalExpenseTotal),
                 expensesByItem,
                 RoundNonNegative(withdrawalTaxes),
-                RoundNonNegative(policyLimitedWithdrawals)));
+                RoundNonNegative(policyExcessWithdrawals)));
         }
 
         var retirementProjection = projections.FirstOrDefault(point => point.Age == retirementAge) ?? projections[0];

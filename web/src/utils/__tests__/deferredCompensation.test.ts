@@ -379,9 +379,12 @@ describe('gap withdrawals', () => {
     expect(result.projections.find((p) => p.age === 60)!.portfolioWithdrawals).toBeGreaterThan(0)
   })
 
-  it('records what the per-account withdrawal-rate cap held back', () => {
-    // A 4% cap on 1,000,000 releases 40,000 against an 80,000 gap, so 40,000 stays put and is
-    // reported rather than silently dropped.
+  it('records what it took to exceed the per-account withdrawal-rate policy', () => {
+    // Flipped for issue #56. The 4% cap on 1,000,000 releases 40,000 against an 80,000 gap. It used
+    // to stop there — withdrawing 40,000, reporting a 40,000 shortfall, and leaving 960,000 in an
+    // account the retiree could actually have drawn on. Now the cap is a spending policy rather than
+    // a hard limit: the full 80,000 comes out, the year is covered, and the 40,000 taken beyond the
+    // policy is what gets disclosed.
     const result = calculateDeferredCompensation(
       plan({
         inflationRate: 0,
@@ -389,9 +392,9 @@ describe('gap withdrawals', () => {
       }),
     )
     const point = result.projections.find((p) => p.age === 55)!
-    expect(point.withdrawals.acct).toBe(40_000)
-    expect(point.policyLimitedWithdrawals).toBe(40_000)
-    expect(point.surplus).toBe(-40_000)
+    expect(point.withdrawals.acct).toBe(80_000)
+    expect(point.policyExcessWithdrawals).toBe(40_000)
+    expect(point.surplus).toBe(0)
   })
 
   it('never withdraws more than the account holds', () => {
@@ -697,5 +700,201 @@ describe('negative-midpoint surplus rounding (issue #63)', () => {
 
       expect(classifiedAsShort).toBe(displayedAsShort)
     }
+  })
+})
+
+/**
+ * Issue #56. The per-account withdrawal rate is a spending *policy*, not a hard limit: a year that
+ * the policy alone cannot cover withdraws beyond it, bounded by what the reachable accounts hold.
+ *
+ * The shipped scenario is the reason this matters. It used to report a shortfall in all 36
+ * retirement years while ending with $4,623,220 unspent, because a capped withdrawal is
+ * `min(cap, need)` and the `cap` branch does not read `need` — so the whole projection stopped
+ * depending on how much the retiree planned to spend.
+ */
+describe('withdrawals beyond the stated policy', () => {
+  const shipped = (annualExpenses: number): DeferredCompensationInputs => ({
+    currentAge: 45,
+    semiRetirementAge: 55,
+    planThroughAge: 90,
+    annualExpenses,
+    inflationRate: 0.03,
+    accounts: [
+      {
+        id: 'savings',
+        name: 'Savings',
+        type: 'savings',
+        balance: 300_000,
+        annualContribution: 0,
+        annualReturn: 0.05,
+        availableAge: 18,
+        withdrawalRate: 0.04,
+        payoutYears: 1,
+        withdrawalTaxRate: 0,
+      },
+      {
+        id: '401k',
+        name: '401(k)',
+        type: 'traditional',
+        balance: 500_000,
+        annualContribution: 23_500,
+        annualReturn: 0.07,
+        availableAge: 60,
+        withdrawalRate: 0.04,
+        payoutYears: 1,
+        withdrawalTaxRate: 0.25,
+      },
+    ],
+    incomeSources: [
+      {
+        id: 'part-time-income',
+        name: 'Part-time income',
+        type: 'salary',
+        annualAmount: 20_000,
+        startAge: 55,
+        endAge: 65,
+        annualGrowth: 0,
+        isAfterTax: true,
+        taxRate: 0.25,
+      },
+    ],
+    additionalExpenses: [],
+    withdrawOnlyAfterRetirement: true,
+    reinvestSurplus: true,
+    currentYear: 2025,
+  })
+
+  it('spends the shipped default portfolio instead of reporting a shortfall next to $4.6M', () => {
+    const result = calculateDeferredCompensation(shipped(80_000))
+    // Was 0 of 36 funded years, first shortfall at 55, $4,623,220 left over. The plan now covers
+    // ages 55 through 75 in full, drains both accounts to the dollar at 76, and is short from there
+    // — a story that reads the same way in the headline and on the chart.
+    expect(result.yearsFullyCovered).toBe(21)
+    expect(result.firstShortfallAge).toBe(76)
+    expect(result.endingBalance).toBe(0)
+    expect(result.projections.find((p) => p.age === 75)!.surplus).toBe(0)
+  })
+
+  it('moves the whole projection when planned spending changes', () => {
+    // The regression anchor for issue #56: $80k and $70k used to produce byte-identical balance
+    // paths, both ending on $4,623,220, because the binding cap discarded the spending figure.
+    const high = calculateDeferredCompensation(shipped(80_000))
+    const low = calculateDeferredCompensation(shipped(70_000))
+
+    expect(low.yearsFullyCovered).toBeGreaterThan(high.yearsFullyCovered)
+    expect(low.firstShortfallAge!).toBeGreaterThan(high.firstShortfallAge!)
+    expect(low.balanceAtSemiRetirement).not.toBe(high.balanceAtSemiRetirement)
+    expect(low.projections.find((p) => p.age === 70)!.totalBalance).not.toBe(
+      high.projections.find((p) => p.age === 70)!.totalBalance,
+    )
+  })
+
+  it('counts a year as funded when exceeding the policy is what covered it', () => {
+    // The distinction the whole change turns on: the decision to exceed the policy is made against
+    // the shortfall *before* flexing, but the funded/short verdict is read from the surplus *after*.
+    // A 4% policy releases 4,000 against a 10,000 need, so this year is short on the first pass and
+    // covered on the second, and the disclosure is what records that it took a breach.
+    const result = calculateDeferredCompensation(
+      plan({
+        inflationRate: 0,
+        annualExpenses: 10_000,
+        accounts: [account({ balance: 100_000, annualReturn: 0, withdrawalRate: 0.04 })],
+      }),
+    )
+    const point = result.projections.find((p) => p.age === 55)!
+    expect(point.surplus).toBe(0)
+    expect(point.policyExcessWithdrawals).toBe(6_000)
+    // 100,000 covers ten 10,000 years, so 55 through 64 are funded and the account is empty at 65.
+    // Under the old hard cap none of them were funded.
+    expect(result.yearsFullyCovered).toBe(10)
+    expect(result.firstShortfallAge).toBe(65)
+  })
+
+  it('leaves the policy alone when it already covers the year', () => {
+    // 4% of 100,000 is 4,000 against a 1,000 need, so nothing is exceeded and nothing is disclosed.
+    const result = calculateDeferredCompensation(
+      plan({
+        inflationRate: 0,
+        annualExpenses: 1_000,
+        accounts: [account({ balance: 100_000, annualReturn: 0, withdrawalRate: 0.04 })],
+      }),
+    )
+    const point = result.projections.find((p) => p.age === 55)!
+    expect(point.withdrawals.acct).toBe(1_000)
+    expect(point.policyExcessWithdrawals).toBe(0)
+  })
+
+  it('will not reach an account before its availability age', () => {
+    // Exceeding a spending policy is a choice; touching a locked account is not one the plan gets to
+    // make. At 55 only the 20,000 taxable account is reachable, so the year is short by 30,000 even
+    // though 1,000,000 exists on paper.
+    const result = calculateDeferredCompensation(
+      plan({
+        inflationRate: 0,
+        annualExpenses: 50_000,
+        accounts: [
+          account({ id: 'open', balance: 20_000, annualReturn: 0, withdrawalRate: 0.04 }),
+          account({
+            id: 'locked',
+            balance: 1_000_000,
+            annualReturn: 0,
+            withdrawalRate: 0.04,
+            availableAge: 60,
+          }),
+        ],
+      }),
+    )
+    const point = result.projections.find((p) => p.age === 55)!
+    expect(point.withdrawals.open).toBe(20_000)
+    expect(point.withdrawals.locked ?? 0).toBe(0)
+    expect(point.surplus).toBe(-30_000)
+    expect(result.projections.find((p) => p.age === 56)!.totalBalance).toBe(1_000_000)
+  })
+
+  it('stops at the balance rather than overdrawing it', () => {
+    const result = calculateDeferredCompensation(
+      plan({
+        inflationRate: 0,
+        annualExpenses: 100_000,
+        accounts: [account({ balance: 30_000, annualReturn: 0, withdrawalRate: 0.04 })],
+      }),
+    )
+    const point = result.projections.find((p) => p.age === 55)!
+    expect(point.withdrawals.acct).toBe(30_000)
+    expect(point.surplus).toBe(-70_000)
+    // Exactly zero, not a rounding residue, and never negative in any later year.
+    result.projections
+      .filter((p) => p.age > 55)
+      .forEach((p) => expect(p.totalBalance).toBe(0))
+  })
+
+  it('prorates the excess across reachable accounts by balance', () => {
+    // Both accounts give up the same fraction of their balance, which is what makes the result
+    // independent of the order the accounts happen to sit in. Net capacity is
+    // 50,000 + 40,000 * 0.75 = 80,000, so a 10,000 need scales every balance by 0.125: 6,250 gross
+    // from the untaxed account and 5,000 gross from the taxed one, 1,250 of which is tax.
+    const result = calculateDeferredCompensation(
+      plan({
+        inflationRate: 0,
+        annualExpenses: 10_000,
+        accounts: [
+          account({ id: 'taxfree', balance: 50_000, annualReturn: 0, withdrawalRate: 0 }),
+          account({
+            id: 'taxed',
+            balance: 40_000,
+            annualReturn: 0,
+            withdrawalRate: 0,
+            withdrawalTaxRate: 0.25,
+          }),
+        ],
+      }),
+    )
+    const point = result.projections.find((p) => p.age === 55)!
+    expect(point.withdrawals.taxfree).toBe(6_250)
+    expect(point.withdrawals.taxed).toBe(5_000)
+    expect(point.withdrawalTaxes).toBe(1_250)
+    expect(point.surplus).toBe(0)
+    // Taxable-first would have taken 50,000 from the untaxed account first; it does not.
+    expect(point.withdrawals.taxfree).toBeLessThan(10_000)
   })
 })

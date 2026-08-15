@@ -68,6 +68,16 @@ platform's ordering into a supposedly neutral artifact.
   being `false`) report a fifty-cent shortfall as a fully funded plan on web while MAUI reported
   failure at the first retirement age.
 - Values the app does not round are stored at full `double` precision and compared with a tolerance.
+- Where a case exists to pin a **policy choice** rather than an arithmetic result, at least one
+  expected value has to differ under the alternative policy. The `deferred` cap-flex cases prorate
+  withdrawals across reachable accounts by balance; `deferred-cap-flex-prorates-and-skips-locked-accounts`
+  therefore ends on `178750` specifically because a taxable-first rule would end on `180000`. A
+  proration rule that no expectation distinguishes from its alternative is not actually pinned, and
+  the next person to touch the ordering would see a green suite.
+- A case that deliberately neutralizes part of the pipeline says so in its `derivation`. The
+  cap-flex cases that isolate the flex pass set `withdrawalRate` to `0` on every account, which is
+  not the shipped 4% default; a reader who assumes the default derives different figures and
+  concludes the fixture is broken.
 - `Infinity` is carried as the **string** `"Infinity"`, because JSON has no infinity literal. Both
   consumers decode the sentinel explicitly. An unreachable target is a correct answer — a 2% return
   against 5% inflation converges to a $700,000 fixed point and can never reach $1.25M — so it is

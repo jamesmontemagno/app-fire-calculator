@@ -435,6 +435,13 @@ public class SharedParityFixtureTests
             Assert.Equal(Number(sample, "expenses"), point.Expenses, ExactTolerance);
             Assert.Equal(Number(sample, "surplus"), point.Surplus, ExactTolerance);
 
+            // Read with the same hard get as every other field: a sample that omits it throws rather
+            // than quietly asserting nothing about how far the plan exceeded its withdrawal policy.
+            Assert.Equal(
+                Number(sample, "policyExcessWithdrawals"),
+                point.PolicyExcessWithdrawals,
+                ExactTolerance);
+
             // Assert.Equal treats -0.0 and 0.0 as equal, so the line above cannot catch a negative
             // zero. It has to be checked outright: negative zero silently satisfying `>= 0` while
             // formatting as "-$0" is the mechanism that made #63 severe.

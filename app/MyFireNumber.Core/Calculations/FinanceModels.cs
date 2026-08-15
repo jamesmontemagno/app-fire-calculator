@@ -294,6 +294,11 @@ public sealed record DeferredCompensationInputs(
 /// short. <see cref="DeferredCompensationCalculator"/> keeps that verdict on the unrounded surplus;
 /// see issue #63, where classifying from the rounded field made web and MAUI give opposite answers to
 /// "is my plan funded" for the same inputs.</para>
+///
+/// <para><c>PolicyExcessWithdrawals</c> is the gross withdrawn *beyond* the per-account
+/// withdrawal-rate limits to keep the year funded. Zero means the stated rates already covered the
+/// year; non-zero means the plan only stays funded by spending faster than the policy the user
+/// entered. See issue #56.</para>
 /// </summary>
 public sealed record RetirementCashFlowPoint(
     int Age,
@@ -312,7 +317,7 @@ public sealed record RetirementCashFlowPoint(
     double AdditionalExpenses,
     IReadOnlyDictionary<string, double> ExpensesByItem,
     double WithdrawalTaxes,
-    double PolicyLimitedWithdrawals);
+    double PolicyExcessWithdrawals);
 
 public sealed record DeferredCompensationResult(
     IReadOnlyList<RetirementCashFlowPoint> Projections,

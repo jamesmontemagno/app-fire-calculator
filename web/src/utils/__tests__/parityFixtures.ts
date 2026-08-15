@@ -49,6 +49,12 @@ export interface DeferredAnnualSample {
   totalIncome: number
   expenses: number
   surplus: number
+  /**
+   * Gross withdrawn beyond the per-account withdrawal-rate limits to keep the year funded — see
+   * issue #56. Required on every sample, including the cases where it is `0`, so a case that omits
+   * it fails to typecheck rather than silently skipping the assertion.
+   */
+  policyExcessWithdrawals: number
 }
 
 export interface FireCase {

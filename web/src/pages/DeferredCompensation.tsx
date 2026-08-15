@@ -63,11 +63,18 @@ export default function DeferredCompensation() {
     () => new Map(params.additionalExpenses.map((expense, index) => [expense.id, { expense, index }])),
     [params.additionalExpenses],
   )
-  const firstShortfallPoint = useMemo(
-    () => results.projections.find(point => point.age === results.firstShortfallAge),
-    [results.firstShortfallAge, results.projections],
+  // Reports the years the plan had to spend past the stated withdrawal policy to stay funded, which
+  // is the opposite of what this disclosure said before issue #56: the rate is no longer a hard
+  // limit, so it can never be "what's binding" on a shortfall. A policy-exceeding year is usually a
+  // funded year, so this is deliberately not scoped to the first shortfall the way it once was.
+  const policyExcessPoints = useMemo(
+    () =>
+      results.projections.filter(
+        point => point.age >= params.semiRetirementAge && point.policyExcessWithdrawals > 0,
+      ),
+    [params.semiRetirementAge, results.projections],
   )
-  const firstShortfallIsPolicyLimited = (firstShortfallPoint?.policyLimitedWithdrawals ?? 0) > 0
+  const firstPolicyExcessPoint = policyExcessPoints[0]
 
   const toggleAnnualDetail = (age: number) => {
     setExpandedAges(previous => {
@@ -287,9 +294,7 @@ export default function DeferredCompensation() {
               subtext={
                 results.firstShortfallAge === null
                   ? `Every year through age ${params.planThroughAge} is covered`
-                  : firstShortfallIsPolicyLimited
-                    ? 'Caused by your withdrawal-rate limits, not by running out'
-                    : `${results.yearsFullyCovered} of ${results.retirementYears} years are covered in total`
+                  : `${results.yearsFullyCovered} of ${results.retirementYears} years are covered in total`
               }
             />
             <ResultCard
@@ -299,11 +304,13 @@ export default function DeferredCompensation() {
               subtext={`Future dollars at age ${params.planThroughAge}`}
             />
           </div>
-          {firstShortfallIsPolicyLimited && (
+          {firstPolicyExcessPoint && (
             <p className="text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3">
-              At age {results.firstShortfallAge} your accounts held {formatCurrency(firstShortfallPoint?.policyLimitedWithdrawals ?? 0)} more
-              than your annual withdrawal-rate limits allowed you to take. The withdrawal rate is a policy
-              limit you set, not a sign the money ran out — raise it on an account to close this gap.
+              To stay funded, this plan withdraws more than your withdrawal-rate limits allow in{' '}
+              {policyExcessPoints.length} of {results.retirementYears} retirement years, starting at age{' '}
+              {firstPolicyExcessPoint.age} — {formatCurrency(firstPolicyExcessPoint.policyExcessWithdrawals)} above
+              your limits that year. The withdrawal rate is a spending policy you set, not the amount of money
+              available, so the plan spends past it rather than reporting a shortfall next to an untouched balance.
             </p>
           )}
         </section>

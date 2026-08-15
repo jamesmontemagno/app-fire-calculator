@@ -203,6 +203,7 @@ describe('deferred compensation parity', () => {
       expect(point!.totalIncome).toBe(sample.totalIncome)
       expect(point!.expenses).toBe(sample.expenses)
       expect(point!.surplus).toBe(sample.surplus)
+      expect(point!.policyExcessWithdrawals).toBe(sample.policyExcessWithdrawals)
 
       // `toBe` uses Object.is, so it already distinguishes -0 from 0 and the assertion above would
       // catch a regression. This states the intent outright, because negative zero silently
