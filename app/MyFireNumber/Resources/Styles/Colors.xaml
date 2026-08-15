@@ -69,7 +69,7 @@
     <Color x:Key="SurfaceAccentSoftLight">#E4F0E9</Color>
     <Color x:Key="SurfaceAccentSoftDark">#29483B</Color>
     <Color x:Key="SurfaceAccentSoftWarmLight">#E6F0EA</Color>
-    <Color x:Key="SurfaceAccentSoftWarmDark">#29483A</Color>
+    <Color x:Key="SurfaceAccentSoftWarmDark">#29483B</Color>
     <Color x:Key="SurfaceAccentTintDeepLight">#EAF4EC</Color>
     <Color x:Key="SurfaceAccentTintDeepDark">#1B3B2D</Color>
     <Color x:Key="SurfaceAccentTintFlatLight">#EAF4EC</Color>
