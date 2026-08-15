@@ -97,6 +97,13 @@ public interface IFireNumberViewModel : ICalculatorViewModel
 
     string SavePlanActionDescription { get; }
 
+    // Declared here, not just on CalculatorViewModelBase, because FireNumberPage.xaml is typed
+    // against this interface. A base-class-only member is invisible to the compiled binding and
+    // silently degrades to a reflection binding, which trimming is free to remove in Release.
+    string DisplayPeriodQualifier { get; }
+
+    string DisplayPeriodSuffix { get; }
+
     IReadOnlyList<StandardFirePreset> StandardFirePresets { get; }
 
     StandardFirePreset? SelectedPreset { get; set; }
