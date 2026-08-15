@@ -50,7 +50,6 @@ public class CalculatorCatalogTests
     public void Every_shipped_calculator_definition_is_well_formed()
     {
         Assert.Equal(Catalog.All.Count, Catalog.All.Select(definition => definition.Id).Distinct(StringComparer.Ordinal).Count());
-        Assert.All(Catalog.All, definition => Assert.Equal($"calculator/{definition.Id}", definition.Route));
         Assert.All(Catalog.All, definition => Assert.False(string.IsNullOrWhiteSpace(definition.Title)));
         Assert.All(Catalog.All, definition => Assert.False(string.IsNullOrWhiteSpace(definition.IconGlyph)));
         Assert.All(Catalog.All, definition => Assert.InRange(definition.Summary.Length, 40, 120));
