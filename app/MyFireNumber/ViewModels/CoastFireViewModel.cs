@@ -141,10 +141,15 @@ public sealed partial class CoastFireViewModel : CalculatorViewModelBase<CoastFi
         var result = FinancialCalculator.CalculateCoastFire(draft.ToFireInputs());
         CoastNumberText = FormatCurrency(result.CoastNumber);
         FullFireNumberText = FormatCurrency(result.FireNumber);
-        YearsToCoastText = result.AlreadyCoasting ? "Already coasting" : $"{result.YearsToCoast:N1} years";
+        var coastReachable = double.IsFinite(result.YearsToCoast);
+        YearsToCoastText = result.AlreadyCoasting
+            ? "Already coasting"
+            : coastReachable ? $"{result.YearsToCoast:N1} years" : "Not reachable with these inputs";
         CoastStatusText = result.AlreadyCoasting
             ? "You're already Coast FIRE!"
-            : $"{result.YearsToCoast:N1} years to Coast FIRE";
+            : coastReachable
+                ? $"{result.YearsToCoast:N1} years to Coast FIRE"
+                : "The current contribution and return assumptions do not reach the Coast FIRE Number.";
         var progress = result.CoastNumber <= 0 ? 0 : Math.Clamp(draft.CurrentSavings / result.CoastNumber, 0, 1);
         CoastProgressDescription = $"{progress:P0} of your Coast FIRE Number is currently funded.";
         CoastProjectionSummary = $"By age {result.Projections[^1].Age:0}, coasting projects {FormatCurrency(result.Projections[^1].Portfolio)} and continuing contributions projects {FormatCurrency(result.ProjectionsWithContributions[^1].Portfolio)}.";

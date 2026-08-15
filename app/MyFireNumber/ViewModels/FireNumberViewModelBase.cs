@@ -195,7 +195,10 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
 
     protected virtual string BuildProjectionSummary(StandardFireResult result)
     {
-        return $"At the current assumptions, your portfolio is projected to reach {FormatCurrency(result.FireNumber)} in approximately {result.YearsToFire:N1} years.";
+        // An unreachable target is a valid result, so guard here rather than in each derived view model.
+        return double.IsPositiveInfinity(result.YearsToFire)
+            ? "The current contribution and return assumptions do not reach the FIRE Number."
+            : $"At the current assumptions, your portfolio is projected to reach {FormatCurrency(result.FireNumber)} in approximately {result.YearsToFire:N1} years.";
     }
 
     private bool TryBuildStandardDraft(out StandardFireDraft draft)
@@ -222,11 +225,11 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
             return false;
         }
 
-        if (!TryParsePercentage(ExpectedReturnText, 0, 20, out var expectedReturn)
+        if (!TryParsePercentage(ExpectedReturnText, 0, 15, out var expectedReturn)
             || !TryParsePercentage(InflationRateText, 0, 10, out var inflationRate)
             || !TryParsePercentage(WithdrawalRateText, 2, 6, out var withdrawalRate))
         {
-            ValidationMessage = "Expected return must be 0% to 20%, inflation 0% to 10%, and withdrawal rate 2% to 6%.";
+            ValidationMessage = "Expected return must be 0% to 15%, inflation 0% to 10%, and withdrawal rate 2% to 6%.";
             return false;
         }
 

@@ -1,0 +1,759 @@
+{
+  "cases": [
+    {
+      "id": "fire-defaults-inflation",
+      "kind": "fire",
+      "description": "Shipped web defaults with inflation-escalated contributions.",
+      "derivation": "rho = 1.07/1.03 - 1 = 0.03883495145631066. n = ln((C + T*rho)/(C + PV*rho))/ln(1+rho) = ln(70601.9417/27883.4951)/ln(1.03883495) = 24.3838964605, so fireAge = 54.4. The projection crosses the 1.2M target between age 54 (1,173,603) and age 55 (1,243,180) in today's dollars, which is the crossing invariant from issue #46.",
+      "inputs": {
+        "currentAge": 30,
+        "retirementAge": 55,
+        "currentSavings": 100000,
+        "annualContribution": 24000,
+        "annualIncome": 72000,
+        "expectedReturn": 0.07,
+        "inflationRate": 0.03,
+        "withdrawalRate": 0.04,
+        "annualExpenses": 48000,
+        "contributionGrowth": "inflation"
+      },
+      "expected": {
+        "fireNumber": 1200000,
+        "yearsToFire": 24.4,
+        "fireAge": 54.4,
+        "coastFireNumber": 462932,
+        "savingsRate": 0.3333333333333333,
+        "monthlyContribution": 2000.0,
+        "projectionCount": 36,
+        "projectionSamples": [
+          {
+            "year": 0,
+            "age": 30,
+            "portfolio": 100000,
+            "inflationAdjusted": 100000,
+            "totalContributions": 100000,
+            "contributions": 100000
+          },
+          {
+            "year": 10,
+            "age": 40,
+            "portfolio": 581874,
+            "inflationAdjusted": 432969,
+            "totalContributions": 383387,
+            "contributions": 32253.993104258934
+          },
+          {
+            "year": 24,
+            "age": 54,
+            "portfolio": 2385693,
+            "inflationAdjusted": 1173603,
+            "totalContributions": 951022,
+            "contributions": 48787.0585550497
+          },
+          {
+            "year": 25,
+            "age": 55,
+            "portfolio": 2602942,
+            "inflationAdjusted": 1243180,
+            "totalContributions": 1001273,
+            "contributions": 50250.670311701186
+          }
+        ],
+        "reverse": {
+          "requiredAnnualSavings": 22946.80026660227,
+          "requiredMonthlySavings": 1912.2333555501891,
+          "currentWillGrowTo": 259217,
+          "alreadyAchievable": false
+        }
+      }
+    },
+    {
+      "id": "fire-defaults-flat",
+      "kind": "fire",
+      "description": "Shipped web defaults with flat nominal contributions, whose purchasing power erodes.",
+      "derivation": "No closed form exists in today's dollars for a flat nominal contribution, so the deflated path (PV(1+r)^n + C((1+r)^n - 1)/r)/(1+i)^n is solved by bisection. Flat contributions must always reach FIRE no earlier than inflation-escalated ones.",
+      "inputs": {
+        "currentAge": 30,
+        "retirementAge": 55,
+        "currentSavings": 100000,
+        "annualContribution": 24000,
+        "annualIncome": 72000,
+        "expectedReturn": 0.07,
+        "inflationRate": 0.03,
+        "withdrawalRate": 0.04,
+        "annualExpenses": 48000,
+        "contributionGrowth": "flat"
+      },
+      "expected": {
+        "fireNumber": 1200000,
+        "yearsToFire": 29.2,
+        "fireAge": 59.2,
+        "coastFireNumber": 462932,
+        "savingsRate": 0.3333333333333333,
+        "monthlyContribution": 2000.0,
+        "projectionCount": 41,
+        "projectionSamples": [
+          {
+            "year": 0,
+            "age": 30,
+            "portfolio": 100000,
+            "inflationAdjusted": 100000,
+            "totalContributions": 100000,
+            "contributions": 100000
+          },
+          {
+            "year": 10,
+            "age": 40,
+            "portfolio": 528310,
+            "inflationAdjusted": 393112,
+            "totalContributions": 340000,
+            "contributions": 24000
+          },
+          {
+            "year": 24,
+            "age": 54,
+            "portfolio": 1903477,
+            "inflationAdjusted": 936384,
+            "totalContributions": 676000,
+            "contributions": 24000
+          },
+          {
+            "year": 25,
+            "age": 55,
+            "portfolio": 2060720,
+            "inflationAdjusted": 984211,
+            "totalContributions": 700000,
+            "contributions": 24000
+          }
+        ],
+        "reverse": {
+          "requiredAnnualSavings": 31143.402693590488,
+          "requiredMonthlySavings": 2595.2835577992073,
+          "currentWillGrowTo": 259217,
+          "alreadyAchievable": false
+        }
+      }
+    },
+    {
+      "id": "fire-non-default-inflation",
+      "kind": "fire",
+      "description": "A scenario sharing no defaults with any other case, inflation-escalated.",
+      "derivation": "rho = 1.06/1.025 - 1. Same closed form as the defaults case; chosen so a drift in either implementation cannot hide behind a value that happens to be a shared default.",
+      "inputs": {
+        "currentAge": 42,
+        "retirementAge": 60,
+        "currentSavings": 250000,
+        "annualContribution": 18000,
+        "annualIncome": 95000,
+        "expectedReturn": 0.06,
+        "inflationRate": 0.025,
+        "withdrawalRate": 0.035,
+        "annualExpenses": 70000,
+        "contributionGrowth": "inflation"
+      },
+      "expected": {
+        "fireNumber": 2000000,
+        "yearsToFire": 35.1,
+        "fireAge": 77.1,
+        "coastFireNumber": 1092833,
+        "savingsRate": 0.18947368421052632,
+        "monthlyContribution": 1500.0,
+        "projectionCount": 47,
+        "projectionSamples": [
+          {
+            "year": 0,
+            "age": 42,
+            "portfolio": 250000,
+            "inflationAdjusted": 250000,
+            "totalContributions": 250000,
+            "contributions": 250000
+          },
+          {
+            "year": 18,
+            "age": 60,
+            "portfolio": 1396066,
+            "inflationAdjusted": 895110,
+            "totalContributions": 663028,
+            "contributions": 28073.85691871705
+          },
+          {
+            "year": 35,
+            "age": 77,
+            "portfolio": 4722169,
+            "inflationAdjusted": 1989786,
+            "totalContributions": 1263425,
+            "contributions": 42717.69334919227
+          },
+          {
+            "year": 36,
+            "age": 78,
+            "portfolio": 5049285,
+            "inflationAdjusted": 2075729,
+            "totalContributions": 1307211,
+            "contributions": 43785.63568292207
+          }
+        ],
+        "reverse": {
+          "requiredAnnualSavings": 63449.60980843576,
+          "requiredMonthlySavings": 5287.467484036313,
+          "currentWillGrowTo": 457526,
+          "alreadyAchievable": false
+        }
+      }
+    },
+    {
+      "id": "fire-non-default-flat",
+      "kind": "fire",
+      "description": "The same non-default scenario with flat nominal contributions.",
+      "derivation": "Bisection on the deflated flat path, as in fire-defaults-flat.",
+      "inputs": {
+        "currentAge": 42,
+        "retirementAge": 60,
+        "currentSavings": 250000,
+        "annualContribution": 18000,
+        "annualIncome": 95000,
+        "expectedReturn": 0.06,
+        "inflationRate": 0.025,
+        "withdrawalRate": 0.035,
+        "annualExpenses": 70000,
+        "contributionGrowth": "flat"
+      },
+      "expected": {
+        "fireNumber": 2000000,
+        "yearsToFire": 40.1,
+        "fireAge": 82.1,
+        "coastFireNumber": 1092833,
+        "savingsRate": 0.18947368421052632,
+        "monthlyContribution": 1500.0,
+        "projectionCount": 51,
+        "projectionSamples": [
+          {
+            "year": 0,
+            "age": 42,
+            "portfolio": 250000,
+            "inflationAdjusted": 250000,
+            "totalContributions": 250000,
+            "contributions": 250000
+          },
+          {
+            "year": 18,
+            "age": 60,
+            "portfolio": 1269887,
+            "inflationAdjusted": 814208,
+            "totalContributions": 574000,
+            "contributions": 18000
+          },
+          {
+            "year": 40,
+            "age": 82,
+            "portfolio": 5357145,
+            "inflationAdjusted": 1995165,
+            "totalContributions": 970000,
+            "contributions": 18000
+          },
+          {
+            "year": 41,
+            "age": 83,
+            "portfolio": 5696574,
+            "inflationAdjusted": 2069833,
+            "totalContributions": 988000,
+            "contributions": 18000
+          }
+        ],
+        "reverse": {
+          "requiredAnnualSavings": 77841.18595800038,
+          "requiredMonthlySavings": 6486.765496500032,
+          "currentWillGrowTo": 457526,
+          "alreadyAchievable": false
+        }
+      }
+    },
+    {
+      "id": "fire-degenerate-zero-real-return",
+      "kind": "fire",
+      "description": "Return exactly equals inflation, so the real return is zero and the annuity factor is 0/0.",
+      "derivation": "r = i = 0.05 gives rho = 0 exactly. The closed form ((1+rho)^n - 1)/rho is undefined and its limit as rho -> 0 is the linear solution: 50,000 + 20,000n = 1,250,000 gives n = 60 exactly, so fireAge = 90. This is a live divide-by-zero that is currently special-cased correctly and must stay that way. Note the projection series is capped at 50 years, so it stops 10 years short of the crossing and the crossing invariant is not checkable here.",
+      "inputs": {
+        "currentAge": 30,
+        "retirementAge": 60,
+        "currentSavings": 50000,
+        "annualContribution": 20000,
+        "annualIncome": 100000,
+        "expectedReturn": 0.05,
+        "inflationRate": 0.05,
+        "withdrawalRate": 0.04,
+        "annualExpenses": 50000,
+        "contributionGrowth": "inflation"
+      },
+      "expected": {
+        "fireNumber": 1250000,
+        "yearsToFire": 60.0,
+        "fireAge": 90.0,
+        "coastFireNumber": 1250000,
+        "savingsRate": 0.2,
+        "monthlyContribution": 1666.6666666666667,
+        "projectionCount": 51,
+        "projectionSamples": [
+          {
+            "year": 0,
+            "age": 30,
+            "portfolio": 50000,
+            "inflationAdjusted": 50000,
+            "totalContributions": 50000,
+            "contributions": 50000
+          },
+          {
+            "year": 30,
+            "age": 60,
+            "portfolio": 2809263,
+            "inflationAdjusted": 650000,
+            "totalContributions": 1445216,
+            "contributions": 86438.84750301336
+          },
+          {
+            "year": 49,
+            "age": 79,
+            "portfolio": 11248973,
+            "inflationAdjusted": 1030000,
+            "totalContributions": 4216960,
+            "contributions": 218426.66258578477
+          },
+          {
+            "year": 50,
+            "age": 80,
+            "portfolio": 12040770,
+            "inflationAdjusted": 1050000,
+            "totalContributions": 4446308,
+            "contributions": 229347.995715074
+          }
+        ],
+        "reverse": {
+          "requiredAnnualSavings": 40000.0,
+          "requiredMonthlySavings": 3333.3333333333335,
+          "currentWillGrowTo": 50000,
+          "alreadyAchievable": false
+        }
+      }
+    },
+    {
+      "id": "fire-unreachable-negative-real-return",
+      "kind": "fire",
+      "description": "A 2% return against 5% inflation. The target is genuinely unreachable, so Infinity is correct.",
+      "derivation": "rho = 1.02/1.05 - 1 = -0.02857142857142858 < 0, so B_{k+1} = B_k(1+rho) + C has a stable fixed point at B* = -C/rho = 20000/0.02857142857142858 = 700,000 exactly. The target is 50,000/0.04 = 1,250,000 > 700,000, so no finite n reaches it. Infinity is the mathematically correct answer and must not be 'fixed'.",
+      "inputs": {
+        "currentAge": 30,
+        "retirementAge": 60,
+        "currentSavings": 100000,
+        "annualContribution": 20000,
+        "annualIncome": 100000,
+        "expectedReturn": 0.02,
+        "inflationRate": 0.05,
+        "withdrawalRate": 0.04,
+        "annualExpenses": 50000,
+        "contributionGrowth": "inflation"
+      },
+      "expected": {
+        "fireNumber": 1250000,
+        "yearsToFire": "Infinity",
+        "fireAge": "Infinity",
+        "coastFireNumber": 2982523,
+        "savingsRate": 0.2,
+        "monthlyContribution": 1666.6666666666667,
+        "projectionCount": 51,
+        "projectionSamples": [
+          {
+            "year": 0,
+            "age": 30,
+            "portfolio": 100000,
+            "inflationAdjusted": 100000,
+            "totalContributions": 100000,
+            "contributions": 100000
+          },
+          {
+            "year": 30,
+            "age": 60,
+            "portfolio": 1938543,
+            "inflationAdjusted": 448535,
+            "totalContributions": 1495216,
+            "contributions": 86438.84750301336
+          },
+          {
+            "year": 50,
+            "age": 80,
+            "portfolio": 6412227,
+            "inflationAdjusted": 559170,
+            "totalContributions": 4496308,
+            "contributions": 229347.995715074
+          }
+        ],
+        "reverse": {
+          "requiredAnnualSavings": 59420.4203852185,
+          "requiredMonthlySavings": 4951.701698768208,
+          "currentWillGrowTo": 41911,
+          "alreadyAchievable": false
+        }
+      }
+    },
+    {
+      "id": "fire-already-funded",
+      "kind": "fire",
+      "description": "Current savings already exceed the FIRE number.",
+      "derivation": "PV >= target short-circuits to n = 0, so fireAge equals currentAge and no solving happens.",
+      "inputs": {
+        "currentAge": 45,
+        "retirementAge": 55,
+        "currentSavings": 2000000,
+        "annualContribution": 24000,
+        "annualIncome": 72000,
+        "expectedReturn": 0.07,
+        "inflationRate": 0.03,
+        "withdrawalRate": 0.04,
+        "annualExpenses": 48000,
+        "contributionGrowth": "inflation"
+      },
+      "expected": {
+        "fireNumber": 1200000,
+        "yearsToFire": 0.0,
+        "fireAge": 45.0,
+        "coastFireNumber": 819815,
+        "savingsRate": 0.3333333333333333,
+        "monthlyContribution": 2000.0,
+        "projectionCount": 11,
+        "projectionSamples": [
+          {
+            "year": 0,
+            "age": 45,
+            "portfolio": 2000000,
+            "inflationAdjusted": 2000000,
+            "totalContributions": 2000000,
+            "contributions": 2000000
+          },
+          {
+            "year": 5,
+            "age": 50,
+            "portfolio": 2955449,
+            "inflationAdjusted": 2549396,
+            "totalContributions": 2131242,
+            "contributions": 27822.577783200002
+          }
+        ],
+        "reverse": {
+          "requiredAnnualSavings": 0.0,
+          "requiredMonthlySavings": 0.0,
+          "currentWillGrowTo": 2927491,
+          "alreadyAchievable": true
+        }
+      }
+    },
+    {
+      "id": "debt-single-20pct-apr",
+      "kind": "debt",
+      "description": "$10,000 at 20% APR with a $500/month budget.",
+      "derivation": "Month-one interest is exactly 10000 * 0.20/12 = 166.666..., charged once and only once. Cross-checked against the amortization closed form n = -ln(1 - P*m/A)/ln(1+m) = 24.53, so 25 months. Pre-fix (#45) this wrongly reported 34 months, $6,617 of interest and $333.33 of month-one interest because interest was charged twice per month.",
+      "inputs": {
+        "debts": [
+          {
+            "id": "card",
+            "name": "Card",
+            "balance": 10000,
+            "rate": 0.2,
+            "minPayment": 500
+          }
+        ],
+        "monthlyPayment": 500,
+        "extraPayment": 0,
+        "strategy": "snowball"
+      },
+      "expected": {
+        "totalMonths": 25,
+        "totalInterest": 2266,
+        "totalPrincipal": 10000,
+        "monthlyPayment": 500,
+        "firstMonthInterest": 166.66666666666666,
+        "payoffOrder": [
+          "Card"
+        ]
+      }
+    },
+    {
+      "id": "debt-multi-snowball",
+      "kind": "debt",
+      "description": "Three debts cleared smallest-balance-first.",
+      "derivation": "Snowball orders by balance ascending, so the $1,500 debt clears first even though it carries the lowest rate. Total interest must be >= the avalanche case below.",
+      "inputs": {
+        "debts": [
+          {
+            "id": "a",
+            "name": "Card A",
+            "balance": 8000,
+            "rate": 0.24,
+            "minPayment": 160
+          },
+          {
+            "id": "b",
+            "name": "Card B",
+            "balance": 1500,
+            "rate": 0.09,
+            "minPayment": 40
+          },
+          {
+            "id": "c",
+            "name": "Loan C",
+            "balance": 12000,
+            "rate": 0.16,
+            "minPayment": 250
+          }
+        ],
+        "monthlyPayment": 900,
+        "extraPayment": 0,
+        "strategy": "snowball"
+      },
+      "expected": {
+        "totalMonths": 30,
+        "totalInterest": 5336,
+        "totalPrincipal": 21500,
+        "monthlyPayment": 900,
+        "firstMonthInterest": 331.25,
+        "payoffOrder": [
+          "Card B",
+          "Card A",
+          "Loan C"
+        ]
+      }
+    },
+    {
+      "id": "debt-multi-avalanche",
+      "kind": "debt",
+      "description": "The same three debts cleared highest-rate-first.",
+      "derivation": "Avalanche orders by rate descending. Directing every spare dollar at the most expensive balance can never cost more total interest than any other ordering, so this must come in at or below debt-multi-snowball. A pre-fix bug inverted exactly this relationship.",
+      "inputs": {
+        "debts": [
+          {
+            "id": "a",
+            "name": "Card A",
+            "balance": 8000,
+            "rate": 0.24,
+            "minPayment": 160
+          },
+          {
+            "id": "b",
+            "name": "Card B",
+            "balance": 1500,
+            "rate": 0.09,
+            "minPayment": 40
+          },
+          {
+            "id": "c",
+            "name": "Loan C",
+            "balance": 12000,
+            "rate": 0.16,
+            "minPayment": 250
+          }
+        ],
+        "monthlyPayment": 900,
+        "extraPayment": 0,
+        "strategy": "avalanche"
+      },
+      "expected": {
+        "totalMonths": 30,
+        "totalInterest": 4957,
+        "totalPrincipal": 21500,
+        "monthlyPayment": 900,
+        "firstMonthInterest": 331.25,
+        "payoffOrder": [
+          "Card A",
+          "Loan C",
+          "Card B"
+        ]
+      }
+    },
+    {
+      "id": "withdrawal-surviving-portfolio",
+      "kind": "withdrawal",
+      "description": "$1M at 4% with a 7% return and 3% inflation, over a 30 year horizon.",
+      "derivation": "The 3.88% real return roughly matches the 4% real draw, so the portfolio outlives the horizon and longevity is capped at retirementYears. The comparison table applies its own 50 year cap, so here the two legitimately report different caps rather than disagreeing.",
+      "inputs": {
+        "portfolioValue": 1000000,
+        "withdrawalRate": 0.04,
+        "expectedReturn": 0.07,
+        "inflationRate": 0.03,
+        "retirementYears": 30
+      },
+      "expected": {
+        "annualWithdrawal": 40000,
+        "monthlyWithdrawal": 3333,
+        "portfolioLongevity": 30,
+        "horizonFundedRatio": 1,
+        "endingBalance": 2427262,
+        "rateAnalysis": [
+          {
+            "rate": 0.03,
+            "years": 50,
+            "endBalance": 10652186
+          },
+          {
+            "rate": 0.035,
+            "years": 50,
+            "endBalance": 7518046
+          },
+          {
+            "rate": 0.04,
+            "years": 50,
+            "endBalance": 4383906
+          },
+          {
+            "rate": 0.045,
+            "years": 50,
+            "endBalance": 1249766
+          },
+          {
+            "rate": 0.05,
+            "years": 42,
+            "endBalance": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "withdrawal-depleting-portfolio",
+      "kind": "withdrawal",
+      "description": "$1M at 5% with a 3% return and 3% inflation, over a 40 year horizon.",
+      "derivation": "Withdrawals grow at inflation while the portfolio grows at the same 3%, so the balance declines and is exhausted well before either cap binds. With neither cap active the headline longevity and the 5% row of the comparison table must agree exactly.",
+      "inputs": {
+        "portfolioValue": 1000000,
+        "withdrawalRate": 0.05,
+        "expectedReturn": 0.03,
+        "inflationRate": 0.03,
+        "retirementYears": 40
+      },
+      "expected": {
+        "annualWithdrawal": 50000,
+        "monthlyWithdrawal": 4167,
+        "portfolioLongevity": 20,
+        "horizonFundedRatio": 0.5,
+        "endingBalance": 52605,
+        "rateAnalysis": [
+          {
+            "rate": 0.03,
+            "years": 34,
+            "endBalance": 0
+          },
+          {
+            "rate": 0.035,
+            "years": 29,
+            "endBalance": 0
+          },
+          {
+            "rate": 0.04,
+            "years": 25,
+            "endBalance": 0
+          },
+          {
+            "rate": 0.045,
+            "years": 22,
+            "endBalance": 0
+          },
+          {
+            "rate": 0.05,
+            "years": 20,
+            "endBalance": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "investment-defaults",
+      "kind": "investment",
+      "description": "Shipped Savings & Investment defaults: $100k plus $500/month for 30 years.",
+      "derivation": "Deflated closed form PV(1+rho)^30 + C((1+rho)^30 - 1)/rho with C = 6,000 and rho = 0.03883495145631066 gives 643,649.7392030944 in today's dollars; multiplying by 1.03^30 gives the 1,562,306.8565586845 nominal figure. The nominal recurrence B_k = B_{k-1}(1.07) + 6000(1.03)^k reproduces both to floating-point noise, which is what makes this an identity rather than an approximation.",
+      "inputs": {
+        "startingAmount": 100000,
+        "contributionAmount": 500,
+        "contributionFrequency": "monthly",
+        "yearsInvesting": 30,
+        "expectedReturn": 0.07,
+        "inflationRate": 0.03,
+        "annualIncome": 72000,
+        "currentAge": 30,
+        "contributionGrowth": "inflation"
+      },
+      "expected": {
+        "annualContribution": 6000,
+        "monthlyContribution": 500.0,
+        "savingsRate": 0.08333333333333333,
+        "finalNominalBalance": 1562306.8565586861,
+        "finalInflationAdjustedBalance": 643649.7392030951,
+        "totalInvested": 394016.0690650701,
+        "totalGrowth": 1168290.7874936159,
+        "inflationImpact": 918657.117355591
+      }
+    },
+    {
+      "id": "investment-flat-contributions",
+      "kind": "investment",
+      "description": "The same plan with flat nominal contributions.",
+      "derivation": "B_k = B_{k-1}(1.07) + 6000 with no escalation, deflated by 1.03^30 at the end. Total invested is exactly 100,000 + 30*6,000 = 280,000 because nothing escalates.",
+      "inputs": {
+        "startingAmount": 100000,
+        "contributionAmount": 500,
+        "contributionFrequency": "monthly",
+        "yearsInvesting": 30,
+        "expectedReturn": 0.07,
+        "inflationRate": 0.03,
+        "annualIncome": 72000,
+        "currentAge": 30,
+        "contributionGrowth": "flat"
+      },
+      "expected": {
+        "annualContribution": 6000,
+        "monthlyContribution": 500.0,
+        "savingsRate": 0.08333333333333333,
+        "finalNominalBalance": 1327990.222208664,
+        "finalInflationAdjustedBalance": 547114.388316556,
+        "totalInvested": 280000,
+        "totalGrowth": 1047990.222208664,
+        "inflationImpact": 780875.833892108
+      }
+    },
+    {
+      "id": "healthcare-default-gap",
+      "kind": "healthcare",
+      "description": "Retiring at 55 with Medicare at 65 leaves a 10 year self-funded gap.",
+      "derivation": "annualCost = 600*12 + 2,500 + 2,000 = 11,700. Costs inflate from year zero, so the total is the geometric sum A*((1+i)^n - 1)/i = 11,700*(1.03^10 - 1)/0.03 = 134,126.6, which rounds to 134,127.",
+      "inputs": {
+        "currentAge": 30,
+        "earlyRetirementAge": 55,
+        "monthlyPremium": 600,
+        "annualDeductible": 2500,
+        "annualOutOfPocket": 2000,
+        "inflationRate": 0.03
+      },
+      "expected": {
+        "gapYears": 10,
+        "annualCost": 11700,
+        "totalCost": 134127,
+        "avgAnnualCost": 13413
+      }
+    },
+    {
+      "id": "healthcare-no-gap",
+      "kind": "healthcare",
+      "description": "Retiring at or after Medicare eligibility leaves no gap at all.",
+      "derivation": "gapYears = max(0, 65 - 67) = 0, so the total is an empty sum and the average is defined as zero rather than a division by zero.",
+      "inputs": {
+        "currentAge": 60,
+        "earlyRetirementAge": 67,
+        "monthlyPremium": 600,
+        "annualDeductible": 2500,
+        "annualOutOfPocket": 2000,
+        "inflationRate": 0.03
+      },
+      "expected": {
+        "gapYears": 0,
+        "annualCost": 11700,
+        "totalCost": 0,
+        "avgAnnualCost": 0
+      }
+    }
+  ]
+}

@@ -65,9 +65,9 @@
                                 <Button Grid.Column="1" Text="Avalanche" Command="{Binding SetDebtStrategyCommand}" CommandParameter="avalanche" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Pay the highest interest rate first." />
                             </Grid>
                             <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                <controls:NumericInputView IsVisible="{Binding IsFixedDebtPayoff}" Header="Monthly budget" HelpText="Total amount available for debt payments each month, in dollars." Placeholder="1000" Text="{Binding DebtMonthlyBudgetText}" />
+                                <controls:NumericInputView IsVisible="{Binding IsFixedDebtPayoff}" Header="Monthly debt budget" HelpText="Total amount available for debt payments each month, in dollars." Placeholder="1000" Text="{Binding DebtMonthlyBudgetText}" />
                                 <controls:NumericInputView IsVisible="{Binding IsTargetDebtPayoff}" Header="Target months" HelpText="Months in which you aim to eliminate all debt." Placeholder="36" Text="{Binding DebtTargetMonthsText}" />
-                                <controls:NumericInputView Grid.Column="1" Header="Extra payment" HelpText="Additional monthly amount paid beyond minimums, in dollars." Placeholder="0" Text="{Binding DebtExtraPaymentText}" />
+                                <controls:NumericInputView Grid.Column="1" Header="Extra monthly payment" HelpText="Additional monthly amount paid beyond minimums, in dollars." Placeholder="0" Text="{Binding DebtExtraPaymentText}" />
                             </Grid>
                         </VerticalStackLayout>
                     </controls:AdvancedAssumptionsExpander>

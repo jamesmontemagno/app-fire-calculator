@@ -10,7 +10,22 @@ public sealed record FireInputs(
     double InflationRate,
     double WithdrawalRate,
     double AnnualExpenses,
-    int ProjectionStartYear = 0);
+    int ProjectionStartYear = 0,
+    ContributionGrowth ContributionGrowth = ContributionGrowth.Inflation);
+
+/// <summary>
+/// How contributions behave over time.
+/// <para><see cref="Inflation"/>: the contribution keeps a constant purchasing power, so the nominal
+/// amount paid at the end of year k is <c>annualContribution * (1 + inflationRate)^k</c>. This is the
+/// model the closed-form solver assumes, and it is the app default.</para>
+/// <para><see cref="Flat"/>: the same nominal amount is contributed every year, so its purchasing power
+/// erodes.</para>
+/// </summary>
+public enum ContributionGrowth
+{
+    Inflation,
+    Flat
+}
 
 public sealed record ProjectionPoint(
     double Age,
@@ -86,7 +101,9 @@ public sealed record WithdrawalRateAnalysis(double Rate, double Years, double En
 
 public sealed record WithdrawalResult(
     double PortfolioLongevity,
-    double SuccessRate,
+    // Share of the retirement horizon funded by this single deterministic projection
+    // (PortfolioLongevity / RetirementYears, capped at 1). Not a probability of success.
+    double HorizonFundedRatio,
     double AnnualWithdrawal,
     double MonthlyWithdrawal,
     double EndingBalance,
@@ -144,7 +161,8 @@ public sealed record InvestmentGrowthInputs(
     double InflationRate,
     double AnnualIncome,
     double CurrentAge = 30,
-    int ProjectionStartYear = 0);
+    int ProjectionStartYear = 0,
+    ContributionGrowth ContributionGrowth = ContributionGrowth.Inflation);
 
 public sealed record InvestmentProjectionPoint(
     double Age,
@@ -190,10 +208,7 @@ public sealed record HealthcareGapResult(
     double AnnualCost,
     double TotalCost,
     double AverageAnnualCost,
-    IReadOnlyList<HealthcareYear> YearlyBreakdown,
-    double EstimatedSubsidy30k,
-    double EstimatedSubsidy50k,
-    double EstimatedSubsidy75k);
+    IReadOnlyList<HealthcareYear> YearlyBreakdown);
 
 public enum RetirementAccountType
 {
@@ -206,6 +221,26 @@ public enum RetirementAccountType
     Other
 }
 
+public static class RetirementTaxDefaults
+{
+    /// <summary>
+    /// The flat rate this app already assumes for ordinary income. It matches the default tax rate
+    /// used for retirement income sources so the two sides of the ledger share one assumption.
+    /// </summary>
+    public const double OrdinaryIncomeTaxRate = 0.25;
+
+    /// <summary>
+    /// Withdrawals from tax-deferred accounts are ordinary income. Roth and HSA withdrawals are
+    /// genuinely tax-free. Taxable and savings accounts default to zero because only the gain or
+    /// interest portion is taxable and this model tracks no cost basis, so taxing the full
+    /// withdrawal would overstate it.
+    /// </summary>
+    public static double WithdrawalTaxRateFor(RetirementAccountType type) =>
+        type is RetirementAccountType.Deferred or RetirementAccountType.Traditional
+            ? OrdinaryIncomeTaxRate
+            : 0;
+}
+
 public sealed record RetirementAccount(
     string Id,
     string Name,
@@ -215,7 +250,16 @@ public sealed record RetirementAccount(
     double AnnualReturn,
     int AvailableAge,
     double WithdrawalRate,
-    int PayoutYears);
+    int PayoutYears,
+    double? WithdrawalTaxRate = null)
+{
+    /// <summary>
+    /// Drafts saved before withdrawal tax existed deserialize with no rate, so they resolve to the
+    /// type-driven default rather than silently becoming tax-free.
+    /// </summary>
+    public double EffectiveWithdrawalTaxRate =>
+        Math.Clamp(WithdrawalTaxRate ?? RetirementTaxDefaults.WithdrawalTaxRateFor(Type), 0, 1);
+}
 
 public sealed record RetirementIncomeSource(
     string Id,
@@ -257,7 +301,9 @@ public sealed record RetirementCashFlowPoint(
     IReadOnlyDictionary<string, double> IncomeBySource,
     double CoreExpenses,
     double AdditionalExpenses,
-    IReadOnlyDictionary<string, double> ExpensesByItem);
+    IReadOnlyDictionary<string, double> ExpensesByItem,
+    double WithdrawalTaxes,
+    double PolicyLimitedWithdrawals);
 
 public sealed record DeferredCompensationResult(
     IReadOnlyList<RetirementCashFlowPoint> Projections,
@@ -266,4 +312,7 @@ public sealed record DeferredCompensationResult(
     double FirstYearIncome,
     double FirstYearSurplus,
     double EndingBalance,
-    int FundedYears);
+    int FundedYears,
+    int YearsFullyCovered,
+    int? FirstShortfallAge,
+    int RetirementYears);

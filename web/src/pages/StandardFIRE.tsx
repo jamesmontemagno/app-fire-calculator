@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateStandardFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, CurrencyPeriodProvider, PercentageInput, PeriodToggle, ToggleInput } from '../components/inputs'
 import {
   AdvancedDetails,
   CalculatorFooter,
@@ -41,6 +41,7 @@ export default function StandardFIRE() {
     inflationRate: params.inflationRate,
     withdrawalRate: params.withdrawalRate,
     annualExpenses: params.annualExpenses,
+    contributionGrowth: params.contributionGrowth,
   }), [params])
 
   const handleExport = () => {
@@ -72,7 +73,7 @@ export default function StandardFIRE() {
   }
 
   return (
-    <>
+    <CurrencyPeriodProvider period={params.currencyPeriod} onChange={value => setParam('currencyPeriod', value)}>
       <SEO {...calculatorSEO.standard} />
       <div className="space-y-8">
         <header>
@@ -85,14 +86,15 @@ export default function StandardFIRE() {
             <CardHeader>
               <h2 id="standard-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Use today&apos;s spending and after-tax income to make the estimate meaningful.</p>
+              <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Your current age." min={18} max={80} showSlider />
-              <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="The age you want this plan to support." min={params.currentAge + 1} max={90} showSlider />
+              <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="The age you want this plan to support." min={params.currentAge} max={90} showSlider />
               <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments available for retirement, including workplace plans, IRAs, and brokerage accounts." />
-              <CurrencyInput label="Annual contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="How much you expect to invest each year." allowMonthlyToggle />
-              <CurrencyInput label="After-tax take-home income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Annual income after taxes. It is used to calculate your savings rate." allowMonthlyToggle />
-              <CurrencyInput label="Annual retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected annual after-tax spending in retirement, expressed in today’s purchasing power." allowMonthlyToggle />
+              <CurrencyInput label="Contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="How much you expect to invest." periodic />
+              <CurrencyInput label="After-tax take-home income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Income after taxes. It is used to calculate your savings rate." periodic />
+              <CurrencyInput label="Retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, expressed in today’s purchasing power." periodic />
             </CardContent>
           </Card>
         </section>
@@ -119,6 +121,13 @@ export default function StandardFIRE() {
           <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation. This is an estimate, not a guarantee." min={0} max={0.15} />
           <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual increase in prices. Spending is kept in today’s dollars for this calculation." min={0} max={0.1} />
           <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="The portion of your portfolio you plan to spend each year in retirement." min={0.02} max={0.06} />
+          <ToggleInput
+            label="Increase contributions with inflation"
+            tooltip="On: the amount you invest rises with inflation, so its purchasing power stays constant. Off: you invest the same dollar amount every year and its purchasing power erodes."
+            checked={params.contributionGrowth === 'inflation'}
+            onChange={checked => setParam('contributionGrowth', checked ? 'inflation' : 'flat')}
+            className="sm:col-span-2"
+          />
         </AdvancedDetails>
 
         <section aria-labelledby="standard-projection-heading">
@@ -127,7 +136,7 @@ export default function StandardFIRE() {
               <h2 id="standard-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Compare the projected portfolio with your FIRE number; the dashed line shows purchasing power in today&apos;s dollars.</p>
             </CardHeader>
-            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} colorScheme="orange" height={350} /></CardContent>
+            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="orange" height={350} /></CardContent>
           </Card>
         </section>
 
@@ -137,6 +146,6 @@ export default function StandardFIRE() {
 
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
-    </>
+    </CurrencyPeriodProvider>
   )
 }

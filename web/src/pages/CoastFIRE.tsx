@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateCoastFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, CurrencyPeriodProvider, PercentageInput, PeriodToggle, ToggleInput } from '../components/inputs'
 import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
@@ -16,6 +16,7 @@ export default function CoastFIRE() {
   const results = useMemo(() => calculateCoastFIRE(
     params.currentAge, params.retirementAge, params.currentSavings, params.annualContribution,
     params.expectedReturn, params.inflationRate, params.annualExpenses, params.withdrawalRate,
+    params.contributionGrowth,
   ), [params])
 
   const handleExport = () => {
@@ -33,7 +34,7 @@ export default function CoastFIRE() {
   }
 
   return (
-    <>
+    <CurrencyPeriodProvider period={params.currencyPeriod} onChange={value => setParam('currencyPeriod', value)}>
       <SEO {...calculatorSEO.coast} />
       <div className="space-y-8">
         <header>
@@ -46,13 +47,14 @@ export default function CoastFIRE() {
             <CardHeader>
               <h2 id="coast-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Your target age and today-dollar retirement spending set the Coast FIRE threshold.</p>
+              <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Your current age." min={18} max={80} showSlider />
-              <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="The age your Coast portfolio should support." min={params.currentAge + 1} max={90} showSlider />
+              <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="The age your Coast portfolio should support." min={params.currentAge} max={90} showSlider />
               <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments available for retirement." />
-              <CurrencyInput label="Annual contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="Contributions used only to estimate how soon you can reach Coast FIRE." allowMonthlyToggle />
-              <CurrencyInput label="Annual retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected annual after-tax spending in retirement, stated in today’s purchasing power." allowMonthlyToggle />
+              <CurrencyInput label="Contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="Contributions used only to estimate how soon you can reach Coast FIRE." periodic />
+              <CurrencyInput label="Retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, stated in today’s purchasing power." periodic />
             </CardContent>
           </Card>
         </section>
@@ -75,7 +77,14 @@ export default function CoastFIRE() {
         <AdvancedDetails description="These assumptions govern how the balance and retirement spending change over time.">
           <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation." min={0} max={0.15} />
           <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual price growth." min={0} max={0.1} />
-          <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="Share of the portfolio available for annual retirement spending." min={0.025} max={0.06} />
+          <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="Share of the portfolio available for annual retirement spending." min={0.02} max={0.06} />
+          <ToggleInput
+            label="Increase contributions with inflation"
+            tooltip="On: the amount you invest rises with inflation, so its purchasing power stays constant. Off: you invest the same dollar amount every year and its purchasing power erodes."
+            checked={params.contributionGrowth === 'inflation'}
+            onChange={checked => setParam('contributionGrowth', checked ? 'inflation' : 'flat')}
+            className="sm:col-span-2"
+          />
         </AdvancedDetails>
 
         <section aria-labelledby="coast-projection-heading">
@@ -84,13 +93,13 @@ export default function CoastFIRE() {
               <h2 id="coast-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Continue contributing</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">The projection includes your stated contributions. The FIRE line represents the retirement target in today&apos;s dollars.</p>
             </CardHeader>
-            <CardContent><ProjectionChart data={results.projectionsWithContributions} fireNumber={results.fireNumber} colorScheme="blue" height={350} /></CardContent>
+            <CardContent><ProjectionChart data={results.projectionsWithContributions} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="blue" height={350} /></CardContent>
           </Card>
         </section>
 
         <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">Coast FIRE does not mean you can cover current living costs without work. It means your retirement savings could grow to the future target if the assumed return and inflation rates hold.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
-    </>
+    </CurrencyPeriodProvider>
   )
 }

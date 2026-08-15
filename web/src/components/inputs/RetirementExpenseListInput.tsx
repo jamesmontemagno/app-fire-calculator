@@ -197,11 +197,11 @@ export default function RetirementExpenseListInput({
                       </select>
                     </div>
                     <CurrencyInput
-                      label="Annual amount"
+                      label="Amount"
                       value={expense.annualAmount}
                       onChange={value => updateExpense(expense.id, 'annualAmount', value)}
-                      tooltip="Enter today’s annual cost. It grows with the scenario inflation rate."
-                      allowMonthlyToggle
+                      tooltip="Enter today’s cost. It grows with the scenario inflation rate."
+                      periodic
                     />
                     <AgeInput
                       label="Starts at age"

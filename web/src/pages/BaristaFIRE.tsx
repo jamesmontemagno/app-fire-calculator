@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateBaristaFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, CurrencyPeriodProvider, PercentageInput, PeriodToggle, ToggleInput } from '../components/inputs'
 import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
@@ -16,6 +16,7 @@ export default function BaristaFIRE() {
   const results = useMemo(() => calculateBaristaFIRE(
     params.currentAge, params.currentSavings, params.annualContribution, params.expectedReturn,
     params.inflationRate, params.annualExpenses, params.withdrawalRate, params.partTimeIncome,
+    params.contributionGrowth,
   ), [params])
   const portfolioReduction = results.fullFireNumber - results.baristaNumber
 
@@ -36,7 +37,7 @@ export default function BaristaFIRE() {
   }
 
   return (
-    <>
+    <CurrencyPeriodProvider period={params.currencyPeriod} onChange={value => setParam('currencyPeriod', value)}>
       <SEO {...calculatorSEO.barista} />
       <div className="space-y-8">
         <header>
@@ -49,13 +50,14 @@ export default function BaristaFIRE() {
             <CardHeader>
               <h2 id="barista-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your plan</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Pair today-dollar spending with the income you expect from flexible work.</p>
+              <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Your current age." min={18} max={80} showSlider />
               <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments available for retirement." />
-              <CurrencyInput label="Annual contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="How much you expect to invest each year before Barista FIRE." allowMonthlyToggle />
-              <CurrencyInput label="Annual retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected annual after-tax spending in retirement, expressed in today’s purchasing power." allowMonthlyToggle />
-              <CurrencyInput label="After-tax part-time take-home income" value={params.partTimeIncome} onChange={value => setParam('partTimeIncome', value)} tooltip="Expected annual income after taxes from part-time or flexible work." allowMonthlyToggle />
+              <CurrencyInput label="Contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="How much you expect to invest before Barista FIRE." periodic />
+              <CurrencyInput label="Retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, expressed in today’s purchasing power." periodic />
+              <CurrencyInput label="After-tax part-time take-home income" value={params.partTimeIncome} onChange={value => setParam('partTimeIncome', value)} tooltip="Expected income after taxes from part-time or flexible work." periodic />
             </CardContent>
           </Card>
         </section>
@@ -76,19 +78,26 @@ export default function BaristaFIRE() {
         <AdvancedDetails description="These long-term assumptions govern investment growth and portfolio withdrawals.">
           <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation." min={0} max={0.15} />
           <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual price growth." min={0} max={0.1} />
-          <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="Share of the portfolio available for annual spending." min={0.025} max={0.06} />
+          <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="Share of the portfolio available for annual spending." min={0.02} max={0.06} />
+          <ToggleInput
+            label="Increase contributions with inflation"
+            tooltip="On: the amount you invest rises with inflation, so its purchasing power stays constant. Off: you invest the same dollar amount every year and its purchasing power erodes."
+            checked={params.contributionGrowth === 'inflation'}
+            onChange={checked => setParam('contributionGrowth', checked ? 'inflation' : 'flat')}
+            className="sm:col-span-2"
+          />
         </AdvancedDetails>
 
         <section aria-labelledby="barista-projection-heading">
           <Card>
             <CardHeader><h2 id="barista-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2></CardHeader>
-            <CardContent><ProjectionChart data={results.projections} fireNumber={results.baristaNumber} colorScheme="amber" height={350} /></CardContent>
+            <CardContent><ProjectionChart data={results.projections} fireNumber={results.baristaNumber} inflationRate={params.inflationRate} colorScheme="amber" height={350} /></CardContent>
           </Card>
         </section>
 
         <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">This estimate assumes part-time income continues to cover the stated share of spending. Health coverage, taxes, and the reliability of that income deserve separate planning.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
-    </>
+    </CurrencyPeriodProvider>
   )
 }

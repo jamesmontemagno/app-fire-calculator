@@ -22,6 +22,23 @@ interface ExportData {
   resultFormats?: Record<string, 'currency' | 'percent' | 'number' | 'years'>
 }
 
+/** Written in place of Infinity/NaN scalars so an exported workbook never contains "$∞". */
+const UNREACHABLE_EXPORT_VALUE = 'Not reachable'
+
+/**
+ * Explicit headers for projection columns whose auto-derived name hides which dollars they are in.
+ *
+ * Contributions escalate with inflation by default, so the series is nominal and rises year over
+ * year; "Contributions" alone reads as a constant. Only the display label is overridden — the keys
+ * are what the formula builder below indexes on, so they must stay untouched.
+ */
+const PROJECTION_HEADER_LABELS: Record<string, string> = {
+  portfolio: 'Portfolio (future $)',
+  inflationAdjusted: 'Portfolio (today’s $)',
+  contributions: 'Contribution that year (future $)',
+  totalContributions: 'Contributions to date (future $)',
+}
+
 /**
  * Format a value for Excel export
  * Converts special types to strings/numbers appropriately
@@ -179,11 +196,11 @@ export async function exportToExcel(data: ExportData): Promise<void> {
     
     // Get column headers from first row
     const headers = Object.keys(data.projections[0] || {})
-    projectionSheet.columns = headers.map(header => ({
-      header: header.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim(),
-      key: header,
-      width: 15
-    }))
+    projectionSheet.columns = headers.map(header => {
+      const label = PROJECTION_HEADER_LABELS[header]
+        ?? header.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim()
+      return { header: label, key: header, width: Math.max(15, label.length + 2) }
+    })
     
     // Check if we have the necessary columns for formulas
     const hasPortfolio = headers.includes('portfolio')
@@ -364,7 +381,7 @@ export function prepareResultsForExport(results: any): {
   
   // Define patterns for different value types
   const currencyKeys = ['number', 'value', 'balance', 'withdrawal', 'income', 'interest', 'payment', 'savings', 'cost', 'total', 'principal']
-  const percentKeys = ['rate', 'savingsrate', 'successrate', 'percent', 'progress']
+  const percentKeys = ['rate', 'savingsrate', 'ratio', 'percent', 'progress']
   const timeKeys = ['years', 'months', 'age', 'longevity']
   
   for (const [key, value] of Object.entries(results)) {
@@ -372,7 +389,15 @@ export function prepareResultsForExport(results: any): {
     if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
       continue
     }
-    
+
+    // Non-finite results are legitimate ("the target is never reached"), but writing Infinity or
+    // NaN into a currency-formatted cell produces a spreadsheet that outlives the session and
+    // cannot be reasoned about. Substitute the same wording the result cards use.
+    if (typeof value === 'number' && !Number.isFinite(value)) {
+      values[key] = UNREACHABLE_EXPORT_VALUE
+      continue
+    }
+
     // Store raw value
     values[key] = value
     
@@ -442,7 +467,7 @@ export function formatResultsForExport(results: any): Record<string, any> {
   
   // Define patterns for different value types
   const currencyKeys = ['number', 'value', 'balance', 'withdrawal', 'income', 'interest', 'payment', 'savings', 'cost', 'total', 'principal']
-  const percentKeys = ['rate', 'savingsrate', 'successrate', 'percent', 'progress']
+  const percentKeys = ['rate', 'savingsrate', 'ratio', 'percent', 'progress']
   const timeKeys = ['years', 'months', 'age', 'longevity']
   
   for (const [key, value] of Object.entries(results)) {

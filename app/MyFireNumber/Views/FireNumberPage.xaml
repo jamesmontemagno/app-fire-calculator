@@ -118,8 +118,8 @@
                                                    Text="{Binding AnnualContributionText}" />
                         <controls:NumericInputView Grid.Row="1"
                                                    Grid.Column="1"
-                                                   Header="Annual net income"
-                                                   HelpText="Annual after-tax income used to calculate your savings rate."
+                                                   Header="Annual after-tax take-home income"
+                                                   HelpText="Annual income after taxes, used to calculate your savings rate."
                                                    Placeholder="72000"
                                                    Text="{Binding AnnualIncomeText}" />
                         <controls:NumericInputView Grid.Row="2"
@@ -143,7 +143,7 @@
                                                               HelpText="Expected average annual investment return before inflation."
                                                               Placeholder="7"
                                                               Minimum="0"
-                                                              Maximum="20"
+                                                              Maximum="15"
                                                               Text="{Binding ExpectedReturnText}" />
                                 <controls:PercentageInputView Grid.Column="1"
                                                               Header="Inflation (%)"

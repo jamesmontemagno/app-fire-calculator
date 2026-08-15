@@ -12,6 +12,9 @@ export interface QuizAnswers {
   retirementAge?: number
   currentSavings?: number
   annualIncome?: number
+  /** What the person spends today. Used to derive contributions, never as the FIRE target. */
+  currentAnnualExpenses?: number
+  /** Expected retirement spending in today's dollars. This is the FIRE target basis. */
   annualExpenses?: number
 }
 

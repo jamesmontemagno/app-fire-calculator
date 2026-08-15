@@ -199,10 +199,11 @@ export default function RetirementIncomeListInput({
                       </select>
                     </div>
                     <CurrencyInput
-                      label={source.isAfterTax ? 'Annual after-tax amount' : 'Annual gross amount'}
+                      label={source.isAfterTax ? 'After-tax amount' : 'Gross amount'}
                       value={source.annualAmount}
                       onChange={value => updateSource(source.id, 'annualAmount', value)}
-                      tooltip="The yearly income expected from this source"
+                      tooltip="The income expected from this source"
+                      periodic
                     />
                     <AgeInput
                       label="Starts at age"

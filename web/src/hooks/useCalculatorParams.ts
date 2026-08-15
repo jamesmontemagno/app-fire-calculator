@@ -1,7 +1,10 @@
 import { useLocation, useSearchParams } from 'react-router-dom'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { DebtItem } from '../utils/calculations'
+import type { ContributionGrowth, DebtItem } from '../utils/calculations'
+import { DEFAULT_CONTRIBUTION_GROWTH } from '../utils/calculations'
+import type { CurrencyPeriod } from '../utils/currencyPeriod'
+import { DEFAULT_CURRENCY_PERIOD, isCurrencyPeriod } from '../utils/currencyPeriod'
 import { STANDARD_STORAGE_KEY_PREFIX } from '../utils/savedCalculationStorage'
 
 interface SavedCalculatorParams {
@@ -35,6 +38,8 @@ interface CalculatorParams {
   healthcareMonthlyPremium: number
   healthcareAnnualDeductible: number
   healthcareAnnualOutOfPocket: number
+  contributionGrowth: ContributionGrowth
+  currencyPeriod: CurrencyPeriod
 }
 
 const DEFAULTS: CalculatorParams = {
@@ -62,6 +67,8 @@ const DEFAULTS: CalculatorParams = {
   healthcareMonthlyPremium: 600,
   healthcareAnnualDeductible: 2500,
   healthcareAnnualOutOfPocket: 2000,
+  contributionGrowth: DEFAULT_CONTRIBUTION_GROWTH,
+  currencyPeriod: DEFAULT_CURRENCY_PERIOD,
 }
 
 const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
@@ -89,6 +96,8 @@ const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
   healthcareMonthlyPremium: 'healthcarePremium',
   healthcareAnnualDeductible: 'healthcareDeductible',
   healthcareAnnualOutOfPocket: 'healthcareOop',
+  contributionGrowth: 'contribGrowth',
+  currencyPeriod: 'period',
 }
 
 interface NumericBounds {
@@ -104,7 +113,8 @@ const NUMERIC_BOUNDS: Partial<Record<keyof CalculatorParams, NumericBounds>> = {
   annualIncome: { min: 0 },
   expectedReturn: { min: 0, max: 0.15 },
   inflationRate: { min: 0, max: 0.1 },
-  withdrawalRate: { min: 0.025, max: 0.06 },
+  // Matches the slider range every calculator renders and the MAUI 2%-6% parse bounds.
+  withdrawalRate: { min: 0.02, max: 0.06 },
   annualExpenses: { min: 0 },
   partTimeIncome: { min: 0 },
   portfolioValue: { min: 0 },
@@ -120,9 +130,6 @@ const NUMERIC_BOUNDS: Partial<Record<keyof CalculatorParams, NumericBounds>> = {
 }
 
 const ROUTE_NUMERIC_BOUNDS: Record<string, Partial<Record<keyof CalculatorParams, NumericBounds>>> = {
-  '/standard': {
-    withdrawalRate: { min: 0.02, max: 0.06 },
-  },
   '/withdrawal': {
     withdrawalRate: { min: 0.02, max: 0.08 },
   },
@@ -269,6 +276,12 @@ export function useCalculatorParams() {
         if (key === 'savingsFrequency') {
           return urlValue === 'monthly' || urlValue === 'yearly' ? urlValue : DEFAULTS[key]
         }
+        if (key === 'contributionGrowth') {
+          return urlValue === 'inflation' || urlValue === 'flat' ? urlValue : DEFAULTS[key]
+        }
+        if (key === 'currencyPeriod') {
+          return isCurrencyPeriod(urlValue) ? urlValue : DEFAULTS[key]
+        }
         
         return parseNumericParam(
           urlValue,
@@ -292,9 +305,9 @@ export function useCalculatorParams() {
 
     const currentAge = getParam('currentAge') as number
     const maximumRetirementAge = location.pathname === '/healthcare' ? 64 : 90
-    const minimumRetirementAge = location.pathname === '/healthcare'
-      ? currentAge
-      : currentAge + 1
+    // Retiring at your current age is a valid scenario to model ("what if I stopped today?"),
+    // so equality is allowed on every calculator and on both platforms.
+    const minimumRetirementAge = currentAge
 
     return {
       currentAge,
@@ -324,6 +337,8 @@ export function useCalculatorParams() {
       healthcareMonthlyPremium: getParam('healthcareMonthlyPremium'),
       healthcareAnnualDeductible: getParam('healthcareAnnualDeductible'),
       healthcareAnnualOutOfPocket: getParam('healthcareAnnualOutOfPocket'),
+      contributionGrowth: getParam('contributionGrowth'),
+      currencyPeriod: getParam('currencyPeriod'),
     }
   }, [location.pathname, savedParams, searchParams])
   const params = useMemo(() => ({ ...resolvedParams, ...pendingParams }), [pendingParams, resolvedParams])

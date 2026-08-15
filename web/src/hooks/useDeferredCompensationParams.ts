@@ -8,7 +8,10 @@ import type {
   RetirementIncomeSource,
   RetirementIncomeType,
 } from '../utils/deferredCompensation'
+import { defaultWithdrawalTaxRate } from '../utils/deferredCompensation'
 import { DEFERRED_STORAGE_KEY_PREFIX } from '../utils/savedCalculationStorage'
+import type { CurrencyPeriod } from '../utils/currencyPeriod'
+import { DEFAULT_CURRENCY_PERIOD, parseCurrencyPeriod } from '../utils/currencyPeriod'
 
 export interface DeferredCompensationParams {
   currentAge: number
@@ -21,6 +24,7 @@ export interface DeferredCompensationParams {
   additionalExpenses: RetirementExpense[]
   withdrawOnlyAfterRetirement: boolean
   reinvestSurplus: boolean
+  currencyPeriod: CurrencyPeriod
 }
 
 const ACCOUNT_TYPES: RetirementAccountType[] = [
@@ -68,6 +72,7 @@ const DEFAULTS: DeferredCompensationParams = {
       availableAge: 18,
       withdrawalRate: 0.04,
       payoutYears: 1,
+      withdrawalTaxRate: 0,
     },
     {
       id: '401k',
@@ -79,6 +84,7 @@ const DEFAULTS: DeferredCompensationParams = {
       availableAge: 60,
       withdrawalRate: 0.04,
       payoutYears: 1,
+      withdrawalTaxRate: 0.25,
     },
   ],
   incomeSources: [
@@ -97,6 +103,7 @@ const DEFAULTS: DeferredCompensationParams = {
   additionalExpenses: [],
   withdrawOnlyAfterRetirement: true,
   reinvestSurplus: true,
+  currencyPeriod: DEFAULT_CURRENCY_PERIOD,
 }
 
 const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
@@ -110,6 +117,7 @@ const PARAM_KEYS: Record<keyof DeferredCompensationParams, string> = {
   additionalExpenses: 'dcAdditionalExpenses',
   withdrawOnlyAfterRetirement: 'dcRetireOnly',
   reinvestSurplus: 'dcReinvest',
+  currencyPeriod: 'dcPeriod',
 }
 
 interface SavedDeferredCompensationParams {
@@ -205,6 +213,11 @@ const sanitizeAccounts = (value: string | null): RetirementAccount[] => {
         availableAge: Math.min(120, Math.max(0, numeric(account.availableAge, 60))),
         withdrawalRate: Math.min(1, Math.max(0, numeric(account.withdrawalRate, 0.04))),
         payoutYears: Math.min(100, Math.max(1, Math.round(numeric(account.payoutYears, 1)))),
+        // Shared links created before withdrawal tax existed fall back to the type-driven default.
+        withdrawalTaxRate: Math.min(1, Math.max(0, numeric(
+          account.withdrawalTaxRate,
+          defaultWithdrawalTaxRate(type),
+        ))),
       }]
     }).slice(0, 20)
   } catch {
@@ -355,6 +368,9 @@ export function useDeferredCompensationParams() {
       reinvestSurplus: searchParams.get(PARAM_KEYS.reinvestSurplus)
         ? searchParams.get(PARAM_KEYS.reinvestSurplus) === 'true'
         : savedParams?.reinvestSurplus ?? DEFAULTS.reinvestSurplus,
+      currencyPeriod: searchParams.get(PARAM_KEYS.currencyPeriod)
+        ? parseCurrencyPeriod(searchParams.get(PARAM_KEYS.currencyPeriod))
+        : savedParams?.currencyPeriod ?? DEFAULTS.currencyPeriod,
     }
   }, [savedParams, searchParams])
   const params = useMemo(() => ({ ...resolvedParams, ...pendingParams }), [pendingParams, resolvedParams])

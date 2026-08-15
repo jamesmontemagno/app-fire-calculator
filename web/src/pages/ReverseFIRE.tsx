@@ -1,44 +1,12 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
-import { formatCurrency, generateProjections } from '../utils/calculations'
+import { calculateReverseFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, CurrencyPeriodProvider, PercentageInput, PeriodToggle, ToggleInput } from '../components/inputs'
 import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
-
-function calculateReverseFIRE(
-  currentAge: number,
-  targetRetirementAge: number,
-  currentSavings: number,
-  annualExpenses: number,
-  expectedReturn: number,
-  inflationRate: number,
-  withdrawalRate: number,
-) {
-  const yearsToFIRE = Math.max(1, targetRetirementAge - currentAge)
-  const fireNumber = annualExpenses / withdrawalRate
-  const realReturn = (1 + expectedReturn) / (1 + inflationRate) - 1
-  const compoundFactor = Math.pow(1 + realReturn, yearsToFIRE)
-  const futureValueOfCurrent = currentSavings * compoundFactor
-  const requiredAnnualSavings = futureValueOfCurrent >= fireNumber
-    ? 0
-    : realReturn === 0
-      ? (fireNumber - currentSavings) / yearsToFIRE
-      : (fireNumber - futureValueOfCurrent) * realReturn / (compoundFactor - 1)
-  const safeAnnualSavings = Math.max(0, requiredAnnualSavings)
-
-  return {
-    fireNumber,
-    yearsToFIRE,
-    requiredAnnualSavings: safeAnnualSavings,
-    requiredMonthlySavings: safeAnnualSavings / 12,
-    projections: generateProjections(currentAge, currentSavings, safeAnnualSavings, expectedReturn, inflationRate, yearsToFIRE + 10),
-    alreadyAchievable: futureValueOfCurrent >= fireNumber,
-    currentWillGrowTo: Math.round(futureValueOfCurrent),
-  }
-}
 
 export default function ReverseFIRE() {
   const {
@@ -47,7 +15,7 @@ export default function ReverseFIRE() {
   } = useCalculatorParams()
   const results = useMemo(() => calculateReverseFIRE(
     params.currentAge, params.retirementAge, params.currentSavings, params.annualExpenses,
-    params.expectedReturn, params.inflationRate, params.withdrawalRate,
+    params.expectedReturn, params.inflationRate, params.withdrawalRate, params.contributionGrowth,
   ), [params])
 
   const handleExport = () => {
@@ -64,7 +32,7 @@ export default function ReverseFIRE() {
   }
 
   return (
-    <>
+    <CurrencyPeriodProvider period={params.currencyPeriod} onChange={value => setParam('currencyPeriod', value)}>
       <SEO {...calculatorSEO.reverse} />
       <div className="space-y-8">
         <header>
@@ -77,12 +45,13 @@ export default function ReverseFIRE() {
             <CardHeader>
               <h2 id="reverse-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your goal</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Set a target age, then state the portfolio and spending you expect to need.</p>
+              <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Your current age." min={18} max={80} showSlider />
-              <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="When you want to reach financial independence." min={params.currentAge + 1} max={90} showSlider />
+              <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="When you want to reach financial independence." min={params.currentAge} max={90} showSlider />
               <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments already available for retirement." />
-              <CurrencyInput label="Annual retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected annual after-tax spending in retirement, expressed in today’s purchasing power." allowMonthlyToggle />
+              <CurrencyInput label="Retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, expressed in today’s purchasing power." periodic />
             </CardContent>
           </Card>
         </section>
@@ -107,19 +76,26 @@ export default function ReverseFIRE() {
         <AdvancedDetails description="These slower-moving assumptions determine how current and future savings grow.">
           <PercentageInput label="Expected annual return" value={params.expectedReturn} onChange={value => setParam('expectedReturn', value)} onSliderChange={value => setParamDebounced('expectedReturn', value)} tooltip="Average annual investment return before inflation." min={0} max={0.15} />
           <PercentageInput label="Inflation rate" value={params.inflationRate} onChange={value => setParam('inflationRate', value)} onSliderChange={value => setParamDebounced('inflationRate', value)} tooltip="Expected annual price growth." min={0} max={0.1} />
-          <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="The portion of the retirement portfolio spent in the first year." min={0.025} max={0.06} />
+          <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="The portion of the retirement portfolio spent in the first year." min={0.02} max={0.06} />
+          <ToggleInput
+            label="Increase contributions with inflation"
+            tooltip="On: the amount you invest rises with inflation, so its purchasing power stays constant. Off: you invest the same dollar amount every year and its purchasing power erodes."
+            checked={params.contributionGrowth === 'inflation'}
+            onChange={checked => setParam('contributionGrowth', checked ? 'inflation' : 'flat')}
+            className="sm:col-span-2"
+          />
         </AdvancedDetails>
 
         <section aria-labelledby="reverse-projection-heading">
           <Card>
             <CardHeader><h2 id="reverse-projection-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Portfolio projection</h2></CardHeader>
-            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} colorScheme="blue" height={350} /></CardContent>
+            <CardContent><ProjectionChart data={results.projections} fireNumber={results.fireNumber} inflationRate={params.inflationRate} colorScheme="blue" height={350} /></CardContent>
           </Card>
         </section>
 
         <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">This calculation uses a steady, inflation-adjusted return and does not account for taxes, contribution limits, or a changing savings pattern.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
-    </>
+    </CurrencyPeriodProvider>
   )
 }

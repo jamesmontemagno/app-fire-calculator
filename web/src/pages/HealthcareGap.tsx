@@ -1,48 +1,11 @@
 import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
-import { formatCurrency } from '../utils/calculations'
+import { MEDICARE_AGE, calculateHealthcareGap, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, PercentageInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, CurrencyPeriodProvider, PercentageInput, PeriodToggle } from '../components/inputs'
 import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
-
-const MEDICARE_AGE = 65
-
-function calculateHealthcareGap(
-  currentAge: number,
-  earlyRetirementAge: number,
-  monthlyPremium: number,
-  annualDeductible: number,
-  annualOutOfPocket: number,
-  inflationRate: number,
-) {
-  const gapYears = Math.max(0, MEDICARE_AGE - earlyRetirementAge)
-  const annualCost = monthlyPremium * 12 + annualDeductible + annualOutOfPocket
-  let totalCost = 0
-  const yearlyBreakdown = []
-
-  for (let index = 0; index < gapYears; index += 1) {
-    const cost = annualCost * Math.pow(1 + inflationRate, index)
-    totalCost += cost
-    yearlyBreakdown.push({
-      age: earlyRetirementAge + index,
-      year: new Date().getFullYear() + earlyRetirementAge - currentAge + index,
-      cost: Math.round(cost),
-      premium: Math.round(monthlyPremium * 12 * Math.pow(1 + inflationRate, index)),
-      deductible: Math.round(annualDeductible * Math.pow(1 + inflationRate, index)),
-      outOfPocket: Math.round(annualOutOfPocket * Math.pow(1 + inflationRate, index)),
-    })
-  }
-
-  return {
-    gapYears,
-    annualCost,
-    totalCost: Math.round(totalCost),
-    avgAnnualCost: gapYears > 0 ? Math.round(totalCost / gapYears) : 0,
-    yearlyBreakdown,
-  }
-}
 
 export default function HealthcareGap() {
   const {
@@ -72,7 +35,7 @@ export default function HealthcareGap() {
   }
 
   return (
-    <>
+    <CurrencyPeriodProvider period={params.currencyPeriod} onChange={value => setParam('currencyPeriod', value)}>
       <SEO {...calculatorSEO.healthcare} />
       <div className="space-y-8">
         <header>
@@ -84,14 +47,15 @@ export default function HealthcareGap() {
           <Card>
             <CardHeader>
               <h2 id="healthcare-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your coverage plan</h2>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Enter the costs you expect to pay before Medicare begins. These values are saved with this calculator.</p>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Enter the costs you expect to pay before Medicare begins. Every amount below uses the same period, so switch them all to monthly or annual with one control. These values are saved with this calculator.</p>
+              <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Used to label the cost timeline." min={18} max={64} showSlider />
               <AgeInput label="Early retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="When employer-sponsored coverage ends." min={params.currentAge} max={64} showSlider />
-              <CurrencyInput label="Monthly premium" value={params.healthcareMonthlyPremium} onChange={value => setParam('healthcareMonthlyPremium', value)} tooltip="Expected monthly health insurance premium." max={3000} />
-              <CurrencyInput label="Annual deductible" value={params.healthcareAnnualDeductible} onChange={value => setParam('healthcareAnnualDeductible', value)} tooltip="Expected annual deductible before the plan pays." max={20000} />
-              <CurrencyInput label="Annual out-of-pocket costs" value={params.healthcareAnnualOutOfPocket} onChange={value => setParam('healthcareAnnualOutOfPocket', value)} tooltip="Expected annual copays, coinsurance, and other medical costs." max={20000} />
+              <CurrencyInput label="Health insurance premium" value={params.healthcareMonthlyPremium} onChange={value => setParam('healthcareMonthlyPremium', value)} tooltip="Expected health insurance premium." max={3000} periodic storedPeriod="monthly" />
+              <CurrencyInput label="Deductible" value={params.healthcareAnnualDeductible} onChange={value => setParam('healthcareAnnualDeductible', value)} tooltip="Expected deductible before the plan pays." max={20000} periodic />
+              <CurrencyInput label="Out-of-pocket costs" value={params.healthcareAnnualOutOfPocket} onChange={value => setParam('healthcareAnnualOutOfPocket', value)} tooltip="Expected copays, coinsurance, and other medical costs." max={20000} periodic />
             </CardContent>
           </Card>
         </section>
@@ -151,6 +115,6 @@ export default function HealthcareGap() {
         <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">Actual insurance options, subsidies, medical needs, and eligibility rules vary by location and household. Use this as a planning estimate, not a coverage quote.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
-    </>
+    </CurrencyPeriodProvider>
   )
 }

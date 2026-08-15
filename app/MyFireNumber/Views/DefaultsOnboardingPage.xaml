@@ -56,7 +56,7 @@
 
                         <VerticalStackLayout Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="Annual pre-tax income"
+                                <Label Text="After-tax take-home income"
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />
                                 <Label Grid.Column="1"
@@ -70,7 +70,7 @@
                                     MinimumTrackColor="#2F6B57"
                                     MaximumTrackColor="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                                     ThumbColor="#2F6B57"
-                                    SemanticProperties.Description="Current annual pre-tax income in dollars" />
+                                    SemanticProperties.Description="Current annual after-tax take-home income in dollars" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="6">

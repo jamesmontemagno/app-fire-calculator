@@ -52,9 +52,6 @@ public sealed partial class HealthcareGapViewModel : CalculatorViewModelBase<Hea
     private string healthcareAverageAnnualCostText = string.Empty;
 
     [ObservableProperty]
-    private string healthcareSubsidyEstimateText = string.Empty;
-
-    [ObservableProperty]
     private string healthcareProjectionSummary = string.Empty;
 
     protected override string CalculatorId => "healthcare-gap";
@@ -138,7 +135,6 @@ public sealed partial class HealthcareGapViewModel : CalculatorViewModelBase<Hea
         HealthcareAnnualCostText = FormatCurrency(result.AnnualCost);
         HealthcareTotalCostText = FormatCurrency(result.TotalCost);
         HealthcareAverageAnnualCostText = FormatCurrency(result.AverageAnnualCost);
-        HealthcareSubsidyEstimateText = $"$30k income: {FormatCurrency(result.EstimatedSubsidy30k)}  |  $50k: {FormatCurrency(result.EstimatedSubsidy50k)}  |  $75k: {FormatCurrency(result.EstimatedSubsidy75k)}";
         HealthcareProjectionSummary = result.GapYears == 0
             ? "Your retirement age is at or beyond Medicare eligibility, so no pre-Medicare coverage gap is projected."
             : $"From age {draft.EarlyRetirementAge} to {draft.MedicareAge}, estimated healthcare costs total {FormatCurrency(result.TotalCost)} before Medicare eligibility.";

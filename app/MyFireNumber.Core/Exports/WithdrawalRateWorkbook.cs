@@ -64,7 +64,7 @@ public static class WithdrawalRateWorkbook
             new(CreateTextCell("A5", "Annual withdrawal"), CreateFormulaCell("B5", "Inputs!B5*Inputs!B6", CurrencyStyleIndex)),
             new(CreateTextCell("A6", "Monthly withdrawal"), CreateFormulaCell("B6", "B5/12", CurrencyStyleIndex)),
             new(CreateTextCell("A7", "Portfolio longevity"), CreateNumberCell("B7", result.PortfolioLongevity, DecimalStyleIndex)),
-            new(CreateTextCell("A8", "Success rate"), CreateNumberCell("B8", result.SuccessRate, PercentageStyleIndex)),
+            new(CreateTextCell("A8", "Share of horizon funded"), CreateNumberCell("B8", result.HorizonFundedRatio, PercentageStyleIndex)),
             new(CreateTextCell("A9", "Ending balance"), CreateNumberCell("B9", result.EndingBalance, CurrencyStyleIndex))
         };
 
@@ -132,7 +132,11 @@ public static class WithdrawalRateWorkbook
 
     private static Cell CreateTextCell(string reference, string value) => new() { CellReference = reference, DataType = CellValues.InlineString, InlineString = new InlineString(new Text(value)) };
 
-    private static Cell CreateNumberCell(string reference, double value, uint styleIndex) => new() { CellReference = reference, StyleIndex = styleIndex, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) };
+    // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
+    // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
+    private static Cell CreateNumberCell(string reference, double value, uint styleIndex) => double.IsFinite(value)
+        ? new() { CellReference = reference, StyleIndex = styleIndex, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) }
+        : CreateTextCell(reference, WorkbookValues.Unreachable);
 
     private static Cell CreateFormulaCell(string reference, string formula, uint styleIndex) => new() { CellReference = reference, StyleIndex = styleIndex, CellFormula = new CellFormula(formula) };
 

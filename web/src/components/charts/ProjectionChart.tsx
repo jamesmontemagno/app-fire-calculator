@@ -1,6 +1,7 @@
 import {
   AreaChart,
   Area,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -12,10 +13,16 @@ import {
 import type { ProjectionPoint } from '../../utils/calculations'
 import { formatCurrency } from '../../utils/calculations'
 import { useTheme } from '../../context/ThemeContext'
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion'
 
 interface ProjectionChartProps {
   data: ProjectionPoint[]
   fireNumber?: number
+  /**
+   * Supplying the inflation rate lets the chart draw the FIRE target in future dollars, so the
+   * nominal series and the today's-dollar series are each compared against a target in their own units.
+   */
+  inflationRate?: number
   showInflationAdjusted?: boolean
   showMilestones?: boolean
   height?: number
@@ -58,6 +65,7 @@ const colorSchemes = {
 export default function ProjectionChart({
   data,
   fireNumber,
+  inflationRate,
   showInflationAdjusted = true,
   showMilestones = true,
   height = 300,
@@ -66,6 +74,18 @@ export default function ProjectionChart({
   const { resolvedTheme } = useTheme()
   const isDark = resolvedTheme === 'dark'
   const colors = colorSchemes[colorScheme]
+  const prefersReducedMotion = usePrefersReducedMotion()
+  const animate = !prefersReducedMotion
+
+  // The FIRE number is stated in today's dollars, so the nominal series has to be compared against a
+  // target that inflates with it. Both crossings then land on the same age as the headline FIRE age.
+  const showFutureTarget = fireNumber !== undefined && inflationRate !== undefined
+  const chartData = showFutureTarget
+    ? data.map((point, index) => ({
+        ...point,
+        fireTarget: Math.round(fireNumber * Math.pow(1 + inflationRate, index)),
+      }))
+    : data
 
   // Calculate milestone values
   const milestones = fireNumber ? [
@@ -84,14 +104,18 @@ export default function ProjectionChart({
     return `$${value}`
   }
 
-  // Calculate max portfolio value for Y-axis domain
-  const maxPortfolio = Math.max(...data.map(d => d.portfolio))
+  // Calculate max plotted value for Y-axis domain
+  const maxPortfolio = Math.max(
+    ...data.map(d => d.portfolio),
+    ...(showFutureTarget ? [fireNumber * Math.pow(1 + inflationRate, Math.max(0, data.length - 1))] : []),
+  )
   const yAxisMax = Math.ceil(maxPortfolio * 1.05) // Add 5% padding
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
-      const point = payload[0].payload as ProjectionPoint
-      const reachedFire = fireNumber && point.portfolio >= fireNumber
+      const point = payload[0].payload as ProjectionPoint & { fireTarget?: number }
+      const targetForYear = point.fireTarget ?? fireNumber
+      const reachedFire = targetForYear !== undefined && point.portfolio >= targetForYear
       return (
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg p-3">
           <p className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -99,19 +123,22 @@ export default function ProjectionChart({
           </p>
           <div className="space-y-1 text-sm">
             <p className="text-gray-600 dark:text-gray-400">
-              Portfolio: <span className="font-medium" style={{ color: colors.primary }}>{formatCurrency(point.portfolio)}</span>
+              Portfolio (future $): <span className="font-medium" style={{ color: colors.primary }}>{formatCurrency(point.portfolio)}</span>
             </p>
             {showInflationAdjusted && (
               <p className="text-gray-600 dark:text-gray-400">
-                Inflation Adjusted: <span className="font-medium" style={{ color: colors.secondary }}>{formatCurrency(point.inflationAdjusted)}</span>
+                In today&apos;s dollars: <span className="font-medium" style={{ color: colors.secondary }}>{formatCurrency(point.inflationAdjusted)}</span>
               </p>
             )}
             <p className="text-gray-600 dark:text-gray-400">
               Total Contributed: <span className="font-medium text-gray-900 dark:text-gray-100">{formatCurrency(point.totalContributions)}</span>
             </p>
-            {fireNumber && (
+            {fireNumber !== undefined && (
               <p className={`${reachedFire ? 'text-red-600 dark:text-red-400' : 'text-gray-600 dark:text-gray-400'}`}>
                 FIRE Number: <span className="font-medium">{formatCurrency(fireNumber)}</span>
+                {showFutureTarget && (
+                  <span className="ml-1">({formatCurrency(point.fireTarget ?? fireNumber)} in future $)</span>
+                )}
                 {reachedFire && <span className="ml-1">✓</span>}
               </p>
             )}
@@ -124,7 +151,7 @@ export default function ProjectionChart({
 
   return (
     <ResponsiveContainer width="100%" height={height}>
-      <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+      <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id={`gradient-${colorScheme}`} x1="0" y1="0" x2="0" y2="1">
             <stop offset="5%" stopColor={colors.primary} stopOpacity={0.3} />
@@ -165,22 +192,38 @@ export default function ProjectionChart({
           <Area
             type="monotone"
             dataKey="inflationAdjusted"
-            name="Inflation Adjusted"
+            name="In Today's Dollars"
             stroke={colors.secondary}
             strokeWidth={2}
             fill={`url(#gradient-${colorScheme}-secondary)`}
             strokeDasharray="5 5"
+            isAnimationActive={animate}
           />
         )}
         
         <Area
           type="monotone"
           dataKey="portfolio"
-          name="Portfolio Value"
+          name="Portfolio Value (Future Dollars)"
           stroke={colors.primary}
           strokeWidth={2}
           fill={`url(#gradient-${colorScheme})`}
+          isAnimationActive={animate}
         />
+
+        {showFutureTarget && (
+          <Line
+            type="monotone"
+            dataKey="fireTarget"
+            name="FIRE Target (Future Dollars)"
+            stroke={isDark ? '#fca5a5' : '#b91c1c'}
+            strokeWidth={2}
+            strokeDasharray="8 4"
+            dot={false}
+            activeDot={false}
+            isAnimationActive={animate}
+          />
+        )}
         
         {/* Milestone lines */}
         {showMilestones && milestones.map((milestone) => (
@@ -206,7 +249,7 @@ export default function ProjectionChart({
             strokeWidth={2}
             strokeDasharray="8 4"
             label={{
-              value: 'FIRE',
+              value: showFutureTarget ? "FIRE (today's $)" : 'FIRE',
               fill: isDark ? '#ef4444' : '#dc2626',
               fontSize: 11,
               fontWeight: 600,
