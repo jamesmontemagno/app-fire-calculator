@@ -12,7 +12,7 @@ import {
   calculateWithdrawal,
 } from '../calculations'
 import type { FIREInputs } from '../calculations'
-import { prepareResultsForExport } from '../excelExport'
+import { prepareInputsForExport, prepareResultsForExport } from '../excelExport'
 
 /**
  * `prepareResultsForExport` enumerates every scalar on a result object and picks percent/currency
@@ -215,9 +215,9 @@ describe('format inference by key name', () => {
 
 describe('known hazards, pinned as characterization', () => {
   /*
-   * The two behaviours below are pre-existing and are NOT changed by this test-only work. They are
+   * The behaviours below are pre-existing and are NOT changed by this test-only work. They are
    * pinned so the next person sees them stated rather than rediscovering them from a user's
-   * spreadsheet. Both deserve their own issue and their own fix.
+   * spreadsheet. Booleans and null are tracked in issue #64; totalMonths has its own issue, #62.
    */
 
   it('booleans still reach the workbook as untyped rows', () => {
@@ -263,7 +263,7 @@ describe('known hazards, pinned as characterization', () => {
 
   it('totalMonths is exported as CURRENCY, not a duration', () => {
     /*
-     * FINDING (live, user-visible, pre-existing — reported, deliberately not fixed here).
+     * FINDING (live, user-visible, pre-existing). Tracked in issue #62, deliberately not fixed here.
      *
      * This is the same substring-collision class as the 'rate' / 'ratio' bug the audit already hit,
      * and it is currently shipping.
@@ -302,5 +302,82 @@ describe('empty and degenerate input', () => {
   it('does not invent rows for a result made only of arrays and objects', () => {
     const { values } = prepareResultsForExport({ rows: [1, 2], nested: { a: 1 } })
     expect(values).toEqual({})
+  })
+})
+
+/**
+ * `prepareInputsForExport` is the sibling of `prepareResultsForExport` and has the same
+ * substring-matching design, with two differences that both produce wrong formatting. Tracked in
+ * issue #64. Not fixed here; this PR is test-only.
+ *
+ * All of these assert the CURRENT, WRONG behaviour on purpose. When #64 is fixed they SHOULD fail.
+ */
+describe('prepareInputsForExport hazards, pinned as characterization (issue #64)', () => {
+  // The exact input DebtPayoff.tsx:71 passes, so these are the formats a real user's workbook gets.
+  const debtInputs = () =>
+    prepareInputsForExport({
+      strategy: 'snowball',
+      mode: 'budget',
+      monthlyBudget: 500,
+      targetMonths: 24,
+      extraPayment: 0,
+      totalDebts: 2,
+      totalDebt: 21_500,
+    })
+
+  it('exports totalDebt without currency formatting', () => {
+    // The exact inverse of the totalMonths bug in #62. There, a month count is formatted as money
+    // because 'total' is in the results currencyKeys. Here, the inputs currencyKeys list
+    // ('savings', 'contribution', 'expenses', 'income', 'value', 'budget', 'payment', 'premium',
+    // 'deductible', 'pocket') has no 'total' entry at all, so totalDebt — a genuine dollar amount —
+    // matches nothing and falls through to 'number'. Same root cause, opposite direction.
+    expect(debtInputs().formats.totalDebt).toBe('number')
+
+    // monthlyBudget is formatted correctly, via 'budget'. The list is not broken, just incomplete.
+    expect(debtInputs().formats.monthlyBudget).toBe('currency')
+  })
+
+  it('assigns a numeric format to non-numeric values', () => {
+    // Unlike prepareResultsForExport, the format branch here is not gated on
+    // `typeof value === 'number'`, so text values receive a numeric format too.
+    //
+    // CORRECTION to issue #64, which records `strategy` as getting 'number': it actually gets
+    // 'percent', because 'strategy' contains the substring 'rate' (st-RATE-gy) and percentKeys is
+    // tested before currencyKeys. So the string "snowball" is written into a cell carrying numFmt
+    // '0.0%'. 'mode' does get 'number' as filed.
+    const { values, formats } = debtInputs()
+
+    expect(values.strategy).toBe('snowball')
+    expect(formats.strategy).toBe('percent')
+
+    expect(values.mode).toBe('budget')
+    expect(formats.mode).toBe('number')
+  })
+
+  it('has no non-finite guard, unlike its results sibling', () => {
+    // prepareResultsForExport substitutes 'Not reachable' for Infinity and NaN. This one has no such
+    // guard, so a non-finite input value is written straight through. Inputs are user-entered so
+    // this is harder to reach than the results path, but the asymmetry is worth stating.
+    const { values } = prepareInputsForExport({ annualIncome: Infinity })
+    expect(values.annualIncome).toBe(Infinity)
+  })
+
+  it('checks ageKeys first, so any key containing "age" is formatted as an age', () => {
+    // Latent rather than live: every current parameter containing 'age' is a genuine age
+    // (currentAge, retirementAge, targetRetirementAge, earlyRetirementAge, medicareAge,
+    // planThroughAge), so nothing is mis-formatted today. But 'age' is checked before percent and
+    // currency, so a future 'mortgageBalance' or 'averageReturn' would silently export with the
+    // age format. Pinned to document the ordering trap before it bites.
+    const { formats } = prepareInputsForExport({ mortgageBalance: 300_000, averageReturn: 0.07 })
+    expect(formats.mortgageBalance).toBe('age')
+    expect(formats.averageReturn).toBe('age')
+
+    // A real age is still correct, which is why the collision is easy to miss.
+    expect(prepareInputsForExport({ currentAge: 30 }).formats.currentAge).toBe('age')
+  })
+
+  it('skips arrays and objects, matching its results sibling', () => {
+    const { values } = prepareInputsForExport({ debts: [{ balance: 1 }], nested: {}, budget: 500 })
+    expect(Object.keys(values)).toEqual(['budget'])
   })
 })
