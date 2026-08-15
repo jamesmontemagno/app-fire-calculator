@@ -70,8 +70,8 @@ export default function Home() {
             const Icon = calc.icon
             return (
             <Link key={calc.path} to={calc.path} className="group">
-              <Card className="h-full border border-border-subtle transition-shadow duration-200 hover:shadow-lg motion-reduce:transition-none">
-                <CardContent className="p-6">
+              <Card className="flex h-full flex-col border border-border-subtle transition-colors duration-200 hover:border-border-strong motion-reduce:transition-none">
+                <CardContent className="flex flex-1 flex-col p-6">
                   <div className="flex items-start gap-4">
                     <div className="rounded-container bg-surface-sunken p-3">
                       <Icon className={`h-6 w-6 ${calc.accent}`} aria-hidden="true" strokeWidth={1.5} />
@@ -88,7 +88,7 @@ export default function Home() {
                       </p>
                     </div>
                   </div>
-                  <div className="mt-4 flex items-center text-sm font-medium text-accent transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">
+                  <div className="mt-auto flex items-center pt-5 text-sm font-medium text-accent transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">
                     Start calculating
                     <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
                   </div>
@@ -163,11 +163,11 @@ export default function Home() {
 
       {/* Privacy Section */}
       <section className="rounded-container border border-border-subtle bg-surface-raised p-6 sm:p-8">
-        <div className="text-center mb-8">
+        <div className="mb-8">
           <h2 className="text-xl font-semibold text-content">
             Your Privacy is Our Priority
           </h2>
-          <p className="text-content-muted">
+          <p className="mt-1 text-sm text-content-muted">
             We built this calculator with privacy-first principles.
           </p>
         </div>

@@ -67,12 +67,12 @@ export default function DebtBreakdownChart({
       <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="gradient-principal" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#10b981" stopOpacity={0.6} />
-            <stop offset="95%" stopColor="#10b981" stopOpacity={0.3} />
+            <stop offset="5%" stopColor={c.positive} stopOpacity={0.6} />
+            <stop offset="95%" stopColor={c.positive} stopOpacity={0.3} />
           </linearGradient>
           <linearGradient id="gradient-interest" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.6} />
-            <stop offset="95%" stopColor="#ef4444" stopOpacity={0.3} />
+            <stop offset="5%" stopColor={c.negative} stopOpacity={0.6} />
+            <stop offset="95%" stopColor={c.negative} stopOpacity={0.3} />
           </linearGradient>
         </defs>
         <CartesianGrid 
@@ -98,7 +98,7 @@ export default function DebtBreakdownChart({
         <Legend 
           wrapperStyle={{ paddingTop: '10px' }}
           iconType="square"
-          formatter={(value) => <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>{value}</span>}
+          formatter={(value) => <span className="text-content">{value}</span>}
         />
         
         <Area
@@ -106,7 +106,7 @@ export default function DebtBreakdownChart({
           dataKey="cumulativePrincipal"
           stackId="1"
           name="Principal Paid"
-          stroke="#10b981"
+          stroke={c.positive}
           strokeWidth={2}
           fill="url(#gradient-principal)"
         />
@@ -116,7 +116,7 @@ export default function DebtBreakdownChart({
           dataKey="cumulativeInterest"
           stackId="1"
           name="Interest Paid"
-          stroke="#ef4444"
+          stroke={c.negative}
           strokeWidth={2}
           fill="url(#gradient-interest)"
         />

@@ -185,7 +185,7 @@ export default function ProjectionChart({
             type="monotone"
             dataKey="fireTarget"
             name="FIRE Target (Future Dollars)"
-            stroke={c.negative}
+            stroke={c.positive}
             strokeWidth={2}
             strokeDasharray="8 4"
             dot={false}
@@ -214,12 +214,12 @@ export default function ProjectionChart({
         {fireNumber && (
           <ReferenceLine
             y={fireNumber}
-            stroke={c.negative}
+            stroke={c.positive}
             strokeWidth={2}
             strokeDasharray="8 4"
             label={{
               value: showFutureTarget ? "FIRE (today's $)" : 'FIRE',
-              fill: c.negative,
+              fill: c.positive,
               fontSize: 11,
               fontWeight: 600,
               position: 'insideBottomLeft',

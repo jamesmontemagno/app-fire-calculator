@@ -1,3 +1,4 @@
+import { ChevronRight } from 'lucide-react'
 import { Fragment, useMemo, useState } from 'react'
 import {
   AgeInput,
@@ -241,7 +242,7 @@ export default function DeferredCompensation() {
                 type="checkbox"
                 checked={params.withdrawOnlyAfterRetirement}
                 onChange={event => setParam('withdrawOnlyAfterRetirement', event.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus-visible:ring-ring"
+                className="mt-0.5 h-4 w-4 rounded border-border-strong text-accent focus-visible:ring-ring"
               />
               <span>
                 <span className="font-medium">Wait until retirement to withdraw</span>
@@ -253,7 +254,7 @@ export default function DeferredCompensation() {
                 type="checkbox"
                 checked={params.reinvestSurplus}
                 onChange={event => setParam('reinvestSurplus', event.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-fire-600 focus-visible:ring-ring"
+                className="mt-0.5 h-4 w-4 rounded border-border-strong text-accent focus-visible:ring-ring"
               />
               <span>
                 <span className="font-medium">Reinvest income surplus</span>
@@ -351,7 +352,8 @@ export default function DeferredCompensation() {
                   <tr className="border-b border-border-subtle">
                     {['Age / year', 'Income & required payouts (after tax)', 'Gap withdrawals (after tax)', 'Expenses', 'Surplus / gap', 'Portfolio'].map(label => (
                       <th key={label} className="text-left py-3 px-3 font-semibold text-content whitespace-nowrap">{label}</th>
-                    ))}                  </tr>
+                    ))}
+                  </tr>
                 </thead>
                 <tbody>
                   {results.projections.map(point => {
@@ -370,10 +372,8 @@ export default function DeferredCompensation() {
                               aria-expanded={expanded}
                               aria-label={`${expanded ? 'Hide' : 'Show'} income and withdrawals for age ${point.age}`}
                             >
-                              <svg className={`w-4 h-4 text-gray-500 transition-transform ${expanded ? 'rotate-90' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                              </svg>
-                              <span>{point.age} <span className="text-gray-500">/ {point.year}</span></span>
+                              <ChevronRight className={`h-4 w-4 text-content-subtle transition-transform motion-reduce:transition-none ${expanded ? 'rotate-90' : ''}`} strokeWidth={1.5} aria-hidden="true" />
+                              <span>{point.age} <span className="text-content-subtle">/ {point.year}</span></span>
                             </button>
                           </td>
                           <td className="py-3 px-3">{formatCurrency(point.outsideIncome + point.deferredIncome)}</td>

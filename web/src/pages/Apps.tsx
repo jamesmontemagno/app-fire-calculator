@@ -1,4 +1,4 @@
-import { Lightbulb } from 'lucide-react'
+import { ArrowRight, Lightbulb } from 'lucide-react'
 import { Card, CardHeader, CardContent } from '../components/ui'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -65,8 +65,8 @@ export default function Apps() {
             rel="noopener noreferrer"
             className="group"
           >
-            <Card className="h-full transition-colors duration-200 hover:border-border-strong motion-reduce:transition-none">
-              <CardContent className="p-4">
+            <Card className="flex h-full flex-col transition-colors duration-200 hover:border-border-strong motion-reduce:transition-none">
+              <CardContent className="flex flex-1 flex-col p-4">
                 <div className="aspect-video mb-4 overflow-hidden rounded-control bg-surface-sunken">
                   <img
                     src={app.imageUrl}
@@ -86,11 +86,9 @@ export default function Apps() {
                 <p className="text-sm text-content-muted mt-2">
                   {app.description}
                 </p>
-                <div className="mt-4 flex items-center gap-2 text-accent text-sm font-medium">
+                <div className="mt-auto flex items-center gap-2 pt-4 text-sm font-medium text-accent">
                   <span>Visit Website</span>
-                  <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0" strokeWidth={1.5} aria-hidden="true" />
                 </div>
               </CardContent>
             </Card>
