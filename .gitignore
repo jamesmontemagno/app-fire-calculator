@@ -46,3 +46,14 @@ TestResults/
 *.mobileprovision
 *.p12
 *.pfx
+
+# Browser-verification debris (screenshots, recordings, traces).
+# Anchored with a leading slash and a single `*`, so these match only files sitting directly in
+# web/ — the shipped assets under web/public/ and metadata/ are deliberately unaffected.
+/web/*.png
+/web/*.jpg
+/web/*.jpeg
+/web/*.webp
+/web/*.webm
+playwright-report/
+test-results/

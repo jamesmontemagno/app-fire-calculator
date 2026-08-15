@@ -16,5 +16,16 @@ export default defineConfig({
   test: {
     environment: 'node',
     include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    /**
+     * `css: true` so `designInvariants.test.ts` can read the stylesheet it guards.
+     *
+     * Vitest defaults this to `false`, which stubs CSS modules to an empty string — and it does so
+     * even when the import carries `?raw`. Measured here: `import './index.css?raw'` yields 0 bytes
+     * under the default and 6306 under `css: true`, against 6306 on disk. Left at the default, the
+     * design guard would have reported the token file clean without reading a byte of it, which is
+     * the silent-pass failure that suite exists to prevent. No test imports CSS for its styles, so
+     * this only affects whether the bytes are readable.
+     */
+    css: true,
   },
 })
