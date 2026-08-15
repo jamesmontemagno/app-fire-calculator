@@ -572,3 +572,89 @@ describe('degenerate inputs', () => {
     })
   })
 })
+
+/**
+ * KNOWN CROSS-PLATFORM DIVERGENCE — tracked in issue #63. Not fixed here; this PR is test-only.
+ *
+ * `surplus` is the one field that uses bare `Math.round` (line 284) rather than the `round` helper,
+ * because it is legitimately allowed to be negative — the helper clamps at zero. The MAUI mirror
+ * rounds the same field with `MidpointRounding.AwayFromZero`.
+ *
+ * Those two agree everywhere except at an exact negative half-integer:
+ *
+ *     JS  Math.round(-2.5)                             === -2
+ *     C#  Math.Round(-2.5, MidpointRounding.AwayFromZero) == -3
+ *
+ * The inputs below make the raw surplus exactly -2.50 and exactly -0.50. Both operands are exactly
+ * representable in binary64, so these are deterministic midpoints, not floating-point noise.
+ *
+ * These tests assert the CURRENT WEB VALUES so the divergence is visible and cannot drift further
+ * unnoticed. They are deliberately NOT in shared/parity/fire-parity-cases.json: that fixture asserts
+ * agreement between the platforms, and adding a case would have forced a choice of which platform is
+ * right, which is a behaviour change. When #63 unifies the rounding, these tests SHOULD fail — that
+ * is the signal. The matching pins live in SharedParityFixtureTests.cs.
+ */
+describe('negative-midpoint surplus rounding (issue #63)', () => {
+  // A flat, after-tax $10,000 pension with zero inflation and no accounts, so surplus is exactly
+  // `pension - annualExpenses` with no compounding in the way.
+  const flatShortfall = (annualExpenses: number) =>
+    calculateDeferredCompensation(
+      plan({
+        currentAge: 60,
+        semiRetirementAge: 60,
+        planThroughAge: 62,
+        annualExpenses,
+        inflationRate: 0,
+        accounts: [],
+        incomeSources: [income({ id: 'pension', name: 'Pension', annualAmount: 10_000 })],
+        withdrawOnlyAfterRetirement: false,
+      }),
+    )
+
+  it('rounds a -2.50 surplus toward zero, where the MAUI mirror rounds away from it', () => {
+    // 10,000 - 10,002.50 = -2.50 exactly. MAUI reports -3 for this same input.
+    const result = flatShortfall(10_002.5)
+
+    expect(result.projections[0].surplus).toBe(-2)
+    expect(result.firstYearSurplus).toBe(-2)
+  })
+
+  it('rounds a -0.50 surplus to negative zero, which flips the funded/shortfall verdict', () => {
+    /*
+     * This is the consequential half. The shortfall predicates below (`point.surplus < 0`, lines
+     * 296-299) read the ROUNDED surplus, so the rounding mode decides a categorical outcome rather
+     * than a display cent.
+     *
+     * `Math.round(-0.5)` is `-0`, and `-0 < 0` is false, so web classifies a fifty-cent shortfall as
+     * a fully funded year. The MAUI mirror gets -1, which IS < 0, and reports a shortfall at the
+     * first retirement age. Same inputs, opposite answers to "does my plan work":
+     *
+     *              web        MAUI
+     *   surplus     -0          -1
+     *   fundedYears  3           0
+     *   firstShortfallAge null   60
+     *   yearsFullyCovered 3      0
+     */
+    const result = flatShortfall(10_000.5)
+
+    expect(Object.is(result.projections[0].surplus, -0)).toBe(true)
+    expect(result.fundedYears).toBe(3)
+    expect(result.firstShortfallAge).toBeNull()
+    expect(result.yearsFullyCovered).toBe(3)
+  })
+
+  it('agrees with the mirror at a positive midpoint, which is why this went unnoticed', () => {
+    // Math.round(2.5) === 3 and MidpointRounding.AwayFromZero also gives 3. The two modes differ
+    // only on negatives, and surplus is the only signed field, so nothing else is exposed.
+    const result = flatShortfall(9_997.5)
+
+    expect(result.projections[0].surplus).toBe(3)
+  })
+
+  it('agrees with the mirror away from midpoints', () => {
+    // -2.4 rounds to -2 under both modes; the divergence needs an exact half.
+    const result = flatShortfall(10_002.4)
+
+    expect(result.projections[0].surplus).toBe(-2)
+  })
+})

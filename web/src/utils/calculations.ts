@@ -472,12 +472,15 @@ export function calculateStandardFIRE(inputs: FIREInputs): StandardFIREResult {
  * @param annualContribution - Annual savings amount (used for accelerated scenario)
  * @param expectedReturn - Expected annual return (decimal, e.g., 0.07 for 7%)
  * @param inflationRate - Expected inflation rate (decimal)
- * @param withdrawalRate - Safe withdrawal rate (typically 0.04)
  * @param annualExpenses - Annual living expenses in retirement
+ * @param withdrawalRate - Safe withdrawal rate (typically 0.04)
+ * @param contributionGrowth - Whether contributions escalate with inflation or stay flat
  * @returns Coast FIRE metrics including coast number, years to reach it, and projections
- * 
+ *
  * @example
- * calculateCoastFIRE(30, 55, 100000, 24000, 0.07, 0.03, 0.04, 48000)
+ * // annualExpenses comes BEFORE withdrawalRate. Passing them the other way round is silent —
+ * // both are numbers — and yields a plausible-looking but entirely wrong result.
+ * calculateCoastFIRE(30, 55, 100000, 24000, 0.07, 0.03, 48000, 0.04)
  * // If you have $100k at 30, you need ~$466k to "coast" to $1.2M by 55
  */
 export function calculateCoastFIRE(
