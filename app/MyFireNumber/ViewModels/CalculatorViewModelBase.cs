@@ -250,6 +250,12 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     /// <summary>Catalog identifier, e.g. <c>withdrawal-rate</c>.</summary>
     protected abstract string CalculatorId { get; }
 
+    /// <summary>
+    /// Explicit implementation so <see cref="CalculatorId"/> stays <c>protected</c> for the eleven
+    /// derived view models while the page base can still read it.
+    /// </summary>
+    string ICalculatorViewModel.CalculatorId => CalculatorId;
+
     /// <summary>Serialization version guarding stored draft and plan payloads.</summary>
     protected abstract int DraftPayloadVersion { get; }
 

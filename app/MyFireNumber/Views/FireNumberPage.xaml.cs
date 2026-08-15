@@ -1,3 +1,4 @@
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.ViewModels;
 
 namespace MyFireNumber.Views;
@@ -11,7 +12,8 @@ public partial class FireNumberPage : CalculatorPageBase
 {
     private readonly IServiceProvider services;
 
-    public FireNumberPage(IServiceProvider services)
+    public FireNumberPage(IServiceProvider services, IAdvancedAssumptionsSessionState advancedAssumptionsState)
+        : base(advancedAssumptionsState)
     {
         this.services = services;
         InitializeComponent();

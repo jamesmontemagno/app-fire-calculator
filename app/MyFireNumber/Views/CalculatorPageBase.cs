@@ -1,15 +1,24 @@
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.ViewModels;
+using MyFireNumber.Views.Controls;
 
 namespace MyFireNumber.Views;
 
 /// <summary>
-/// Shared lifecycle for calculator pages: applies navigation query attributes and
-/// flushes the pending local draft when the page or window goes away.
+/// Shared lifecycle for calculator pages: applies navigation query attributes, restores the
+/// advanced assumptions disclosure state, and flushes the pending local draft when the page or
+/// window goes away.
 /// </summary>
 public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
 {
+    private readonly IAdvancedAssumptionsSessionState advancedAssumptionsState;
     private ICalculatorViewModel? calculatorViewModel;
     private Window? subscribedWindow;
+
+    protected CalculatorPageBase(IAdvancedAssumptionsSessionState advancedAssumptionsState)
+    {
+        this.advancedAssumptionsState = advancedAssumptionsState;
+    }
 
     protected void InitializeCalculator(ICalculatorViewModel viewModel)
     {
@@ -43,7 +52,51 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
             && bool.TryParse(returnHomeValue?.ToString(), out var parsedReturnHome)
             && parsedReturnHome;
 
+        RestoreAdvancedAssumptions(viewModel.CalculatorId);
+
         await viewModel.LoadAsync(planId, returnHomeAfterSave);
+    }
+
+    /// <summary>
+    /// Reapplies the disclosure state the user last chose for this calculator in this app run.
+    /// </summary>
+    /// <remarks>
+    /// <para>Runs synchronously, before the first <c>await</c> above. Shell applies query attributes
+    /// after the page's XAML is inflated but before the page is given a handler and drawn, so a
+    /// restored expansion lands ahead of the first paint and never flashes.</para>
+    /// <para>Keyed on the view model's calculator id rather than the page type on purpose: Standard,
+    /// Lean, and Fat FIRE all resolve to <see cref="FireNumberPage"/>, so a page-typed key would let
+    /// one variant open the other two.</para>
+    /// </remarks>
+    private void RestoreAdvancedAssumptions(string calculatorId)
+    {
+        foreach (var expander in FindExpanders(this))
+        {
+            expander.BindSessionState(advancedAssumptionsState, calculatorId);
+        }
+    }
+
+    /// <summary>
+    /// Walks the page's own logical tree for expanders, so the state survives without every
+    /// calculator's XAML having to name itself.
+    /// </summary>
+    private static IEnumerable<AdvancedAssumptionsExpander> FindExpanders(Element root)
+    {
+        foreach (var child in ((IVisualTreeElement)root).GetVisualChildren())
+        {
+            if (child is AdvancedAssumptionsExpander expander)
+            {
+                // Expanders are never nested inside one another, so stop descending here.
+                yield return expander;
+            }
+            else if (child is Element element)
+            {
+                foreach (var nested in FindExpanders(element))
+                {
+                    yield return nested;
+                }
+            }
+        }
     }
 
     protected override void OnAppearing()

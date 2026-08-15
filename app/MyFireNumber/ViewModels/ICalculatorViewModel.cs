@@ -6,6 +6,13 @@ namespace MyFireNumber.ViewModels;
 /// </summary>
 public interface ICalculatorViewModel
 {
+    /// <summary>
+    /// Catalog identifier, e.g. <c>withdrawal-rate</c>. Surfaced here because Standard, Lean, and
+    /// Fat FIRE share one page type, so the page cannot infer which calculator it is showing from
+    /// its own type — only the selected view model knows.
+    /// </summary>
+    string CalculatorId { get; }
+
     Task LoadAsync(string? planId = null, bool returnHomeAfterSave = false);
 
     Task FlushPendingDraftAsync();
