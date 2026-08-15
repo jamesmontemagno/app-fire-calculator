@@ -547,7 +547,6 @@ describe('declared formats', () => {
     ['yearsToFIRE', 'years'],
     ['yearsToCoast', 'years'],
     ['portfolioLongevity', 'years'],
-    ['gapYears', 'years'],
     // An age, but the calculators round it to one decimal, so the integer 'age' format would show
     // 51.5 as 52 — a silent change to the number rather than to its styling.
     ['fireAge', 'years'],
@@ -571,6 +570,10 @@ describe('declared formats', () => {
     ['incomeSourceCount', 'number'],
     ['accountCount', 'number'],
     ['retirementYears', 'number'],
+    // gapYears looks like fireAge/portfolioLongevity above but is provably integral
+    // (max(0, 65 - earlyRetirementAge), an int minus a parseInt/step=1 age), so it renders as a
+    // whole count with no trailing '.0'. This matches MAUI (#69); keep it out of the decimal bucket.
+    ['gapYears', 'number'],
   ] as const)('%s renders as a whole count', (key, expected) => {
     expect(format(key, 25)).toBe(expected)
   })
