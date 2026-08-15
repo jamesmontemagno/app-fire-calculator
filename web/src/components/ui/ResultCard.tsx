@@ -1,5 +1,14 @@
 import { formatCurrency } from '../../utils/calculations'
 
+/**
+ * Copy for results the model cannot reach. `yearsToFIRE` and friends legitimately return `Infinity`
+ * when the target is unreachable (for example a 0% return against 3% inflation), and formatting that
+ * straight through printed "Infinity years" and "$∞". The wording mirrors `retirementGoalMessage`
+ * in `calculations.ts` so the cards and the goal assessment say the same thing.
+ */
+const UNREACHABLE_VALUE = 'Not reachable'
+const UNREACHABLE_SUBTEXT = 'The current return, inflation and contribution assumptions never reach this target.'
+
 interface ResultCardProps {
   label: string
   value: number | string
@@ -7,6 +16,8 @@ interface ResultCardProps {
   highlight?: boolean
   subtext?: string
   icon?: string
+  unreachableText?: string
+  unreachableSubtext?: string
 }
 
 export default function ResultCard({
@@ -16,10 +27,17 @@ export default function ResultCard({
   highlight = false,
   subtext,
   icon,
+  unreachableText = UNREACHABLE_VALUE,
+  unreachableSubtext = UNREACHABLE_SUBTEXT,
 }: ResultCardProps) {
+  // Guarded here rather than at each call site so a new card cannot reintroduce the leak.
+  const isUnreachable = typeof value === 'number' && !Number.isFinite(value)
+  const displaySubtext = isUnreachable ? unreachableSubtext : subtext
+
   const formatValue = () => {
     if (typeof value === 'string') return value
-    
+    if (isUnreachable) return unreachableText
+
     switch (format) {
       case 'currency':
         return formatCurrency(value)
@@ -50,8 +68,8 @@ export default function ResultCard({
           }`}>
             {formatValue()}
           </p>
-          {subtext && (
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{subtext}</p>
+          {displaySubtext && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{displaySubtext}</p>
           )}
         </div>
         {icon && <span className="text-2xl">{icon}</span>}

@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateReverseFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
-import { AgeInput, CurrencyInput, PercentageInput, ToggleInput } from '../components/inputs'
+import { AgeInput, CurrencyInput, CurrencyPeriodProvider, PercentageInput, PeriodToggle, ToggleInput } from '../components/inputs'
 import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
@@ -32,7 +32,7 @@ export default function ReverseFIRE() {
   }
 
   return (
-    <>
+    <CurrencyPeriodProvider period={params.currencyPeriod} onChange={value => setParam('currencyPeriod', value)}>
       <SEO {...calculatorSEO.reverse} />
       <div className="space-y-8">
         <header>
@@ -45,12 +45,13 @@ export default function ReverseFIRE() {
             <CardHeader>
               <h2 id="reverse-plan-heading" className="text-lg font-semibold text-gray-900 dark:text-gray-100">Start with your goal</h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Set a target age, then state the portfolio and spending you expect to need.</p>
+              <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Your current age." min={18} max={80} showSlider />
               <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="When you want to reach financial independence." min={params.currentAge} max={90} showSlider />
               <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments already available for retirement." />
-              <CurrencyInput label="Annual retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected annual after-tax spending in retirement, expressed in today’s purchasing power." allowMonthlyToggle />
+              <CurrencyInput label="Retirement spending (today's dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, expressed in today’s purchasing power." periodic />
             </CardContent>
           </Card>
         </section>
@@ -95,6 +96,6 @@ export default function ReverseFIRE() {
         <p className="max-w-3xl text-sm text-gray-600 dark:text-gray-400">This calculation uses a steady, inflation-adjusted return and does not account for taxes, contribution limits, or a changing savings pattern.</p>
         <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
       </div>
-    </>
+    </CurrencyPeriodProvider>
   )
 }

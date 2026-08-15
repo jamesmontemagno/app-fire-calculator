@@ -43,6 +43,7 @@ public sealed partial class SavingsInvestmentViewModel : CalculatorViewModelBase
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMonthlyContribution))]
     [NotifyPropertyChangedFor(nameof(IsYearlyContribution))]
+    [NotifyPropertyChangedFor(nameof(ContributionAmountHeader))]
     private ContributionFrequency contributionFrequency = ContributionFrequency.Monthly;
 
     [ObservableProperty]
@@ -69,6 +70,13 @@ public sealed partial class SavingsInvestmentViewModel : CalculatorViewModelBase
     public bool IsMonthlyContribution => ContributionFrequency == ContributionFrequency.Monthly;
 
     public bool IsYearlyContribution => ContributionFrequency == ContributionFrequency.Yearly;
+
+    /// <summary>
+    /// Names the period on the contribution field so the amount can never be read as the wrong cadence.
+    /// </summary>
+    public string ContributionAmountHeader => IsMonthlyContribution
+        ? "Monthly contribution amount"
+        : "Yearly contribution amount";
 
     protected override string CalculatorId => "savings-rate";
 

@@ -118,7 +118,7 @@
                                                    Text="{Binding AnnualContributionText}" />
                         <controls:NumericInputView Grid.Row="1"
                                                    Grid.Column="1"
-                                                   Header="After-tax take-home income"
+                                                   Header="Annual after-tax take-home income"
                                                    HelpText="Annual income after taxes, used to calculate your savings rate."
                                                    Placeholder="72000"
                                                    Text="{Binding AnnualIncomeText}" />

@@ -99,7 +99,11 @@ public static class HealthcareGapWorkbook
 
     private static Cell CreateTextCell(string reference, string value) => new() { CellReference = reference, DataType = CellValues.InlineString, InlineString = new InlineString(new Text(value)) };
 
-    private static Cell CreateNumberCell(string reference, double value, uint styleIndex) => new() { CellReference = reference, StyleIndex = styleIndex, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) };
+    // A non-finite result is a legitimate outcome (an unreachable target), but "Infinity" inside a
+    // numeric cell is not a number Excel can read. Emit the same wording the apps show on screen.
+    private static Cell CreateNumberCell(string reference, double value, uint styleIndex) => double.IsFinite(value)
+        ? new() { CellReference = reference, StyleIndex = styleIndex, CellValue = new CellValue(value.ToString(CultureInfo.InvariantCulture)) }
+        : CreateTextCell(reference, WorkbookValues.Unreachable);
 
     private static Cell CreateFormulaCell(string reference, string formula, uint styleIndex) => new() { CellReference = reference, StyleIndex = styleIndex, CellFormula = new CellFormula(formula) };
 
