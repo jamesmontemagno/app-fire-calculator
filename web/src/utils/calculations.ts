@@ -677,9 +677,13 @@ const RATE_ANALYSIS_MAX_YEARS = 50
  * This function projects a single deterministic path at a fixed return. It does not run
  * historical or Monte Carlo simulations, so it cannot produce a probability of success.
  *
- * Year convention: both `portfolioLongevity` and each `rateAnalysis[].years` count the
- * full years funded while a positive balance remained, so the headline and the comparison
- * table always agree for the same rate.
+ * Year convention: `portfolioLongevity` and each `rateAnalysis[].years` count years the same way —
+ * full years funded while a positive balance remained — but they stop at different horizons, so for
+ * the same rate they can report different numbers. `portfolioLongevity` stops at `retirementYears`,
+ * because the headline answers "does this last my retirement?". `rateAnalysis` stops at
+ * `RATE_ANALYSIS_MAX_YEARS`, because the table answers "how long would each rate last?". A portfolio
+ * that outlives a 30-year plan shows 30 in the headline and up to 50 in the table. That divergence
+ * is the intended design, not a disagreement, and only appears when one of the two caps binds.
  * 
  * @param portfolioValue - Starting portfolio balance
  * @param withdrawalRate - Initial withdrawal rate (decimal, e.g., 0.04 for 4%)
@@ -734,8 +738,10 @@ export function calculateWithdrawal(
     ? 1
     : portfolioLongevity / retirementYears
 
-  // Analyze different withdrawal rates using the same "years fully funded" convention
-  // as portfolioLongevity so the headline and this table cannot disagree.
+  // Analyze different withdrawal rates using the same "years fully funded" convention as
+  // portfolioLongevity. The horizon differs: this table runs to RATE_ANALYSIS_MAX_YEARS so it can
+  // show how far a lower rate stretches, while portfolioLongevity stops at the user's
+  // retirementYears. Equal counting, different caps — see the note on this function.
   const rates = [0.03, 0.035, 0.04, 0.045, 0.05]
   const rateAnalysis = rates.map(rate => {
     let bal = portfolioValue

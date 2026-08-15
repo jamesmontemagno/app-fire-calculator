@@ -4,6 +4,7 @@ import {
   calculateBaristaFIRE,
   calculateCoastFIRE,
   calculateFatFIRE,
+  calculateHealthcareGap,
   calculateInvestmentGrowth,
   calculateLeanFIRE,
   calculateReverseFIRE,
@@ -12,21 +13,25 @@ import {
   calculateWithdrawal,
 } from '../calculations'
 import type { FIREInputs } from '../calculations'
-import { prepareInputsForExport, prepareResultsForExport } from '../excelExport'
+import { isExportFieldDeclared, prepareInputsForExport, prepareResultsForExport } from '../excelExport'
 
 /**
- * `prepareResultsForExport` enumerates every scalar on a result object and picks percent/currency
- * formatting by substring match on the key name. That design means **any new scalar field on a
- * result type silently appears in the user's spreadsheet**, formatted by whatever its name happens
- * to contain.
+ * Both export helpers used to infer a cell format by substring-matching the key name against
+ * hand-maintained lists whose order decided precedence. That produced seven shipped defects —
+ * `$25` for a 25-month payoff, `$3` for a count of three income sources, the string `"snowball"`
+ * in a percent cell — because a name like `totalMonths` or `incomeSourceCount` contains a word
+ * belonging to the wrong list.
  *
- * It bit the cross-platform audit three separate times: a new boolean leaked a row into the export,
- * `'rate'` matched while `'ratio'` did not so percent formatting was silently dropped, and a null
- * field emitted a blank row.
+ * Lookup is now exact, against a single declared map. This file guards the two properties that
+ * keep it that way:
  *
- * The key-set guards below are the point of this file. They fail when a result type gains or loses
- * an exported field, forcing a conscious decision about the workbook rather than letting it change
- * by accident.
+ *   - `exported fields are declared` walks the real calculator results and the real page call
+ *     sites, so a field that reaches a workbook without a declared format fails here first.
+ *   - `exported key sets` pins which fields reach the workbook at all, so a new scalar becomes a
+ *     decision rather than an accident.
+ *
+ * Both derive what they check from real code rather than a hand-kept list. A hand-kept list would
+ * be the same maintenance failure one level up.
  */
 
 const DEFAULTS: FIREInputs = {
@@ -42,60 +47,336 @@ const DEFAULTS: FIREInputs = {
   contributionGrowth: 'inflation',
 }
 
+const DEBTS = [{ id: '1', name: 'Card', balance: 10_000, rate: 0.2, minPayment: 200 }]
+
+/** Every result type a page hands to `prepareResultsForExport`, built by the real calculator. */
+const RESULT_BUILDERS = {
+  StandardFIRE: () => calculateStandardFIRE(DEFAULTS),
+  LeanFIRE: () => calculateLeanFIRE(DEFAULTS),
+  FatFIRE: () => calculateFatFIRE(DEFAULTS),
+  CoastFIRE: () => calculateCoastFIRE(30, 55, 100_000, 24_000, 0.07, 0.03, 48_000, 0.04),
+  BaristaFIRE: () => calculateBaristaFIRE(30, 100_000, 24_000, 0.07, 0.03, 48_000, 0.04, 20_000),
+  Withdrawal: () => calculateWithdrawal(1_000_000, 0.04, 0.07, 0.03, 30),
+  ReverseFIRE: () => calculateReverseFIRE(30, 55, 100_000, 48_000, 0.07, 0.03, 0.04),
+  InvestmentGrowth: () => calculateInvestmentGrowth(100_000, 500, 'monthly', 30, 0.07, 0.03, 72_000, 30),
+  HealthcareGap: () => calculateHealthcareGap(30, 55, 600, 3_000, 2_000, 0.03),
+  DebtPayoff: () => calculateSnowballPayoff(DEBTS, 500),
+} as const
+
+// ================================================================================================
+// Coverage: nothing reaches a workbook without a declared format
+// ================================================================================================
+
+/**
+ * The source of every calculator page, read through Vite rather than `node:fs` so the suite keeps
+ * type-checking under `npm run build` without pulling in Node type definitions.
+ */
+const PAGE_SOURCES = import.meta.glob('../../pages/*.tsx', {
+  query: '?raw',
+  import: 'default',
+  eager: true,
+}) as Record<string, string>
+
+/**
+ * Read the object literals the pages actually pass to the export helpers.
+ *
+ * The input shapes are built inline inside each page's export handler, so there is nothing to
+ * import. Listing them here by hand would reintroduce exactly the drift this file exists to catch:
+ * the list would be correct the day it was written and quietly wrong afterwards. Reading the call
+ * sites keeps the check tied to shipping code, so adding `mortgageBalance: …` to a page fails this
+ * test rather than surfacing in someone's spreadsheet.
+ */
+function readCallSiteKeys(fnName: string): Map<string, string[]> {
+  const byFile = new Map<string, string[]>()
+
+  for (const [path, raw] of Object.entries(PAGE_SOURCES)) {
+    const source = blankOutCommentsAndStrings(raw)
+    const keys: string[] = []
+    const call = new RegExp(`\\b${fnName}\\s*\\(\\s*\\{`, 'g')
+
+    for (const match of source.matchAll(call)) {
+      const open = match.index + match[0].length - 1
+      let depth = 0
+      let close = -1
+
+      for (let i = open; i < source.length; i += 1) {
+        const char = source[i]
+        if (char === '{' || char === '[' || char === '(') depth += 1
+        else if (char === '}' || char === ']' || char === ')') {
+          depth -= 1
+          if (depth === 0) {
+            close = i
+            break
+          }
+        }
+      }
+      // An unbalanced literal means the scan lost track, and a scan that quietly returns fewer
+      // keys is worse than no scan at all: it reports success over fields nobody checked.
+      if (close === -1) throw new Error(`Could not find the end of the ${fnName} call in ${path}`)
+
+      keys.push(...topLevelKeys(source.slice(open + 1, close)))
+    }
+
+    if (keys.length > 0) byFile.set(path.split('/').pop() ?? path, keys)
+  }
+
+  return byFile
+}
+
+/**
+ * Replace the contents of comments and string literals with spaces, preserving length and so every
+ * offset, before anything counts a brace.
+ *
+ * A `//` comment or a string holding an unbalanced `)` would otherwise end a scan early and drop
+ * every key after it, silently. That is the one failure mode this whole file cannot afford: the
+ * coverage suites would still pass, over a shorter list, which is indistinguishable from success.
+ */
+function blankOutCommentsAndStrings(source: string): string {
+  const out = source.split('')
+  let i = 0
+
+  const blankUntil = (isEnd: (index: number) => boolean, escapes: boolean) => {
+    i += 1
+    while (i < source.length && !isEnd(i)) {
+      if (escapes && source[i] === '\\') out[i++] = ' '
+      out[i] = source[i] === '\n' ? '\n' : ' '
+      i += 1
+    }
+  }
+
+  while (i < source.length) {
+    const char = source[i]
+    const next = source[i + 1]
+
+    if (char === '/' && next === '/') {
+      while (i < source.length && source[i] !== '\n') out[i++] = ' '
+    } else if (char === '/' && next === '*') {
+      out[i] = ' '
+      blankUntil(index => source[index] === '*' && source[index + 1] === '/', false)
+      out[i] = ' '
+      out[i + 1] = ' '
+      i += 2
+    } else if (char === '"' || char === "'" || char === '`') {
+      blankUntil(index => source[index] === char, true)
+      i += 1
+    } else {
+      i += 1
+    }
+  }
+
+  return out.join('')
+}
+
+/** Property names declared directly on an object literal body, ignoring anything nested. */
+function topLevelKeys(body: string): string[] {
+  const keys: string[] = []
+  let depth = 0
+  let start = 0
+
+  const take = (segment: string) => {
+    const text = segment.trim()
+    if (!text) return
+    const colon = text.indexOf(':')
+    // A colon-less segment is shorthand (`totalDebt,`), which is a property name on its own.
+    const name = (colon === -1 ? text : text.slice(0, colon)).trim()
+    if (/^[A-Za-z_$][\w$]*$/.test(name)) keys.push(name)
+  }
+
+  for (let i = 0; i < body.length; i += 1) {
+    const char = body[i]
+    if (char === '{' || char === '[' || char === '(') depth += 1
+    else if (char === '}' || char === ']' || char === ')') depth -= 1
+    else if (char === ',' && depth === 0) {
+      take(body.slice(start, i))
+      start = i + 1
+    }
+  }
+  take(body.slice(start))
+
+  return keys
+}
+
+function undeclared(keys: Iterable<string>): string[] {
+  return [...new Set(keys)].filter(key => !isExportFieldDeclared(key)).sort()
+}
+
+function coverageFailure(source: string, missing: string[]): string {
+  return [
+    `${source} reaches an exported workbook with no declared format: ${missing.join(', ')}.`,
+    '',
+    'Undeclared fields still export, they just render unstyled — that is deliberate, so a missing',
+    'declaration never costs a user their data. It does mean nobody has decided how these should',
+    'look. Add each one to EXPORT_FIELD_FORMATS in web/src/utils/excelExport.ts:',
+    '',
+    "  'currency' / 'percent' / 'age'   dollars, rates, whole ages",
+    "  'years'                          a duration carrying one decimal (25.4 years)",
+    "  'number'                         a whole count (25 months, 3 accounts)",
+    "  'text'                           deliberately non-numeric: a string or a boolean",
+    '',
+    'Guessing the format from the name is what this map replaced. Pick one explicitly.',
+  ].join('\n')
+}
+
+describe('exported fields are declared', () => {
+  it.each(Object.entries(RESULT_BUILDERS))('%s results are fully declared', (label, build) => {
+    const { values } = prepareResultsForExport(build())
+    const missing = undeclared(Object.keys(values))
+    expect(missing, coverageFailure(`${label} results`, missing)).toEqual([])
+  })
+
+  it.each([...readCallSiteKeys('prepareInputsForExport')])(
+    '%s passes only declared input fields',
+    (file, keys) => {
+      const missing = undeclared(keys)
+      expect(missing, coverageFailure(`${file} inputs`, missing)).toEqual([])
+    },
+  )
+
+  it.each([...readCallSiteKeys('prepareResultsForExport')])(
+    '%s passes only declared result fields',
+    (file, keys) => {
+      const missing = undeclared(keys)
+      expect(missing, coverageFailure(`${file} results`, missing)).toEqual([])
+    },
+  )
+
+  it('actually finds the page call sites it claims to check', () => {
+    // Without this, renaming a helper would make the scan match nothing and the two suites above
+    // would pass by checking zero fields. Rather than hard-code a page count — which passes when a
+    // twelfth page is missed, i.e. fails in the permissive direction — this locates every call
+    // independently and asserts that each one passing an object literal was actually read.
+    for (const fnName of ['prepareInputsForExport', 'prepareResultsForExport'] as const) {
+      const parsed = readCallSiteKeys(fnName)
+      let literalCallSites = 0
+
+      for (const [path, raw] of Object.entries(PAGE_SOURCES)) {
+        const file = path.split('/').pop() ?? path
+        const source = blankOutCommentsAndStrings(raw)
+
+        for (const call of source.matchAll(new RegExp(`\\b${fnName}\\s*\\(`, 'g'))) {
+          // Pages either build the shape inline or hand over a result object wholesale. Only the
+          // inline ones are this scanner's job; the rest are covered by RESULT_BUILDERS above.
+          if (!/^\s*\{/.test(source.slice(call.index + call[0].length))) continue
+          literalCallSites += 1
+          expect(
+            parsed.get(file),
+            `${file} passes an object literal to ${fnName}, but the call-site scanner in this ` +
+              'file read no fields out of it, so those exports are unchecked. Fix the scanner — ' +
+              'do not delete this assertion, and do not relax it to make the build go green.',
+          ).toBeDefined()
+        }
+      }
+
+      expect(literalCallSites).toBeGreaterThan(0)
+    }
+
+    expect(readCallSiteKeys('prepareInputsForExport').get('DebtPayoff.tsx')).toContain('totalDebt')
+    expect(readCallSiteKeys('prepareResultsForExport').get('DeferredCompensation.tsx')).toContain(
+      'firstShortfallAge',
+    )
+  })
+
+  it('reads keys past a comment or a string holding an unbalanced brace', () => {
+    // The three ways the scanner used to give up early and silently report a shorter list.
+    const hostile = [
+      'const handleExport = () => {',
+      '  prepareInputsForExport(',
+      '    {',
+      '      currentAge,',
+      "      label: 'plan {A',  // capped at 64 (see #62) :)",
+      '      mortgageBalance,',
+      '    },',
+      '  )',
+      '}',
+    ].join('\n')
+
+    const original = PAGE_SOURCES['../../pages/StandardFIRE.tsx']
+    try {
+      PAGE_SOURCES['../../pages/StandardFIRE.tsx'] = hostile
+      expect(readCallSiteKeys('prepareInputsForExport').get('StandardFIRE.tsx')).toEqual([
+        'currentAge',
+        'label',
+        'mortgageBalance',
+      ])
+    } finally {
+      PAGE_SOURCES['../../pages/StandardFIRE.tsx'] = original
+    }
+  })
+})
+
+// ================================================================================================
+// Which fields reach the workbook at all
+// ================================================================================================
+
+function keySetFailure(label: string, actual: string[], expected: readonly string[]): string {
+  const added = actual.filter(key => !expected.includes(key))
+  const removed = expected.filter(key => !actual.includes(key))
+
+  return [
+    `${label} no longer exports the fields this test expects.`,
+    added.length > 0 ? `  now also exported: ${added.join(', ')}` : null,
+    removed.length > 0 ? `  no longer exported: ${removed.join(', ')}` : null,
+    '',
+    'This test is not asking you to paste the new list in. Everything in it lands in a spreadsheet',
+    'a user downloads and forwards to other people, so for each ADDED field pick one:',
+    '',
+    '  1. It belongs in the workbook — declare it in EXPORT_FIELD_FORMATS (web/src/utils/',
+    '     excelExport.ts) with the format it should render as, then add it to the list below.',
+    '  2. It does not belong — it is internal, or configuration rather than an outcome. Stop',
+    '     passing the raw result and pass a curated object instead, the way',
+    '     DeferredCompensation.tsx does.',
+    "  3. It belongs but is not a number — declare it as 'text' and add it below.",
+    '',
+    'A REMOVED field means a row existing users currently see has disappeared from their download.',
+    'Confirm that was intended before deleting it from the list.',
+  ]
+    .filter((line): line is string => line !== null)
+    .join('\n')
+}
+
 describe('exported key sets', () => {
-  // If one of these fails, a result type gained or lost a scalar. Decide whether it belongs in the
-  // user's workbook and update the list deliberately — do not just paste the new set in.
   it.each([
     [
       'StandardFIRE',
-      () => calculateStandardFIRE(DEFAULTS),
       ['fireNumber', 'yearsToFIRE', 'fireAge', 'savingsRate', 'monthlyContribution', 'coastFireNumber'],
     ],
     [
       'LeanFIRE',
-      () => calculateLeanFIRE(DEFAULTS),
       ['fireNumber', 'yearsToFIRE', 'fireAge', 'savingsRate', 'monthlyContribution', 'coastFireNumber', 'isLean', 'leanThreshold'],
     ],
     [
       'FatFIRE',
-      () => calculateFatFIRE(DEFAULTS),
       ['fireNumber', 'yearsToFIRE', 'fireAge', 'savingsRate', 'monthlyContribution', 'coastFireNumber', 'isFat', 'fatThreshold'],
     ],
-    [
-      'CoastFIRE',
-      () => calculateCoastFIRE(30, 55, 100_000, 24_000, 0.07, 0.03, 48_000, 0.04),
-      ['coastNumber', 'yearsToCoast', 'alreadyCoasting', 'fireNumber'],
-    ],
+    ['CoastFIRE', ['coastNumber', 'yearsToCoast', 'alreadyCoasting', 'fireNumber']],
     [
       'BaristaFIRE',
-      () => calculateBaristaFIRE(30, 100_000, 24_000, 0.07, 0.03, 48_000, 0.04, 20_000),
       ['baristaNumber', 'fullFireNumber', 'yearsToBaristaFIRE', 'partTimeIncomeNeeded', 'savingsFromPartTime'],
     ],
     [
       'Withdrawal',
-      () => calculateWithdrawal(1_000_000, 0.04, 0.07, 0.03, 30),
       ['portfolioLongevity', 'horizonFundedRatio', 'annualWithdrawal', 'monthlyWithdrawal', 'endingBalance'],
     ],
     [
       'ReverseFIRE',
-      () => calculateReverseFIRE(30, 55, 100_000, 48_000, 0.07, 0.03, 0.04),
       ['fireNumber', 'yearsToFIRE', 'requiredAnnualSavings', 'requiredMonthlySavings', 'alreadyAchievable', 'currentWillGrowTo'],
     ],
     [
       'InvestmentGrowth',
-      () => calculateInvestmentGrowth(100_000, 500, 'monthly', 30, 0.07, 0.03, 72_000, 30),
       ['savingsRate', 'annualContribution', 'monthlyContribution', 'finalNominalBalance', 'finalInflationAdjustedBalance', 'totalInvested', 'totalGrowth', 'inflationImpact'],
     ],
-    [
-      'DebtPayoff',
-      () => calculateSnowballPayoff([{ id: '1', name: 'Card', balance: 10_000, rate: 0.2, minPayment: 200 }], 500),
-      ['totalMonths', 'totalInterest', 'totalPrincipal', 'monthlyPayment'],
-    ],
-  ] as const)('%s exports exactly its known scalar fields', (_label, build, expected) => {
-    const { values } = prepareResultsForExport(build())
-    expect(Object.keys(values).sort()).toEqual([...expected].sort())
+    ['HealthcareGap', ['gapYears', 'annualCost', 'totalCost', 'avgAnnualCost']],
+    ['DebtPayoff', ['totalMonths', 'totalInterest', 'totalPrincipal', 'monthlyPayment']],
+  ] as const)('%s exports exactly its known scalar fields', (label, expected) => {
+    const { values } = prepareResultsForExport(RESULT_BUILDERS[label]())
+    const actual = Object.keys(values).sort()
+    expect(actual, keySetFailure(label, actual, expected)).toEqual([...expected].sort())
   })
 })
+
+// ================================================================================================
+// Structural filtering
+// ================================================================================================
 
 describe('structural filtering', () => {
   it('omits arrays, which belong on their own sheets', () => {
@@ -110,10 +391,23 @@ describe('structural filtering', () => {
   })
 
   it('omits an empty array as readily as a populated one', () => {
-    const { values } = prepareResultsForExport({ rows: [], total: 5 })
-    expect(Object.keys(values)).toEqual(['total'])
+    const { values } = prepareResultsForExport({ rows: [], totalDebt: 5 })
+    expect(Object.keys(values)).toEqual(['totalDebt'])
+  })
+
+  it('applies the same rules to inputs as to results', () => {
+    // These were two near-copies that had already drifted: only one had a non-finite guard, only
+    // one type-gated formatting, and their key lists disagreed about whether 'total' meant money.
+    // They share one implementation now, so the two calls cannot disagree.
+    const shape = { debts: [{ balance: 1 }], nested: {}, monthlyBudget: 500, mode: null }
+    expect(prepareInputsForExport(shape)).toEqual(prepareResultsForExport(shape))
+    expect(Object.keys(prepareInputsForExport(shape).values)).toEqual(['monthlyBudget'])
   })
 })
+
+// ================================================================================================
+// Values that are not plain finite numbers
+// ================================================================================================
 
 describe('non-finite values', () => {
   it('replaces Infinity with wording rather than writing "$∞" into a cell', () => {
@@ -135,35 +429,66 @@ describe('non-finite values', () => {
   })
 
   it('handles -Infinity and NaN the same way', () => {
-    const { values } = prepareResultsForExport({ a: -Infinity, b: NaN, c: 42 })
-    expect(values.a).toBe('Not reachable')
-    expect(values.b).toBe('Not reachable')
-    expect(values.c).toBe(42)
+    const { values } = prepareResultsForExport({ fireNumber: -Infinity, totalCost: NaN, gapYears: 42 })
+    expect(values.fireNumber).toBe('Not reachable')
+    expect(values.totalCost).toBe('Not reachable')
+    expect(values.gapYears).toBe(42)
+  })
+
+  it('guards non-finite inputs too, which it previously did not', () => {
+    // Pinned under #64: only the results helper had this guard, so an infinite input was written
+    // straight into a cell. Sharing one implementation removed the asymmetry.
+    const { values, formats } = prepareInputsForExport({ annualIncome: Infinity })
+    expect(values.annualIncome).toBe('Not reachable')
+    expect(formats).not.toHaveProperty('annualIncome')
   })
 
   it('leaves finite values, including zero and negatives, as numbers', () => {
-    const { values } = prepareResultsForExport({ zero: 0, negative: -1_500 })
-    expect(values.zero).toBe(0)
-    expect(values.negative).toBe(-1_500)
+    const { values } = prepareResultsForExport({ totalGrowth: 0, firstYearSurplus: -1_500 })
+    expect(values.totalGrowth).toBe(0)
+    expect(values.firstYearSurplus).toBe(-1_500)
   })
 })
 
-describe('format inference by key name', () => {
+describe('null and undefined', () => {
+  it('omits null instead of emitting a blank labelled row', () => {
+    // #64 item 2. `typeof null === 'object'`, but the old guard also required `value !== null`, so
+    // null fell through to a blank row. DeferredCompensation.tsx worked around it with `?? 0`,
+    // which wrote a 0 that reads as a shortfall at age 0.
+    const { values, formats } = prepareResultsForExport({ firstShortfallAge: null, fireNumber: 1_200_000 })
+    expect(values).not.toHaveProperty('firstShortfallAge')
+    expect(formats).not.toHaveProperty('firstShortfallAge')
+    expect(values.fireNumber).toBe(1_200_000)
+  })
+
+  it('omits undefined the same way, so the two are no longer asymmetric', () => {
+    const { values } = prepareResultsForExport({ fireAge: undefined, fireNumber: 1 })
+    expect(values).not.toHaveProperty('fireAge')
+    expect(values.fireNumber).toBe(1)
+  })
+
+  it('still exports a real zero, which says something different from null', () => {
+    const { values } = prepareResultsForExport({ firstShortfallAge: 0 })
+    expect(values.firstShortfallAge).toBe(0)
+  })
+})
+
+// ================================================================================================
+// Declared formats
+// ================================================================================================
+
+describe('declared formats', () => {
+  const format = (key: string, value: unknown) =>
+    prepareResultsForExport({ [key]: value }).formats[key]
+
   it.each([
     ['withdrawalRate', 'percent'],
     ['savingsRate', 'percent'],
     ['horizonFundedRatio', 'percent'],
-    ['percentComplete', 'percent'],
-    ['progress', 'percent'],
-  ] as const)('%s is formatted as a percentage', (key, expected) => {
-    expect(prepareResultsForExport({ [key]: 0.04 }).formats[key]).toBe(expected)
-  })
-
-  it('formats horizonFundedRatio as a percentage', () => {
-    // The audit's second bite: 'rate' matched but 'ratio' did not, so this ratio silently exported
-    // as a bare number. 'ratio' is now in the percent list and must stay there.
-    const { formats } = prepareResultsForExport(calculateWithdrawal(1_000_000, 0.05, 0.03, 0.03, 40))
-    expect(formats.horizonFundedRatio).toBe('percent')
+    ['expectedReturn', 'percent'],
+    ['inflationRate', 'percent'],
+  ] as const)('%s renders as a percentage', (key, expected) => {
+    expect(format(key, 0.04)).toBe(expected)
   })
 
   it.each([
@@ -171,126 +496,168 @@ describe('format inference by key name', () => {
     ['endingBalance', 'currency'],
     ['annualWithdrawal', 'currency'],
     ['totalInterest', 'currency'],
+    ['totalPrincipal', 'currency'],
     ['monthlyPayment', 'currency'],
     ['requiredAnnualSavings', 'currency'],
     ['totalCost', 'currency'],
-    ['totalPrincipal', 'currency'],
     ['portfolioValue', 'currency'],
-  ] as const)('%s is formatted as currency', (key, expected) => {
-    expect(prepareResultsForExport({ [key]: 1_000 }).formats[key]).toBe(expected)
+    // Both are dollar thresholds and used to render as bare numbers.
+    ['leanThreshold', 'currency'],
+    ['fatThreshold', 'currency'],
+  ] as const)('%s renders as currency', (key, expected) => {
+    expect(format(key, 1_000)).toBe(expected)
   })
 
   it.each([
     ['yearsToFIRE', 'years'],
-    ['fireAge', 'years'],
+    ['yearsToCoast', 'years'],
     ['portfolioLongevity', 'years'],
-    ['monthsRemaining', 'years'],
-  ] as const)('%s is formatted as a duration', (key, expected) => {
-    expect(prepareResultsForExport({ [key]: 25 }).formats[key]).toBe(expected)
+    ['gapYears', 'years'],
+    // An age, but the calculators round it to one decimal, so the integer 'age' format would show
+    // 51.5 as 52 — a silent change to the number rather than to its styling.
+    ['fireAge', 'years'],
+  ] as const)('%s renders with a decimal', (key, expected) => {
+    expect(format(key, 25.4)).toBe(expected)
   })
 
-  it('falls back to plain number for an unrecognised key', () => {
-    expect(prepareResultsForExport({ mysteryField: 7 }).formats.mysteryField).toBe('number')
+  it.each([
+    ['currentAge', 'age'],
+    ['retirementAge', 'age'],
+    ['medicareAge', 'age'],
+    ['firstShortfallAge', 'age'],
+  ] as const)('%s renders as a whole age', (key, expected) => {
+    expect(format(key, 55)).toBe(expected)
   })
 
-  it('checks percent before currency, so a key matching both is a percentage', () => {
-    // 'savingsRate' contains both 'savings' (currency) and 'rate' (percent). Percent wins because
-    // it is tested first, which is the behaviour the result cards depend on.
-    expect(prepareResultsForExport({ savingsRate: 0.33 }).formats.savingsRate).toBe('percent')
+  it.each([
+    ['totalMonths', 'number'],
+    ['targetMonths', 'number'],
+    ['totalDebts', 'number'],
+    ['incomeSourceCount', 'number'],
+    ['accountCount', 'number'],
+    ['retirementYears', 'number'],
+  ] as const)('%s renders as a whole count', (key, expected) => {
+    expect(format(key, 25)).toBe(expected)
   })
 
-  it('matches key names case-insensitively', () => {
-    expect(prepareResultsForExport({ TotalInterest: 500 }).formats.TotalInterest).toBe('currency')
-    expect(prepareResultsForExport({ WITHDRAWALRATE: 0.04 }).formats.WITHDRAWALRATE).toBe('percent')
+  it('leaves an undeclared key unformatted rather than guessing', () => {
+    const { values, formats } = prepareResultsForExport({ mysteryField: 7 })
+    // Still exported: an unstyled number is never wrong, whereas a guessed one can be.
+    expect(values.mysteryField).toBe(7)
+    expect(formats).not.toHaveProperty('mysteryField')
   })
 
-  it('attaches no format to non-numeric values', () => {
-    const { values, formats } = prepareResultsForExport({ label: 'Standard', flag: true })
-    expect(values.label).toBe('Standard')
-    expect(values.flag).toBe(true)
-    expect(formats).not.toHaveProperty('label')
-    expect(formats).not.toHaveProperty('flag')
+  it('matches key names exactly, so a differently-cased key is not a match', () => {
+    // The old lookup lowercased both sides and used `.includes()`, which is how 'strategy' matched
+    // 'rate'. Exact matching is what makes that class of collision unrepresentable.
+    expect(prepareResultsForExport({ TotalInterest: 500 }).formats).not.toHaveProperty('TotalInterest')
+    expect(prepareResultsForExport({ totalInterest: 500 }).formats.totalInterest).toBe('currency')
   })
 })
 
-describe('known hazards, pinned as characterization', () => {
-  /*
-   * The behaviours below are pre-existing and are NOT changed by this test-only work. They are
-   * pinned so the next person sees them stated rather than rediscovering them from a user's
-   * spreadsheet. Booleans and null are tracked in issue #64; totalMonths has its own issue, #62.
-   */
+// ================================================================================================
+// The specific defects in #62 and #64
+// ================================================================================================
 
-  it('booleans still reach the workbook as untyped rows', () => {
-    // `typeof true` is neither array nor object, so a boolean passes the filter and lands in the
-    // export with no format hint. LeanFIRE, FatFIRE and CoastFIRE all pass raw results containing
-    // isLean / isFat / alreadyCoasting straight through.
+describe('substring collisions that used to mis-format live exports', () => {
+  it('#62: totalMonths is a count of months, not an amount of money', () => {
+    // 'totalmonths'.includes('total'), and currencyKeys was tested before timeKeys, so a 25-month
+    // payoff was written into the user's spreadsheet as "$25". Exact lookup makes that impossible.
+    //
+    // Declared 'number' (#,##0 -> "25") rather than 'years' (0.0 -> "25.0"): these are whole
+    // months, and "25.0 months" is a smaller version of the same defect.
+    //
+    // This deliberately diverges from MAUI, which writes TotalMonths with DecimalStyleIndex
+    // (DebtPayoffWorkbook.cs:61 -> format code "0.0") and so renders "25.0". MAUI is immune to the
+    // name-inference class — it declares a style per cell at the call site — but it picked a
+    // decimal style for a whole-number field. Web is correct here; the C# side is worth a look.
+    const debt = calculateSnowballPayoff(DEBTS, 500)
+    expect(debt.totalMonths).toBe(25)
+
+    const { formats } = prepareResultsForExport(debt)
+    expect(formats.totalMonths).toBe('number')
+
+    // The genuinely-currency siblings are unchanged.
+    expect(formats.totalInterest).toBe('currency')
+    expect(formats.totalPrincipal).toBe('currency')
+    expect(formats.monthlyPayment).toBe('currency')
+  })
+
+  it('#64: strategy is a word, not a percentage', () => {
+    // 'strategy' contains 'rate' — st-RATE-gy — and percentKeys was tested first, so the string
+    // "snowball" was written into a cell carrying numFmt '0.0%'.
+    const { values, formats } = prepareInputsForExport({ strategy: 'snowball', mode: 'budget' })
+    expect(values.strategy).toBe('snowball')
+    expect(formats.strategy).toBe('text')
+    expect(formats.mode).toBe('text')
+  })
+
+  it('#64: totalDebt is money, the inverse of the totalMonths defect', () => {
+    // The inputs list had no 'total' entry at all, so a real dollar amount exported unformatted
+    // while the results list treated 'total' as currency. One shared map ends that disagreement.
+    const { formats } = prepareInputsForExport({ totalDebt: 21_500, monthlyBudget: 500 })
+    expect(formats.totalDebt).toBe('currency')
+    expect(formats.monthlyBudget).toBe('currency')
+  })
+
+  it('a count of income sources is a count, not an amount of money', () => {
+    // Not filed: 'incomeSourceCount' contains 'income', so three income sources exported as "$3".
+    // The same defect as #62 on a different field, found by enumerating every live call site.
+    expect(prepareInputsForExport({ incomeSourceCount: 3 }).formats.incomeSourceCount).toBe('number')
+  })
+
+  it('a contribution frequency is a word, not an amount of money', () => {
+    // Not filed: 'contributionFrequency' contains 'contribution', so "monthly" landed in a $ cell.
+    const { values, formats } = prepareInputsForExport({ contributionFrequency: 'monthly' })
+    expect(values.contributionFrequency).toBe('monthly')
+    expect(formats.contributionFrequency).toBe('text')
+  })
+
+  it('input booleans are declared non-numeric instead of receiving a number format', () => {
+    // Not filed: neither list matched 'withdrawOnlyAfterRetirement' or 'reinvestSurplus', and the
+    // inputs helper never type-gated, so both booleans received numFmt '#,##0'.
+    const { values, formats } = prepareInputsForExport({
+      withdrawOnlyAfterRetirement: true,
+      reinvestSurplus: false,
+    })
+    expect(values.withdrawOnlyAfterRetirement).toBe(true)
+    expect(values.reinvestSurplus).toBe(false)
+    expect(formats.withdrawOnlyAfterRetirement).toBe('text')
+    expect(formats.reinvestSurplus).toBe('text')
+  })
+
+  it('result booleans stay in the workbook, now declared rather than accidental', () => {
+    // #64 item 1. These carry real meaning — "you are already coasting" — so they are exported,
+    // with no number format. Previously they were exported because nothing happened to filter them
+    // out, which is not the same thing.
     const lean = prepareResultsForExport(calculateLeanFIRE(DEFAULTS))
     expect(lean.values.isLean).toBe(false)
-    expect(lean.formats).not.toHaveProperty('isLean')
+    expect(lean.formats.isLean).toBe('text')
 
     const coast = prepareResultsForExport(
       calculateCoastFIRE(30, 55, 100_000, 24_000, 0.07, 0.03, 48_000, 0.04),
     )
     expect(coast.values.alreadyCoasting).toBe(false)
-    expect(coast.formats).not.toHaveProperty('alreadyCoasting')
+    expect(coast.formats.alreadyCoasting).toBe('text')
   })
 
-  it('null still emits a row', () => {
-    // The guard is `typeof value === 'object' && value !== null`, so null falls through to
-    // `values[key] = null` and produces a blank row. Callers work around this at the call site
-    // (DeferredCompensation.tsx uses `?? 0`) rather than in this helper.
-    const { values, formats } = prepareResultsForExport({ firstShortfallAge: null, fireNumber: 1_200_000 })
-    expect(values).toHaveProperty('firstShortfallAge')
-    expect(values.firstShortfallAge).toBeNull()
-    expect(formats).not.toHaveProperty('firstShortfallAge')
-  })
+  it('a name that merely contains "age" is no longer formatted as an age', () => {
+    // Latent when filed under #64: ageKeys was checked first and 'age' is the shortest, most
+    // collision-prone token in any of the lists, so a future 'mortgageBalance' or 'averageReturn'
+    // would have exported with the age format ahead of the currency and percent rules. There is no
+    // precedence to get wrong now, and neither name matches anything.
+    const { formats } = prepareInputsForExport({ mortgageBalance: 300_000, averageReturn: 0.07 })
+    expect(formats).not.toHaveProperty('mortgageBalance')
+    expect(formats).not.toHaveProperty('averageReturn')
 
-  it('undefined is dropped, unlike null', () => {
-    // Object.entries skips nothing, but `typeof undefined` is 'undefined', so it is stored as a
-    // value with no format. Pinned to document the asymmetry with null above.
-    const { values } = prepareResultsForExport({ maybe: undefined, sure: 1 })
-    expect(values.maybe).toBeUndefined()
-    expect(values.sure).toBe(1)
-  })
-
-  it('a threshold constant is exported as if it were a result', () => {
-    // leanThreshold / fatThreshold are configuration, not outcomes, but they are scalars on the
-    // result type so they reach the user's workbook. Documented, not changed.
-    const { values, formats } = prepareResultsForExport(calculateLeanFIRE(DEFAULTS))
-    expect(values.leanThreshold).toBe(40_000)
-    expect(formats.leanThreshold).toBe('number')
-  })
-
-  it('totalMonths is exported as CURRENCY, not a duration', () => {
-    /*
-     * FINDING (live, user-visible, pre-existing). Tracked in issue #62, deliberately not fixed here.
-     *
-     * This is the same substring-collision class as the 'rate' / 'ratio' bug the audit already hit,
-     * and it is currently shipping.
-     *
-     * 'totalmonths' contains 'total', which is in currencyKeys. currencyKeys is tested BEFORE
-     * timeKeys, so the intended 'months' match in timeKeys is never reached. The 'currency' hint
-     * maps to numFmt '$#,##0' (getExcelFormat), so a debt payoff that takes 25 months is written
-     * into the user's spreadsheet as "$25".
-     *
-     * DebtPayoff.tsx passes the raw result to prepareResultsForExport and forwards the derived
-     * formats to the workbook without overriding them, so nothing downstream corrects this.
-     *
-     * Asserted as the WRONG value on purpose. When this is fixed, this test SHOULD fail — that is
-     * the signal, and the expectation below should flip to 'years'.
-     */
-    const debt = calculateSnowballPayoff([{ id: '1', name: 'Card', balance: 10_000, rate: 0.2, minPayment: 200 }], 500)
-    expect(debt.totalMonths).toBe(25)
-
-    const { formats } = prepareResultsForExport(debt)
-    expect(formats.totalMonths).toBe('currency')
-
-    // The genuinely-currency siblings are unaffected and correct.
-    expect(formats.totalInterest).toBe('currency')
-    expect(formats.totalPrincipal).toBe('currency')
-    expect(formats.monthlyPayment).toBe('currency')
+    // A real age is still correct, which is why the collision was easy to miss.
+    expect(prepareInputsForExport({ currentAge: 30 }).formats.currentAge).toBe('age')
   })
 })
+
+// ================================================================================================
+// Degenerate input
+// ================================================================================================
 
 describe('empty and degenerate input', () => {
   it('returns empty maps for an empty result object', () => {
@@ -303,81 +670,9 @@ describe('empty and degenerate input', () => {
     const { values } = prepareResultsForExport({ rows: [1, 2], nested: { a: 1 } })
     expect(values).toEqual({})
   })
-})
 
-/**
- * `prepareInputsForExport` is the sibling of `prepareResultsForExport` and has the same
- * substring-matching design, with two differences that both produce wrong formatting. Tracked in
- * issue #64. Not fixed here; this PR is test-only.
- *
- * All of these assert the CURRENT, WRONG behaviour on purpose. When #64 is fixed they SHOULD fail.
- */
-describe('prepareInputsForExport hazards, pinned as characterization (issue #64)', () => {
-  // The exact input DebtPayoff.tsx:71 passes, so these are the formats a real user's workbook gets.
-  const debtInputs = () =>
-    prepareInputsForExport({
-      strategy: 'snowball',
-      mode: 'budget',
-      monthlyBudget: 500,
-      targetMonths: 24,
-      extraPayment: 0,
-      totalDebts: 2,
-      totalDebt: 21_500,
-    })
-
-  it('exports totalDebt without currency formatting', () => {
-    // The exact inverse of the totalMonths bug in #62. There, a month count is formatted as money
-    // because 'total' is in the results currencyKeys. Here, the inputs currencyKeys list
-    // ('savings', 'contribution', 'expenses', 'income', 'value', 'budget', 'payment', 'premium',
-    // 'deductible', 'pocket') has no 'total' entry at all, so totalDebt — a genuine dollar amount —
-    // matches nothing and falls through to 'number'. Same root cause, opposite direction.
-    expect(debtInputs().formats.totalDebt).toBe('number')
-
-    // monthlyBudget is formatted correctly, via 'budget'. The list is not broken, just incomplete.
-    expect(debtInputs().formats.monthlyBudget).toBe('currency')
-  })
-
-  it('assigns a numeric format to non-numeric values', () => {
-    // Unlike prepareResultsForExport, the format branch here is not gated on
-    // `typeof value === 'number'`, so text values receive a numeric format too.
-    //
-    // CORRECTION to issue #64, which records `strategy` as getting 'number': it actually gets
-    // 'percent', because 'strategy' contains the substring 'rate' (st-RATE-gy) and percentKeys is
-    // tested before currencyKeys. So the string "snowball" is written into a cell carrying numFmt
-    // '0.0%'. 'mode' does get 'number' as filed.
-    const { values, formats } = debtInputs()
-
-    expect(values.strategy).toBe('snowball')
-    expect(formats.strategy).toBe('percent')
-
-    expect(values.mode).toBe('budget')
-    expect(formats.mode).toBe('number')
-  })
-
-  it('has no non-finite guard, unlike its results sibling', () => {
-    // prepareResultsForExport substitutes 'Not reachable' for Infinity and NaN. This one has no such
-    // guard, so a non-finite input value is written straight through. Inputs are user-entered so
-    // this is harder to reach than the results path, but the asymmetry is worth stating.
-    const { values } = prepareInputsForExport({ annualIncome: Infinity })
-    expect(values.annualIncome).toBe(Infinity)
-  })
-
-  it('checks ageKeys first, so any key containing "age" is formatted as an age', () => {
-    // Latent rather than live: every current parameter containing 'age' is a genuine age
-    // (currentAge, retirementAge, targetRetirementAge, earlyRetirementAge, medicareAge,
-    // planThroughAge), so nothing is mis-formatted today. But 'age' is checked before percent and
-    // currency, so a future 'mortgageBalance' or 'averageReturn' would silently export with the
-    // age format. Pinned to document the ordering trap before it bites.
-    const { formats } = prepareInputsForExport({ mortgageBalance: 300_000, averageReturn: 0.07 })
-    expect(formats.mortgageBalance).toBe('age')
-    expect(formats.averageReturn).toBe('age')
-
-    // A real age is still correct, which is why the collision is easy to miss.
-    expect(prepareInputsForExport({ currentAge: 30 }).formats.currentAge).toBe('age')
-  })
-
-  it('skips arrays and objects, matching its results sibling', () => {
-    const { values } = prepareInputsForExport({ debts: [{ balance: 1 }], nested: {}, budget: 500 })
-    expect(Object.keys(values)).toEqual(['budget'])
+  it('tolerates a missing object rather than throwing mid-download', () => {
+    expect(prepareResultsForExport(undefined).values).toEqual({})
+    expect(prepareInputsForExport(null).values).toEqual({})
   })
 })

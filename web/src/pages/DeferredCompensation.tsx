@@ -91,8 +91,9 @@ export default function DeferredCompensation() {
       accountCount: params.accounts.length,
       additionalExpenseCount: params.additionalExpenses.length,
     })
-    // prepareResultsForExport enumerates every scalar key, so a null firstShortfallAge would emit
-    // a blank row. Pass a curated shape instead of the raw result.
+    // prepareResultsForExport omits null rather than emitting a blank row, so a plan with no
+    // shortfall simply has no "First Shortfall Age" row. This used to pass `?? 0`, which wrote a 0
+    // that reads as a shortfall at age 0.
     const { values: resultValues, formats: resultFormats } = prepareResultsForExport({
       currentBalance: results.currentBalance,
       balanceAtSemiRetirement: results.balanceAtSemiRetirement,
@@ -102,7 +103,7 @@ export default function DeferredCompensation() {
       consecutiveFundedYears: results.fundedYears,
       retirementYears: results.retirementYears,
       yearsFullyCovered: results.yearsFullyCovered,
-      firstShortfallAge: results.firstShortfallAge ?? 0,
+      firstShortfallAge: results.firstShortfallAge,
     })
 
     exportToExcel({

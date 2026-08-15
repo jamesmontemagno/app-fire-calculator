@@ -1,10 +1,18 @@
 import ExcelJS from 'exceljs'
-import { formatCurrency, formatPercent } from './calculations'
 
 /**
  * Export calculator data to Excel spreadsheet
  * Creates a workbook with multiple sheets for inputs, results, and projections
  */
+
+/**
+ * How a value is rendered in its cell.
+ *
+ * `'text'` is a positive declaration that a field is deliberately non-numeric — a string or a
+ * boolean — and must carry no number format. It is not the same as a field having no entry here,
+ * which means nobody has declared it yet.
+ */
+export type ExportFormat = 'currency' | 'percent' | 'number' | 'age' | 'years' | 'text'
 
 interface ExportData {
   calculatorName: string
@@ -18,8 +26,8 @@ interface ExportData {
   // New: Support for formulas in results
   resultFormulas?: Record<string, string>
   // New: Support for formatting hints
-  inputFormats?: Record<string, 'currency' | 'percent' | 'number' | 'age'>
-  resultFormats?: Record<string, 'currency' | 'percent' | 'number' | 'years'>
+  inputFormats?: Record<string, ExportFormat>
+  resultFormats?: Record<string, ExportFormat>
 }
 
 /** Written in place of Infinity/NaN scalars so an exported workbook never contains "$∞". */
@@ -65,7 +73,7 @@ function formatValue(value: any): any {
 /**
  * Get Excel format string for a given format type
  */
-function getExcelFormat(format?: 'currency' | 'percent' | 'number' | 'age' | 'years'): string | undefined {
+function getExcelFormat(format?: ExportFormat): string | undefined {
   switch (format) {
     case 'currency':
       return '$#,##0'
@@ -77,6 +85,7 @@ function getExcelFormat(format?: 'currency' | 'percent' | 'number' | 'age' | 'ye
       return '0'
     case 'number':
       return '#,##0'
+    // 'text' is a declared non-numeric field: exported, but deliberately unformatted.
     default:
       return undefined
   }
@@ -327,172 +336,216 @@ export async function exportToExcel(data: ExportData): Promise<void> {
 }
 
 /**
- * Helper to prepare input values for Excel export
- * Returns raw numeric values (not formatted strings) and format hints
+ * The single declaration site for how every exported field is formatted.
+ *
+ * Lookup is by **exact** field name. That is the whole point. This map replaces two independently
+ * maintained lists of substrings, matched with `.includes()` in an order that decided precedence,
+ * which produced seven distinct formatting defects:
+ *
+ *   - `'rate'` matched but `'ratio'` did not, so percent formatting was silently dropped (#53).
+ *   - `'totalmonths'` contains `'total'`, so a 25-month payoff exported as `$25` (#62).
+ *   - `'strategy'` contains `'rate'` — st-RATE-gy — so the string `"snowball"` got numFmt `0.0%` (#64).
+ *   - `'totalDebt'` matched nothing in the *inputs* list, so real dollars exported unformatted (#64).
+ *   - `'incomeSourceCount'` contains `'income'`, so a count of 3 income sources exported as `$3`.
+ *   - `'contributionFrequency'` contains `'contribution'`, so `"monthly"` landed in a `$#,##0` cell.
+ *   - `'withdrawOnlyAfterRetirement'` matched nothing, so a boolean received numFmt `#,##0`.
+ *
+ * Exact matching makes every one of those unrepresentable rather than merely reordered. There is no
+ * precedence to get wrong, and a name like `mortgageBalance` can no longer resolve to `age`.
+ *
+ * Inputs and results share this map deliberately. The `totalDebt` defect existed *because* the two
+ * helpers kept separate lists; one map makes that divergence impossible. Adding a field here is the
+ * conscious decision — `exportedFieldsAreDeclared` in the test suite fails until you make it.
  */
-export function prepareInputsForExport(params: any): { 
-  values: Record<string, any>
-  formats: Record<string, 'currency' | 'percent' | 'number' | 'age'>
-} {
-  const values: Record<string, any> = {}
-  const formats: Record<string, 'currency' | 'percent' | 'number' | 'age'> = {}
-  
-  // Define patterns for different value types
-  const currencyKeys = ['savings', 'contribution', 'expenses', 'income', 'value', 'budget', 'payment', 'premium', 'deductible', 'pocket']
-  const percentKeys = ['rate', 'return', 'inflation', 'withdrawal', 'swr']
-  const ageKeys = ['age']
-  
-  for (const [key, value] of Object.entries(params)) {
-    // Skip complex objects like debts array
-    if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
-      continue
-    }
-    
-    // Store raw numeric value
-    values[key] = value
-    
-    const lowerKey = key.toLowerCase()
-    
-    // Determine format type
-    if (ageKeys.some(pattern => lowerKey.includes(pattern))) {
-      formats[key] = 'age'
-    } else if (percentKeys.some(pattern => lowerKey.includes(pattern))) {
-      formats[key] = 'percent'
-    } else if (currencyKeys.some(pattern => lowerKey.includes(pattern))) {
-      formats[key] = 'currency'
-    } else {
-      formats[key] = 'number'
-    }
-  }
-  
-  return { values, formats }
+const EXPORT_FIELD_FORMATS: Record<string, ExportFormat> = {
+  // --- Ages -------------------------------------------------------------------------------------
+  currentAge: 'age',
+  retirementAge: 'age',
+  targetRetirementAge: 'age',
+  earlyRetirementAge: 'age',
+  medicareAge: 'age',
+  planThroughAge: 'age',
+  firstShortfallAge: 'age',
+
+  // --- Rates ------------------------------------------------------------------------------------
+  expectedReturn: 'percent',
+  inflationRate: 'percent',
+  withdrawalRate: 'percent',
+  savingsRate: 'percent',
+  horizonFundedRatio: 'percent',
+
+  // --- Dollar inputs ----------------------------------------------------------------------------
+  currentSavings: 'currency',
+  annualContribution: 'currency',
+  annualIncome: 'currency',
+  annualExpenses: 'currency',
+  partTimeIncome: 'currency',
+  portfolioValue: 'currency',
+  contributionAmount: 'currency',
+  monthlyPremium: 'currency',
+  annualDeductible: 'currency',
+  annualOutOfPocket: 'currency',
+  monthlyBudget: 'currency',
+  extraPayment: 'currency',
+  // A real dollar amount that the old inputs list had no entry for at all (#64).
+  totalDebt: 'currency',
+
+  // --- Dollar results ---------------------------------------------------------------------------
+  fireNumber: 'currency',
+  coastFireNumber: 'currency',
+  coastNumber: 'currency',
+  baristaNumber: 'currency',
+  fullFireNumber: 'currency',
+  partTimeIncomeNeeded: 'currency',
+  savingsFromPartTime: 'currency',
+  monthlyContribution: 'currency',
+  annualWithdrawal: 'currency',
+  monthlyWithdrawal: 'currency',
+  endingBalance: 'currency',
+  requiredAnnualSavings: 'currency',
+  requiredMonthlySavings: 'currency',
+  currentWillGrowTo: 'currency',
+  finalNominalBalance: 'currency',
+  finalInflationAdjustedBalance: 'currency',
+  totalInvested: 'currency',
+  totalGrowth: 'currency',
+  inflationImpact: 'currency',
+  totalInterest: 'currency',
+  totalPrincipal: 'currency',
+  monthlyPayment: 'currency',
+  currentBalance: 'currency',
+  balanceAtSemiRetirement: 'currency',
+  firstYearIncomeAfterTax: 'currency',
+  firstYearSurplus: 'currency',
+  annualCost: 'currency',
+  totalCost: 'currency',
+  avgAnnualCost: 'currency',
+  // Configuration rather than an outcome, but it reaches the workbook and it is measured in dollars.
+  leanThreshold: 'currency',
+  fatThreshold: 'currency',
+
+  // --- Durations --------------------------------------------------------------------------------
+  // These carry a fractional part (rounded to one decimal by the calculators), so '0.0' is correct.
+  yearsToFIRE: 'years',
+  yearsToCoast: 'years',
+  yearsToBaristaFIRE: 'years',
+  // An age rather than a duration, but rounded to one decimal, so '0.0' preserves it where the
+  // integer 'age' format would silently show 51.5 as 52.
+  fireAge: 'years',
+  portfolioLongevity: 'years',
+  gapYears: 'years',
+
+  // --- Whole counts -----------------------------------------------------------------------------
+  // Integers, so '#,##0' rather than the '0.0' of the duration formats above. `totalMonths` is the
+  // #62 defect: it used to render as '$25' for a 25-month payoff.
+  totalMonths: 'number',
+  targetMonths: 'number',
+  retirementYears: 'number',
+  yearsInvesting: 'number',
+  consecutiveFundedYears: 'number',
+  yearsFullyCovered: 'number',
+  totalDebts: 'number',
+  incomeSourceCount: 'number',
+  accountCount: 'number',
+  additionalExpenseCount: 'number',
+
+  // --- Declared non-numeric ---------------------------------------------------------------------
+  // Strings and booleans. Declaring them keeps a number format off a text cell without needing a
+  // type guard to rescue them from a name-based guess.
+  strategy: 'text',
+  mode: 'text',
+  contributionFrequency: 'text',
+  withdrawOnlyAfterRetirement: 'text',
+  reinvestSurplus: 'text',
+  isLean: 'text',
+  isFat: 'text',
+  alreadyCoasting: 'text',
+  alreadyAchievable: 'text',
+}
+
+/** True when a field has a declared format. Used by the test suite's coverage guard. */
+export function isExportFieldDeclared(key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(EXPORT_FIELD_FORMATS, key)
 }
 
 /**
- * Helper to prepare result values for Excel export
- * Returns raw numeric values (not formatted strings) and format hints
+ * Flatten an inputs or results object into cell values plus their declared formats.
+ *
+ * Inputs and results share one implementation on purpose. They used to be two near-copies whose
+ * behaviour had already diverged — only one had a non-finite guard, only one type-gated formatting,
+ * and their key lists disagreed about whether `total*` meant money. Sharing the code means they
+ * cannot drift apart again.
+ *
+ * An **undeclared** field is still exported, just without a number format. Losing a value from a
+ * user's workbook is worse than showing it unstyled, and an unstyled number is never *wrong* — the
+ * whole point of the defects above is that a guessed format is. `EXPORT_FIELD_FORMATS` is enforced
+ * in CI instead, so an undeclared field fails a test long before it reaches anyone.
  */
-export function prepareResultsForExport(results: any): {
+function prepareForExport(source: any): {
   values: Record<string, any>
-  formats: Record<string, 'currency' | 'percent' | 'number' | 'years'>
+  formats: Record<string, ExportFormat>
 } {
   const values: Record<string, any> = {}
-  const formats: Record<string, 'currency' | 'percent' | 'number' | 'years'> = {}
-  
-  // Define patterns for different value types
-  const currencyKeys = ['number', 'value', 'balance', 'withdrawal', 'income', 'interest', 'payment', 'savings', 'cost', 'total', 'principal']
-  const percentKeys = ['rate', 'savingsrate', 'ratio', 'percent', 'progress']
-  const timeKeys = ['years', 'months', 'age', 'longevity']
-  
-  for (const [key, value] of Object.entries(results)) {
-    // Skip arrays and complex objects (they go in separate sheets)
+  const formats: Record<string, ExportFormat> = {}
+
+  for (const [key, value] of Object.entries(source ?? {})) {
+    // Arrays and nested objects belong on their own sheets, not as a JSON blob in a labelled row.
     if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
+      continue
+    }
+
+    // A null means "this did not happen" — no shortfall age, no payoff date. A blank labelled row
+    // cannot be told apart from a missing one, and substituting 0 at the call site reads as a
+    // shortfall at age 0. Omitting the row is the only option that generalises.
+    if (value === null || value === undefined) {
       continue
     }
 
     // Non-finite results are legitimate ("the target is never reached"), but writing Infinity or
-    // NaN into a currency-formatted cell produces a spreadsheet that outlives the session and
-    // cannot be reasoned about. Substitute the same wording the result cards use.
+    // NaN into a numeric cell produces a spreadsheet that outlives the session and cannot be
+    // reasoned about. Substitute the same wording the result cards use, with no numeric format.
     if (typeof value === 'number' && !Number.isFinite(value)) {
       values[key] = UNREACHABLE_EXPORT_VALUE
       continue
     }
 
-    // Store raw value
     values[key] = value
-    
-    // Determine format type
-    if (typeof value === 'number') {
-      const lowerKey = key.toLowerCase()
-      
-      if (percentKeys.some(pattern => lowerKey.includes(pattern))) {
-        formats[key] = 'percent'
-      } else if (currencyKeys.some(pattern => lowerKey.includes(pattern))) {
-        formats[key] = 'currency'
-      } else if (timeKeys.some(pattern => lowerKey.includes(pattern))) {
-        formats[key] = 'years'
-      } else {
-        formats[key] = 'number'
-      }
+
+    const format = EXPORT_FIELD_FORMATS[key]
+    if (format) {
+      formats[key] = format
+    } else if (import.meta.env?.DEV && import.meta.env?.MODE !== 'test') {
+      // The suite deliberately exercises undeclared keys, so it opts out of the noise. In the dev
+      // server this is the first signal that a newly added field is heading for the workbook
+      // unstyled; the `exported fields are declared` suite is what actually blocks it.
+      console.warn(
+        `[excelExport] "${key}" has no entry in EXPORT_FIELD_FORMATS, so it is exported unformatted. ` +
+          'Add it there to choose how it renders.',
+      )
     }
   }
-  
+
   return { values, formats }
 }
 
 /**
- * Helper to format input values for display (DEPRECATED - kept for backward compatibility)
- * Use prepareInputsForExport instead for Excel exports with formulas
+ * Helper to prepare input values for Excel export
+ * Returns raw values (not formatted strings) and their declared format hints
  */
-export function formatInputsForExport(params: any): Record<string, any> {
-  const formatted: Record<string, any> = {}
-  
-  // Define patterns for different value types
-  const currencyKeys = ['savings', 'contribution', 'expenses', 'income', 'value', 'budget', 'payment', 'premium', 'deductible', 'pocket']
-  const percentKeys = ['rate', 'return', 'inflation', 'withdrawal', 'swr']
-  const ageKeys = ['age']
-  const timeKeys = ['years', 'months']
-  
-  for (const [key, value] of Object.entries(params)) {
-    // Skip complex objects like debts array
-    if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
-      continue
-    }
-    
-    const lowerKey = key.toLowerCase()
-    
-    // Format based on the key name patterns
-    if (ageKeys.some(pattern => lowerKey.includes(pattern))) {
-      formatted[key] = value
-    } else if (percentKeys.some(pattern => lowerKey.includes(pattern))) {
-      formatted[key] = formatPercent(value as number)
-    } else if (currencyKeys.some(pattern => lowerKey.includes(pattern))) {
-      formatted[key] = formatCurrency(value as number)
-    } else if (timeKeys.some(pattern => lowerKey.includes(pattern))) {
-      formatted[key] = value
-    } else {
-      formatted[key] = value
-    }
-  }
-  
-  return formatted
+export function prepareInputsForExport(params: any): {
+  values: Record<string, any>
+  formats: Record<string, ExportFormat>
+} {
+  return prepareForExport(params)
 }
 
 /**
- * Helper to format result values for display (DEPRECATED - kept for backward compatibility)
- * Use prepareResultsForExport instead for Excel exports with formulas
+ * Helper to prepare result values for Excel export
+ * Returns raw values (not formatted strings) and their declared format hints
  */
-export function formatResultsForExport(results: any): Record<string, any> {
-  const formatted: Record<string, any> = {}
-  
-  // Define patterns for different value types
-  const currencyKeys = ['number', 'value', 'balance', 'withdrawal', 'income', 'interest', 'payment', 'savings', 'cost', 'total', 'principal']
-  const percentKeys = ['rate', 'savingsrate', 'ratio', 'percent', 'progress']
-  const timeKeys = ['years', 'months', 'age', 'longevity']
-  
-  for (const [key, value] of Object.entries(results)) {
-    // Skip arrays and complex objects (they go in separate sheets)
-    if (Array.isArray(value) || (typeof value === 'object' && value !== null)) {
-      continue
-    }
-    
-    // Format based on the key name and value type
-    if (typeof value === 'number') {
-      const lowerKey = key.toLowerCase()
-      
-      if (percentKeys.some(pattern => lowerKey.includes(pattern))) {
-        formatted[key] = formatPercent(value)
-      } else if (currencyKeys.some(pattern => lowerKey.includes(pattern))) {
-        formatted[key] = formatCurrency(value)
-      } else if (timeKeys.some(pattern => lowerKey.includes(pattern))) {
-        formatted[key] = Math.round(value * 10) / 10 // Round to 1 decimal
-      } else {
-        formatted[key] = value
-      }
-    } else {
-      formatted[key] = value
-    }
-  }
-  
-  return formatted
+export function prepareResultsForExport(results: any): {
+  values: Record<string, any>
+  formats: Record<string, ExportFormat>
+} {
+  return prepareForExport(results)
 }
