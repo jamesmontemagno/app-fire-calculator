@@ -50,7 +50,7 @@ export default function HealthcareGap() {
               <p className="mt-1 text-sm text-content-muted">Enter the costs you expect to pay before Medicare begins. Every amount below uses the same period, so switch them all to monthly or annual with one control. These values are saved with this calculator.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <CardContent className="field-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Used to label the cost timeline." min={18} max={64} showSlider />
               <AgeInput label="Early retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="When employer-sponsored coverage ends." min={params.currentAge} max={64} showSlider />
               <CurrencyInput label="Health insurance premium" value={params.healthcareMonthlyPremium} onChange={value => setParam('healthcareMonthlyPremium', value)} tooltip="Expected health insurance premium." max={3000} periodic storedPeriod="monthly" />

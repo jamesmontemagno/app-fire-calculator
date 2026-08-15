@@ -48,7 +48,7 @@ export default function WithdrawalRate() {
               <h2 id="withdrawal-plan-heading" className="text-lg font-semibold text-content">Start with your withdrawal plan</h2>
               <p className="mt-1 text-sm text-content-muted">Choose a portfolio, a first-year withdrawal rate, and how long the money needs to last.</p>
             </CardHeader>
-            <CardContent className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <CardContent className="field-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <CurrencyInput label="Portfolio value" value={params.portfolioValue} onChange={value => setParam('portfolioValue', value)} tooltip="Current total invested assets available for withdrawals." />
               <PercentageInput label="Withdrawal rate" value={params.withdrawalRate} onChange={value => setParam('withdrawalRate', value)} onSliderChange={value => setParamDebounced('withdrawalRate', value)} tooltip="Percentage of the starting portfolio withdrawn in the first year." min={0.02} max={0.08} step={0.005} />
               <InputGroup label="Retirement duration" value={params.retirementYears} onChange={value => setParam('retirementYears', value)} onSliderChange={value => setParamDebounced('retirementYears', value)} tooltip="How many years the portfolio needs to support withdrawals." suffix="years" min={10} max={60} showSlider />

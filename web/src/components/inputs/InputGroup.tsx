@@ -55,66 +55,68 @@ export default function InputGroup({
         {label}
         {tooltip && <Tooltip content={tooltip} />}
       </label>
-      <div className="relative">
-        {prefix && (
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none">
-            {prefix}
-          </span>
+      <div>
+        <div className="relative">
+          {prefix && (
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none">
+              {prefix}
+            </span>
+          )}
+          <input
+            id={id}
+            type="number"
+            value={value}
+            onChange={handleChange}
+            min={min}
+            max={max}
+            step={step}
+            aria-describedby={helperText ? helperTextId : undefined}
+            className={`
+              w-full px-3 py-2.5 
+              bg-surface-raised 
+              border border-border-strong 
+              rounded-control 
+              text-content
+              placeholder-content-subtle
+              focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-accent
+              transition-colors
+              ${prefix ? 'pl-8' : ''}
+              ${suffix ? 'pr-12' : ''}
+            `}
+            {...props}
+          />
+          {suffix && (
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none">
+              {suffix}
+            </span>
+          )}
+        </div>
+        {showSlider && min !== undefined && max !== undefined && (
+          <input
+            type="range"
+            value={value}
+            onChange={(event) => {
+              const newValue = parseFloat(event.target.value)
+              ;(onSliderChange ?? onChange)(newValue)
+            }}
+            min={min}
+            max={max}
+            step={step}
+            aria-label={`${label} slider`}
+            className="
+              mt-3 w-full h-2
+              bg-border-subtle
+              rounded-control appearance-none cursor-pointer
+              accent-accent
+            "
+          />
         )}
-        <input
-          id={id}
-          type="number"
-          value={value}
-          onChange={handleChange}
-          min={min}
-          max={max}
-          step={step}
-          aria-describedby={helperText ? helperTextId : undefined}
-          className={`
-            w-full px-3 py-2.5 
-            bg-surface-raised 
-            border border-border-strong 
-            rounded-control 
-            text-content
-            placeholder-content-subtle
-            focus-visible:ring-2 focus-visible:ring-ring focus-visible:border-accent
-            transition-colors
-            ${prefix ? 'pl-8' : ''}
-            ${suffix ? 'pr-12' : ''}
-          `}
-          {...props}
-        />
-        {suffix && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-content-subtle pointer-events-none">
-            {suffix}
-          </span>
+        {helperText && (
+          <p id={helperTextId} className="mt-1.5 text-xs text-content-subtle">
+            {helperText}
+          </p>
         )}
       </div>
-      {showSlider && min !== undefined && max !== undefined && (
-        <input
-          type="range"
-          value={value}
-          onChange={(event) => {
-            const newValue = parseFloat(event.target.value)
-            ;(onSliderChange ?? onChange)(newValue)
-          }}
-          min={min}
-          max={max}
-          step={step}
-          aria-label={`${label} slider`}
-          className="
-            mt-3 w-full h-2
-            bg-border-subtle
-            rounded-control appearance-none cursor-pointer
-            accent-accent
-          "
-        />
-      )}
-      {helperText && (
-        <p id={helperTextId} className="mt-1.5 text-xs text-content-subtle">
-          {helperText}
-        </p>
-      )}
     </div>
   )
 }
