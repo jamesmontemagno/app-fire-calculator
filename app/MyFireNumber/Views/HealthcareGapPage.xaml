@@ -9,7 +9,8 @@
                           x:DataType="viewModels:HealthcareGapViewModel"
                           Title="{Binding Title}"
                           Shell.NavBarIsVisible="True"
-                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+                          Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+                          SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding SavePlanCommand}"
                      SemanticProperties.Description="Save the current calculator values as a plan.">
@@ -19,7 +20,7 @@
         </ToolbarItem>
     </ContentPage.ToolbarItems>
     <ScrollView>
-        <VerticalStackLayout Padding="20,20,20,32" Spacing="18">
+        <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
             <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" SemanticProperties.Description="Restoring your local calculator draft." />
             <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light=#FFF4E8, Dark=#4A3323}" Stroke="{AppThemeBinding Light=#C97727, Dark=#F2B56D}" StrokeShape="RoundRectangle 8"><Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light=#6B3B12, Dark=#FFE0BC}" LineHeight="1.3" /></Border>
 
@@ -28,17 +29,17 @@
                                          Details="Leaving employer coverage before Medicare can create a major retirement expense. This estimate includes premiums, deductibles, out-of-pocket costs, and medical inflation. It does not estimate ACA premium tax credits, which depend on household size and the federal poverty level."
                                          IconGlyph="&#xf0f9;" />
 
-            <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
-                <VerticalStackLayout Spacing="14">
-                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8"><Label Text="Coverage basics" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Healthcare Gap values to their defaults." /></Grid>
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}"><Label Text="Coverage basics" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Healthcare Gap values to their defaults." /></Grid>
                     <controls:PeriodToggleView />
-                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}" RowSpacing="{StaticResource SpaceMd}">
                         <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="30" Text="{Binding HealthcareCurrentAgeText}" />
                         <controls:NumericInputView Grid.Column="1" Header="Retire at age" HelpText="The age when employer health coverage ends." Placeholder="55" Text="{Binding EarlyRetirementAgeText}" />
                         <controls:NumericInputView Grid.Row="1" Grid.ColumnSpan="2" Header="Health insurance premium" HelpText="Expected health insurance premium, in dollars." Placeholder="600" Text="{Binding MonthlyPremiumText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                     </Grid>
                     <controls:AdvancedAssumptionsExpander>
-                        <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+                        <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}" RowSpacing="{StaticResource SpaceMd}">
                             <controls:NumericInputView Header="Medicare age" HelpText="The expected age when Medicare coverage begins." Placeholder="65" Text="{Binding MedicareAgeText}" />
                             <controls:NumericInputView Grid.Column="1" Header="Deductible" HelpText="Expected deductible, in dollars." Placeholder="2500" Text="{Binding AnnualDeductibleText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                             <controls:NumericInputView Grid.Row="1" Header="Out-of-pocket costs" HelpText="Expected medical costs beyond premiums and deductibles, in dollars." Placeholder="2000" Text="{Binding AnnualOutOfPocketText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
@@ -48,24 +49,24 @@
                 </VerticalStackLayout>
             </Border>
 
-            <VerticalStackLayout Spacing="10">
+            <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                 <Label Text="Your pre-Medicare healthcare outlook" Style="{StaticResource CalculatorSectionHeading}" />
-                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="10" RowSpacing="10">
-                    <Border Padding="12" Background="{AppThemeBinding Light=#FDEEEB, Dark=#4A2B2A}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Coverage gap" FontSize="12" /><Label Text="{Binding HealthcareGapYearsText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
-                    <Border Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="First-year cost" FontSize="12" /><Label Text="{Binding HealthcareAnnualCostText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Total projected cost" FontSize="12" /><Label Text="{Binding HealthcareTotalCostText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
-                    <Border Grid.Row="1" Grid.Column="1" Padding="12" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Average annual cost" FontSize="12" /><Label Text="{Binding HealthcareAverageAnnualCostText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
+                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FDEEEB, Dark=#4A2B2A}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Coverage gap" FontSize="12" /><Label Text="{Binding HealthcareGapYearsText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="First-year cost" FontSize="12" /><Label Text="{Binding HealthcareAnnualCostText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Total projected cost" FontSize="12" /><Label Text="{Binding HealthcareTotalCostText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Average annual cost" FontSize="12" /><Label Text="{Binding HealthcareAverageAnnualCostText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
                 </Grid>
             </VerticalStackLayout>
 
-            <VerticalStackLayout Spacing="10">
+            <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                 <Label Text="Annual healthcare cost projection" Style="{StaticResource CalculatorSectionHeading}" />
                 <lvc:CartesianChart Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" HeightRequest="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
                 <Label Text="{Binding HealthcareProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>
 
-            <Border Padding="16" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
-                <VerticalStackLayout Spacing="10">
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}" Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
                     <Entry Text="{Binding PlanNameText}" Placeholder="My Healthcare Gap Plan" Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}" SemanticProperties.Description="Name for this saved Healthcare Gap plan" />
                     <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />

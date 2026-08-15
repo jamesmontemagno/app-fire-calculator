@@ -8,7 +8,8 @@
              Title="Withdrawal rate"
              Shell.NavBarIsVisible="True"
              Shell.TabBarIsVisible="False"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Skip"
                      Command="{Binding SkipCommand}"
@@ -17,7 +18,7 @@
 
     <Grid>
         <ScrollView>
-            <VerticalStackLayout Padding="24,20,24,32" Spacing="18">
+            <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Choose your withdrawal rate"
                            FontSize="28"
@@ -30,11 +31,11 @@
                            TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
                 </VerticalStackLayout>
 
-                <Border Padding="18"
+                <Border Padding="{StaticResource CardPadding}"
                         Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                         Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                         StrokeShape="RoundRectangle 12">
-                    <VerticalStackLayout Spacing="14">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Label Text="Your comfort level"
                                FontSize="18"
                                FontAttributes="Bold"
@@ -63,11 +64,11 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Border Padding="18"
+                <Border Padding="{StaticResource CardPadding}"
                         Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}"
                         StrokeThickness="0"
                         StrokeShape="RoundRectangle 12">
-                    <VerticalStackLayout Spacing="10">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                         <Label Text="Common starting points"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}" />

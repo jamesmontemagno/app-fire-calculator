@@ -5,11 +5,12 @@
              x:Class="MyFireNumber.Views.PlansPage"
              x:DataType="viewModels:PlansViewModel"
              Title="Plans"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             SafeAreaEdges="Container">
 
-    <Grid Padding="20,16" RowDefinitions="Auto,*" RowSpacing="14">
-        <VerticalStackLayout Spacing="14">
-            <Grid ColumnDefinitions="32,*" ColumnSpacing="10">
+    <Grid Padding="{StaticResource PagePaddingCompact}" RowDefinitions="Auto,*" RowSpacing="{StaticResource SpaceMd}">
+        <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+            <Grid ColumnDefinitions="32,*" ColumnSpacing="{StaticResource SpaceSm}">
                         <Label Text="&#xf15c;"
                                FontFamily="FontAwesomeSolid"
                                WidthRequest="32"
@@ -37,7 +38,7 @@
                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                        PlaceholderColor="{AppThemeBinding Light=#587068, Dark=#B9D1C2}"
                        SemanticProperties.Description="Search saved plans by name." />
-            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                 <Label Text="Sort"
                        VerticalTextAlignment="Center"
                        TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}"
@@ -136,12 +137,12 @@
                                </SwipeItemView>
                            </SwipeItems>
                        </SwipeView.RightItems>
-                       <Border Padding="16"
+                       <Border Padding="{StaticResource CardPadding}"
                                Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                                Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                                StrokeShape="RoundRectangle 12"
                                SemanticProperties.Description="{Binding Name, StringFormat='Saved plan {0}.'}">
-                           <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                           <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
                                <Grid.GestureRecognizers>
                                    <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:PlansViewModel}}, Path=OpenPlanCommand}"
                                                          CommandParameter="{Binding .}" />
@@ -171,7 +172,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
             <CollectionView.EmptyView>
-                <VerticalStackLayout VerticalOptions="Center" Spacing="10">
+                <VerticalStackLayout VerticalOptions="Center" Spacing="{StaticResource SpaceSm}">
                     <Label Text="&#xf15c;"
                            FontFamily="FontAwesomeSolid"
                            HorizontalTextAlignment="Center"

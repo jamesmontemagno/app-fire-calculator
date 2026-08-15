@@ -8,7 +8,7 @@
     <VerticalStackLayout Spacing="6">
         <controls:FieldHelpView Header="Show recurring amounts as"
                                 HelpText="Switches how recurring dollar amounts are displayed. This does not change any result — the same amount is used either way." />
-        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
             <Button Text="Monthly"
                     Command="{Binding SetDisplayPeriodCommand}"
                     CommandParameter="Monthly"

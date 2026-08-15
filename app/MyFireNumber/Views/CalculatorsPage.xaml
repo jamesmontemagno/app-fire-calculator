@@ -7,15 +7,16 @@
              x:Class="MyFireNumber.Views.CalculatorsPage"
              x:DataType="viewModels:CalculatorCatalogViewModel"
              Title="Calculators"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             SafeAreaEdges="Container">
 
-    <Grid Padding="20,16">
+    <Grid Padding="{StaticResource PagePaddingCompact}">
         <CollectionView ItemsSource="{Binding FilteredCalculatorGroups}"
                         IsGrouped="True"
                         SelectionMode="None">
             <CollectionView.Header>
-                <VerticalStackLayout Spacing="14" Margin="0,0,0,14">
-                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                <VerticalStackLayout Spacing="{StaticResource SpaceMd}" Margin="0,0,0,14">
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                         <Label Text="&#xf1ec;"
                                FontFamily="FontAwesomeSolid"
                                VerticalTextAlignment="Center"
@@ -45,7 +46,7 @@
             <CollectionView.GroupHeaderTemplate>
                 <DataTemplate x:DataType="viewModels:CalculatorGroup">
                     <Grid ColumnDefinitions="Auto,*"
-                          ColumnSpacing="8"
+                          ColumnSpacing="{StaticResource SpaceSm}"
                           Padding="4,12,4,10">
                         <Label Text="{Binding IconGlyph}"
                                FontFamily="FontAwesomeSolid"
@@ -65,7 +66,7 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="catalog:CalculatorDefinition">
                     <Border Margin="0,0,0,10"
-                            Padding="16"
+                            Padding="{StaticResource CardPadding}"
                             Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                             Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                             StrokeShape="RoundRectangle 12"
@@ -74,7 +75,7 @@
                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:CalculatorCatalogViewModel}}, Path=OpenCalculatorCommand}"
                                                   CommandParameter="{Binding .}" />
                         </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12">
+                        <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
                             <Border WidthRequest="44"
                                     HeightRequest="44"
                                     Padding="0"
@@ -110,7 +111,7 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
             <CollectionView.EmptyView>
-                  <VerticalStackLayout VerticalOptions="Center" Spacing="8">
+                  <VerticalStackLayout VerticalOptions="Center" Spacing="{StaticResource SpaceSm}">
                       <Label Text="&#xf002;"
                               FontFamily="FontAwesomeSolid"
                               VerticalTextAlignment="Center"

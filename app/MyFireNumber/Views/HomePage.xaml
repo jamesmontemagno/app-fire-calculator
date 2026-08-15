@@ -7,19 +7,20 @@
              x:Class="MyFireNumber.Views.HomePage"
              x:DataType="viewModels:HomeViewModel"
              Title="Home"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             SafeAreaEdges="Container">
 
     <Grid>
         <ScrollView>
-            <VerticalStackLayout Padding="24,24,24,32" Spacing="24">
-                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceXl}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceMd}">
                     <Label Text="&#xf201;"
                               FontFamily="FontAwesomeSolid"
                               VerticalTextAlignment="Center"
                            TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                            FontSize="28"
                            SemanticProperties.Description="Financial progress" />
-                    <VerticalStackLayout Grid.Column="1" Spacing="8">
+                    <VerticalStackLayout Grid.Column="1" Spacing="{StaticResource SpaceSm}">
                     <Label Text="MY FIRE NUMBER"
                            TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                            FontAttributes="Bold"
@@ -40,11 +41,11 @@
 
                 <Border IsVisible="{Binding HasRecentCalculators}"
                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                       Padding="18"
+                       Padding="{StaticResource CardPadding}"
                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                        StrokeShape="RoundRectangle 12">
-                   <VerticalStackLayout Spacing="12">
-                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                   <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                            <Label Text="&#xf1da;"
                                   FontFamily="FontAwesomeSolid"
                                   VerticalTextAlignment="Center"
@@ -56,10 +57,10 @@
                                   FontAttributes="Bold"
                                   FontSize="20" />
                        </Grid>
-                       <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentCalculators}" Spacing="8">
+                       <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentCalculators}" Spacing="{StaticResource SpaceSm}">
                            <BindableLayout.ItemTemplate>
                                <DataTemplate x:DataType="catalog:CalculatorDefinition">
-                                   <Border Padding="12"
+                                   <Border Padding="{StaticResource CardPaddingCompact}"
                                            Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
                                            StrokeThickness="0"
                                            StrokeShape="RoundRectangle 10"
@@ -68,7 +69,7 @@
                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=OpenCalculatorCommand}"
                                                                  CommandParameter="{Binding .}" />
                                        </Border.GestureRecognizers>
-                                       <Grid ColumnDefinitions="32,*,Auto" ColumnSpacing="10">
+                                       <Grid ColumnDefinitions="32,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                                            <Label Text="{Binding IconGlyph}"
                                                   FontFamily="FontAwesomeSolid"
                                                   FontSize="16"
@@ -97,11 +98,11 @@
 
                 <Border IsVisible="{Binding HasRecentPlans}"
                        Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                       Padding="18"
+                       Padding="{StaticResource CardPadding}"
                        Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                        StrokeShape="RoundRectangle 12">
-                   <VerticalStackLayout Spacing="12">
-                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                   <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                            <Label Text="&#xf15c;"
                                   FontFamily="FontAwesomeSolid"
                                   VerticalTextAlignment="Center"
@@ -113,10 +114,10 @@
                                   FontAttributes="Bold"
                                   FontSize="20" />
                        </Grid>
-                       <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentPlans}" Spacing="8">
+                       <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentPlans}" Spacing="{StaticResource SpaceSm}">
                            <BindableLayout.ItemTemplate>
                                <DataTemplate x:DataType="viewModels:RecentPlanItem">
-                                   <Border Padding="12"
+                                   <Border Padding="{StaticResource CardPaddingCompact}"
                                            Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
                                            StrokeThickness="0"
                                            StrokeShape="RoundRectangle 10"
@@ -125,7 +126,7 @@
                                            <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=OpenPlanCommand}"
                                                                  CommandParameter="{Binding .}" />
                                        </Border.GestureRecognizers>
-                                       <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                       <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                                            <VerticalStackLayout Spacing="2">
                                                <Label Text="{Binding Name}"
                                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
@@ -150,17 +151,17 @@
 
                 <Border IsVisible="{Binding ShowRecommendedBooks}"
                         Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Padding="18"
+                        Padding="{StaticResource CardPadding}"
                         Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                         StrokeShape="RoundRectangle 12">
-                   <VerticalStackLayout Spacing="12">
-                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                   <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                            <Label Text="&#xf02d;"
                                   FontFamily="FontAwesomeSolid"
                                   VerticalTextAlignment="Center"
                                   TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                   SemanticProperties.Description="Recommended books" />
-                           <VerticalStackLayout Grid.Column="1" Spacing="1">
+                           <VerticalStackLayout Grid.Column="1" Spacing="{StaticResource SpaceXs}">
                                <Label Text="Recommended FIRE books"
                                       TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
                                       FontAttributes="Bold"
@@ -204,7 +205,7 @@
                                                       FontSize="11"
                                                       LineBreakMode="TailTruncation"
                                                       MaxLines="2" />
-                                               <Grid Margin="0,4,0,0" ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                                               <Grid Margin="0,4,0,0" ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceXs}">
                                                    <Label Text="View on Amazon"
                                                           TextColor="{AppThemeBinding Light=#326B57, Dark=#9ACCB3}"
                                                           FontAttributes="Bold"
@@ -222,7 +223,7 @@
                                </DataTemplate>
                            </BindableLayout.ItemTemplate>
                        </FlexLayout>
-                       <Border Padding="12"
+                       <Border Padding="{StaticResource CardPaddingCompact}"
                                Background="{AppThemeBinding Light=#EDF2EE, Dark=#15211C}"
                                Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                                StrokeShape="RoundRectangle 10">
@@ -242,11 +243,11 @@
 
                 <Border IsVisible="{Binding ShowGettingStarted}"
                         Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
-                        Padding="18"
+                        Padding="{StaticResource CardPadding}"
                         Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                         StrokeShape="RoundRectangle 8">
-                    <VerticalStackLayout Spacing="14">
-                           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                           <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf1ec;"
                                 FontFamily="FontAwesomeSolid"
                                 VerticalTextAlignment="Center"
@@ -268,7 +269,7 @@
                                 <TapGestureRecognizer Command="{Binding OpenCalculatorCommand}"
                                                       CommandParameter="{Binding RecommendedCalculator}" />
                             </Border.GestureRecognizers>
-                            <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12">
+                            <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
                                 <Label Text="{Binding RecommendedCalculator.IconGlyph}"
                                        FontFamily="FontAwesomeSolid"
                                        FontSize="20"
@@ -302,7 +303,7 @@
                                LineHeight="1.3" />
                         <VerticalStackLayout IsVisible="{Binding ShowFeaturedCalculators}"
                                              BindableLayout.ItemsSource="{Binding FeaturedCalculators}"
-                                             Spacing="10">
+                                             Spacing="{StaticResource SpaceSm}">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="catalog:CalculatorDefinition">
                                     <Border Padding="10,8"
@@ -313,7 +314,7 @@
                                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=OpenCalculatorCommand}"
                                                                   CommandParameter="{Binding .}" />
                                         </Border.GestureRecognizers>
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
                                             <VerticalStackLayout Spacing="2">
                                                 <Label Text="{Binding Title}"
                                                        TextColor="{AppThemeBinding Light=#17352C, Dark=#F2F7F3}"
@@ -333,7 +334,7 @@
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
                         </VerticalStackLayout>
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Button Text="Retake quiz"
                                     Command="{Binding RetakeQuizCommand}"
                                     Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}"

@@ -8,12 +8,13 @@
              Title="Welcome"
              Shell.NavBarIsVisible="False"
              Shell.TabBarIsVisible="False"
-             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}">
-    <Grid Padding="24,32,24,24"
+             Background="{AppThemeBinding Light=#F5F7F2, Dark=#15211C}"
+             SafeAreaEdges="Container">
+    <Grid Padding="{StaticResource PagePadding}"
           RowDefinitions="*,Auto">
         <VerticalStackLayout Grid.Row="0"
                              VerticalOptions="Center"
-                             Spacing="24">
+                             Spacing="{StaticResource SpaceXl}">
             <Border HorizontalOptions="Center"
                     Padding="20"
                     Background="{AppThemeBinding Light=#E4F0E9, Dark=#29483B}"
@@ -26,7 +27,7 @@
                        SemanticProperties.Description="A sprouting plant representing growth" />
             </Border>
 
-            <VerticalStackLayout Spacing="12">
+            <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                 <Label Text="Welcome to My Fire Number"
                        FontAttributes="Bold"
                        FontSize="34"
@@ -45,7 +46,7 @@
                     Background="{AppThemeBinding Light=#FFFFFF, Dark=#203129}"
                     Stroke="{AppThemeBinding Light=#D7DED8, Dark=#365244}"
                     StrokeShape="RoundRectangle 16">
-                <VerticalStackLayout Spacing="14">
+                <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                     <Label Text="Make your plan your own"
                            FontAttributes="Bold"
                            FontSize="18"
@@ -54,7 +55,7 @@
                            LineHeight="1.4"
                            TextColor="{AppThemeBinding Light=#425D54, Dark=#B9D1C2}" />
                     <Grid ColumnDefinitions="Auto,*"
-                          ColumnSpacing="10">
+                          ColumnSpacing="{StaticResource SpaceSm}">
                         <Label Text="&#xf023;"
                                FontFamily="FontAwesomeSolid"
                                FontSize="16"
@@ -70,7 +71,7 @@
         </VerticalStackLayout>
 
         <VerticalStackLayout Grid.Row="1"
-                             Spacing="16">
+                             Spacing="{StaticResource SpaceLg}">
             <Button AutomationId="WelcomeGetStartedButton"
                     Text="Get started"
                     Command="{Binding GetStartedCommand}"
