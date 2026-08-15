@@ -10,6 +10,9 @@
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+    /* The shared parity fixture is imported as a typed module so a malformed case
+       fails `npm run build` instead of producing garbage at runtime. */
+    "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
