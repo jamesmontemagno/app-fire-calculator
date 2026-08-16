@@ -3,10 +3,6 @@ name: Build and Package iOS
 on:
   pull_request:
     branches: ['main']
-    paths:
-      - 'app/**'
-      - 'MyFireNumber.slnx'
-      - '.github/workflows/maui-ios.yml'
   workflow_dispatch:
     inputs:
       build_release:
@@ -27,6 +23,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: maui-ios-${{ github.ref }}
@@ -34,7 +31,7 @@ concurrency:
 
 jobs:
   build-ios:
-    name: iOS
+    name: Required / iOS
     runs-on: macos-26
     timeout-minutes: 45
     env:
@@ -50,6 +47,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Detect iOS changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            ios:
+              - 'app/**'
+              - 'MyFireNumber.slnx'
+              - '.github/workflows/maui-ios.yml'
+
       - name: Validate workflow inputs
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.upload_testflight && !inputs.build_release }}
         run: |
@@ -57,31 +64,40 @@ jobs:
           exit 1
 
       - name: Select Xcode
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.ios == 'true' }}
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
 
       - name: Setup .NET SDK
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.ios == 'true' }}
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
       - name: Restore .NET workloads
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.ios == 'true' }}
         run: dotnet workload restore "${{ env.PROJECT_PATH }}"
 
       - name: Restore
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.ios == 'true' }}
         run: dotnet restore "${{ env.PROJECT_PATH }}" -p:TargetFramework="${{ env.TARGET_FRAMEWORK }}"
 
       - name: Test calculation, storage, and export layers
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.ios == 'true' }}
         run: dotnet test "${{ env.TEST_PROJECT }}" -c Release
 
       - name: Build iOS simulator app
-        if: ${{ github.event_name == 'pull_request' || !inputs.build_release }}
+        if: ${{ (github.event_name != 'pull_request' || steps.changes.outputs.ios == 'true') && (github.event_name == 'pull_request' || !inputs.build_release) }}
         run: >-
           dotnet build "${{ env.PROJECT_PATH }}"
           -c Debug
           -f "${{ env.TARGET_FRAMEWORK }}"
           -p:RuntimeIdentifier=iossimulator-arm64
+
+      - name: No relevant changes
+        if: ${{ github.event_name == 'pull_request' && steps.changes.outputs.ios != 'true' }}
+        run: echo "No relevant iOS changes; check passed."
 
       - name: Compute release version
         if: ${{ github.event_name == 'workflow_dispatch' && inputs.build_release }}

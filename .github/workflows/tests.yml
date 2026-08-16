@@ -9,12 +9,6 @@ name: Tests
 
 on:
   pull_request:
-    paths:
-      - 'web/**'
-      - 'app/**'
-      - 'shared/parity/**'
-      - 'MyFireNumber.slnx'
-      - '.github/workflows/tests.yml'
   push:
     branches: ['main']
     paths:
@@ -27,6 +21,7 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read
 
 concurrency:
   group: tests-${{ github.ref }}
@@ -34,13 +29,24 @@ concurrency:
 
 jobs:
   web:
-    name: Web (Vitest)
+    name: Required / Web
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Detect web changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            web:
+              - 'web/**'
+              - 'shared/parity/**'
+              - '.github/workflows/tests.yml'
+
       - name: Setup Node
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.web == 'true' }}
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
@@ -48,27 +54,48 @@ jobs:
           cache-dependency-path: web/package-lock.json
 
       - name: Install dependencies
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.web == 'true' }}
         run: npm ci
         working-directory: web
 
       - name: Test
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.web == 'true' }}
         run: npm test
         working-directory: web
 
       # The tests live under src/, so `tsc` type-checks them as part of the build. That is what makes
       # a wrong call signature a build failure rather than a confidently wrong assertion.
       - name: Build
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.web == 'true' }}
         run: npm run build
         working-directory: web
 
+      - name: No relevant changes
+        if: ${{ github.event_name == 'pull_request' && steps.changes.outputs.web != 'true' }}
+        run: echo "No relevant web changes; check passed."
+
   core:
-    name: Core (xUnit)
+    name: Required / Core
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Detect core changes
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            core:
+              - 'app/MyFireNumber.Core/**'
+              - 'app/MyFireNumber.Storage/**'
+              - 'app/MyFireNumber.Tests/**'
+              - 'shared/parity/**'
+              - 'MyFireNumber.slnx'
+              - '.github/workflows/tests.yml'
+
       - name: Setup .NET
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.core == 'true' }}
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
@@ -76,4 +103,9 @@ jobs:
       # MyFireNumber.Core, .Storage and .Tests all target plain net10.0, so the shared calculation
       # suite runs on Linux without the MAUI workload or a macOS runner.
       - name: Test
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.core == 'true' }}
         run: dotnet test app/MyFireNumber.Tests/MyFireNumber.Tests.csproj --configuration Release
+
+      - name: No relevant changes
+        if: ${{ github.event_name == 'pull_request' && steps.changes.outputs.core != 'true' }}
+        run: echo "No relevant core changes; check passed."
