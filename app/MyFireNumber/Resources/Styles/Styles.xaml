@@ -376,6 +376,38 @@
     </Style>
 
     <!--
+    The visible name of a single form field, sitting directly above its input.
+    A placeholder is not a label: it disappears as soon as the field has a value, so a
+    form that relies on placeholders alone leaves the user guessing what they typed and
+    gives assistive technology nothing stable to announce. Every editable field pairs
+    this label with its input, and placeholders are reserved for example values.
+    -->
+    <Style x:Key="FormFieldLabel" TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="LineBreakMode" Value="WordWrap" />
+    </Style>
+
+    <!-- A form input on a card or inset surface, so the field reads as editable. -->
+    <Style x:Key="FormEntry" TargetType="Entry">
+        <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
+    </Style>
+
+    <Style x:Key="FormPicker" TargetType="Picker">
+        <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+        <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
+    </Style>
+
+    <Style x:Key="FormDatePicker" TargetType="DatePicker">
+        <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+    </Style>
+
+    <!--
     Dynamic result sentences ("You're already Coast FIRE!", "To FIRE by age 55 you
     need to save $X per month."). These are full sentences, so they wrap freely and
     are never truncated - the sentence is the result. Smaller and semibold rather
