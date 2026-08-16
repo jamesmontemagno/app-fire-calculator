@@ -24,8 +24,8 @@ public sealed class BaristaFireWorkbookTests : IDisposable
         var sheets = (workbook.Sheets ?? throw new InvalidOperationException("Workbook sheets were not created.")).Elements<Sheet>().ToArray();
 
         Assert.Equal(["Inputs", "Results", "Projection"], sheets.Select(sheet => sheet.Name!.Value));
-        Assert.Equal("Retirement spending (today’s dollars) (per year)", GetCellText(workbookPart, sheets[0], "A8"));
-        Assert.Equal("Part-time take-home income (after tax)", GetCellText(workbookPart, sheets[0], "A9"));
+        Assert.Equal("Expenses (per year)", GetCellText(workbookPart, sheets[0], "A8"));
+        Assert.Equal("Part-time income (after tax)", GetCellText(workbookPart, sheets[0], "A9"));
         Assert.Equal("20000", GetCell(workbookPart, sheets[0], "B9").CellValue!.Text);
         Assert.Equal("Inputs!B8/Inputs!B12", GetCell(workbookPart, sheets[1], "B5").CellFormula!.Text);
         Assert.Equal("MAX(0,Inputs!B8-Inputs!B9)/Inputs!B12", GetCell(workbookPart, sheets[1], "B6").CellFormula!.Text);

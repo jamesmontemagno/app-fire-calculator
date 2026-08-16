@@ -92,7 +92,7 @@ public static class StandardFireWorkbook
             ("Retirement age", CreateNumberCell("", draft.RetirementAge, IntegerFormat.Plain)),
             ("Current savings", CreateNumberCell("", draft.CurrentSavings, CurrencyStyleIndex)),
             ("Annual contribution", CreateNumberCell("", draft.AnnualContribution, CurrencyStyleIndex)),
-            ("Annual take-home income (after tax)", CreateNumberCell("", draft.AnnualIncome, CurrencyStyleIndex)),
+            ("Annual income (after tax)", CreateNumberCell("", draft.AnnualIncome, CurrencyStyleIndex)),
             (RecurringAmountLabels.RetirementSpendingFor(displayPeriod), CreateNumberCell("", CurrencyPeriodMath.Convert(draft.AnnualExpenses, CurrencyPeriod.Annual, displayPeriod), CurrencyStyleIndex)),
             ("Expected return", CreateNumberCell("", draft.ExpectedReturn, PercentageStyleIndex)),
             ("Inflation rate", CreateNumberCell("", draft.InflationRate, PercentageStyleIndex)),

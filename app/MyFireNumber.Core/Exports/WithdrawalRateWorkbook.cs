@@ -51,7 +51,7 @@ public static class WithdrawalRateWorkbook
             new(CreateTextCell("A6", "Withdrawal rate"), CreateNumberCell("B6", draft.WithdrawalRate, PercentageStyleIndex)),
             new(CreateTextCell("A7", "Expected return"), CreateNumberCell("B7", draft.ExpectedReturn, PercentageStyleIndex)),
             new(CreateTextCell("A8", "Inflation rate"), CreateNumberCell("B8", draft.InflationRate, PercentageStyleIndex)),
-            new(CreateTextCell("A9", "Retirement duration"), CreateNumberCell("B9", draft.RetirementYears, IntegerFormat.Grouped))
+            new(CreateTextCell("A9", "Duration"), CreateNumberCell("B9", draft.RetirementYears, IntegerFormat.Grouped))
         };
 
         AddWorksheet(workbookPart, sheets, "Inputs", 1, rows, 32, 20);

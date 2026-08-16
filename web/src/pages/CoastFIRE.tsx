@@ -54,7 +54,7 @@ export default function CoastFIRE() {
               <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="The age your Coast portfolio should support." min={params.currentAge} max={90} showSlider />
               <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments available for retirement." />
               <CurrencyInput label="Contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="Contributions used only to estimate how soon you can reach Coast FIRE." periodic />
-              <CurrencyInput label="Retirement spending (today’s dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, stated in today’s purchasing power." periodic />
+              <CurrencyInput label="Expenses" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, stated in today’s purchasing power." periodic />
             </CardContent>
           </Card>
         </section>

@@ -177,7 +177,7 @@ export default function DeferredCompensation() {
                 showSlider
               />
               <CurrencyInput
-                label="Retirement spending (today’s dollars)"
+                label="Expenses"
                 value={params.annualExpenses}
                 onChange={value => setParam('annualExpenses', value)}
                 tooltip="Your after-tax annual spending target in today’s dollars."

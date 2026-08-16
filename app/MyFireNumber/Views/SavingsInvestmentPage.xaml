@@ -37,7 +37,7 @@
                         <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="30" Text="{Binding CurrentAgeText}" />
                         <controls:NumericInputView Grid.Column="1" Header="Years investing" HelpText="How long contributions and growth should be modeled." Placeholder="30" Text="{Binding YearsInvestingText}" />
                         <controls:NumericInputView Grid.Row="1" Header="Starting amount" HelpText="Current invested balance, in dollars." Placeholder="100000" Text="{Binding StartingAmountText}" />
-                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="After-tax take-home income" HelpText="Income after taxes, used to calculate the savings rate, in dollars." Placeholder="72000" Text="{Binding InvestmentAnnualIncomeText}" PeriodQualifier="{Binding DisplayPeriodQualifier}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
+                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="After-tax income" HelpText="Income after taxes, used to calculate the savings rate, in dollars." Placeholder="72000" Text="{Binding InvestmentAnnualIncomeText}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                     </Grid>
                     <VerticalStackLayout Spacing="6">
                         <controls:FieldHelpView Header="Contribution frequency" HelpText="Choose whether the contribution amount represents a monthly or yearly amount." />
@@ -53,8 +53,8 @@
                     <controls:NumericInputView Header="{Binding ContributionAmountHeader}" HelpText="The amount you invest at the selected frequency, in dollars." Placeholder="500" Text="{Binding InvestmentContributionText}" />
                     <controls:AdvancedAssumptionsExpander>
                         <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
-                            <controls:PercentageInputView Header="Expected return (%)" HelpText="Expected average annual investment return before inflation." Placeholder="7" Minimum="0" Maximum="15" Text="{Binding ExpectedReturnText}" />
-                            <controls:PercentageInputView Grid.Column="1" Header="Inflation (%)" HelpText="Expected annual increase in the cost of living." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding InflationRateText}" />
+                            <controls:PercentageInputView Header="Expected return" HelpText="Expected average annual investment return before inflation." Placeholder="7" Minimum="0" Maximum="15" Text="{Binding ExpectedReturnText}" />
+                            <controls:PercentageInputView Grid.Column="1" Header="Inflation" HelpText="Expected annual increase in the cost of living." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding InflationRateText}" />
                         </Grid>
                     </controls:AdvancedAssumptionsExpander>
                 </VerticalStackLayout>

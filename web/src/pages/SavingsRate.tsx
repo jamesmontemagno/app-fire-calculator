@@ -55,7 +55,7 @@ export default function SavingsRate() {
           <Card>
             <CardHeader>
               <h2 id="savings-plan-heading" className="text-lg font-semibold text-content">Start with your plan</h2>
-              <p className="mt-1 text-sm text-content-muted">Use after-tax take-home income to see the share of income you are investing.</p>
+              <p className="mt-1 text-sm text-content-muted">Use after-tax income to see the share of income you are investing.</p>
               <PeriodToggle className="mt-3" />
             </CardHeader>
             <CardContent className="field-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
@@ -79,7 +79,7 @@ export default function SavingsRate() {
               </div>
               <CurrencyInput label={`${params.savingsFrequency === 'monthly' ? 'Monthly' : 'Annual'} contribution`} value={params.savingsContribution} onChange={value => setParam('savingsContribution', value)} tooltip={`Amount you invest each ${params.savingsFrequency === 'monthly' ? 'month' : 'year'}.`} />
               <InputGroup label="Years investing" value={params.savingsYears} onChange={value => setParam('savingsYears', value)} onSliderChange={value => setParamDebounced('savingsYears', value)} tooltip="How long contributions and investment growth continue." suffix="years" min={1} max={50} showSlider />
-              <CurrencyInput label="After-tax take-home income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Income after taxes, used to calculate the savings rate." periodic />
+              <CurrencyInput label="After-tax income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Income after taxes, used to calculate the savings rate." periodic />
             </CardContent>
           </Card>
         </section>

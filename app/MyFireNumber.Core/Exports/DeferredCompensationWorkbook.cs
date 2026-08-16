@@ -58,7 +58,7 @@ public static class DeferredCompensationWorkbook
             Text($"A{index + 2}", expense.Name),
             Number($"B{index + 2}", expense.AnnualAmount, CurrencyStyleIndex),
             Number($"C{index + 2}", expense.StartAge, IntegerFormat.Plain)))
-            .Prepend(new Row(Text("A1", "Name"), Text("B1", "Annual amount (today's dollars)"), Text("C1", "Start age"))), 30, 30, 14);
+            .Prepend(new Row(Text("A1", "Name"), Text("B1", "Annual amount"), Text("C1", "Start age"))), 30, 30, 14);
         workbookPart.Workbook.Save();
     }
 

@@ -24,8 +24,8 @@ public sealed class StandardFireWorkbookTests : IDisposable
         var sheets = (workbook.Sheets ?? throw new InvalidOperationException("Workbook sheets were not created.")).Elements<Sheet>().ToArray();
 
         Assert.Equal(["Inputs", "Results", "Projections"], sheets.Select(sheet => sheet.Name!.Value));
-        Assert.Equal("Annual take-home income (after tax)", GetCellText(workbookPart, sheets[0], "A9"));
-        Assert.Equal("Retirement spending (today’s dollars) (per year)", GetCellText(workbookPart, sheets[0], "A10"));
+        Assert.Equal("Annual income (after tax)", GetCellText(workbookPart, sheets[0], "A9"));
+        Assert.Equal("Expenses (per year)", GetCellText(workbookPart, sheets[0], "A10"));
         Assert.Equal("100000", GetCell(workbookPart, sheets[0], "B7").CellValue!.Text);
         Assert.Equal("Inputs!B10/Inputs!B13", GetCell(workbookPart, sheets[1], "B5").CellFormula!.Text);
         Assert.Equal("Target retirement age", GetCellText(workbookPart, sheets[1], "A11"));
@@ -84,7 +84,7 @@ public sealed class StandardFireWorkbookTests : IDisposable
         var workbookPart = document.WorkbookPart ?? throw new InvalidOperationException("Workbook part was not created.");
         var sheets = (workbookPart.Workbook?.Sheets ?? throw new InvalidOperationException("Workbook sheets were not created.")).Elements<Sheet>().ToArray();
 
-        Assert.Equal("Retirement spending (today’s dollars) (per month)", GetCellText(workbookPart, sheets[0], "A10"));
+        Assert.Equal("Expenses (per month)", GetCellText(workbookPart, sheets[0], "A10"));
         Assert.Equal("4000", GetCell(workbookPart, sheets[0], "B10").CellValue!.Text);
     }
 

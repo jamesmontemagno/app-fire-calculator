@@ -25,7 +25,7 @@ public class SharedPeriodicFieldInventoryTests
 {
     private static readonly ICalculatorCatalog Calculators = new CalculatorCatalog();
     private static readonly IReadOnlyList<SharedCalculator> Shared = LoadShared();
-    private const string RetirementSpendingLabel = "Retirement spending (today’s dollars)";
+    private const string RetirementSpendingLabel = "Expenses";
 
     [Fact]
     public void The_shared_inventory_covers_exactly_the_shipped_calculators()
