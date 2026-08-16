@@ -29,6 +29,7 @@ public partial class HomeViewModel : ObservableObject
     private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
     private readonly IExternalLinkService externalLinkService;
     private readonly IErrorPresentationService errorPresentationService;
+    private readonly IProfileService profileService;
 
     public HomeViewModel(
         ICalculatorCatalog catalog,
@@ -40,7 +41,8 @@ public partial class HomeViewModel : ObservableObject
         IRecentActivityRepository recentActivityRepository,
         IAppBehaviorPreferencesService behaviorPreferencesService,
         IExternalLinkService externalLinkService,
-        IErrorPresentationService errorPresentationService)
+        IErrorPresentationService errorPresentationService,
+        IProfileService profileService)
     {
         this.catalog = catalog;
         this.recommendedBookCatalog = recommendedBookCatalog;
@@ -52,6 +54,7 @@ public partial class HomeViewModel : ObservableObject
         this.behaviorPreferencesService = behaviorPreferencesService;
         this.externalLinkService = externalLinkService;
         this.errorPresentationService = errorPresentationService;
+        this.profileService = profileService;
     }
 
     public ObservableCollection<CalculatorDefinition> FeaturedCalculators { get; } = [];
@@ -61,6 +64,18 @@ public partial class HomeViewModel : ObservableObject
 
     public bool HasRecentCalculators => RecentCalculators.Count > 0;
     public bool HasRecentPlans => RecentPlans.Count > 0;
+
+    /// <summary>
+    /// The profile display name, shown only when onboarding or Profile captured one. The header
+    /// falls back to the product name so an anonymous profile still reads correctly.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasGreeting))]
+    [NotifyPropertyChangedFor(nameof(HasNoGreeting))]
+    private string greeting = string.Empty;
+
+    public bool HasGreeting => !string.IsNullOrWhiteSpace(Greeting);
+    public bool HasNoGreeting => !HasGreeting;
     public bool ShowGettingStarted { get; private set; }
     public bool HasQuizRecommendation => ShowGettingStarted && RecommendedCalculator is not null;
     public bool ShowFeaturedCalculators => ShowGettingStarted && RecommendedCalculator is null;
@@ -73,6 +88,10 @@ public partial class HomeViewModel : ObservableObject
 
     public async Task LoadAsync()
     {
+        await profileService.LoadAsync();
+        var displayName = profileService.Current.DisplayName;
+        Greeting = string.IsNullOrWhiteSpace(displayName) ? string.Empty : $"Welcome back, {displayName.Trim()}";
+
         var preferencesTask = preferencesRepository.ListAsync();
         var recentCalculatorsTask = recentActivityRepository.ListAsync(RecentActivityKind.Calculator, 3);
         var recentPlansTask = recentActivityRepository.ListAsync(RecentActivityKind.Plan, 3);

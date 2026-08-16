@@ -13,20 +13,20 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Skip"
                      Command="{Binding SkipCommand}"
-                     SemanticProperties.Description="Skip these details and continue to withdrawal rate." />
+                     SemanticProperties.Description="Skip these details and continue to your timeline." />
     </ContentPage.ToolbarItems>
 
     <Grid>
         <ScrollView>
             <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
                 <VerticalStackLayout Spacing="6">
-                    <Label Text="Tell us about today"
+                    <Label Text="Tell us about you"
                            FontSize="28"
                            FontAttributes="Bold"
                            LineHeight="1.1"
                            TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                            SemanticProperties.HeadingLevel="Level1" />
-                    <Label Text="These three details give your calculators a useful starting point. You can fine-tune everything later."
+                    <Label Text="These details personalize your plans and give every calculator a useful starting point. Everything stays on this device, and you can change it later in Profile."
                            LineHeight="1.35"
                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                 </VerticalStackLayout>
@@ -37,22 +37,74 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceXl}">
                         <VerticalStackLayout Spacing="6">
+                            <Label Text="What should we call you?"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                            <Entry AutomationId="OnboardingDisplayNameEntry"
+                                   Text="{Binding DisplayName, Mode=TwoWay}"
+                                   Placeholder="Name (optional)"
+                                   Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                   PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
+                                   SemanticProperties.Description="Your name, used to personalize the app. Optional." />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="Current age"
+                                <Label Text="Birth date"
+                                       FontAttributes="Bold"
+                                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Button Grid.Column="1"
+                                        AutomationId="OnboardingSkipBirthDateButton"
+                                        Text="Skip"
+                                        FontSize="12"
+                                        Padding="12,4"
+                                        IsVisible="{Binding HasBirthDate}"
+                                        Command="{Binding SkipBirthDateCommand}"
+                                        Background="Transparent"
+                                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                                        SemanticProperties.Description="Continue without sharing a birth date." />
+                                <Button Grid.Column="1"
+                                        AutomationId="OnboardingUseBirthDateButton"
+                                        Text="Add"
+                                        FontSize="12"
+                                        Padding="12,4"
+                                        IsVisible="{Binding HasNoBirthDate}"
+                                        Command="{Binding UseBirthDateCommand}"
+                                        Background="Transparent"
+                                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                                        SemanticProperties.Description="Add your birth date." />
+                            </Grid>
+                            <DatePicker AutomationId="OnboardingBirthDatePicker"
+                                        Date="{Binding BirthDate, Mode=TwoWay}"
+                                        MaximumDate="{Binding MaximumBirthDate}"
+                                        IsVisible="{Binding HasBirthDate}"
+                                        Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                        SemanticProperties.Description="Your birth date" />
+                            <Label Text="{Binding DerivedAgeText}"
+                                   FontSize="12"
+                                   LineHeight="1.3"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="6">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Household size"
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                                 <Label Grid.Column="1"
-                                       Text="{Binding CurrentAgeText}"
+                                       Text="{Binding HouseholdSizeText}"
                                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                             </Grid>
-                            <Slider AutomationId="OnboardingCurrentAgeSlider"
-                                    Minimum="18"
-                                    Maximum="80"
-                                    Value="{Binding CurrentAge}"
+                            <Slider AutomationId="OnboardingHouseholdSizeSlider"
+                                    Minimum="1"
+                                    Maximum="{Binding MaximumHouseholdSize}"
+                                    Value="{Binding HouseholdSize, Mode=TwoWay}"
                                     MinimumTrackColor="{StaticResource FixedAccent}"
                                     MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                                     ThumbColor="{StaticResource FixedAccent}"
-                                    SemanticProperties.Description="Current age" />
+                                    SemanticProperties.Description="Number of people your plan supports" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="6">
@@ -100,7 +152,7 @@
                         Command="{Binding SaveAndContinueCommand}"
                         Background="{StaticResource FixedAccent}"
                         TextColor="{StaticResource FixedWhite}"
-                        SemanticProperties.Description="Save these details and continue to withdrawal rate." />
+                        SemanticProperties.Description="Save these details and continue to your timeline." />
 
                 <controls:EducationalDisclaimerView />
             </VerticalStackLayout>
