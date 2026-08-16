@@ -1,5 +1,7 @@
 namespace MyFireNumber.ViewModels;
 
+using MyFireNumber.Core.Profile;
+
 /// <summary>
 /// Non-generic surface used by calculator pages so a single page base class can
 /// drive load and draft-flush lifecycle for any calculator view model.
@@ -13,7 +15,9 @@ public interface ICalculatorViewModel
     /// </summary>
     string CalculatorId { get; }
 
-    Task LoadAsync(string? planId = null, bool returnHomeAfterSave = false);
+    Task LoadAsync(string? planId = null, bool returnHomeAfterSave = false, ScenarioDataMode? requestedMode = null);
 
     Task FlushPendingDraftAsync();
+
+    Task RefreshLinkedProfileAsync();
 }

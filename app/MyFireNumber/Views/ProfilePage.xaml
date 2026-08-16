@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.ProfilePage"
+             x:DataType="viewModels:ProfileViewModel"
+             Title="Profile"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+             SafeAreaEdges="Container">
+    <Grid>
+        <ScrollView>
+            <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
+                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
+                    <Label Text="&#xf2bd;"
+                           FontFamily="FontAwesomeSolid"
+                           FontSize="28"
+                           VerticalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                           SemanticProperties.Description="Profile" />
+                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                        <Label Text="Profile"
+                               FontSize="30"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                               SemanticProperties.HeadingLevel="Level1" />
+                        <Label Text="Personalize new plans without sharing your data."
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="2"
+                            AutomationId="ProfileSettingsButton"
+                            Text="&#xf013;"
+                            FontFamily="FontAwesomeSolid"
+                            Command="{Binding OpenSettingsCommand}"
+                            Background="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                            SemanticProperties.Description="Open settings." />
+                </Grid>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                        <Label Text="Make your plans personal"
+                               FontAttributes="Bold"
+                               FontSize="18"
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                        <Label Text="{Binding CompletionText}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Grid ColumnDefinitions="*,Auto"><Label Text="Recurring income" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Add" Command="{Binding AddIncomeCommand}" /></Grid>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Income}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView><Label Text="No recurring income yet." /></BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:ProfileRecurringEditorItem">
+                                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
+                                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                            <Grid ColumnDefinitions="*,Auto"><Entry Text="{Binding Name, Mode=TwoWay}" Placeholder="Income name" /><Button Grid.Column="1" Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveIncomeCommand}" CommandParameter="{Binding .}" /></Grid>
+                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}"><Entry Text="{Binding AmountText, Mode=TwoWay}" Keyboard="Numeric" Placeholder="Amount" /><Picker Grid.Column="1" ItemsSource="{Binding Periods}" SelectedItem="{Binding Period, Mode=TwoWay}" /></Grid>
+                                            <Entry Text="{Binding Category, Mode=TwoWay}" Placeholder="Category (optional)" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Grid ColumnDefinitions="*,Auto"><Label Text="Recurring expenses" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Add" Command="{Binding AddExpenseCommand}" /></Grid>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Expenses}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView><Label Text="No recurring expenses yet." /></BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:ProfileRecurringEditorItem">
+                                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
+                                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                            <Grid ColumnDefinitions="*,Auto"><Entry Text="{Binding Name, Mode=TwoWay}" Placeholder="Expense name" /><Button Grid.Column="1" Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveExpenseCommand}" CommandParameter="{Binding .}" /></Grid>
+                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}"><Entry Text="{Binding AmountText, Mode=TwoWay}" Keyboard="Numeric" Placeholder="Amount" /><Picker Grid.Column="1" ItemsSource="{Binding Periods}" SelectedItem="{Binding Period, Mode=TwoWay}" /></Grid>
+                                            <Entry Text="{Binding Category, Mode=TwoWay}" Placeholder="Category (optional)" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Grid ColumnDefinitions="*,Auto"><Label Text="Debts" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Add" Command="{Binding AddDebtCommand}" /></Grid>
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Debts}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView><Label Text="No debts saved." /></BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:ProfileDebtEditorItem">
+                                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
+                                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                            <Grid ColumnDefinitions="*,Auto"><Entry Text="{Binding Name, Mode=TwoWay}" Placeholder="Debt name" /><Button Grid.Column="1" Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" /></Grid>
+                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}"><Entry Text="{Binding BalanceText, Mode=TwoWay}" Keyboard="Numeric" Placeholder="Balance" /><Entry Grid.Column="1" Text="{Binding RateText, Mode=TwoWay}" Keyboard="Numeric" Placeholder="Rate (%)" /></Grid>
+                                            <Entry Text="{Binding MinimumPaymentText, Mode=TwoWay}" Keyboard="Numeric" Placeholder="Minimum monthly payment" />
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Label Text="About you" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Entry AutomationId="ProfileDisplayNameEntry"
+                               Text="{Binding DisplayName, Mode=TwoWay}"
+                               Placeholder="Name (optional)"
+                               Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                               PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
+                        <Entry AutomationId="ProfileHouseholdNameEntry"
+                               Text="{Binding HouseholdName, Mode=TwoWay}"
+                               Placeholder="Household name (optional)"
+                               Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                               PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
+                        <Entry AutomationId="ProfileHouseholdSizeEntry"
+                               Text="{Binding HouseholdSizeText, Mode=TwoWay}"
+                               Placeholder="Household size (optional)"
+                               Keyboard="Numeric"
+                               Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}"
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                               PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Label Text="Your timeline" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Label Text="Dates are used only to set starting ages for new plans. You can always override a scenario."
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                                <Label Text="Birth date" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="Set" Command="{Binding SetBirthDateCommand}" IsVisible="{Binding HasNoBirthDate}" />
+                                <Button Grid.Column="2" Text="Clear" Command="{Binding ClearBirthDateCommand}" IsVisible="{Binding HasBirthDate}" />
+                            </Grid>
+                            <Label Text="Not set" IsVisible="{Binding HasNoBirthDate}" />
+                            <DatePicker AutomationId="ProfileBirthDatePicker"
+                                        Date="{Binding BirthDate, Mode=TwoWay}"
+                                        IsVisible="{Binding HasBirthDate}"
+                                        Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                        SemanticProperties.Description="Birth date" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                                <Label Text="Phased retirement date" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="Set" Command="{Binding SetPhasedRetirementDateCommand}" IsVisible="{Binding HasNoPhasedRetirementDate}" />
+                                <Button Grid.Column="2" Text="Clear" Command="{Binding ClearPhasedRetirementDateCommand}" IsVisible="{Binding HasPhasedRetirementDate}" />
+                            </Grid>
+                            <Label Text="Not set" IsVisible="{Binding HasNoPhasedRetirementDate}" />
+                            <DatePicker AutomationId="ProfilePhasedRetirementDatePicker"
+                                        Date="{Binding PhasedRetirementDate, Mode=TwoWay}"
+                                        IsVisible="{Binding HasPhasedRetirementDate}"
+                                        Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                        SemanticProperties.Description="Phased retirement date" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                                <Label Text="Full retirement date" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="Set" Command="{Binding SetTargetRetirementDateCommand}" IsVisible="{Binding HasNoTargetRetirementDate}" />
+                                <Button Grid.Column="2" Text="Clear" Command="{Binding ClearTargetRetirementDateCommand}" IsVisible="{Binding HasTargetRetirementDate}" />
+                            </Grid>
+                            <Label Text="Not set" IsVisible="{Binding HasNoTargetRetirementDate}" />
+                            <DatePicker AutomationId="ProfileTargetRetirementDatePicker"
+                                        Date="{Binding TargetRetirementDate, Mode=TwoWay}"
+                                        IsVisible="{Binding HasTargetRetirementDate}"
+                                        Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                        SemanticProperties.Description="Full retirement date" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Label Text="Household defaults" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Entry AutomationId="ProfileAnnualIncomeEntry" Text="{Binding AnnualIncomeText, Mode=TwoWay}" Keyboard="Numeric" Placeholder="Annual household income" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
+                        <Entry AutomationId="ProfileAnnualExpensesEntry" Text="{Binding AnnualExpensesText, Mode=TwoWay}" Keyboard="Numeric" Placeholder="Annual household spending" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Button Grid.Column="1" Text="Add" Command="{Binding AddAccountCommand}" SemanticProperties.Description="Add a reusable account." />
+                        </Grid>
+                        <Label Text="Accounts stay on this device. Adding one to a scenario creates an independent copy."
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Accounts}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView>
+                                <Label Text="No reusable accounts yet." />
+                            </BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:RetirementAccountEditorItem">
+                                    <Border Padding="{StaticResource CardPaddingCompact}"
+                                            Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 8">
+                                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" />
+                                                <Button Grid.Column="2" Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveAccountCommand}" CommandParameter="{Binding .}" />
+                                            </Grid>
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                                <Entry Text="{Binding Name, Mode=TwoWay}" Placeholder="Account name" />
+                                                <Picker Title="Account type" ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding Type, Mode=TwoWay}" />
+                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                    <Entry Placeholder="Balance" Text="{Binding BalanceText, Mode=TwoWay}" Keyboard="Numeric" />
+                                                    <Entry Grid.Column="1" Placeholder="Annual contribution" Text="{Binding AnnualContributionText, Mode=TwoWay}" Keyboard="Numeric" />
+                                                </Grid>
+                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                    <Entry Placeholder="Expected return (%)" Text="{Binding AnnualReturnText, Mode=TwoWay}" Keyboard="Numeric" />
+                                                    <Entry Grid.Column="1" Placeholder="Available age" Text="{Binding AvailableAgeText, Mode=TwoWay}" Keyboard="Numeric" />
+                                                </Grid>
+                                                <Entry IsVisible="{Binding UsesWithdrawalRate}" Placeholder="Withdrawal rate (%)" Text="{Binding WithdrawalRateText, Mode=TwoWay}" Keyboard="Numeric" />
+                                                <Entry IsVisible="{Binding UsesPayoutSchedule}" Placeholder="Payout years" Text="{Binding PayoutYearsText, Mode=TwoWay}" Keyboard="Numeric" />
+                                                <Entry Placeholder="Withdrawal tax rate (%)" Text="{Binding WithdrawalTaxRateText, Mode=TwoWay}" Keyboard="Numeric" />
+                                                <Label Text="{Binding WithdrawalTaxHelpText}" FontSize="11" />
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="{Binding ValidationMessage}" IsVisible="{Binding HasValidationMessage}" TextColor="{StaticResource FixedDanger}" />
+                <Label Text="{Binding StatusMessage}" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                <Button AutomationId="SaveProfileButton" Text="Save profile" Command="{Binding SaveCommand}" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

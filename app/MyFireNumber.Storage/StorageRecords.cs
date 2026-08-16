@@ -1,10 +1,14 @@
+using MyFireNumber.Core.Profile;
+
 namespace MyFireNumber.Storage;
 
 public sealed record DraftRecord(
     string CalculatorId,
     int PayloadVersion,
     string PayloadJson,
-    DateTime UpdatedAtUtc);
+    DateTime UpdatedAtUtc,
+    ScenarioDataMode DataMode = ScenarioDataMode.Standalone,
+    long? ProfileRevision = null);
 
 public sealed record PlanRecord(
     string Id,
@@ -13,7 +17,9 @@ public sealed record PlanRecord(
     int PayloadVersion,
     string PayloadJson,
     DateTime CreatedAtUtc,
-    DateTime UpdatedAtUtc);
+    DateTime UpdatedAtUtc,
+    ScenarioDataMode DataMode = ScenarioDataMode.Standalone,
+    long? ProfileRevision = null);
 
 public sealed record CalculatorPreferenceRecord(
     string CalculatorId,
@@ -109,4 +115,46 @@ public interface ICorruptPayloadRepository
     Task QuarantineDraftAsync(DraftRecord draft, CancellationToken cancellationToken = default);
 
     Task QuarantinePlanAsync(PlanRecord plan, CancellationToken cancellationToken = default);
+}
+
+public interface IProfileRepository
+{
+    Task<FinancialProfile> GetAsync(CancellationToken cancellationToken = default);
+
+    Task SaveAsync(FinancialProfile profile, CancellationToken cancellationToken = default);
+}
+
+public interface IProfileAccountRepository
+{
+    Task<IReadOnlyList<ProfileAccount>> ListAsync(CancellationToken cancellationToken = default);
+
+    Task SaveAsync(ProfileAccount account, CancellationToken cancellationToken = default);
+
+    Task DeleteAsync(string id, CancellationToken cancellationToken = default);
+}
+
+public interface IProfileIncomeRepository
+{
+    Task<IReadOnlyList<ProfileIncome>> ListAsync(CancellationToken cancellationToken = default);
+    Task SaveAsync(ProfileIncome income, CancellationToken cancellationToken = default);
+    Task DeleteAsync(string id, CancellationToken cancellationToken = default);
+}
+
+public interface IProfileExpenseRepository
+{
+    Task<IReadOnlyList<ProfileExpense>> ListAsync(CancellationToken cancellationToken = default);
+    Task SaveAsync(ProfileExpense expense, CancellationToken cancellationToken = default);
+    Task DeleteAsync(string id, CancellationToken cancellationToken = default);
+}
+
+public interface IProfileDebtRepository
+{
+    Task<IReadOnlyList<ProfileDebt>> ListAsync(CancellationToken cancellationToken = default);
+    Task SaveAsync(ProfileDebt debt, CancellationToken cancellationToken = default);
+    Task DeleteAsync(string id, CancellationToken cancellationToken = default);
+}
+
+public interface IProfileFinancialSnapshotRepository
+{
+    Task<ProfileFinancialSnapshot> GetAsync(CancellationToken cancellationToken = default);
 }

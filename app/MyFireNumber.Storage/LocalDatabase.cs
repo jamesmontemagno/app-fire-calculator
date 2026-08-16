@@ -5,7 +5,7 @@ namespace MyFireNumber.Storage;
 public sealed class LocalDatabase
 {
     private const string SchemaVersionKey = "schema-version";
-    private const int CurrentSchemaVersion = 3;
+    private const int CurrentSchemaVersion = 5;
 
     private readonly SQLiteAsyncConnection connection;
     private readonly SemaphoreSlim initializationLock = new(1, 1);
@@ -75,6 +75,11 @@ public sealed class LocalDatabase
             database.DeleteAll<CalculatorPreferenceEntity>();
             database.DeleteAll<RecentActivityEntity>();
             database.DeleteAll<CorruptPayloadEntity>();
+            database.DeleteAll<ProfileEntity>();
+            database.DeleteAll<ProfileAccountEntity>();
+            database.DeleteAll<ProfileIncomeEntity>();
+            database.DeleteAll<ProfileExpenseEntity>();
+            database.DeleteAll<ProfileDebtEntity>();
         });
     }
 
@@ -153,7 +158,9 @@ public sealed class LocalDatabase
         item.CalculatorId,
         item.PayloadVersion,
         item.PayloadJson,
-        ParseDate(item.UpdatedAtUtc));
+        ParseDate(item.UpdatedAtUtc),
+        Enum.Parse<MyFireNumber.Core.Profile.ScenarioDataMode>(item.DataMode),
+        item.ProfileRevision);
 
     private static PlanRecord ToRecord(PlanEntity item) => new(
         item.Id,
@@ -162,7 +169,9 @@ public sealed class LocalDatabase
         item.PayloadVersion,
         item.PayloadJson,
         ParseDate(item.CreatedAtUtc),
-        ParseDate(item.UpdatedAtUtc));
+        ParseDate(item.UpdatedAtUtc),
+        Enum.Parse<MyFireNumber.Core.Profile.ScenarioDataMode>(item.DataMode),
+        item.ProfileRevision);
 
     private static RecentActivityRecord ToRecord(RecentActivityEntity item) => new(
         Enum.Parse<RecentActivityKind>(item.Kind),
@@ -186,7 +195,9 @@ public sealed class LocalDatabase
         CalculatorId = item.CalculatorId,
         PayloadVersion = item.PayloadVersion,
         PayloadJson = item.PayloadJson,
-        UpdatedAtUtc = FormatDate(item.UpdatedAtUtc)
+        UpdatedAtUtc = FormatDate(item.UpdatedAtUtc),
+        DataMode = item.DataMode.ToString(),
+        ProfileRevision = item.ProfileRevision
     };
 
     private static PlanEntity ToEntity(PlanRecord item) => new()
@@ -197,7 +208,9 @@ public sealed class LocalDatabase
         PayloadVersion = item.PayloadVersion,
         PayloadJson = item.PayloadJson,
         CreatedAtUtc = FormatDate(item.CreatedAtUtc),
-        UpdatedAtUtc = FormatDate(item.UpdatedAtUtc)
+        UpdatedAtUtc = FormatDate(item.UpdatedAtUtc),
+        DataMode = item.DataMode.ToString(),
+        ProfileRevision = item.ProfileRevision
     };
 
     private static RecentActivityEntity ToEntity(RecentActivityRecord item) => new()
@@ -238,6 +251,11 @@ public sealed class LocalDatabase
         await connection.CreateTableAsync<CalculatorPreferenceEntity>();
         await connection.CreateTableAsync<RecentActivityEntity>();
         await connection.CreateTableAsync<CorruptPayloadEntity>();
+        await connection.CreateTableAsync<ProfileEntity>();
+        await connection.CreateTableAsync<ProfileAccountEntity>();
+        await connection.CreateTableAsync<ProfileIncomeEntity>();
+        await connection.CreateTableAsync<ProfileExpenseEntity>();
+        await connection.CreateTableAsync<ProfileDebtEntity>();
     }
 
     private async Task ApplyMigrationsAsync(int storedVersion, SchemaMetadataEntity schemaVersion)
@@ -259,10 +277,41 @@ public sealed class LocalDatabase
             await connection.CreateTableAsync<CorruptPayloadEntity>();
         }
 
+        if (storedVersion < 4)
+        {
+            await connection.CreateTableAsync<ProfileEntity>();
+            await connection.CreateTableAsync<ProfileAccountEntity>();
+        }
+
+        if (storedVersion < 5)
+        {
+            await connection.CreateTableAsync<ProfileIncomeEntity>();
+            await connection.CreateTableAsync<ProfileExpenseEntity>();
+            await connection.CreateTableAsync<ProfileDebtEntity>();
+            await AddColumnIfMissingAsync("drafts", "DataMode", "TEXT NOT NULL DEFAULT 'Standalone'");
+            await AddColumnIfMissingAsync("drafts", "ProfileRevision", "INTEGER NULL");
+            await AddColumnIfMissingAsync("plans", "DataMode", "TEXT NOT NULL DEFAULT 'Standalone'");
+            await AddColumnIfMissingAsync("plans", "ProfileRevision", "INTEGER NULL");
+        }
+
         if (storedVersion != CurrentSchemaVersion)
         {
             schemaVersion.Value = CurrentSchemaVersion.ToString(System.Globalization.CultureInfo.InvariantCulture);
             await connection.UpdateAsync(schemaVersion);
+        }
+    }
+
+    private async Task AddColumnIfMissingAsync(string tableName, string columnName, string definition)
+    {
+        var columns = await connection.GetTableInfoAsync(tableName);
+        if (columns.Count == 0)
+        {
+            return;
+        }
+
+        if (columns.All(column => !string.Equals(column.Name, columnName, StringComparison.OrdinalIgnoreCase)))
+        {
+            await connection.ExecuteAsync($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {definition}");
         }
     }
 }
@@ -281,6 +330,11 @@ internal sealed class DraftEntity
 
     [NotNull]
     public string UpdatedAtUtc { get; set; } = string.Empty;
+
+    [NotNull]
+    public string DataMode { get; set; } = "Standalone";
+
+    public long? ProfileRevision { get; set; }
 }
 
 [Table("plans")]
@@ -306,6 +360,11 @@ internal sealed class PlanEntity
 
     [NotNull]
     public string UpdatedAtUtc { get; set; } = string.Empty;
+
+    [NotNull]
+    public string DataMode { get; set; } = "Standalone";
+
+    public long? ProfileRevision { get; set; }
 }
 
 [Table("calculator_preferences")]
@@ -377,4 +436,84 @@ internal sealed class CorruptPayloadEntity
 
     [NotNull]
     public string QuarantinedAtUtc { get; set; } = string.Empty;
+}
+
+[Table("profile")]
+internal sealed class ProfileEntity
+{
+    [PrimaryKey]
+    public int Id { get; set; } = 1;
+
+    public string? DisplayName { get; set; }
+
+    public string? HouseholdName { get; set; }
+
+    public int? HouseholdSize { get; set; }
+
+    public string? BirthDate { get; set; }
+
+    public string? PhasedRetirementDate { get; set; }
+
+    public string? TargetRetirementDate { get; set; }
+
+    public double? AnnualIncome { get; set; }
+
+    public double? AnnualExpenses { get; set; }
+}
+
+[Table("profile_accounts")]
+internal sealed class ProfileAccountEntity
+{
+    [PrimaryKey]
+    public string Id { get; set; } = string.Empty;
+
+    [NotNull]
+    public string Name { get; set; } = string.Empty;
+
+    [NotNull]
+    public string Type { get; set; } = string.Empty;
+
+    public double Balance { get; set; }
+
+    public double AnnualContribution { get; set; }
+
+    public double AnnualReturn { get; set; }
+
+    public int AvailableAge { get; set; }
+
+    public double WithdrawalRate { get; set; }
+
+    public int PayoutYears { get; set; }
+
+    public double EffectiveWithdrawalTaxRate { get; set; }
+}
+
+[Table("profile_income")]
+internal sealed class ProfileIncomeEntity
+{
+    [PrimaryKey] public string Id { get; set; } = string.Empty;
+    [NotNull] public string Name { get; set; } = string.Empty;
+    public double Amount { get; set; }
+    [NotNull] public string Period { get; set; } = string.Empty;
+    public string? Category { get; set; }
+}
+
+[Table("profile_expenses")]
+internal sealed class ProfileExpenseEntity
+{
+    [PrimaryKey] public string Id { get; set; } = string.Empty;
+    [NotNull] public string Name { get; set; } = string.Empty;
+    public double Amount { get; set; }
+    [NotNull] public string Period { get; set; } = string.Empty;
+    public string? Category { get; set; }
+}
+
+[Table("profile_debts")]
+internal sealed class ProfileDebtEntity
+{
+    [PrimaryKey] public string Id { get; set; } = string.Empty;
+    [NotNull] public string Name { get; set; } = string.Empty;
+    public double Balance { get; set; }
+    public double Rate { get; set; }
+    public double MinimumPayment { get; set; }
 }

@@ -10,4 +10,8 @@
     <PackageReference Include="sqlite-net-pcl" Version="1.11.285" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MyFireNumber.Core\MyFireNumber.Core.csproj" />
+  </ItemGroup>
+
 </Project>

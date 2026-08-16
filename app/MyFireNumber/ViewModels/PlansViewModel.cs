@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using MyFireNumber.Core.Calculators;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
+using MyFireNumber.Core.Profile;
 
 namespace MyFireNumber.ViewModels;
 
@@ -13,7 +14,12 @@ public sealed record PlanListItem(
     string Name,
     string CalculatorTitle,
     DateTime UpdatedAtUtc,
-    string UpdatedDescription);
+    string UpdatedDescription,
+    ScenarioDataMode DataMode)
+{
+    public bool IsLinkedProfile => DataMode == ScenarioDataMode.LinkedProfile;
+    public string DataModeDescription => IsLinkedProfile ? "Linked to Profile" : "Standalone";
+}
 
 public enum PlanSortOrder
 {
@@ -96,7 +102,8 @@ public partial class PlansViewModel : ObservableObject
                     record.Name,
                     title,
                     record.UpdatedAtUtc,
-                    $"Updated {record.UpdatedAtUtc.ToLocalTime():g}"));
+                    $"Updated {record.UpdatedAtUtc.ToLocalTime():g}",
+                    record.DataMode));
             }
 
             ApplyFilters();
@@ -194,7 +201,9 @@ public partial class PlansViewModel : ObservableObject
                 Id = Guid.NewGuid().ToString("N"),
                 Name = name.Trim(),
                 CreatedAtUtc = now,
-                UpdatedAtUtc = now
+                UpdatedAtUtc = now,
+                DataMode = ScenarioDataMode.Standalone,
+                ProfileRevision = null
             });
             await LoadAsync();
         }

@@ -1,5 +1,6 @@
 using MyFireNumber.Core.Presentation;
 using MyFireNumber.ViewModels;
+using MyFireNumber.Core.Profile;
 using MyFireNumber.Views.Controls;
 
 namespace MyFireNumber.Views;
@@ -24,6 +25,67 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
     {
         calculatorViewModel = viewModel;
         BindingContext = viewModel;
+        AddScenarioModeBanner();
+    }
+
+    private void AddScenarioModeBanner()
+    {
+        if (Content is null || Content is Grid { StyleId: "ScenarioModeRoot" })
+        {
+            return;
+        }
+
+        var originalContent = Content;
+        var status = new Label
+        {
+            FontSize = 12,
+            VerticalTextAlignment = TextAlignment.Center
+        };
+        status.SetBinding(Label.TextProperty, "ScenarioDataModeText");
+
+        var unlink = new Button
+        {
+            Text = "Unlink",
+            FontSize = 12,
+            Padding = new Thickness(12, 6)
+        };
+        SemanticProperties.SetDescription(unlink, "Make this linked scenario an independent standalone snapshot.");
+        unlink.SetBinding(Button.CommandProperty, "UnlinkFromProfileCommand");
+
+        var bannerContent = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 12
+        };
+        bannerContent.Add(status);
+        bannerContent.Add(unlink, 1);
+
+        var banner = new Border
+        {
+            Padding = new Thickness(16, 8),
+            Background = new SolidColorBrush(Color.FromArgb("#E8F3EF")),
+            Stroke = new SolidColorBrush(Color.FromArgb("#2B6F57")),
+            StrokeThickness = 1,
+            Content = bannerContent
+        };
+        banner.SetBinding(IsVisibleProperty, "IsLinkedProfile");
+
+        var root = new Grid
+        {
+            StyleId = "ScenarioModeRoot",
+            RowDefinitions =
+            {
+                new RowDefinition(GridLength.Auto),
+                new RowDefinition(GridLength.Star)
+            }
+        };
+        root.Add(banner);
+        root.Add(originalContent, 0, 1);
+        Content = root;
     }
 
     /// <summary>
@@ -51,10 +113,14 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
         var returnHomeAfterSave = query.TryGetValue("returnHomeAfterSave", out var returnHomeValue)
             && bool.TryParse(returnHomeValue?.ToString(), out var parsedReturnHome)
             && parsedReturnHome;
+        var requestedMode = query.TryGetValue("dataMode", out var dataModeValue) &&
+            Enum.TryParse<ScenarioDataMode>(dataModeValue?.ToString(), out var parsedMode)
+                ? parsedMode
+                : (ScenarioDataMode?)null;
 
         RestoreAdvancedAssumptions(viewModel.CalculatorId);
 
-        await viewModel.LoadAsync(planId, returnHomeAfterSave);
+        await viewModel.LoadAsync(planId, returnHomeAfterSave, requestedMode);
     }
 
     /// <summary>
@@ -102,6 +168,10 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        if (calculatorViewModel is not null)
+        {
+            _ = calculatorViewModel.RefreshLinkedProfileAsync();
+        }
         subscribedWindow = Window;
         if (subscribedWindow is not null)
         {

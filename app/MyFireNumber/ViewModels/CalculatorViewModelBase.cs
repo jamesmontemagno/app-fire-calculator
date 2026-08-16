@@ -7,6 +7,7 @@ using MyFireNumber.Core.Calculators;
 using MyFireNumber.Core.Presentation;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
+using MyFireNumber.Core.Profile;
 using SkiaSharp;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -32,6 +33,8 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     private readonly IDraftRepository draftRepository;
     private readonly INavigationService navigation;
     private readonly IPlanRepository planRepository;
+    private readonly IProfileScenarioResolver profileScenarioResolver;
+    private readonly IConfirmationService confirmationService;
     private readonly SemaphoreSlim draftSaveLock = new(1, 1);
     private readonly object pendingDraftLock = new();
     private CancellationTokenSource? saveCancellationTokenSource;
@@ -51,6 +54,8 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
         draftRepository = services.DraftRepository;
         navigation = services.Navigation;
         planRepository = services.PlanRepository;
+        profileScenarioResolver = services.ProfileScenarioResolver;
+        confirmationService = services.ConfirmationService;
     }
 
     [ObservableProperty]
@@ -81,6 +86,20 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasExportStatusMessage))]
     private string exportStatusMessage = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsLinkedProfile))]
+    [NotifyPropertyChangedFor(nameof(ScenarioDataModeText))]
+    private ScenarioDataMode scenarioDataMode;
+
+    public bool IsLinkedProfile => ScenarioDataMode == ScenarioDataMode.LinkedProfile;
+
+    public string ScenarioDataModeText => IsLinkedProfile
+        ? "Linked to Profile — compatible values update when Profile changes."
+        : "Standalone snapshot — values are independent from Profile.";
+
+    private long? resolvedProfileRevision;
+    private bool linkedResolutionValid = true;
 
     [ObservableProperty]
     private IReadOnlyList<ISeries> projectionSeries = [];
@@ -284,12 +303,16 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     /// <summary>Builds the workbook and hands it to the platform share sheet.</summary>
     protected abstract Task ShareAsync(TDraft draft);
 
-    public async Task LoadAsync(string? planId = null, bool returnHomeAfterSave = false)
+    public async Task LoadAsync(
+        string? planId = null,
+        bool returnHomeAfterSave = false,
+        ScenarioDataMode? requestedMode = null)
     {
         this.returnHomeAfterSave = returnHomeAfterSave;
         loadedPlanId = null;
         loadedPlanCreatedAtUtc = null;
         IsLoadedPlan = false;
+        ScenarioDataMode = requestedMode ?? ScenarioDataMode.Standalone;
 
         var definition = catalog.GetRequired(CalculatorId);
         Title = definition.Title;
@@ -315,12 +338,12 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
             ValidationMessage = wasQuarantined
                 ? "Unreadable saved data was moved to local recovery storage. Default values are shown."
                 : "Saved data could not be read or moved to recovery storage. Default values are shown.";
-            LoadInputs(DefaultDraft);
+            await LoadResolvedInputsAsync(DefaultDraft);
         }
         catch (Exception)
         {
             ValidationMessage = "Your saved draft could not be restored. You can continue with the values shown.";
-            LoadInputs(DefaultDraft);
+            await LoadResolvedInputsAsync(DefaultDraft);
         }
         finally
         {
@@ -334,19 +357,20 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
         if (savedPlan is null || savedPlan.CalculatorId != CalculatorId)
         {
             ValidationMessage = "The requested plan could not be found. Default values are shown.";
-            LoadInputs(DefaultDraft);
+            await LoadResolvedInputsAsync(DefaultDraft);
             return;
         }
 
         if (savedPlan.PayloadVersion != DraftPayloadVersion)
         {
             ValidationMessage = "This saved plan uses an unsupported format. Default values are shown.";
-            LoadInputs(DefaultDraft);
+            await LoadResolvedInputsAsync(DefaultDraft);
             return;
         }
 
         PlanNameText = savedPlan.Name;
-        LoadInputs(JsonSerializer.Deserialize<TDraft>(savedPlan.PayloadJson) ?? DefaultDraft);
+        ScenarioDataMode = savedPlan.DataMode;
+        await LoadResolvedInputsAsync(JsonSerializer.Deserialize<TDraft>(savedPlan.PayloadJson) ?? DefaultDraft);
         loadedPlanId = savedPlan.Id;
         loadedPlanCreatedAtUtc = savedPlan.CreatedAtUtc;
         IsLoadedPlan = true;
@@ -360,18 +384,53 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
 
         if (savedDraft is null)
         {
-            LoadInputs(DefaultDraft);
+            await LoadResolvedInputsAsync(DefaultDraft);
             return;
         }
 
         if (savedDraft.PayloadVersion != DraftPayloadVersion)
         {
             ValidationMessage = "This saved draft uses an unsupported format. Default values are shown.";
-            LoadInputs(DefaultDraft);
+            await LoadResolvedInputsAsync(DefaultDraft);
             return;
         }
 
-        LoadInputs(JsonSerializer.Deserialize<TDraft>(savedDraft.PayloadJson) ?? DefaultDraft);
+        ScenarioDataMode = savedDraft.DataMode;
+        await LoadResolvedInputsAsync(JsonSerializer.Deserialize<TDraft>(savedDraft.PayloadJson) ?? DefaultDraft);
+    }
+
+    private async Task LoadResolvedInputsAsync(TDraft draft)
+    {
+        if (!IsLinkedProfile)
+        {
+            resolvedProfileRevision = null;
+            linkedResolutionValid = true;
+            LoadInputs(draft);
+            return;
+        }
+
+        var resolution = await profileScenarioResolver.ResolveAsync(draft);
+        if (!resolution.IsValid)
+        {
+            linkedResolutionValid = false;
+            ValidationMessage = string.Join(Environment.NewLine, resolution.Errors);
+            ProjectionSeries = [];
+            return;
+        }
+
+        linkedResolutionValid = true;
+        resolvedProfileRevision = resolution.ProfileRevision;
+        LoadInputs(resolution.Draft);
+    }
+
+    public async Task RefreshLinkedProfileAsync()
+    {
+        if (!IsLinkedProfile || !TryBuildDraft(out var currentDraft))
+        {
+            return;
+        }
+
+        await LoadResolvedInputsAsync(currentDraft);
     }
 
     /// <summary>
@@ -396,12 +455,19 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     /// <summary>Called by derived view models whenever a bound input changes.</summary>
     protected virtual void OnDraftInputChanged()
     {
+        if (IsLinkedProfile && !IsApplyingDraft)
+        {
+            PlanStatusMessage = "Linked values come from Profile. Scenario-only values remain editable.";
+            _ = RefreshLinkedProfileAsync();
+            return;
+        }
+
         RecalculateAndSave();
     }
 
     private void RecalculateAndSave()
     {
-        if (IsApplyingDraft)
+        if (IsApplyingDraft || IsLinkedProfile && !linkedResolutionValid)
         {
             return;
         }
@@ -420,7 +486,31 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     private void ResetDefaults()
     {
         ValidationMessage = string.Empty;
-        LoadInputs(DefaultDraft);
+        _ = LoadResolvedInputsAsync(DefaultDraft);
+    }
+
+    [RelayCommand]
+    private async Task UnlinkFromProfileAsync()
+    {
+        if (!IsLinkedProfile || !TryBuildDraft(out var draft))
+        {
+            return;
+        }
+
+        if (!await confirmationService.ConfirmAsync(
+                "Unlink from Profile?",
+                "This keeps the currently resolved values as an editable standalone snapshot. Future Profile changes will no longer update it.",
+                "Unlink",
+                "Cancel"))
+        {
+            return;
+        }
+
+        ScenarioDataMode = ScenarioDataMode.Standalone;
+        resolvedProfileRevision = null;
+        LoadInputs(draft);
+        PlanStatusMessage = "This scenario is now an independent standalone snapshot.";
+        await FlushPendingDraftAsync();
     }
 
     [RelayCommand]
@@ -440,6 +530,11 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
 
     private async Task<bool> SavePlanCoreAsync(string planName)
     {
+        await RefreshLinkedProfileAsync();
+        if (IsLinkedProfile && !linkedResolutionValid)
+        {
+            return false;
+        }
         if (string.IsNullOrWhiteSpace(planName))
         {
             ValidationMessage = "Enter a name before saving this plan.";
@@ -463,7 +558,9 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
                 DraftPayloadVersion,
                 JsonSerializer.Serialize(draft),
                 isUpdatingLoadedPlan ? loadedPlanCreatedAtUtc ?? now : now,
-                now));
+                now,
+                ScenarioDataMode,
+                resolvedProfileRevision));
             loadedPlanId = planIdToSave;
             loadedPlanCreatedAtUtc = isUpdatingLoadedPlan ? loadedPlanCreatedAtUtc ?? now : now;
             IsLoadedPlan = true;
@@ -484,6 +581,12 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     [RelayCommand]
     private async Task ExportAsync()
     {
+        await RefreshLinkedProfileAsync();
+        if (IsLinkedProfile && !linkedResolutionValid)
+        {
+            ExportStatusMessage = "Fix the linked Profile data or unlink this scenario before exporting.";
+            return;
+        }
         if (!TryBuildDraft(out var draft))
         {
             return;
@@ -541,7 +644,9 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
                 CalculatorId,
                 DraftPayloadVersion,
                 JsonSerializer.Serialize(draft),
-                DateTime.UtcNow);
+                DateTime.UtcNow,
+                ScenarioDataMode,
+                resolvedProfileRevision);
             saveCancellationTokenSource?.Cancel();
             saveCancellationTokenSource?.Dispose();
             saveCancellationTokenSource = new CancellationTokenSource();

@@ -1,4 +1,6 @@
 using System.Globalization;
+using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Profile;
 using SQLite;
 
 namespace MyFireNumber.Storage;
@@ -32,7 +34,9 @@ public sealed class SqliteDraftRepository(LocalDatabase database) : IDraftReposi
             CalculatorId = draft.CalculatorId,
             PayloadVersion = draft.PayloadVersion,
             PayloadJson = draft.PayloadJson,
-            UpdatedAtUtc = draft.UpdatedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)
+            UpdatedAtUtc = draft.UpdatedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
+            DataMode = draft.DataMode.ToString(),
+            ProfileRevision = draft.ProfileRevision
         });
     }
 
@@ -48,7 +52,9 @@ public sealed class SqliteDraftRepository(LocalDatabase database) : IDraftReposi
             entity.CalculatorId,
             entity.PayloadVersion,
             entity.PayloadJson,
-            DateTime.Parse(entity.UpdatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
+            DateTime.Parse(entity.UpdatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
+            Enum.Parse<ScenarioDataMode>(entity.DataMode),
+            entity.ProfileRevision);
     }
 }
 
@@ -91,7 +97,9 @@ public sealed class SqlitePlanRepository(LocalDatabase database) : IPlanReposito
             PayloadVersion = plan.PayloadVersion,
             PayloadJson = plan.PayloadJson,
             CreatedAtUtc = plan.CreatedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
-            UpdatedAtUtc = plan.UpdatedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture)
+            UpdatedAtUtc = plan.UpdatedAtUtc.ToUniversalTime().ToString("O", CultureInfo.InvariantCulture),
+            DataMode = plan.DataMode.ToString(),
+            ProfileRevision = plan.ProfileRevision
         });
     }
 
@@ -110,7 +118,9 @@ public sealed class SqlitePlanRepository(LocalDatabase database) : IPlanReposito
             entity.PayloadVersion,
             entity.PayloadJson,
             DateTime.Parse(entity.CreatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
-            DateTime.Parse(entity.UpdatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
+            DateTime.Parse(entity.UpdatedAtUtc, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind),
+            Enum.Parse<ScenarioDataMode>(entity.DataMode),
+            entity.ProfileRevision);
     }
 }
 
@@ -138,6 +148,169 @@ public sealed class SqliteCalculatorPreferencesRepository(LocalDatabase database
             SortOrder = preference.SortOrder
         });
     }
+}
+
+public sealed class SqliteProfileRepository(LocalDatabase database) : IProfileRepository
+{
+    private const int ProfileId = 1;
+
+    public async Task<FinancialProfile> GetAsync(CancellationToken cancellationToken = default)
+    {
+        await database.InitializeAsync(cancellationToken);
+        var entity = await database.Connection.FindAsync<ProfileEntity>(ProfileId);
+        return entity is null
+            ? FinancialProfile.Empty
+            : new FinancialProfile(entity.DisplayName, entity.HouseholdName, entity.HouseholdSize, ParseDate(entity.BirthDate), ParseDate(entity.PhasedRetirementDate), ParseDate(entity.TargetRetirementDate), entity.AnnualIncome, entity.AnnualExpenses);
+    }
+
+    public async Task SaveAsync(FinancialProfile profile, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(profile);
+        if (!ProfileAgeCalculator.TryValidate(profile, out var validationMessage))
+        {
+            throw new ArgumentException(validationMessage, nameof(profile));
+        }
+
+        await database.InitializeAsync(cancellationToken);
+        await database.Connection.InsertOrReplaceAsync(new ProfileEntity
+        {
+            Id = ProfileId,
+            DisplayName = NullIfWhiteSpace(profile.DisplayName),
+            HouseholdName = NullIfWhiteSpace(profile.HouseholdName),
+            HouseholdSize = profile.HouseholdSize,
+            BirthDate = FormatDate(profile.BirthDate),
+            PhasedRetirementDate = FormatDate(profile.PhasedRetirementDate),
+            TargetRetirementDate = FormatDate(profile.TargetRetirementDate),
+            AnnualIncome = profile.AnnualIncome,
+            AnnualExpenses = profile.AnnualExpenses
+        });
+    }
+
+    private static DateOnly? ParseDate(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : DateOnly.Parse(value, CultureInfo.InvariantCulture);
+
+    private static string? FormatDate(DateOnly? value) =>
+        value?.ToString("O", CultureInfo.InvariantCulture);
+
+    private static string? NullIfWhiteSpace(string? value) =>
+        string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+}
+
+public sealed class SqliteProfileAccountRepository(LocalDatabase database) : IProfileAccountRepository
+{
+    public async Task<IReadOnlyList<ProfileAccount>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        await database.InitializeAsync(cancellationToken);
+        var entities = await database.Connection.Table<ProfileAccountEntity>().OrderBy(account => account.Name).ToListAsync();
+        return entities.Select(ToRecord).ToArray();
+    }
+
+    public async Task SaveAsync(ProfileAccount account, CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(account.Id);
+            ArgumentException.ThrowIfNullOrWhiteSpace(account.Name);
+
+            await database.InitializeAsync(cancellationToken);
+            await database.Connection.InsertOrReplaceAsync(new ProfileAccountEntity
+            {
+                Id = account.Id,
+                Name = account.Name.Trim(),
+                Type = account.Type.ToString(),
+                Balance = account.Balance,
+                AnnualContribution = account.AnnualContribution,
+                AnnualReturn = account.AnnualReturn,
+                AvailableAge = account.AvailableAge,
+                WithdrawalRate = account.WithdrawalRate,
+                PayoutYears = account.PayoutYears,
+                EffectiveWithdrawalTaxRate = account.EffectiveWithdrawalTaxRate
+            });
+        }
+
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
+        {
+            await database.InitializeAsync(cancellationToken);
+            await database.Connection.DeleteAsync<ProfileAccountEntity>(id);
+        }
+
+    private static ProfileAccount ToRecord(ProfileAccountEntity entity) => new(
+            entity.Id,
+            entity.Name,
+            Enum.Parse<RetirementAccountType>(entity.Type),
+            entity.Balance,
+            entity.AnnualContribution,
+            entity.AnnualReturn,
+            entity.AvailableAge,
+            entity.WithdrawalRate,
+            entity.PayoutYears,
+            entity.EffectiveWithdrawalTaxRate);
+}
+
+public sealed class SqliteProfileIncomeRepository(LocalDatabase database) : IProfileIncomeRepository
+{
+    public async Task<IReadOnlyList<ProfileIncome>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        await database.InitializeAsync(cancellationToken);
+        var items = await database.Connection.Table<ProfileIncomeEntity>().OrderBy(item => item.Name).ToListAsync();
+        return items.Select(item => new ProfileIncome(item.Id, item.Name, item.Amount, Enum.Parse<MyFireNumber.Core.Presentation.CurrencyPeriod>(item.Period), item.Category)).ToArray();
+    }
+    public async Task SaveAsync(ProfileIncome item, CancellationToken cancellationToken = default)
+    {
+        Validate(item.Id, item.Name, item.Amount);
+        await database.InitializeAsync(cancellationToken);
+        await database.Connection.InsertOrReplaceAsync(new ProfileIncomeEntity { Id = item.Id, Name = item.Name.Trim(), Amount = item.Amount, Period = item.Period.ToString(), Category = item.Category });
+    }
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default) { await database.InitializeAsync(cancellationToken); await database.Connection.DeleteAsync<ProfileIncomeEntity>(id); }
+    private static void Validate(string id, string name, double amount) { ArgumentException.ThrowIfNullOrWhiteSpace(id); ArgumentException.ThrowIfNullOrWhiteSpace(name); ArgumentOutOfRangeException.ThrowIfNegative(amount); }
+}
+
+public sealed class SqliteProfileExpenseRepository(LocalDatabase database) : IProfileExpenseRepository
+{
+    public async Task<IReadOnlyList<ProfileExpense>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        await database.InitializeAsync(cancellationToken);
+        var items = await database.Connection.Table<ProfileExpenseEntity>().OrderBy(item => item.Name).ToListAsync();
+        return items.Select(item => new ProfileExpense(item.Id, item.Name, item.Amount, Enum.Parse<MyFireNumber.Core.Presentation.CurrencyPeriod>(item.Period), item.Category)).ToArray();
+    }
+    public async Task SaveAsync(ProfileExpense item, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(item.Id); ArgumentException.ThrowIfNullOrWhiteSpace(item.Name); ArgumentOutOfRangeException.ThrowIfNegative(item.Amount);
+        await database.InitializeAsync(cancellationToken);
+        await database.Connection.InsertOrReplaceAsync(new ProfileExpenseEntity { Id = item.Id, Name = item.Name.Trim(), Amount = item.Amount, Period = item.Period.ToString(), Category = item.Category });
+    }
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default) { await database.InitializeAsync(cancellationToken); await database.Connection.DeleteAsync<ProfileExpenseEntity>(id); }
+}
+
+public sealed class SqliteProfileDebtRepository(LocalDatabase database) : IProfileDebtRepository
+{
+    public async Task<IReadOnlyList<ProfileDebt>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        await database.InitializeAsync(cancellationToken);
+        var items = await database.Connection.Table<ProfileDebtEntity>().OrderBy(item => item.Name).ToListAsync();
+        return items.Select(item => new ProfileDebt(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment)).ToArray();
+    }
+    public async Task SaveAsync(ProfileDebt item, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(item.Id); ArgumentException.ThrowIfNullOrWhiteSpace(item.Name);
+        await database.InitializeAsync(cancellationToken);
+        await database.Connection.InsertOrReplaceAsync(new ProfileDebtEntity { Id = item.Id, Name = item.Name.Trim(), Balance = item.Balance, Rate = item.Rate, MinimumPayment = item.MinimumPayment });
+    }
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default) { await database.InitializeAsync(cancellationToken); await database.Connection.DeleteAsync<ProfileDebtEntity>(id); }
+}
+
+public sealed class SqliteProfileFinancialSnapshotRepository(
+    IProfileRepository profileRepository,
+    IProfileAccountRepository accountRepository,
+    IProfileIncomeRepository incomeRepository,
+    IProfileExpenseRepository expenseRepository,
+    IProfileDebtRepository debtRepository) : IProfileFinancialSnapshotRepository
+{
+    public async Task<ProfileFinancialSnapshot> GetAsync(CancellationToken cancellationToken = default) => new(
+        await profileRepository.GetAsync(cancellationToken),
+        await accountRepository.ListAsync(cancellationToken),
+        await incomeRepository.ListAsync(cancellationToken),
+        await expenseRepository.ListAsync(cancellationToken),
+        await debtRepository.ListAsync(cancellationToken),
+        DateTime.UtcNow.Ticks);
 }
 
 public sealed class SqliteRecentActivityRepository(LocalDatabase database) : IRecentActivityRepository

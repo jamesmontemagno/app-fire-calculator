@@ -7,24 +7,28 @@ public partial class AppShell : Shell
 {
 	private readonly IOnboardingService onboardingService;
 	private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
+	private readonly IProfileService profileService;
 	private bool hasPresentedOnboarding;
 
 	public AppShell(
 		HomePage homePage,
 		CalculatorsPage calculatorsPage,
 		PlansPage plansPage,
-		SettingsPage settingsPage,
+		ProfilePage profilePage,
 		IOnboardingService onboardingService,
-		IAppBehaviorPreferencesService behaviorPreferencesService)
+		IAppBehaviorPreferencesService behaviorPreferencesService,
+		IProfileService profileService)
 	{
 		InitializeComponent();
 		this.onboardingService = onboardingService;
 		this.behaviorPreferencesService = behaviorPreferencesService;
+		this.profileService = profileService;
 
 		Items.Add(CreateTab("Home", "home", "tab_home.png", homePage));
 		Items.Add(CreateTab("Calculators", "calculators", "tab_calculators.png", calculatorsPage));
 		Items.Add(CreateTab("Plans", "plans", "tab_plans.png", plansPage));
-		Items.Add(CreateTab("Settings", "settings", "tab_settings.png", settingsPage));
+		Items.Add(CreateTab("Profile", "profile", "tab_profile.png", profilePage));
+		Routing.RegisterRoute("settings", typeof(SettingsPage));
 
 		Routing.RegisterRoute("quiz", typeof(QuizPage));
 		Routing.RegisterRoute("welcome", typeof(WelcomePage));
@@ -72,6 +76,7 @@ public partial class AppShell : Shell
 		}
 
 		hasPresentedOnboarding = true;
+		await profileService.LoadAsync();
 		if (!onboardingService.IsComplete)
 		{
 			await GoToAsync(onboardingService.HasSeenWelcome

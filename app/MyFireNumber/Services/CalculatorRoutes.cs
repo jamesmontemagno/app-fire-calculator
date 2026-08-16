@@ -19,7 +19,8 @@ public static class CalculatorRoutes
         string calculatorId,
         string? planId = null,
         bool returnHomeAfterSave = false,
-        string routePrefix = "")
+        string routePrefix = "",
+        MyFireNumber.Core.Profile.ScenarioDataMode? dataMode = null)
     {
         var query = new List<string>();
         if (SharedFireNumberCalculatorIds.Contains(calculatorId))
@@ -35,6 +36,11 @@ public static class CalculatorRoutes
         if (returnHomeAfterSave)
         {
             query.Add("returnHomeAfterSave=true");
+        }
+
+        if (dataMode is not null)
+        {
+            query.Add($"dataMode={dataMode}");
         }
 
         var route = $"{routePrefix}{calculatorId}";

@@ -10,15 +10,18 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly ICurrencyPreferencesService currencyPreferencesService;
     private readonly INavigationService navigationService;
+    private readonly IProfileService profileService;
 
     public DefaultsOnboardingViewModel(
         ICalculatorDefaultsService calculatorDefaultsService,
         ICurrencyPreferencesService currencyPreferencesService,
-        INavigationService navigationService)
+        INavigationService navigationService,
+        IProfileService profileService)
     {
         this.calculatorDefaultsService = calculatorDefaultsService;
         this.currencyPreferencesService = currencyPreferencesService;
         this.navigationService = navigationService;
+        this.profileService = profileService;
 
         var defaults = calculatorDefaultsService.Current;
         currentAge = defaults.CurrentAge;
@@ -61,6 +64,11 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
         {
             CurrentAge = (int)CurrentAge,
             RetirementAge = Math.Max(defaults.RetirementAge, (int)CurrentAge),
+            AnnualIncome = AnnualIncome,
+            AnnualExpenses = AnnualExpenses
+        });
+        await profileService.SaveAsync(profileService.Current with
+        {
             AnnualIncome = AnnualIncome,
             AnnualExpenses = AnnualExpenses
         });

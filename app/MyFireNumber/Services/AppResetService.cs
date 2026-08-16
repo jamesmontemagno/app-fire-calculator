@@ -7,12 +7,13 @@ public interface IAppResetService
     Task ResetAsync();
 }
 
-public sealed class AppResetService(LocalDatabase database, IThemeService themeService) : IAppResetService
+public sealed class AppResetService(LocalDatabase database, IThemeService themeService, IProfileService profileService) : IAppResetService
 {
     public async Task ResetAsync()
     {
         await database.ClearAsync();
         Preferences.Default.Clear();
         themeService.Apply(ThemePreference.System);
+        await profileService.LoadAsync();
     }
 }
