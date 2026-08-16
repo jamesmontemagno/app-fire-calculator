@@ -83,7 +83,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="DatePicker">
+    <Style x:Key="BaseDatePicker" TargetType="DatePicker">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
@@ -103,6 +103,8 @@
             </VisualStateGroupList>
         </Setter>
     </Style>
+
+    <Style TargetType="DatePicker" BasedOn="{StaticResource BaseDatePicker}" />
 
     <Style TargetType="Editor">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
@@ -126,7 +128,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="Entry">
+    <Style x:Key="BaseEntry" TargetType="Entry">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="FontFamily" Value="OpenSansRegular"/>
@@ -147,6 +149,8 @@
             </VisualStateGroupList>
         </Setter>
     </Style>
+
+    <Style TargetType="Entry" BasedOn="{StaticResource BaseEntry}" />
 
     <Style TargetType="ImageButton">
         <Setter Property="Opacity" Value="1" />
@@ -203,7 +207,7 @@
         <Setter Property="HorizontalTextAlignment" Value="Center" />
     </Style>
 
-    <Style TargetType="Picker">
+    <Style x:Key="BasePicker" TargetType="Picker">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource White}}" />
         <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource Gray900}, Dark={StaticResource Gray200}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
@@ -225,6 +229,8 @@
             </VisualStateGroupList>
         </Setter>
     </Style>
+
+    <Style TargetType="Picker" BasedOn="{StaticResource BasePicker}" />
 
     <Style TargetType="ProgressBar">
         <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource White}}" />
@@ -390,19 +396,19 @@
     </Style>
 
     <!-- A form input on a card or inset surface, so the field reads as editable. -->
-    <Style x:Key="FormEntry" TargetType="Entry">
+    <Style x:Key="FormEntry" TargetType="Entry" BasedOn="{StaticResource BaseEntry}">
         <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
     </Style>
 
-    <Style x:Key="FormPicker" TargetType="Picker">
+    <Style x:Key="FormPicker" TargetType="Picker" BasedOn="{StaticResource BasePicker}">
         <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
         <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
     </Style>
 
-    <Style x:Key="FormDatePicker" TargetType="DatePicker">
+    <Style x:Key="FormDatePicker" TargetType="DatePicker" BasedOn="{StaticResource BaseDatePicker}">
         <Setter Property="Background" Value="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
     </Style>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
              xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
              x:Class="MyFireNumber.Views.ProfilePage"
              x:DataType="viewModels:ProfileViewModel"
@@ -79,10 +80,10 @@
                                                 <Button Grid.Column="1" Text="Delete" VerticalOptions="End" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveIncomeCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} income.'}" />
                                             </Grid>
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <VerticalStackLayout Spacing="3">
-                                                    <Label Text="Amount" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding AmountText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="0" SemanticProperties.Description="Recurring income amount" />
-                                                </VerticalStackLayout>
+                                                <controls:NumericInputView Header="Amount"
+                                                                           HelpText="Recurring income amount for the period you choose."
+                                                                           Placeholder="0"
+                                                                           Text="{Binding AmountText, Mode=TwoWay}" />
                                                 <VerticalStackLayout Grid.Column="1" Spacing="3">
                                                     <Label Text="How often" Style="{StaticResource FormFieldLabel}" />
                                                     <Picker Title="How often" ItemsSource="{Binding Periods}" SelectedItem="{Binding Period, Mode=TwoWay}" Style="{StaticResource FormPicker}" SemanticProperties.Description="How often this income is received" />
@@ -120,10 +121,10 @@
                                                 <Button Grid.Column="1" Text="Delete" VerticalOptions="End" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveExpenseCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} expense.'}" />
                                             </Grid>
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <VerticalStackLayout Spacing="3">
-                                                    <Label Text="Amount" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding AmountText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="0" SemanticProperties.Description="Recurring expense amount" />
-                                                </VerticalStackLayout>
+                                                <controls:NumericInputView Header="Amount"
+                                                                           HelpText="Recurring expense amount for the period you choose."
+                                                                           Placeholder="0"
+                                                                           Text="{Binding AmountText, Mode=TwoWay}" />
                                                 <VerticalStackLayout Grid.Column="1" Spacing="3">
                                                     <Label Text="How often" Style="{StaticResource FormFieldLabel}" />
                                                     <Picker Title="How often" ItemsSource="{Binding Periods}" SelectedItem="{Binding Period, Mode=TwoWay}" Style="{StaticResource FormPicker}" SemanticProperties.Description="How often this expense is paid" />
@@ -161,19 +162,22 @@
                                                 <Button Grid.Column="1" Text="Delete" VerticalOptions="End" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} debt.'}" />
                                             </Grid>
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <VerticalStackLayout Spacing="3">
-                                                    <Label Text="Balance" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding BalanceText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="5000" SemanticProperties.Description="Current balance owed on this debt" />
-                                                </VerticalStackLayout>
-                                                <VerticalStackLayout Grid.Column="1" Spacing="3">
-                                                    <Label Text="Interest rate (%)" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding RateText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="19.99" SemanticProperties.Description="Annual interest rate percentage for this debt" />
-                                                </VerticalStackLayout>
+                                                <controls:NumericInputView Header="Balance"
+                                                                           HelpText="Amount still owed on this debt."
+                                                                           Placeholder="5000"
+                                                                           Text="{Binding BalanceText, Mode=TwoWay}" />
+                                                <controls:NumericInputView Grid.Column="1"
+                                                                           Header="Interest rate"
+                                                                           HelpText="Annual interest rate charged on this debt."
+                                                                           Placeholder="19.99"
+                                                                           PeriodSuffix="%"
+                                                                           Text="{Binding RateText, Mode=TwoWay}" />
                                             </Grid>
-                                            <VerticalStackLayout Spacing="3">
-                                                <Label Text="Minimum monthly payment" Style="{StaticResource FormFieldLabel}" />
-                                                <Entry Text="{Binding MinimumPaymentText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="150" SemanticProperties.Description="Minimum monthly payment for this debt" />
-                                            </VerticalStackLayout>
+                                            <controls:NumericInputView Header="Minimum payment"
+                                                                       HelpText="Smallest payment you must make each month."
+                                                                       Placeholder="150"
+                                                                       PeriodSuffix="/mo"
+                                                                       Text="{Binding MinimumPaymentText, Mode=TwoWay}" />
                                         </VerticalStackLayout>
                                     </Border>
                                 </DataTemplate>
@@ -274,14 +278,18 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Label Text="Household defaults" Style="{StaticResource CalculatorSectionHeading}" />
-                        <VerticalStackLayout Spacing="3">
-                            <Label Text="Annual household income" Style="{StaticResource FormFieldLabel}" />
-                            <Entry AutomationId="ProfileAnnualIncomeEntry" Text="{Binding AnnualIncomeText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="120000" SemanticProperties.Description="Annual after-tax household income in dollars" />
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Spacing="3">
-                            <Label Text="Annual household spending" Style="{StaticResource FormFieldLabel}" />
-                            <Entry AutomationId="ProfileAnnualExpensesEntry" Text="{Binding AnnualExpensesText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="72000" SemanticProperties.Description="Annual household spending in dollars" />
-                        </VerticalStackLayout>
+                        <controls:NumericInputView AutomationId="ProfileAnnualIncomeInput"
+                                                   Header="Annual household income"
+                                                   HelpText="After-tax income your household brings in each year."
+                                                   Placeholder="120000"
+                                                   PeriodSuffix="/yr"
+                                                   Text="{Binding AnnualIncomeText, Mode=TwoWay}" />
+                        <controls:NumericInputView AutomationId="ProfileAnnualExpensesInput"
+                                                   Header="Annual household spending"
+                                                   HelpText="What your household spends each year, before retirement."
+                                                   Placeholder="72000"
+                                                   PeriodSuffix="/yr"
+                                                   Text="{Binding AnnualExpensesText, Mode=TwoWay}" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -295,20 +303,27 @@
                                FontSize="12"
                                LineHeight="1.3"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                            <VerticalStackLayout Spacing="3">
-                                <Label Text="Expected return (%)" Style="{StaticResource FormFieldLabel}" />
-                                <Entry AutomationId="ProfileExpectedReturnEntry" Text="{Binding ExpectedReturnText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="7" SemanticProperties.Description="Expected annual investment return percentage" />
-                            </VerticalStackLayout>
-                            <VerticalStackLayout Grid.Column="1" Spacing="3">
-                                <Label Text="Inflation (%)" Style="{StaticResource FormFieldLabel}" />
-                                <Entry AutomationId="ProfileInflationRateEntry" Text="{Binding InflationRateText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="3" SemanticProperties.Description="Expected annual inflation percentage" />
-                            </VerticalStackLayout>
-                        </Grid>
-                        <VerticalStackLayout Spacing="3">
-                            <Label Text="Withdrawal rate (%)" Style="{StaticResource FormFieldLabel}" />
-                            <Entry AutomationId="ProfileWithdrawalRateEntry" Text="{Binding WithdrawalRateText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="4" SemanticProperties.Description="Safe withdrawal rate percentage" />
-                        </VerticalStackLayout>
+                        <controls:PercentageInputView AutomationId="ProfileExpectedReturnInput"
+                                                      Header="Expected return"
+                                                      HelpText="Expected average annual investment return before inflation."
+                                                      Placeholder="7"
+                                                      Minimum="0"
+                                                      Maximum="15"
+                                                      Text="{Binding ExpectedReturnText, Mode=TwoWay}" />
+                        <controls:PercentageInputView AutomationId="ProfileInflationRateInput"
+                                                      Header="Inflation"
+                                                      HelpText="Expected annual increase in the cost of living."
+                                                      Placeholder="3"
+                                                      Minimum="0"
+                                                      Maximum="10"
+                                                      Text="{Binding InflationRateText, Mode=TwoWay}" />
+                        <controls:PercentageInputView AutomationId="ProfileWithdrawalRateInput"
+                                                      Header="Withdrawal rate"
+                                                      HelpText="First-year percentage withdrawn from the portfolio. This is an assumption, not a promise."
+                                                      Placeholder="4"
+                                                      Minimum="2"
+                                                      Maximum="6"
+                                                      Text="{Binding WithdrawalRateText, Mode=TwoWay}" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -350,36 +365,46 @@
                                                     <Picker Title="Account type" ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding Type, Mode=TwoWay}" Style="{StaticResource FormPicker}" SemanticProperties.Description="Account type" />
                                                 </VerticalStackLayout>
                                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                                    <VerticalStackLayout Spacing="3">
-                                                        <Label Text="Balance" Style="{StaticResource FormFieldLabel}" />
-                                                        <Entry Text="{Binding BalanceText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="0" SemanticProperties.Description="Current account balance in dollars" />
-                                                    </VerticalStackLayout>
-                                                    <VerticalStackLayout Grid.Column="1" Spacing="3">
-                                                        <Label Text="Annual contribution" Style="{StaticResource FormFieldLabel}" />
-                                                        <Entry Text="{Binding AnnualContributionText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="0" SemanticProperties.Description="Annual account contribution in dollars" />
-                                                    </VerticalStackLayout>
+                                                    <controls:NumericInputView Header="Balance"
+                                                                               HelpText="What this account is worth today."
+                                                                               Placeholder="0"
+                                                                               Text="{Binding BalanceText, Mode=TwoWay}" />
+                                                    <controls:NumericInputView Grid.Column="1"
+                                                                               Header="Contribution"
+                                                                               HelpText="How much you add to this account each year."
+                                                                               Placeholder="0"
+                                                                               PeriodSuffix="/yr"
+                                                                               Text="{Binding AnnualContributionText, Mode=TwoWay}" />
                                                 </Grid>
                                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                                    <VerticalStackLayout Spacing="3">
-                                                        <Label Text="Expected return (%)" Style="{StaticResource FormFieldLabel}" />
-                                                        <Entry Text="{Binding AnnualReturnText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="5" SemanticProperties.Description="Expected annual account return percentage" />
-                                                    </VerticalStackLayout>
-                                                    <VerticalStackLayout Grid.Column="1" Spacing="3">
-                                                        <Label Text="Available age" Style="{StaticResource FormFieldLabel}" />
-                                                        <Entry Text="{Binding AvailableAgeText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="59" SemanticProperties.Description="Age when this account becomes available" />
-                                                    </VerticalStackLayout>
+                                                    <controls:NumericInputView Header="Expected return"
+                                                                               HelpText="Expected average annual return for this account."
+                                                                               Placeholder="5"
+                                                                               PeriodSuffix="%"
+                                                                               Text="{Binding AnnualReturnText, Mode=TwoWay}" />
+                                                    <controls:NumericInputView Grid.Column="1"
+                                                                               Header="Available age"
+                                                                               HelpText="Age when you can withdraw from this account without penalty."
+                                                                               Placeholder="59"
+                                                                               Text="{Binding AvailableAgeText, Mode=TwoWay}" />
                                                 </Grid>
-                                                <VerticalStackLayout IsVisible="{Binding UsesWithdrawalRate}" Spacing="3">
-                                                    <Label Text="Withdrawal rate (%)" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding WithdrawalRateText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="4" SemanticProperties.Description="Annual account withdrawal rate percentage" />
-                                                </VerticalStackLayout>
-                                                <VerticalStackLayout IsVisible="{Binding UsesPayoutSchedule}" Spacing="3">
-                                                    <Label Text="Payout years" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding PayoutYearsText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="5" SemanticProperties.Description="Number of years receiving equal payouts" />
-                                                </VerticalStackLayout>
+                                                <controls:NumericInputView IsVisible="{Binding UsesWithdrawalRate}"
+                                                                           Header="Withdrawal rate"
+                                                                           HelpText="Share of the remaining balance withdrawn each year."
+                                                                           Placeholder="4"
+                                                                           PeriodSuffix="%"
+                                                                           Text="{Binding WithdrawalRateText, Mode=TwoWay}" />
+                                                <controls:NumericInputView IsVisible="{Binding UsesPayoutSchedule}"
+                                                                           Header="Payout years"
+                                                                           HelpText="Number of years the balance is paid out over."
+                                                                           Placeholder="5"
+                                                                           Text="{Binding PayoutYearsText, Mode=TwoWay}" />
                                                 <VerticalStackLayout Spacing="3">
-                                                    <Label Text="Withdrawal tax rate (%)" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding WithdrawalTaxRateText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="0" SemanticProperties.Description="Flat estimated tax rate applied to withdrawals from this account" />
+                                                    <controls:NumericInputView Header="Withdrawal tax rate"
+                                                                               HelpText="Flat estimated tax rate applied to withdrawals from this account."
+                                                                               Placeholder="0"
+                                                                               PeriodSuffix="%"
+                                                                               Text="{Binding WithdrawalTaxRateText, Mode=TwoWay}" />
                                                     <Label Text="{Binding WithdrawalTaxHelpText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                                 </VerticalStackLayout>
                                             </VerticalStackLayout>
