@@ -78,6 +78,6 @@ public sealed class SqliteCorruptPayloadRepositoryTests : IAsyncLifetime
         await inspectionConnection.CloseAsync();
 
         Assert.Empty(payloads);
-        Assert.Equal("3", schemaVersion);
+        Assert.Equal("5", schemaVersion);
     }
 }

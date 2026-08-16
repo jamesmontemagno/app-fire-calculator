@@ -1,3 +1,6 @@
+using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
+using MyFireNumber.Core.Profile;
 using SQLite;
 
 namespace MyFireNumber.Storage;
@@ -5,7 +8,7 @@ namespace MyFireNumber.Storage;
 public sealed class LocalDatabase
 {
     private const string SchemaVersionKey = "schema-version";
-    private const int CurrentSchemaVersion = 3;
+    private const int CurrentSchemaVersion = 5;
 
     private readonly SQLiteAsyncConnection connection;
     private readonly SemaphoreSlim initializationLock = new(1, 1);
@@ -75,6 +78,11 @@ public sealed class LocalDatabase
             database.DeleteAll<CalculatorPreferenceEntity>();
             database.DeleteAll<RecentActivityEntity>();
             database.DeleteAll<CorruptPayloadEntity>();
+            database.DeleteAll<ProfileEntity>();
+            database.DeleteAll<ProfileAccountEntity>();
+            database.DeleteAll<ProfileIncomeEntity>();
+            database.DeleteAll<ProfileExpenseEntity>();
+            database.DeleteAll<ProfileDebtEntity>();
         });
     }
 
@@ -86,6 +94,11 @@ public sealed class LocalDatabase
         var preferences = await connection.Table<CalculatorPreferenceEntity>().ToListAsync();
         var activity = await connection.Table<RecentActivityEntity>().ToListAsync();
         var corruptPayloads = await connection.Table<CorruptPayloadEntity>().ToListAsync();
+        var profile = await connection.Table<ProfileEntity>().FirstOrDefaultAsync();
+        var profileAccounts = await connection.Table<ProfileAccountEntity>().ToListAsync();
+        var profileIncome = await connection.Table<ProfileIncomeEntity>().ToListAsync();
+        var profileExpenses = await connection.Table<ProfileExpenseEntity>().ToListAsync();
+        var profileDebts = await connection.Table<ProfileDebtEntity>().ToListAsync();
 
         return new LocalDataArchive(
             1,
@@ -94,7 +107,14 @@ public sealed class LocalDatabase
             plans.Select(ToRecord).ToArray(),
             preferences.Select(item => new CalculatorPreferenceRecord(item.CalculatorId, item.IsVisible, item.SortOrder)).ToArray(),
             activity.Select(ToRecord).ToArray(),
-            corruptPayloads.Select(ToRecord).ToArray());
+            corruptPayloads.Select(ToRecord).ToArray())
+        {
+            Profile = ToRecord(profile),
+            ProfileAccounts = profileAccounts.Select(ToRecord).ToArray(),
+            ProfileIncome = profileIncome.Select(ToRecord).ToArray(),
+            ProfileExpenses = profileExpenses.Select(ToRecord).ToArray(),
+            ProfileDebts = profileDebts.Select(ToRecord).ToArray()
+        };
     }
 
     public async Task ImportAsync(LocalDataArchive archive, CancellationToken cancellationToken = default)
@@ -114,6 +134,11 @@ public sealed class LocalDatabase
             database.DeleteAll<CalculatorPreferenceEntity>();
             database.DeleteAll<RecentActivityEntity>();
             database.DeleteAll<CorruptPayloadEntity>();
+            database.DeleteAll<ProfileEntity>();
+            database.DeleteAll<ProfileAccountEntity>();
+            database.DeleteAll<ProfileIncomeEntity>();
+            database.DeleteAll<ProfileExpenseEntity>();
+            database.DeleteAll<ProfileDebtEntity>();
 
             database.InsertAll(archive.Drafts.Select(ToEntity));
             database.InsertAll(archive.Plans.Select(ToEntity));
@@ -125,6 +150,11 @@ public sealed class LocalDatabase
             }));
             database.InsertAll(archive.RecentActivity.Select(ToEntity));
             database.InsertAll(archive.CorruptPayloads.Select(ToEntity));
+            database.Insert(ToEntity(archive.Profile));
+            database.InsertAll(archive.ProfileAccounts.Select(ToEntity));
+            database.InsertAll(archive.ProfileIncome.Select(ToEntity));
+            database.InsertAll(archive.ProfileExpenses.Select(ToEntity));
+            database.InsertAll(archive.ProfileDebts.Select(ToEntity));
         });
     }
 
@@ -134,7 +164,11 @@ public sealed class LocalDatabase
             archive.Plans is null ||
             archive.CalculatorPreferences is null ||
             archive.RecentActivity is null ||
-            archive.CorruptPayloads is null)
+            archive.CorruptPayloads is null ||
+            archive.ProfileAccounts is null ||
+            archive.ProfileIncome is null ||
+            archive.ProfileExpenses is null ||
+            archive.ProfileDebts is null)
         {
             throw new InvalidDataException("The archive is missing required local data.");
         }
@@ -147,13 +181,28 @@ public sealed class LocalDatabase
         {
             throw new InvalidDataException("The archive contains invalid local data.");
         }
+
+        if (archive.ProfileAccounts.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Balance < 0 || item.AnnualContribution < 0) ||
+            archive.ProfileIncome.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Amount < 0) ||
+            archive.ProfileExpenses.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Amount < 0) ||
+            archive.ProfileDebts.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Balance < 0 || item.Rate < 0 || item.MinimumPayment < 0))
+        {
+            throw new InvalidDataException("The archive contains invalid profile data.");
+        }
+
+        if (!ProfileAgeCalculator.TryValidate(archive.Profile, out var profileError))
+        {
+            throw new InvalidDataException($"The archive contains invalid profile data. {profileError}");
+        }
     }
 
     private static DraftRecord ToRecord(DraftEntity item) => new(
         item.CalculatorId,
         item.PayloadVersion,
         item.PayloadJson,
-        ParseDate(item.UpdatedAtUtc));
+        ParseDate(item.UpdatedAtUtc),
+        Enum.Parse<MyFireNumber.Core.Profile.ScenarioDataMode>(item.DataMode),
+        item.ProfileRevision);
 
     private static PlanRecord ToRecord(PlanEntity item) => new(
         item.Id,
@@ -162,7 +211,9 @@ public sealed class LocalDatabase
         item.PayloadVersion,
         item.PayloadJson,
         ParseDate(item.CreatedAtUtc),
-        ParseDate(item.UpdatedAtUtc));
+        ParseDate(item.UpdatedAtUtc),
+        Enum.Parse<MyFireNumber.Core.Profile.ScenarioDataMode>(item.DataMode),
+        item.ProfileRevision);
 
     private static RecentActivityRecord ToRecord(RecentActivityEntity item) => new(
         Enum.Parse<RecentActivityKind>(item.Kind),
@@ -186,7 +237,9 @@ public sealed class LocalDatabase
         CalculatorId = item.CalculatorId,
         PayloadVersion = item.PayloadVersion,
         PayloadJson = item.PayloadJson,
-        UpdatedAtUtc = FormatDate(item.UpdatedAtUtc)
+        UpdatedAtUtc = FormatDate(item.UpdatedAtUtc),
+        DataMode = item.DataMode.ToString(),
+        ProfileRevision = item.ProfileRevision
     };
 
     private static PlanEntity ToEntity(PlanRecord item) => new()
@@ -197,7 +250,9 @@ public sealed class LocalDatabase
         PayloadVersion = item.PayloadVersion,
         PayloadJson = item.PayloadJson,
         CreatedAtUtc = FormatDate(item.CreatedAtUtc),
-        UpdatedAtUtc = FormatDate(item.UpdatedAtUtc)
+        UpdatedAtUtc = FormatDate(item.UpdatedAtUtc),
+        DataMode = item.DataMode.ToString(),
+        ProfileRevision = item.ProfileRevision
     };
 
     private static RecentActivityEntity ToEntity(RecentActivityRecord item) => new()
@@ -222,6 +277,100 @@ public sealed class LocalDatabase
         QuarantinedAtUtc = FormatDate(item.QuarantinedAtUtc)
     };
 
+    private static FinancialProfile ToRecord(ProfileEntity? item) => item is null
+        ? FinancialProfile.Empty
+        : new FinancialProfile(
+            item.DisplayName,
+            item.HouseholdName,
+            item.HouseholdSize,
+            ParseDateOnly(item.BirthDate),
+            ParseDateOnly(item.PhasedRetirementDate),
+            ParseDateOnly(item.TargetRetirementDate),
+            item.AnnualIncome,
+            item.AnnualExpenses);
+
+    private static ProfileAccount ToRecord(ProfileAccountEntity item) => new(
+        item.Id,
+        item.Name,
+        Enum.Parse<RetirementAccountType>(item.Type),
+        item.Balance,
+        item.AnnualContribution,
+        item.AnnualReturn,
+        item.AvailableAge,
+        item.WithdrawalRate,
+        item.PayoutYears,
+        item.EffectiveWithdrawalTaxRate);
+
+    private static ProfileIncome ToRecord(ProfileIncomeEntity item) =>
+        new(item.Id, item.Name, item.Amount, Enum.Parse<CurrencyPeriod>(item.Period), item.Category);
+
+    private static ProfileExpense ToRecord(ProfileExpenseEntity item) =>
+        new(item.Id, item.Name, item.Amount, Enum.Parse<CurrencyPeriod>(item.Period), item.Category);
+
+    private static ProfileDebt ToRecord(ProfileDebtEntity item) =>
+        new(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment);
+
+    private static ProfileEntity ToEntity(FinancialProfile item) => new()
+    {
+        Id = 1,
+        DisplayName = item.DisplayName,
+        HouseholdName = item.HouseholdName,
+        HouseholdSize = item.HouseholdSize,
+        BirthDate = FormatDateOnly(item.BirthDate),
+        PhasedRetirementDate = FormatDateOnly(item.PhasedRetirementDate),
+        TargetRetirementDate = FormatDateOnly(item.TargetRetirementDate),
+        AnnualIncome = item.AnnualIncome,
+        AnnualExpenses = item.AnnualExpenses
+    };
+
+    private static ProfileAccountEntity ToEntity(ProfileAccount item) => new()
+    {
+        Id = item.Id,
+        Name = item.Name,
+        Type = item.Type.ToString(),
+        Balance = item.Balance,
+        AnnualContribution = item.AnnualContribution,
+        AnnualReturn = item.AnnualReturn,
+        AvailableAge = item.AvailableAge,
+        WithdrawalRate = item.WithdrawalRate,
+        PayoutYears = item.PayoutYears,
+        EffectiveWithdrawalTaxRate = item.EffectiveWithdrawalTaxRate
+    };
+
+    private static ProfileIncomeEntity ToEntity(ProfileIncome item) => new()
+    {
+        Id = item.Id,
+        Name = item.Name,
+        Amount = item.Amount,
+        Period = item.Period.ToString(),
+        Category = item.Category
+    };
+
+    private static ProfileExpenseEntity ToEntity(ProfileExpense item) => new()
+    {
+        Id = item.Id,
+        Name = item.Name,
+        Amount = item.Amount,
+        Period = item.Period.ToString(),
+        Category = item.Category
+    };
+
+    private static ProfileDebtEntity ToEntity(ProfileDebt item) => new()
+    {
+        Id = item.Id,
+        Name = item.Name,
+        Balance = item.Balance,
+        Rate = item.Rate,
+        MinimumPayment = item.MinimumPayment
+    };
+
+    private static DateOnly? ParseDateOnly(string? value) => string.IsNullOrWhiteSpace(value)
+        ? null
+        : DateOnly.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string? FormatDateOnly(DateOnly? value) =>
+        value?.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
+
     private static DateTime ParseDate(string value) => DateTime.Parse(
         value,
         System.Globalization.CultureInfo.InvariantCulture,
@@ -238,6 +387,11 @@ public sealed class LocalDatabase
         await connection.CreateTableAsync<CalculatorPreferenceEntity>();
         await connection.CreateTableAsync<RecentActivityEntity>();
         await connection.CreateTableAsync<CorruptPayloadEntity>();
+        await connection.CreateTableAsync<ProfileEntity>();
+        await connection.CreateTableAsync<ProfileAccountEntity>();
+        await connection.CreateTableAsync<ProfileIncomeEntity>();
+        await connection.CreateTableAsync<ProfileExpenseEntity>();
+        await connection.CreateTableAsync<ProfileDebtEntity>();
     }
 
     private async Task ApplyMigrationsAsync(int storedVersion, SchemaMetadataEntity schemaVersion)
@@ -259,10 +413,41 @@ public sealed class LocalDatabase
             await connection.CreateTableAsync<CorruptPayloadEntity>();
         }
 
+        if (storedVersion < 4)
+        {
+            await connection.CreateTableAsync<ProfileEntity>();
+            await connection.CreateTableAsync<ProfileAccountEntity>();
+        }
+
+        if (storedVersion < 5)
+        {
+            await connection.CreateTableAsync<ProfileIncomeEntity>();
+            await connection.CreateTableAsync<ProfileExpenseEntity>();
+            await connection.CreateTableAsync<ProfileDebtEntity>();
+            await AddColumnIfMissingAsync("drafts", "DataMode", "TEXT NOT NULL DEFAULT 'Standalone'");
+            await AddColumnIfMissingAsync("drafts", "ProfileRevision", "INTEGER NULL");
+            await AddColumnIfMissingAsync("plans", "DataMode", "TEXT NOT NULL DEFAULT 'Standalone'");
+            await AddColumnIfMissingAsync("plans", "ProfileRevision", "INTEGER NULL");
+        }
+
         if (storedVersion != CurrentSchemaVersion)
         {
             schemaVersion.Value = CurrentSchemaVersion.ToString(System.Globalization.CultureInfo.InvariantCulture);
             await connection.UpdateAsync(schemaVersion);
+        }
+    }
+
+    private async Task AddColumnIfMissingAsync(string tableName, string columnName, string definition)
+    {
+        var columns = await connection.GetTableInfoAsync(tableName);
+        if (columns.Count == 0)
+        {
+            return;
+        }
+
+        if (columns.All(column => !string.Equals(column.Name, columnName, StringComparison.OrdinalIgnoreCase)))
+        {
+            await connection.ExecuteAsync($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {definition}");
         }
     }
 }
@@ -281,6 +466,11 @@ internal sealed class DraftEntity
 
     [NotNull]
     public string UpdatedAtUtc { get; set; } = string.Empty;
+
+    [NotNull]
+    public string DataMode { get; set; } = "Standalone";
+
+    public long? ProfileRevision { get; set; }
 }
 
 [Table("plans")]
@@ -306,6 +496,11 @@ internal sealed class PlanEntity
 
     [NotNull]
     public string UpdatedAtUtc { get; set; } = string.Empty;
+
+    [NotNull]
+    public string DataMode { get; set; } = "Standalone";
+
+    public long? ProfileRevision { get; set; }
 }
 
 [Table("calculator_preferences")]
@@ -377,4 +572,84 @@ internal sealed class CorruptPayloadEntity
 
     [NotNull]
     public string QuarantinedAtUtc { get; set; } = string.Empty;
+}
+
+[Table("profile")]
+internal sealed class ProfileEntity
+{
+    [PrimaryKey]
+    public int Id { get; set; } = 1;
+
+    public string? DisplayName { get; set; }
+
+    public string? HouseholdName { get; set; }
+
+    public int? HouseholdSize { get; set; }
+
+    public string? BirthDate { get; set; }
+
+    public string? PhasedRetirementDate { get; set; }
+
+    public string? TargetRetirementDate { get; set; }
+
+    public double? AnnualIncome { get; set; }
+
+    public double? AnnualExpenses { get; set; }
+}
+
+[Table("profile_accounts")]
+internal sealed class ProfileAccountEntity
+{
+    [PrimaryKey]
+    public string Id { get; set; } = string.Empty;
+
+    [NotNull]
+    public string Name { get; set; } = string.Empty;
+
+    [NotNull]
+    public string Type { get; set; } = string.Empty;
+
+    public double Balance { get; set; }
+
+    public double AnnualContribution { get; set; }
+
+    public double AnnualReturn { get; set; }
+
+    public int AvailableAge { get; set; }
+
+    public double WithdrawalRate { get; set; }
+
+    public int PayoutYears { get; set; }
+
+    public double EffectiveWithdrawalTaxRate { get; set; }
+}
+
+[Table("profile_income")]
+internal sealed class ProfileIncomeEntity
+{
+    [PrimaryKey] public string Id { get; set; } = string.Empty;
+    [NotNull] public string Name { get; set; } = string.Empty;
+    public double Amount { get; set; }
+    [NotNull] public string Period { get; set; } = string.Empty;
+    public string? Category { get; set; }
+}
+
+[Table("profile_expenses")]
+internal sealed class ProfileExpenseEntity
+{
+    [PrimaryKey] public string Id { get; set; } = string.Empty;
+    [NotNull] public string Name { get; set; } = string.Empty;
+    public double Amount { get; set; }
+    [NotNull] public string Period { get; set; } = string.Empty;
+    public string? Category { get; set; }
+}
+
+[Table("profile_debts")]
+internal sealed class ProfileDebtEntity
+{
+    [PrimaryKey] public string Id { get; set; } = string.Empty;
+    [NotNull] public string Name { get; set; } = string.Empty;
+    public double Balance { get; set; }
+    public double Rate { get; set; }
+    public double MinimumPayment { get; set; }
 }

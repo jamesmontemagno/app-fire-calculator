@@ -16,7 +16,9 @@ public sealed class AppDataTransferService(
     IThemeService themeService,
     ICalculatorDefaultsService calculatorDefaultsService,
     IAppBehaviorPreferencesService behaviorPreferencesService,
-    ICurrencyPreferencesService currencyPreferencesService) : IAppDataTransferService
+    ICurrencyPreferencesService currencyPreferencesService,
+    IProfileService profileService,
+    IAppDataVersionService appDataVersionService) : IAppDataTransferService
 {
     private const int ArchiveVersion = 1;
     private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web)
@@ -69,6 +71,10 @@ public sealed class AppDataTransferService(
 
         await archiveRepository.ImportAsync(envelope.LocalData);
         Preferences.Default.Clear();
+
+        // The cleared preferences take the app-data version marker with them; restoring it keeps the
+        // next launch from treating this import as an un-versioned install and wiping it again.
+        appDataVersionService.MarkCurrentVersion();
         if (envelope.CalculatorDefaults is not null)
         {
             calculatorDefaultsService.Save(envelope.CalculatorDefaults);
@@ -93,6 +99,7 @@ public sealed class AppDataTransferService(
             onboardingService.SetRecommendation(envelope.RecommendationCalculatorId);
         }
 
+        await profileService.NotifyExternalChangeAsync();
         return true;
     }
 

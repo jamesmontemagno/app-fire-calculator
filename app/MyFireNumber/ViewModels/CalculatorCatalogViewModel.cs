@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyFireNumber.Core.Calculators;
+using MyFireNumber.Core.Profile;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
 
@@ -39,15 +40,24 @@ public partial class CalculatorCatalogViewModel : ObservableObject
     private readonly ICalculatorCatalog catalog;
     private readonly INavigationService navigationService;
     private readonly IRecentActivityRepository recentActivityRepository;
+    private readonly IProfileScenarioResolver profileScenarioResolver;
+    private readonly IScenarioModePromptService scenarioModePromptService;
+    private readonly IDraftRepository draftRepository;
 
     public CalculatorCatalogViewModel(
         ICalculatorCatalog catalog,
         INavigationService navigationService,
-        IRecentActivityRepository recentActivityRepository)
+        IRecentActivityRepository recentActivityRepository,
+        IProfileScenarioResolver profileScenarioResolver,
+        IScenarioModePromptService scenarioModePromptService,
+        IDraftRepository draftRepository)
     {
         this.catalog = catalog;
         this.navigationService = navigationService;
         this.recentActivityRepository = recentActivityRepository;
+        this.profileScenarioResolver = profileScenarioResolver;
+        this.scenarioModePromptService = scenarioModePromptService;
+        this.draftRepository = draftRepository;
     }
 
     [ObservableProperty]
@@ -77,10 +87,16 @@ public partial class CalculatorCatalogViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenCalculatorAsync(CalculatorDefinition definition)
     {
+        var existingDraft = await draftRepository.GetAsync(definition.Id);
+        ScenarioDataMode? dataMode = existingDraft is null
+            ? await profileScenarioResolver.HasCompatibleDataAsync(definition.Id)
+                ? await scenarioModePromptService.ChooseAsync(definition.Title)
+                : ScenarioDataMode.Standalone
+            : null;
         await recentActivityRepository.TrackAsync(new RecentActivityRecord(
             RecentActivityKind.Calculator,
             definition.Id,
             DateTime.UtcNow));
-        await navigationService.GoToAsync(CalculatorRoutes.Build(definition.Id));
+        await navigationService.GoToAsync(CalculatorRoutes.Build(definition.Id, dataMode: dataMode));
     }
 }

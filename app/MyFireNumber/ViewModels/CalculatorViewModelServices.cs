@@ -17,7 +17,9 @@ public sealed class CalculatorViewModelServices(
     IDisplayPeriodPreferencesService displayPeriodPreferences,
     IDraftRepository draftRepository,
     INavigationService navigation,
-    IPlanRepository planRepository)
+    IPlanRepository planRepository,
+    IProfileScenarioResolver profileScenarioResolver,
+    IConfirmationService confirmationService)
 {
     public IAppBehaviorPreferencesService BehaviorPreferences { get; } = behaviorPreferences;
 
@@ -36,4 +38,8 @@ public sealed class CalculatorViewModelServices(
     public INavigationService Navigation { get; } = navigation;
 
     public IPlanRepository PlanRepository { get; } = planRepository;
+
+    public IProfileScenarioResolver ProfileScenarioResolver { get; } = profileScenarioResolver;
+
+    public IConfirmationService ConfirmationService { get; } = confirmationService;
 }

@@ -1,5 +1,6 @@
 using MyFireNumber.Core.Presentation;
 using MyFireNumber.ViewModels;
+using MyFireNumber.Core.Profile;
 using MyFireNumber.Views.Controls;
 
 namespace MyFireNumber.Views;
@@ -11,6 +12,8 @@ namespace MyFireNumber.Views;
 /// </summary>
 public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
 {
+    private const string ScenarioModeRootId = "ScenarioModeRoot";
+
     private readonly IAdvancedAssumptionsSessionState advancedAssumptionsState;
     private ICalculatorViewModel? calculatorViewModel;
     private Window? subscribedWindow;
@@ -24,6 +27,29 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
     {
         calculatorViewModel = viewModel;
         BindingContext = viewModel;
+        AddScenarioModeBanner();
+    }
+
+    private void AddScenarioModeBanner()
+    {
+        if (Content is null || Content is Grid { StyleId: ScenarioModeRootId })
+        {
+            return;
+        }
+
+        var originalContent = Content;
+        var root = new Grid
+        {
+            StyleId = ScenarioModeRootId,
+            RowDefinitions =
+            {
+                new RowDefinition(GridLength.Auto),
+                new RowDefinition(GridLength.Star)
+            }
+        };
+        root.Add(new ScenarioModeBannerView { Margin = new Thickness(16, 8, 16, 0) });
+        root.Add(originalContent, 0, 1);
+        Content = root;
     }
 
     /// <summary>
@@ -51,10 +77,14 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
         var returnHomeAfterSave = query.TryGetValue("returnHomeAfterSave", out var returnHomeValue)
             && bool.TryParse(returnHomeValue?.ToString(), out var parsedReturnHome)
             && parsedReturnHome;
+        var requestedMode = query.TryGetValue("dataMode", out var dataModeValue) &&
+            Enum.TryParse<ScenarioDataMode>(dataModeValue?.ToString(), out var parsedMode)
+                ? parsedMode
+                : (ScenarioDataMode?)null;
 
         RestoreAdvancedAssumptions(viewModel.CalculatorId);
 
-        await viewModel.LoadAsync(planId, returnHomeAfterSave);
+        await viewModel.LoadAsync(planId, returnHomeAfterSave, requestedMode);
     }
 
     /// <summary>
@@ -102,6 +132,10 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
     protected override void OnAppearing()
     {
         base.OnAppearing();
+        if (calculatorViewModel is not null)
+        {
+            _ = calculatorViewModel.RefreshLinkedProfileAsync();
+        }
         subscribedWindow = Window;
         if (subscribedWindow is not null)
         {

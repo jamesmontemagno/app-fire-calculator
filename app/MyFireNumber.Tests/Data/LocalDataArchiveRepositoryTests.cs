@@ -1,3 +1,6 @@
+using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
+using MyFireNumber.Core.Profile;
 using MyFireNumber.Storage;
 
 namespace MyFireNumber.Tests.Data;
@@ -50,5 +53,58 @@ public sealed class LocalDataArchiveRepositoryTests : IAsyncLifetime
 
         await Assert.ThrowsAsync<InvalidDataException>(() => database.ImportAsync(invalidArchive));
         Assert.NotNull(await repository.GetAsync("standard-fire"));
+    }
+
+    [Fact]
+    public async Task ExportAndImport_RoundTripsProfileAndInventory()
+    {
+        var database = new LocalDatabase(databasePath);
+        var profile = new FinancialProfile("Alex", "Alex household", 2, new DateOnly(1990, 8, 16), null, new DateOnly(2045, 8, 16), 120_000, 72_000);
+        await new SqliteProfileRepository(database).SaveAsync(profile);
+        await new SqliteProfileAccountRepository(database).SaveAsync(
+            new ProfileAccount("brokerage", "Brokerage", RetirementAccountType.Taxable, 50_000, 6_000, 0.07, 18, 0.04, 1, 0.15));
+        await new SqliteProfileIncomeRepository(database).SaveAsync(
+            new ProfileIncome("salary", "Salary", 10_000, CurrencyPeriod.Monthly, "Work"));
+        await new SqliteProfileExpenseRepository(database).SaveAsync(
+            new ProfileExpense("housing", "Housing", 2_500, CurrencyPeriod.Monthly, "Home"));
+        await new SqliteProfileDebtRepository(database).SaveAsync(
+            new ProfileDebt("card", "Card", 5_000, 0.2, 150));
+
+        var archive = await database.ExportAsync();
+        await database.ClearAsync();
+        await database.ImportAsync(archive);
+
+        Assert.Equal(profile, await new SqliteProfileRepository(database).GetAsync());
+        Assert.Single(await new SqliteProfileAccountRepository(database).ListAsync());
+        Assert.Single(await new SqliteProfileIncomeRepository(database).ListAsync());
+        Assert.Single(await new SqliteProfileExpenseRepository(database).ListAsync());
+        Assert.Single(await new SqliteProfileDebtRepository(database).ListAsync());
+    }
+
+    [Fact]
+    public async Task ImportAsync_ReplacesExistingProfileWhenArchiveHasNone()
+    {
+        var database = new LocalDatabase(databasePath);
+        var archive = await database.ExportAsync();
+
+        await new SqliteProfileRepository(database).SaveAsync(FinancialProfile.Empty with { DisplayName = "Existing" });
+        await new SqliteProfileDebtRepository(database).SaveAsync(new ProfileDebt("card", "Card", 5_000, 0.2, 150));
+
+        await database.ImportAsync(archive);
+
+        Assert.Equal(FinancialProfile.Empty, await new SqliteProfileRepository(database).GetAsync());
+        Assert.Empty(await new SqliteProfileDebtRepository(database).ListAsync());
+    }
+
+    [Fact]
+    public async Task ImportAsync_RejectsInvalidProfileInventory()
+    {
+        var database = new LocalDatabase(databasePath);
+        var archive = (await database.ExportAsync()) with
+        {
+            ProfileDebts = [new ProfileDebt("card", "Card", -1, 0.2, 150)]
+        };
+
+        await Assert.ThrowsAsync<InvalidDataException>(() => database.ImportAsync(archive));
     }
 }

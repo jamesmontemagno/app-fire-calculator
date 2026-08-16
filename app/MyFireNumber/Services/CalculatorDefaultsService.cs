@@ -31,7 +31,7 @@ public interface ICalculatorDefaultsService
     DeferredCompensationDraft RetirementCashFlow { get; }
 }
 
-public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
+public sealed class CalculatorDefaultsService(IProfileService profileService) : ICalculatorDefaultsService
 {
     private const string ExpectedReturnKey = "defaults-expected-return";
     private const string InflationRateKey = "defaults-inflation-rate";
@@ -41,16 +41,23 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
     private const string AnnualIncomeKey = "defaults-annual-income";
     private const string AnnualExpensesKey = "defaults-annual-expenses";
 
-    public CalculatorDefaults Current => new(
-        Preferences.Default.Get(ExpectedReturnKey, 0.07),
-        Preferences.Default.Get(InflationRateKey, 0.03),
-        Preferences.Default.Get(WithdrawalRateKey, 0.04),
-        Preferences.Default.Get(CurrentAgeKey, 30),
-        Preferences.Default.Get(RetirementAgeKey, 55))
+    public CalculatorDefaults Current
     {
-        AnnualIncome = Preferences.Default.Get(AnnualIncomeKey, StandardFireDraft.Default.AnnualIncome),
-        AnnualExpenses = Preferences.Default.Get(AnnualExpensesKey, StandardFireDraft.Default.AnnualExpenses)
-    };
+        get
+        {
+            var profile = profileService.Current;
+            return new(
+                Preferences.Default.Get(ExpectedReturnKey, 0.07),
+                Preferences.Default.Get(InflationRateKey, 0.03),
+                Preferences.Default.Get(WithdrawalRateKey, 0.04),
+                profileService.DerivedCurrentAge ?? Preferences.Default.Get(CurrentAgeKey, 30),
+                profileService.DerivedTargetRetirementAge ?? Preferences.Default.Get(RetirementAgeKey, 55))
+            {
+                AnnualIncome = profile.AnnualIncome ?? Preferences.Default.Get(AnnualIncomeKey, StandardFireDraft.Default.AnnualIncome),
+                AnnualExpenses = profile.AnnualExpenses ?? Preferences.Default.Get(AnnualExpensesKey, StandardFireDraft.Default.AnnualExpenses)
+            };
+        }
+    }
 
     public StandardFireDraft StandardFire => Apply(StandardFireDraft.Default);
     public CoastFireDraft CoastFire => Apply(CoastFireDraft.Default);
@@ -201,7 +208,7 @@ public sealed class CalculatorDefaultsService : ICalculatorDefaultsService
         {
             InflationRate = defaults.InflationRate,
             CurrentAge = defaults.CurrentAge,
-            SemiRetirementAge = defaults.RetirementAge
+            SemiRetirementAge = profileService.DerivedPhasedRetirementAge ?? defaults.RetirementAge
         };
     }
 }

@@ -11,14 +11,18 @@ public partial class App : Application
 		IServiceProvider services,
 		IThemeService themeService,
 		IAppBehaviorPreferencesService behaviorPreferencesService,
-		ITemporaryExportCleanupService temporaryExportCleanupService)
+		ITemporaryExportCleanupService temporaryExportCleanupService,
+		IProfileService profileService,
+		IAppDataVersionService appDataVersionService)
 	{
 		InitializeComponent();
 		this.services = services;
+		appDataVersionService.EnsureCurrentVersion();
 		temporaryExportCleanupService.RemoveStaleFiles();
 		themeService.Apply(behaviorPreferencesService.Current.HighContrast
 			? ThemePreference.Dark
 			: themeService.Preference);
+		_ = profileService.LoadAsync();
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

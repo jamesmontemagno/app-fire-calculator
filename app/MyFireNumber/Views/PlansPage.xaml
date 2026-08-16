@@ -155,6 +155,10 @@
                                    <Label Text="{Binding CalculatorTitle}"
                                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                           FontSize="13" />
+                                   <Label Text="{Binding DataModeDescription}"
+                                          TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                                          FontAttributes="Bold"
+                                          FontSize="11" />
                                    <Label Text="{Binding UpdatedDescription}"
                                           TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                           FontSize="12" />

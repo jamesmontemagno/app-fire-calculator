@@ -163,12 +163,30 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
             WithdrawalTaxRateText = Format(RetirementTaxDefaults.WithdrawalTaxRateFor(value) * 100);
         }
 
+        if (int.TryParse(AvailableAgeText, NumberStyles.Integer, CultureInfo.CurrentCulture, out var currentAge) &&
+            IsSuggestedAvailableAge(currentAge))
+        {
+            AvailableAgeText = SuggestedAvailableAge(value).ToString(CultureInfo.CurrentCulture);
+        }
+
         RaiseChanged();
     }
 
     private static bool IsTypeDefaultRate(double rate) =>
         Enum.GetValues<RetirementAccountType>()
             .Any(candidate => Math.Abs(rate - RetirementTaxDefaults.WithdrawalTaxRateFor(candidate)) < 0.0001);
+
+    private static bool IsSuggestedAvailableAge(int age) =>
+        Enum.GetValues<RetirementAccountType>()
+            .Select(SuggestedAvailableAge)
+            .Contains(age);
+
+    private static int SuggestedAvailableAge(RetirementAccountType type) => type switch
+    {
+        RetirementAccountType.Taxable or RetirementAccountType.Savings => 18,
+        RetirementAccountType.Hsa => 65,
+        _ => 59
+    };
 
     partial void OnBalanceTextChanged(string value) => RaiseChanged();
     partial void OnAnnualContributionTextChanged(string value) => RaiseChanged();
