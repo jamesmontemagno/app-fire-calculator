@@ -65,6 +65,92 @@
                         Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Label Text="About you" Style="{StaticResource CalculatorSectionHeading}" />
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="Name (optional)" Style="{StaticResource FormFieldLabel}" />
+                            <Entry AutomationId="ProfileDisplayNameEntry"
+                                   Text="{Binding DisplayName, Mode=TwoWay}"
+                                   Style="{StaticResource FormEntry}"
+                                   Placeholder="Alex"
+                                   SemanticProperties.Description="Your name, used to personalize the app" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="Household name (optional)" Style="{StaticResource FormFieldLabel}" />
+                            <Entry AutomationId="ProfileHouseholdNameEntry"
+                                   Text="{Binding HouseholdName, Mode=TwoWay}"
+                                   Style="{StaticResource FormEntry}"
+                                   Placeholder="The Smith household"
+                                   SemanticProperties.Description="A label for your household" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="Household size (optional)" Style="{StaticResource FormFieldLabel}" />
+                            <Entry AutomationId="ProfileHouseholdSizeEntry"
+                                   Text="{Binding HouseholdSizeText, Mode=TwoWay}"
+                                   Style="{StaticResource FormEntry}"
+                                   Placeholder="2"
+                                   Keyboard="Numeric"
+                                   SemanticProperties.Description="Number of people your plan supports" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Label Text="Your timeline" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Label Text="Dates are used only to set starting ages for new plans. You can always override a scenario."
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                                <Label Text="Birth date" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="Set" Command="{Binding SetBirthDateCommand}" IsVisible="{Binding HasNoBirthDate}" />
+                                <Button Grid.Column="2" Text="Clear" Command="{Binding ClearBirthDateCommand}" IsVisible="{Binding HasBirthDate}" />
+                            </Grid>
+                            <Label Text="Not set" IsVisible="{Binding HasNoBirthDate}" />
+                            <DatePicker AutomationId="ProfileBirthDatePicker"
+                                        Date="{Binding BirthDate, Mode=TwoWay}"
+                                        MaximumDate="{Binding MaximumBirthDate}"
+                                        IsVisible="{Binding HasBirthDate}"
+                                        Style="{StaticResource FormDatePicker}"
+                                        SemanticProperties.Description="Birth date" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                                <Label Text="Phased retirement date" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="Set" Command="{Binding SetPhasedRetirementDateCommand}" IsVisible="{Binding HasNoPhasedRetirementDate}" />
+                                <Button Grid.Column="2" Text="Clear" Command="{Binding ClearPhasedRetirementDateCommand}" IsVisible="{Binding HasPhasedRetirementDate}" />
+                            </Grid>
+                            <Label Text="Not set" IsVisible="{Binding HasNoPhasedRetirementDate}" />
+                            <DatePicker AutomationId="ProfilePhasedRetirementDatePicker"
+                                        Date="{Binding PhasedRetirementDate, Mode=TwoWay}"
+                                        IsVisible="{Binding HasPhasedRetirementDate}"
+                                        Style="{StaticResource FormDatePicker}"
+                                        SemanticProperties.Description="Phased retirement date" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                                <Label Text="Full retirement date" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                <Button Grid.Column="1" Text="Set" Command="{Binding SetTargetRetirementDateCommand}" IsVisible="{Binding HasNoTargetRetirementDate}" />
+                                <Button Grid.Column="2" Text="Clear" Command="{Binding ClearTargetRetirementDateCommand}" IsVisible="{Binding HasTargetRetirementDate}" />
+                            </Grid>
+                            <Label Text="Not set" IsVisible="{Binding HasNoTargetRetirementDate}" />
+                            <DatePicker AutomationId="ProfileTargetRetirementDatePicker"
+                                        Date="{Binding TargetRetirementDate, Mode=TwoWay}"
+                                        IsVisible="{Binding HasTargetRetirementDate}"
+                                        Style="{StaticResource FormDatePicker}"
+                                        SemanticProperties.Description="Full retirement date" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Grid ColumnDefinitions="*,Auto"><Label Text="Recurring income" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Add" Command="{Binding AddIncomeCommand}" /></Grid>
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Income}" Spacing="{StaticResource SpaceSm}">
                             <BindableLayout.EmptyView><Label Text="No recurring income yet." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
@@ -182,92 +268,6 @@
                                     </Border>
                                 </DataTemplate>
                             </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
-                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                        StrokeShape="RoundRectangle 12">
-                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
-                        <Label Text="About you" Style="{StaticResource CalculatorSectionHeading}" />
-                        <VerticalStackLayout Spacing="3">
-                            <Label Text="Name (optional)" Style="{StaticResource FormFieldLabel}" />
-                            <Entry AutomationId="ProfileDisplayNameEntry"
-                                   Text="{Binding DisplayName, Mode=TwoWay}"
-                                   Style="{StaticResource FormEntry}"
-                                   Placeholder="Alex"
-                                   SemanticProperties.Description="Your name, used to personalize the app" />
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Spacing="3">
-                            <Label Text="Household name (optional)" Style="{StaticResource FormFieldLabel}" />
-                            <Entry AutomationId="ProfileHouseholdNameEntry"
-                                   Text="{Binding HouseholdName, Mode=TwoWay}"
-                                   Style="{StaticResource FormEntry}"
-                                   Placeholder="The Smith household"
-                                   SemanticProperties.Description="A label for your household" />
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Spacing="3">
-                            <Label Text="Household size (optional)" Style="{StaticResource FormFieldLabel}" />
-                            <Entry AutomationId="ProfileHouseholdSizeEntry"
-                                   Text="{Binding HouseholdSizeText, Mode=TwoWay}"
-                                   Style="{StaticResource FormEntry}"
-                                   Placeholder="2"
-                                   Keyboard="Numeric"
-                                   SemanticProperties.Description="Number of people your plan supports" />
-                        </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
-
-                <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
-                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                        StrokeShape="RoundRectangle 12">
-                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
-                        <Label Text="Your timeline" Style="{StaticResource CalculatorSectionHeading}" />
-                        <Label Text="Dates are used only to set starting ages for new plans. You can always override a scenario."
-                               FontSize="12"
-                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                        <VerticalStackLayout Spacing="4">
-                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                                <Label Text="Birth date" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                <Button Grid.Column="1" Text="Set" Command="{Binding SetBirthDateCommand}" IsVisible="{Binding HasNoBirthDate}" />
-                                <Button Grid.Column="2" Text="Clear" Command="{Binding ClearBirthDateCommand}" IsVisible="{Binding HasBirthDate}" />
-                            </Grid>
-                            <Label Text="Not set" IsVisible="{Binding HasNoBirthDate}" />
-                            <DatePicker AutomationId="ProfileBirthDatePicker"
-                                        Date="{Binding BirthDate, Mode=TwoWay}"
-                                        MaximumDate="{Binding MaximumBirthDate}"
-                                        IsVisible="{Binding HasBirthDate}"
-                                        Style="{StaticResource FormDatePicker}"
-                                        SemanticProperties.Description="Birth date" />
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Spacing="4">
-                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                                <Label Text="Phased retirement date" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                <Button Grid.Column="1" Text="Set" Command="{Binding SetPhasedRetirementDateCommand}" IsVisible="{Binding HasNoPhasedRetirementDate}" />
-                                <Button Grid.Column="2" Text="Clear" Command="{Binding ClearPhasedRetirementDateCommand}" IsVisible="{Binding HasPhasedRetirementDate}" />
-                            </Grid>
-                            <Label Text="Not set" IsVisible="{Binding HasNoPhasedRetirementDate}" />
-                            <DatePicker AutomationId="ProfilePhasedRetirementDatePicker"
-                                        Date="{Binding PhasedRetirementDate, Mode=TwoWay}"
-                                        IsVisible="{Binding HasPhasedRetirementDate}"
-                                        Style="{StaticResource FormDatePicker}"
-                                        SemanticProperties.Description="Phased retirement date" />
-                        </VerticalStackLayout>
-                        <VerticalStackLayout Spacing="4">
-                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                                <Label Text="Full retirement date" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                <Button Grid.Column="1" Text="Set" Command="{Binding SetTargetRetirementDateCommand}" IsVisible="{Binding HasNoTargetRetirementDate}" />
-                                <Button Grid.Column="2" Text="Clear" Command="{Binding ClearTargetRetirementDateCommand}" IsVisible="{Binding HasTargetRetirementDate}" />
-                            </Grid>
-                            <Label Text="Not set" IsVisible="{Binding HasNoTargetRetirementDate}" />
-                            <DatePicker AutomationId="ProfileTargetRetirementDatePicker"
-                                        Date="{Binding TargetRetirementDate, Mode=TwoWay}"
-                                        IsVisible="{Binding HasTargetRetirementDate}"
-                                        Style="{StaticResource FormDatePicker}"
-                                        SemanticProperties.Description="Full retirement date" />
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
