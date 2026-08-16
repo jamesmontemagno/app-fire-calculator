@@ -47,7 +47,7 @@
                         <controls:PeriodToggleView />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
                             <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="45" Text="{Binding RetirementCurrentAgeText}" />
-                            <controls:NumericInputView Grid.Column="1" Header="Retirement age" HelpText="The age when your plan changes from full-time work." Placeholder="55" Text="{Binding RetirementSemiAgeText}" />
+                            <controls:NumericInputView Grid.Column="1" Header="Semi-retirement age" HelpText="The age when your plan changes from full-time work." Placeholder="55" Text="{Binding RetirementSemiAgeText}" />
                         </Grid>
                         <controls:NumericInputView Header="Expenses" HelpText="Expected spending in retirement." Placeholder="80000" Text="{Binding RetirementExpensesText}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                         <controls:AdvancedAssumptionsExpander>

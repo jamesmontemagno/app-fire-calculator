@@ -37,7 +37,7 @@
                         <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="30" Text="{Binding CurrentAgeText}" />
                         <controls:NumericInputView Grid.Column="1" Header="Current savings" HelpText="Invested assets available for this goal, in dollars." Placeholder="100000" Text="{Binding CurrentSavingsText}" />
                         <controls:NumericInputView Grid.Row="1" Header="Expenses" HelpText="Expected spending after retirement in today’s dollars." Placeholder="48000" Text="{Binding AnnualExpensesText}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
-                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="Part-time take-home" HelpText="Expected take-home pay after taxes while in the Barista FIRE phase, in dollars." Placeholder="20000" Text="{Binding PartTimeAnnualIncomeText}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
+                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="After-tax part-time income" HelpText="Expected income after taxes while in the Barista FIRE phase, in dollars." Placeholder="20000" Text="{Binding PartTimeAnnualIncomeText}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                         <controls:NumericInputView Grid.Row="2" Grid.ColumnSpan="2" Header="Contribution" HelpText="How much you expect to invest before changing work." Placeholder="24000" Text="{Binding AnnualContributionText}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                     </Grid>
                     <controls:AdvancedAssumptionsExpander>
