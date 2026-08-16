@@ -76,6 +76,7 @@
                     <controls:EducationalDisclaimerView />
                 </VerticalStackLayout>
             </Border>
+            <controls:CalculationExplanationView Explanation="Gap years = max(0, Medicare age - early retirement age).&#10;&#10;Annual healthcare cost = (monthly premium x 12) + annual deductible + annual out-of-pocket cost.&#10;&#10;For each gap year, cost = annual healthcare cost x (1 + healthcare inflation rate)^year.&#10;&#10;Total healthcare gap = the sum of each year's inflated cost. Average annual cost = total healthcare gap / gap years when gap years is greater than zero." />
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>

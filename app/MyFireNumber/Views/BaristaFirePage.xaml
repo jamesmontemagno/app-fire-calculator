@@ -78,6 +78,7 @@
                     <controls:EducationalDisclaimerView />
                 </VerticalStackLayout>
             </Border>
+            <controls:CalculationExplanationView Explanation="Full FIRE number = annual expenses / withdrawal rate.&#10;&#10;Barista FIRE number = max(0, annual expenses - after-tax part-time income) / withdrawal rate.&#10;&#10;Each projection year calculates contribution = annual contribution x (1 + inflation rate)^year, then portfolio = prior portfolio x (1 + expected return) + contribution.&#10;&#10;Years to target uses the real return, where real return = (1 + expected return) / (1 + inflation rate) - 1." />
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>

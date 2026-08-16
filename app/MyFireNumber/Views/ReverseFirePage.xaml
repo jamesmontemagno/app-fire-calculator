@@ -77,6 +77,7 @@
                     <controls:EducationalDisclaimerView />
                 </VerticalStackLayout>
             </Border>
+            <controls:CalculationExplanationView Explanation="FIRE number = annual expenses / withdrawal rate.&#10;&#10;Years to target = max(1, retirement age - current age).&#10;&#10;Real return = (1 + expected return) / (1 + inflation rate) - 1.&#10;&#10;Future value of current savings = current savings x (1 + real return)^years.&#10;&#10;With inflation-adjusted contributions, required annual savings = ((FIRE number - future value of current savings) x real return) / ((1 + real return)^years - 1). When real return is zero, it is (FIRE number - current savings) / years.&#10;&#10;Required monthly savings = required annual savings / 12. Negative required savings is shown as zero." />
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>
