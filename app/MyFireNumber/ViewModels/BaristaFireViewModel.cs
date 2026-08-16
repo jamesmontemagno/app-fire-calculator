@@ -142,7 +142,7 @@ public sealed partial class BaristaFireViewModel : CalculatorViewModelBase<Baris
         BaristaYearsText = double.IsPositiveInfinity(result.YearsToBaristaFire)
             ? "Not reachable with these inputs"
             : $"{result.YearsToBaristaFire:N1} years";
-        BaristaReductionText = $"{FormatCurrency(result.SavingsFromPartTime)} less needed with part-time take-home income.";
+        BaristaReductionText = $"{FormatCurrency(result.SavingsFromPartTime)} less needed with part-time income.";
         var progress = result.BaristaNumber <= 0 ? 0 : Math.Clamp(draft.CurrentSavings / result.BaristaNumber, 0, 1);
         BaristaProgressDescription = $"{progress:P0} of your Barista FIRE Number is currently funded.";
         BaristaProjectionSummary = double.IsPositiveInfinity(result.YearsToBaristaFire)

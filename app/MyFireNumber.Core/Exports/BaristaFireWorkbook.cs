@@ -54,7 +54,7 @@ public static class BaristaFireWorkbook
             ("Current savings", CreateNumberCell("", draft.CurrentSavings, CurrencyStyleIndex)),
             ("Annual contribution", CreateNumberCell("", draft.AnnualContribution, CurrencyStyleIndex)),
             (RecurringAmountLabels.RetirementSpendingFor(displayPeriod), CreateNumberCell("", CurrencyPeriodMath.Convert(draft.AnnualExpenses, CurrencyPeriod.Annual, displayPeriod), CurrencyStyleIndex)),
-            ("Part-time take-home income (after tax)", CreateNumberCell("", draft.PartTimeAnnualIncome, CurrencyStyleIndex)),
+            ("Part-time income (after tax)", CreateNumberCell("", draft.PartTimeAnnualIncome, CurrencyStyleIndex)),
             ("Expected return", CreateNumberCell("", draft.ExpectedReturn, PercentageStyleIndex)),
             ("Inflation rate", CreateNumberCell("", draft.InflationRate, PercentageStyleIndex)),
             ("Safe withdrawal rate", CreateNumberCell("", draft.WithdrawalRate, PercentageStyleIndex))

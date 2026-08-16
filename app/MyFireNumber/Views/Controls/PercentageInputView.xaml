@@ -13,14 +13,23 @@
         <local:FieldHelpView Header="{Binding Header, Source={x:Reference Root}}"
                              HelpText="{Binding HelpText, Source={x:Reference Root}}"
                              VerticalOptions="Start" />
-        <Entry Grid.Row="1"
-               Text="{Binding Text, Source={x:Reference Root}, Mode=TwoWay}"
-               Placeholder="{Binding Placeholder, Source={x:Reference Root}}"
-               Keyboard="Numeric"
-               Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
-               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
-               PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
-               SemanticProperties.Description="{Binding HelpText, Source={x:Reference Root}}" />
+        <Grid Grid.Row="1"
+              ColumnDefinitions="*,Auto"
+              ColumnSpacing="6">
+            <Entry Text="{Binding Text, Source={x:Reference Root}, Mode=TwoWay}"
+                   Placeholder="{Binding Placeholder, Source={x:Reference Root}}"
+                   Keyboard="Numeric"
+                   Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                   PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
+                   SemanticProperties.Description="{Binding HelpText, Source={x:Reference Root}}" />
+            <Label Grid.Column="1"
+                   Text="%"
+                   VerticalTextAlignment="Center"
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
+                   SemanticProperties.Description="Percentage" />
+        </Grid>
         <Slider Grid.Row="2"
                 Minimum="{Binding Minimum, Source={x:Reference Root}}"
                 Maximum="{Binding Maximum, Source={x:Reference Root}}"

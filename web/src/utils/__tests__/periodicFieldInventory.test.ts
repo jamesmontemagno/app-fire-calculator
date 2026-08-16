@@ -157,7 +157,7 @@ describe('shared periodic field inventory', () => {
   })
 
   it('pins the retirement-spending wording before comparing source', () => {
-    expect(FIELD_LABELS.annualExpenses).toBe('Retirement spending (today’s dollars)')
+    expect(FIELD_LABELS.annualExpenses).toBe('Expenses')
   })
 
   it.each(

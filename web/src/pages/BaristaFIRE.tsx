@@ -42,7 +42,7 @@ export default function BaristaFIRE() {
       <div className="space-y-8">
         <header>
           <h1 className="text-2xl font-bold text-content sm:text-3xl">Barista FIRE Calculator</h1>
-          <p className="mt-1 text-content-muted">See how part-time take-home income can reduce the portfolio needed for retirement.</p>
+          <p className="mt-1 text-content-muted">See how part-time income can reduce the portfolio needed for retirement.</p>
         </header>
 
         <section aria-labelledby="barista-plan-heading">
@@ -56,8 +56,8 @@ export default function BaristaFIRE() {
               <AgeInput label="Current age" value={params.currentAge} onChange={value => setParam('currentAge', value)} onSliderChange={value => setParamDebounced('currentAge', value)} tooltip="Your current age." min={18} max={80} showSlider />
               <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments available for retirement." />
               <CurrencyInput label="Contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="How much you expect to invest before Barista FIRE." periodic />
-              <CurrencyInput label="Retirement spending (today’s dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, expressed in today’s purchasing power." periodic />
-              <CurrencyInput label="After-tax part-time take-home income" value={params.partTimeIncome} onChange={value => setParam('partTimeIncome', value)} tooltip="Expected income after taxes from part-time or flexible work." periodic />
+              <CurrencyInput label="Expenses" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, expressed in today’s purchasing power." periodic />
+              <CurrencyInput label="After-tax part-time income" value={params.partTimeIncome} onChange={value => setParam('partTimeIncome', value)} tooltip="Expected income after taxes from part-time or flexible work." periodic />
             </CardContent>
           </Card>
         </section>

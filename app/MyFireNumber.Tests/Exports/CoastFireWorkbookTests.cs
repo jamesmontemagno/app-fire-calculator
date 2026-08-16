@@ -24,7 +24,7 @@ public sealed class CoastFireWorkbookTests : IDisposable
         var sheets = (workbook.Sheets ?? throw new InvalidOperationException("Workbook sheets were not created.")).Elements<Sheet>().ToArray();
 
         Assert.Equal(["Inputs", "Results", "Coast Projection", "Contributions Projection"], sheets.Select(sheet => sheet.Name!.Value));
-        Assert.Equal("Retirement spending (today’s dollars) (per year)", GetCellText(workbookPart, sheets[0], "A9"));
+        Assert.Equal("Expenses (per year)", GetCellText(workbookPart, sheets[0], "A9"));
         Assert.Equal("48000", GetCell(workbookPart, sheets[0], "B9").CellValue!.Text);
         Assert.Equal("Inputs!B9/Inputs!B12", GetCell(workbookPart, sheets[1], "B5").CellFormula!.Text);
         Assert.Equal("C2*(1+Inputs!$B$10)+D3", GetCell(workbookPart, sheets[2], "C3").CellFormula!.Text);

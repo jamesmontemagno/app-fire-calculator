@@ -63,7 +63,7 @@ public static class PeriodicFieldCatalog
             ["savings-rate"] =
             [
                 // The contribution is governed by ContributionFrequency, which changes the arithmetic,
-                // so it is not a display-period field. Only take-home income is.
+                // so it is not a display-period field. Only income is.
                 new(AnnualIncome, CurrencyPeriod.Annual)
             ],
             ["healthcare-gap"] =

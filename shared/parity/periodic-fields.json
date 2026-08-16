@@ -8,7 +8,7 @@
   ],
   "storedPeriodValues": ["annual", "monthly"],
   "fieldLabels": {
-    "annualExpenses": "Retirement spending (today’s dollars)"
+    "annualExpenses": "Expenses"
   },
   "calculators": [
     {

@@ -12,8 +12,8 @@
               ColumnSpacing="{StaticResource SpaceSm}">
             <Label Text="&#xf071;"
                    FontFamily="FontAwesomeSolid"
-                   FontSize="11"
-                   VerticalTextAlignment="Start"
+                   FontSize="16"
+                   VerticalTextAlignment="Center"
                    TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                    SemanticProperties.Description="Disclaimer" />
             <Label Grid.Column="1"

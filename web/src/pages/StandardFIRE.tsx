@@ -93,8 +93,8 @@ export default function StandardFIRE() {
               <AgeInput label="Target retirement age" value={params.retirementAge} onChange={value => setParam('retirementAge', value)} onSliderChange={value => setParamDebounced('retirementAge', value)} tooltip="The age you want this plan to support." min={params.currentAge} max={90} showSlider />
               <CurrencyInput label="Current invested assets" value={params.currentSavings} onChange={value => setParam('currentSavings', value)} tooltip="Investments available for retirement, including workplace plans, IRAs, and brokerage accounts." />
               <CurrencyInput label="Contributions" value={params.annualContribution} onChange={value => setParam('annualContribution', value)} tooltip="How much you expect to invest." periodic />
-              <CurrencyInput label="After-tax take-home income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Income after taxes. It is used to calculate your savings rate." periodic />
-              <CurrencyInput label="Retirement spending (today’s dollars)" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, expressed in today’s purchasing power." periodic />
+              <CurrencyInput label="After-tax income" value={params.annualIncome} onChange={value => setParam('annualIncome', value)} tooltip="Income after taxes. It is used to calculate your savings rate." periodic />
+              <CurrencyInput label="Expenses" value={params.annualExpenses} onChange={value => setParam('annualExpenses', value)} tooltip="Expected after-tax spending in retirement, expressed in today’s purchasing power." periodic />
             </CardContent>
           </Card>
         </section>
