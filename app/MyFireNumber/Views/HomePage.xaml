@@ -149,97 +149,6 @@
                    </VerticalStackLayout>
                 </Border>
 
-                <Border IsVisible="{Binding ShowRecommendedBooks}"
-                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
-                        Padding="{StaticResource CardPadding}"
-                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                        StrokeShape="RoundRectangle 12">
-                   <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
-                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
-                           <Label Text="&#xf02d;"
-                                  FontFamily="FontAwesomeSolid"
-                                  VerticalTextAlignment="Center"
-                                  TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
-                                  SemanticProperties.Description="Recommended books" />
-                           <VerticalStackLayout Grid.Column="1" Spacing="{StaticResource SpaceXs}">
-                               <Label Text="Recommended FIRE books"
-                                      TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
-                                      FontAttributes="Bold"
-                                      FontSize="20"
-                                      SemanticProperties.HeadingLevel="Level2" />
-                               <Label Text="Essential reading for your financial independence journey."
-                                      TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
-                                      FontSize="13" />
-                           </VerticalStackLayout>
-                       </Grid>
-                       <FlexLayout BindableLayout.ItemsSource="{Binding RecommendedBooks}"
-                                   Direction="Row"
-                                   Wrap="Wrap"
-                                   JustifyContent="SpaceBetween">
-                           <BindableLayout.ItemTemplate>
-                               <DataTemplate x:DataType="books:RecommendedBook">
-                                   <Border FlexLayout.Basis="48%"
-                                           Margin="0,0,0,12"
-                                           Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
-                                           Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                                           StrokeShape="RoundRectangle 10"
-                                           SemanticProperties.Description="{Binding Title, StringFormat='Open {0} on Amazon.'}">
-                                       <Border.GestureRecognizers>
-                                           <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=OpenBookCommand}"
-                                                                 CommandParameter="{Binding .}" />
-                                       </Border.GestureRecognizers>
-                                       <Grid RowDefinitions="150,Auto">
-                                           <Image Source="{Binding ImageName}"
-                                                  Aspect="AspectFill"
-                                                  HeightRequest="150"
-                                                  SemanticProperties.Description="{Binding Title, StringFormat='{0} book artwork'}" />
-                                           <VerticalStackLayout Grid.Row="1" Padding="10,9" Spacing="3">
-                                               <Label Text="{Binding Title}"
-                                                      TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
-                                                      FontAttributes="Bold"
-                                                      FontSize="13"
-                                                      LineBreakMode="TailTruncation"
-                                                      MaxLines="2" />
-                                               <Label Text="{Binding Author}"
-                                                      TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
-                                                      FontSize="11"
-                                                      LineBreakMode="TailTruncation"
-                                                      MaxLines="2" />
-                                               <Grid Margin="0,4,0,0" ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceXs}">
-                                                   <Label Text="View on Amazon"
-                                                          TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
-                                                          FontAttributes="Bold"
-                                                          FontSize="11" />
-                                                   <Label Grid.Column="1"
-                                                          Text="&#xf35d;"
-                                                          FontFamily="FontAwesomeSolid"
-                                                          TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
-                                                          FontSize="11"
-                                                          SemanticProperties.Description="Opens externally" />
-                                               </Grid>
-                                           </VerticalStackLayout>
-                                       </Grid>
-                                   </Border>
-                               </DataTemplate>
-                           </BindableLayout.ItemTemplate>
-                       </FlexLayout>
-                       <Border Padding="{StaticResource CardPaddingCompact}"
-                               Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
-                               Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                               StrokeShape="RoundRectangle 10">
-                           <VerticalStackLayout Spacing="3">
-                               <Label Text="Affiliate disclosure"
-                                      TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
-                                      FontAttributes="Bold"
-                                      FontSize="12" />
-                               <Label Text="These Amazon links are affiliate links. We may earn a small commission at no extra cost to you, which helps support this free calculator."
-                                      TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
-                                      FontSize="12"
-                                      LineHeight="1.25" />
-                           </VerticalStackLayout>
-                       </Border>
-                   </VerticalStackLayout>
-                </Border>
 
                 <Border IsVisible="{Binding ShowGettingStarted}"
                         Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
@@ -354,6 +263,98 @@
                             </Button>
                         </Grid>
                     </VerticalStackLayout>
+                </Border>
+
+                <Border IsVisible="{Binding ShowRecommendedBooks}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Padding="{StaticResource CardPadding}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                   <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                       <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
+                           <Label Text="&#xf02d;"
+                                  FontFamily="FontAwesomeSolid"
+                                  VerticalTextAlignment="Center"
+                                  TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                                  SemanticProperties.Description="Recommended books" />
+                           <VerticalStackLayout Grid.Column="1" Spacing="{StaticResource SpaceXs}">
+                               <Label Text="Recommended FIRE books"
+                                      TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                      FontAttributes="Bold"
+                                      FontSize="20"
+                                      SemanticProperties.HeadingLevel="Level2" />
+                               <Label Text="Essential reading for your financial independence journey."
+                                      TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
+                                      FontSize="13" />
+                           </VerticalStackLayout>
+                       </Grid>
+                       <FlexLayout BindableLayout.ItemsSource="{Binding RecommendedBooks}"
+                                   Direction="Row"
+                                   Wrap="Wrap"
+                                   JustifyContent="SpaceBetween">
+                           <BindableLayout.ItemTemplate>
+                               <DataTemplate x:DataType="books:RecommendedBook">
+                                   <Border FlexLayout.Basis="48%"
+                                           Margin="0,0,0,12"
+                                           Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+                                           Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                           StrokeShape="RoundRectangle 10"
+                                           SemanticProperties.Description="{Binding Title, StringFormat='Open {0} on Amazon.'}">
+                                       <Border.GestureRecognizers>
+                                           <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:HomeViewModel}}, Path=OpenBookCommand}"
+                                                                 CommandParameter="{Binding .}" />
+                                       </Border.GestureRecognizers>
+                                       <Grid RowDefinitions="150,Auto">
+                                           <Image Source="{Binding ImageName}"
+                                                  Aspect="AspectFill"
+                                                  HeightRequest="150"
+                                                  SemanticProperties.Description="{Binding Title, StringFormat='{0} book artwork'}" />
+                                           <VerticalStackLayout Grid.Row="1" Padding="10,9" Spacing="3">
+                                               <Label Text="{Binding Title}"
+                                                      TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                                      FontAttributes="Bold"
+                                                      FontSize="13"
+                                                      LineBreakMode="TailTruncation"
+                                                      MaxLines="2" />
+                                               <Label Text="{Binding Author}"
+                                                      TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
+                                                      FontSize="11"
+                                                      LineBreakMode="TailTruncation"
+                                                      MaxLines="2" />
+                                               <Grid Margin="0,4,0,0" ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceXs}">
+                                                   <Label Text="View on Amazon"
+                                                          TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                                                          FontAttributes="Bold"
+                                                          FontSize="11" />
+                                                   <Label Grid.Column="1"
+                                                          Text="&#xf35d;"
+                                                          FontFamily="FontAwesomeSolid"
+                                                          TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                                                          FontSize="11"
+                                                          SemanticProperties.Description="Opens externally" />
+                                               </Grid>
+                                           </VerticalStackLayout>
+                                       </Grid>
+                                   </Border>
+                               </DataTemplate>
+                           </BindableLayout.ItemTemplate>
+                       </FlexLayout>
+                       <Border Padding="{StaticResource CardPaddingCompact}"
+                               Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                               Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                               StrokeShape="RoundRectangle 10">
+                           <VerticalStackLayout Spacing="3">
+                               <Label Text="Affiliate disclosure"
+                                      TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                      FontAttributes="Bold"
+                                      FontSize="12" />
+                               <Label Text="These Amazon links are affiliate links. We may earn a small commission at no extra cost to you, which helps support this free calculator."
+                                      TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
+                                      FontSize="12"
+                                      LineHeight="1.25" />
+                           </VerticalStackLayout>
+                       </Border>
+                   </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>
         </ScrollView>

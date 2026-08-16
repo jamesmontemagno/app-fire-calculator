@@ -83,6 +83,7 @@
                     <controls:EducationalDisclaimerView />
                 </VerticalStackLayout>
             </Border>
+            <controls:CalculationExplanationView Explanation="Full FIRE number = annual expenses / withdrawal rate.&#10;&#10;Coast FIRE number = full FIRE number / (1 + real return)^years to retirement.&#10;&#10;Real return = (1 + expected return) / (1 + inflation rate) - 1.&#10;&#10;Years to retirement = max(0, retirement age - current age). The calculator also estimates years to Coast FIRE by projecting current savings and contributions against the Coast FIRE target." />
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>

@@ -225,6 +225,7 @@
                     <controls:EducationalDisclaimerView />
                 </VerticalStackLayout>
             </Border>
+            <controls:CalculationExplanationView Explanation="FIRE number = annual expenses / withdrawal rate.&#10;&#10;Real return = (1 + expected return) / (1 + inflation rate) - 1.&#10;&#10;When contributions rise with inflation, years to FIRE = log((annual contribution + FIRE number x real return) / (annual contribution + current savings x real return)) / log(1 + real return).&#10;&#10;If real return is zero, years to FIRE = (FIRE number - current savings) / annual contribution.&#10;&#10;Each projection year calculates contribution = annual contribution x (1 + inflation rate)^year, portfolio = prior portfolio x (1 + expected return) + contribution, and today's-dollar portfolio = portfolio / (1 + inflation rate)^year. Lean FIRE and Fat FIRE use this same calculation with their selected expense assumptions." />
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>

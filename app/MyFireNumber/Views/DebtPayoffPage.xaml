@@ -107,6 +107,7 @@
                     <controls:EducationalDisclaimerView />
                 </VerticalStackLayout>
             </Border>
+            <controls:CalculationExplanationView Explanation="Each month, interest charge = current balance x (annual interest rate / 12), then the charge is added to the balance.&#10;&#10;Available monthly budget = total monthly payment + extra payment.&#10;&#10;Minimum payments are applied in priority order, and remaining budget is applied as principal to the first unpaid debt. Snowball priority sorts by smallest balance; Avalanche priority sorts by highest interest rate.&#10;&#10;Monthly principal = total payments - monthly interest. The schedule repeats until all balances are paid or 600 months have elapsed." />
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>

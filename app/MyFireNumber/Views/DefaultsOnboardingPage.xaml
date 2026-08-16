@@ -57,7 +57,7 @@
 
                         <VerticalStackLayout Spacing="6">
                             <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="After-tax income"
+                                <Label Text="After-tax annual income"
                                        FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                                 <Label Grid.Column="1"

@@ -89,6 +89,7 @@
                     <controls:EducationalDisclaimerView />
                 </VerticalStackLayout>
             </Border>
+            <controls:CalculationExplanationView Explanation="Annual contribution = entered contribution x 12 when the frequency is monthly; otherwise it equals the entered contribution.&#10;&#10;Savings rate = annual contribution / annual income when annual income is greater than zero.&#10;&#10;Each year, contribution = annual contribution x (1 + inflation rate)^year, nominal balance = prior nominal balance x (1 + expected return) + contribution, and inflation-adjusted balance = nominal balance / (1 + inflation rate)^year.&#10;&#10;Investment growth = nominal balance - total contributions." />
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>

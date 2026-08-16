@@ -17,11 +17,11 @@
                    TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                    SemanticProperties.Description="Disclaimer" />
             <Label Grid.Column="1"
-                   Text="Educational and informational purposes only. Not financial, investment, tax, or legal advice. Projections are hypothetical; actual results will vary."
+                   Text="For educational and informational purposes only. Not financial, investment, tax, or legal advice. Check your inputs and review results carefully; projections are estimates, not guarantees, and actual results will vary. Consult qualified professionals before making financial decisions."
                    FontSize="11"
                    LineHeight="1.25"
                    TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
-                   SemanticProperties.Description="Educational and informational purposes only. Not financial, investment, tax, or legal advice. Projections are hypothetical; actual results will vary." />
+                   SemanticProperties.Description="For educational and informational purposes only. Not financial, investment, tax, or legal advice. Check your inputs and review results carefully; projections are estimates, not guarantees, and actual results will vary. Consult qualified professionals before making financial decisions." />
         </Grid>
     </Grid>
 </ContentView>

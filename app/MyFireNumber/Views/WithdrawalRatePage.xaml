@@ -74,6 +74,7 @@
                     <controls:EducationalDisclaimerView />
                 </VerticalStackLayout>
             </Border>
+            <controls:CalculationExplanationView Explanation="Annual withdrawal = starting portfolio x withdrawal rate.&#10;&#10;Monthly withdrawal = annual withdrawal / 12.&#10;&#10;Each year, balance = prior balance x (1 + expected return) - inflation-adjusted withdrawal, and next year's withdrawal = prior withdrawal x (1 + inflation rate).&#10;&#10;Portfolio longevity is the number of complete funded years before the balance reaches zero. This is a deterministic projection, not a historical or Monte Carlo probability." />
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>

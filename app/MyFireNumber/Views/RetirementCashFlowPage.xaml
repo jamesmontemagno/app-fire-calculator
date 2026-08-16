@@ -225,6 +225,7 @@
                         <controls:EducationalDisclaimerView />
                     </VerticalStackLayout>
                 </Border>
+                <controls:CalculationExplanationView Explanation="For each age, inflation multiplier = (1 + inflation rate)^(age - current age).&#10;&#10;Each account first grows by its annual return; before semi-retirement, its contribution is added after being increased by the inflation multiplier.&#10;&#10;Active income = annual amount x (1 + income growth)^(age - current age), reduced by the tax rate when it is not already after-tax.&#10;&#10;Expenses = annual expenses x inflation multiplier plus active additional expenses. The remaining spending gap is expenses - outside income - deferred income.&#10;&#10;Withdrawals are grossed up for each account's tax rate, limited by its balance and withdrawal-rate policy, and account balances are reduced by gross withdrawals." />
         </VerticalStackLayout>
     </ScrollView>
 </views:CalculatorPageBase>
