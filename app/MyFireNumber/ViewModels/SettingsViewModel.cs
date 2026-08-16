@@ -63,7 +63,6 @@ public partial class SettingsViewModel : ObservableObject
         highContrast = behavior.HighContrast;
         showRecommendedBooks = behavior.ShowRecommendedBooks;
         selectedCurrencyOption = currencyPreferencesService.SelectedOption;
-        LoadCalculatorDefaults();
     }
 
     public IReadOnlyList<ThemePreference> ThemeOptions { get; } = Enum.GetValues<ThemePreference>();
@@ -74,38 +73,16 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private ThemePreference selectedTheme;
 
-    [ObservableProperty]
-    private string expectedReturnPercent = string.Empty;
 
-    [ObservableProperty]
-    private string inflationRatePercent = string.Empty;
 
-    [ObservableProperty]
-    private string withdrawalRatePercent = string.Empty;
 
-    [ObservableProperty]
-    private double expectedReturnSlider;
 
-    [ObservableProperty]
-    private double inflationRateSlider;
 
-    [ObservableProperty]
-    private double withdrawalRateSlider;
 
-    [ObservableProperty]
-    private string defaultCurrentAge = string.Empty;
 
-    [ObservableProperty]
-    private string defaultRetirementAge = string.Empty;
 
-    [ObservableProperty]
-    private string defaultAnnualIncome = string.Empty;
 
-    [ObservableProperty]
-    private string defaultAnnualExpenses = string.Empty;
 
-    [ObservableProperty]
-    private string defaultsStatus = string.Empty;
 
     [ObservableProperty]
     private string selectedCurrencyOption = CurrencyPreferencesService.DeviceRegion;
@@ -139,25 +116,12 @@ public partial class SettingsViewModel : ObservableObject
 
     public string LaunchDestinationDescription => $"{SelectedLaunchDestination} will open after onboarding.";
 
-    private bool isSynchronizingDefaultPercentages;
 
-    partial void OnExpectedReturnPercentChanged(string value) =>
-        SyncTextToSlider(value, slider => ExpectedReturnSlider = slider);
 
-    partial void OnInflationRatePercentChanged(string value) =>
-        SyncTextToSlider(value, slider => InflationRateSlider = slider);
 
-    partial void OnWithdrawalRatePercentChanged(string value) =>
-        SyncTextToSlider(value, slider => WithdrawalRateSlider = slider);
 
-    partial void OnExpectedReturnSliderChanged(double value) =>
-        SyncSliderToText(value, slider => ExpectedReturnSlider = slider, text => ExpectedReturnPercent = text);
 
-    partial void OnInflationRateSliderChanged(double value) =>
-        SyncSliderToText(value, slider => InflationRateSlider = slider, text => InflationRatePercent = text);
 
-    partial void OnWithdrawalRateSliderChanged(double value) =>
-        SyncSliderToText(value, slider => WithdrawalRateSlider = slider, text => WithdrawalRatePercent = text);
 
     partial void OnSelectedLaunchDestinationChanged(LaunchDestination value) => SaveBehaviorPreferences();
     partial void OnRestoreDraftsChanged(bool value) => SaveBehaviorPreferences();
@@ -178,42 +142,15 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     private void SetLaunchDestination(LaunchDestination destination) => SelectedLaunchDestination = destination;
 
+    /// <summary>
+    /// Sends the user to Profile, which now owns their age, retirement date, income, spending, and
+    /// planning assumptions. Settings keeps only app-level preferences such as currency and theme.
+    /// </summary>
     [RelayCommand]
-    private void SaveCalculatorDefaults()
-    {
-        if (!TryParsePercent(ExpectedReturnPercent, out var expectedReturn, 0, 15)
-            || !TryParsePercent(InflationRatePercent, out var inflationRate, 0, 10)
-            || !TryParsePercent(WithdrawalRatePercent, out var withdrawalRate, 2, 6)
-            || !int.TryParse(DefaultCurrentAge, NumberStyles.Integer, CultureInfo.CurrentCulture, out var currentAge)
-            || !int.TryParse(DefaultRetirementAge, NumberStyles.Integer, CultureInfo.CurrentCulture, out var retirementAge)
-            || !double.TryParse(DefaultAnnualIncome, NumberStyles.Number, CultureInfo.CurrentCulture, out var annualIncome)
-            || !double.TryParse(DefaultAnnualExpenses, NumberStyles.Number, CultureInfo.CurrentCulture, out var annualExpenses)
-            || currentAge is < 18 or > 100
-            || retirementAge < currentAge
-            || retirementAge > 100
-            || annualIncome < 0
-            || annualExpenses < 0)
-        {
-            DefaultsStatus = "Enter an expected return of 0% to 15%, inflation of 0% to 10%, a withdrawal rate of 2% to 6%, ages from 18 to 100, and non-negative annual income and expenses. Retirement age cannot be earlier than your current age.";
-            return;
-        }
-
-        calculatorDefaultsService.Save(new CalculatorDefaults(
-            expectedReturn,
-            inflationRate,
-            withdrawalRate,
-            currentAge,
-            retirementAge)
-        {
-            AnnualIncome = annualIncome,
-            AnnualExpenses = annualExpenses
-        });
-        DefaultsStatus = "Saved. These assumptions apply only to new calculators.";
-    }
+    private Task OpenProfileAsync() => navigationService.GoToAsync("//profile");
 
     public async Task LoadAsync()
     {
-        LoadCalculatorDefaults();
         var storedPreferences = await preferencesRepository.ListAsync();
         var preferencesByCalculator = storedPreferences.ToDictionary(preference => preference.CalculatorId);
         CalculatorPreferences.Clear();
@@ -384,72 +321,6 @@ public partial class SettingsViewModel : ObservableObject
             item.SortOrder));
     }
 
-    private void LoadCalculatorDefaults()
-    {
-        var defaults = calculatorDefaultsService.Current;
-        isSynchronizingDefaultPercentages = true;
-        ExpectedReturnPercent = (defaults.ExpectedReturn * 100).ToString("0.##", CultureInfo.CurrentCulture);
-        InflationRatePercent = (defaults.InflationRate * 100).ToString("0.##", CultureInfo.CurrentCulture);
-        WithdrawalRatePercent = (defaults.WithdrawalRate * 100).ToString("0.##", CultureInfo.CurrentCulture);
-        ExpectedReturnSlider = defaults.ExpectedReturn * 100;
-        InflationRateSlider = defaults.InflationRate * 100;
-        WithdrawalRateSlider = defaults.WithdrawalRate * 100;
-        isSynchronizingDefaultPercentages = false;
-        DefaultCurrentAge = defaults.CurrentAge.ToString(CultureInfo.CurrentCulture);
-        DefaultRetirementAge = defaults.RetirementAge.ToString(CultureInfo.CurrentCulture);
-        DefaultAnnualIncome = defaults.AnnualIncome.ToString("0", CultureInfo.CurrentCulture);
-        DefaultAnnualExpenses = defaults.AnnualExpenses.ToString("0", CultureInfo.CurrentCulture);
-        DefaultsStatus = string.Empty;
-    }
-
-    /// <summary>
-    /// Parses a default percentage against the same bounds the calculators enforce, so a saved
-    /// default can never be rejected by the calculator that consumes it.
-    /// </summary>
-    private static bool TryParsePercent(string text, out double value, double minimumPercent, double maximumPercent)
-    {
-        if (double.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out var percent)
-            && percent >= minimumPercent
-            && percent <= maximumPercent)
-        {
-            value = percent / 100;
-            return true;
-        }
-
-        value = 0;
-        return false;
-    }
-
-    private void SyncTextToSlider(string text, Action<double> updateSlider)
-    {
-        if (isSynchronizingDefaultPercentages ||
-            !double.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out var value))
-        {
-            return;
-        }
-
-        isSynchronizingDefaultPercentages = true;
-        updateSlider(value);
-        isSynchronizingDefaultPercentages = false;
-    }
-
-    private void SyncSliderToText(double value, Action<double> updateSlider, Action<string> updateText)
-    {
-        if (isSynchronizingDefaultPercentages)
-        {
-            return;
-        }
-
-        var rounded = Math.Round(value, 1);
-        isSynchronizingDefaultPercentages = true;
-        if (Math.Abs(value - rounded) > double.Epsilon)
-        {
-            updateSlider(rounded);
-        }
-
-        updateText(rounded.ToString("0.0", CultureInfo.CurrentCulture));
-        isSynchronizingDefaultPercentages = false;
-    }
 
     private void SaveBehaviorPreferences()
     {

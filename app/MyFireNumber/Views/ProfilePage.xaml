@@ -5,12 +5,28 @@
              x:Class="MyFireNumber.Views.ProfilePage"
              x:DataType="viewModels:ProfileViewModel"
              Title="Profile"
+             Shell.NavBarIsVisible="True"
              Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
              SafeAreaEdges="Container">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem AutomationId="ProfileSettingsToolbarItem"
+                     Text="Settings"
+                     Order="Primary"
+                     Priority="0"
+                     Command="{Binding OpenSettingsCommand}"
+                     SemanticProperties.Description="Open settings.">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="FontAwesomeSolid"
+                                 Glyph="&#xf013;"
+                                 Color="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+
     <Grid>
         <ScrollView>
             <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
-                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceMd}">
                     <Label Text="&#xf2bd;"
                            FontFamily="FontAwesomeSolid"
                            FontSize="28"
@@ -18,7 +34,7 @@
                            TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                            SemanticProperties.Description="Profile" />
                     <VerticalStackLayout Grid.Column="1" Spacing="2">
-                        <Label Text="Profile"
+                        <Label Text="{Binding HeaderTitle}"
                                FontSize="30"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
@@ -27,14 +43,6 @@
                                FontSize="13"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     </VerticalStackLayout>
-                    <Button Grid.Column="2"
-                            AutomationId="ProfileSettingsButton"
-                            Text="&#xf013;"
-                            FontFamily="FontAwesomeSolid"
-                            Command="{Binding OpenSettingsCommand}"
-                            Background="Transparent"
-                            TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
-                            SemanticProperties.Description="Open settings." />
                 </Grid>
 
                 <Border Padding="{StaticResource CardPadding}"
@@ -273,6 +281,33 @@
                         <VerticalStackLayout Spacing="3">
                             <Label Text="Annual household spending" Style="{StaticResource FormFieldLabel}" />
                             <Entry AutomationId="ProfileAnnualExpensesEntry" Text="{Binding AnnualExpensesText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="72000" SemanticProperties.Description="Annual household spending in dollars" />
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Label Text="Planning assumptions" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Label Text="Starting assumptions for new calculators. Existing drafts and saved plans never change."
+                               FontSize="12"
+                               LineHeight="1.3"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                            <VerticalStackLayout Spacing="3">
+                                <Label Text="Expected return (%)" Style="{StaticResource FormFieldLabel}" />
+                                <Entry AutomationId="ProfileExpectedReturnEntry" Text="{Binding ExpectedReturnText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="7" SemanticProperties.Description="Expected annual investment return percentage" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                <Label Text="Inflation (%)" Style="{StaticResource FormFieldLabel}" />
+                                <Entry AutomationId="ProfileInflationRateEntry" Text="{Binding InflationRateText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="3" SemanticProperties.Description="Expected annual inflation percentage" />
+                            </VerticalStackLayout>
+                        </Grid>
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="Withdrawal rate (%)" Style="{StaticResource FormFieldLabel}" />
+                            <Entry AutomationId="ProfileWithdrawalRateEntry" Text="{Binding WithdrawalRateText, Mode=TwoWay}" Keyboard="Numeric" Style="{StaticResource FormEntry}" Placeholder="4" SemanticProperties.Description="Safe withdrawal rate percentage" />
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>

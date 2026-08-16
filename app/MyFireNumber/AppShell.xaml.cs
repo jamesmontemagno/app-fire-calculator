@@ -27,7 +27,10 @@ public partial class AppShell : Shell
 		Items.Add(CreateTab("Home", "home", "tab_home.png", homePage));
 		Items.Add(CreateTab("Calculators", "calculators", "tab_calculators.png", calculatorsPage));
 		Items.Add(CreateTab("Plans", "plans", "tab_plans.png", plansPage));
-		Items.Add(CreateTab("Profile", "profile", "tab_profile.png", profilePage));
+
+		// Profile keeps the platform nav bar so its Settings action sits in the standard toolbar
+		// position rather than being a button drawn inside the scrolling content.
+		Items.Add(CreateTab("Profile", "profile", "tab_profile.png", profilePage, showNavBar: true));
 		Routing.RegisterRoute("settings", typeof(SettingsPage));
 
 		Routing.RegisterRoute("quiz", typeof(QuizPage));
@@ -51,9 +54,9 @@ public partial class AppShell : Shell
 		Loaded += OnLoaded;
 	}
 
-	private static Tab CreateTab(string title, string route, string icon, Page page)
+	private static Tab CreateTab(string title, string route, string icon, Page page, bool showNavBar = false)
 	{
-		Shell.SetNavBarIsVisible(page, false);
+		Shell.SetNavBarIsVisible(page, showNavBar);
 
 		var shellContent = new ShellContent
 		{

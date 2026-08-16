@@ -15,6 +15,7 @@ public sealed partial class ProfileViewModel(
     IProfileIncomeRepository profileIncomeRepository,
     IProfileExpenseRepository profileExpenseRepository,
     IProfileDebtRepository profileDebtRepository,
+    ICalculatorDefaultsService calculatorDefaultsService,
     ILocalDateProvider localDateProvider,
     INavigationService navigationService) : ObservableObject
 {
@@ -39,6 +40,15 @@ public sealed partial class ProfileViewModel(
     [ObservableProperty] private bool hasTargetRetirementDate;
     [ObservableProperty] private string validationMessage = string.Empty;
     [ObservableProperty] private string statusMessage = string.Empty;
+
+    // Planning assumptions. These live with the profile rather than in Settings because they are
+    // personal planning inputs, not app preferences, and every new calculator starts from them.
+    [ObservableProperty] private string expectedReturnText = string.Empty;
+    [ObservableProperty] private string inflationRateText = string.Empty;
+    [ObservableProperty] private string withdrawalRateText = string.Empty;
+
+    /// <summary>The page heading, personalized once the profile has a name.</summary>
+    [ObservableProperty] private string headerTitle = "Profile";
 
     public bool HasValidationMessage => !string.IsNullOrWhiteSpace(ValidationMessage);
     public bool HasNoBirthDate => !HasBirthDate;
@@ -96,6 +106,7 @@ public sealed partial class ProfileViewModel(
 
         await profileService.LoadAsync();
         ApplyProfile(profileService.Current);
+        ApplyAssumptions();
 
         Accounts.Clear();
         Income.Clear();
@@ -128,10 +139,67 @@ public sealed partial class ProfileViewModel(
         isLoaded = true;
     }
 
+    private void ApplyAssumptions()
+    {
+        var defaults = calculatorDefaultsService.Current;
+        ExpectedReturnText = (defaults.ExpectedReturn * 100).ToString("0.##", CultureInfo.CurrentCulture);
+        InflationRateText = (defaults.InflationRate * 100).ToString("0.##", CultureInfo.CurrentCulture);
+        WithdrawalRateText = (defaults.WithdrawalRate * 100).ToString("0.##", CultureInfo.CurrentCulture);
+    }
+
+    /// <summary>
+    /// Validates the planning assumptions without writing anything, so an invalid entry is caught
+    /// before any part of the profile is persisted.
+    /// </summary>
+    private bool TryReadAssumptions(out (double ExpectedReturn, double InflationRate, double WithdrawalRate) assumptions)
+    {
+        assumptions = default;
+        if (!TryPercent(ExpectedReturnText, 0, 15, out var expectedReturn) ||
+            !TryPercent(InflationRateText, 0, 10, out var inflationRate) ||
+            !TryPercent(WithdrawalRateText, 2, 6, out var withdrawalRate))
+        {
+            ValidationMessage = "Enter an expected return of 0% to 15%, inflation of 0% to 10%, and a withdrawal rate of 2% to 6%.";
+            return false;
+        }
+
+        assumptions = (expectedReturn, inflationRate, withdrawalRate);
+        return true;
+    }
+
+    /// <summary>
+    /// Persists the assumptions. Runs after the profile is saved and re-reads
+    /// <see cref="ICalculatorDefaultsService.Current"/>, which resolves age, income, and spending
+    /// from the profile, so the stored fallbacks mirror the values just saved rather than the
+    /// previous ones.
+    /// </summary>
+    private void SaveAssumptions((double ExpectedReturn, double InflationRate, double WithdrawalRate) assumptions)
+    {
+        calculatorDefaultsService.Save(calculatorDefaultsService.Current with
+        {
+            ExpectedReturn = assumptions.ExpectedReturn,
+            InflationRate = assumptions.InflationRate,
+            WithdrawalRate = assumptions.WithdrawalRate
+        });
+    }
+
+    private static bool TryPercent(string text, double minimum, double maximum, out double value)
+    {
+        value = 0;
+        if (!double.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out var percent) ||
+            percent < minimum ||
+            percent > maximum)
+        {
+            return false;
+        }
+
+        value = percent / 100;
+        return true;
+    }
+
     [RelayCommand]
     private async Task SaveAsync()
     {
-        if (!TryCreateProfile(out var profile))
+        if (!TryCreateProfile(out var profile) || !TryReadAssumptions(out var assumptions))
         {
             return;
         }
@@ -221,8 +289,13 @@ public sealed partial class ProfileViewModel(
         }
 
         await profileService.SaveAsync(profile);
+
+        // Written last so the stored fallbacks mirror the profile that was just saved.
+        SaveAssumptions(assumptions);
+
         ValidationMessage = string.Empty;
         StatusMessage = "Profile saved on this device.";
+        HeaderTitle = FirstNonEmpty(profile.HouseholdName, profile.DisplayName) ?? "Profile";
         NotifyCompletionChanged();
     }
 
@@ -340,8 +413,14 @@ public sealed partial class ProfileViewModel(
         if (profile.BirthDate is DateOnly birth) BirthDate = birth.ToDateTime(TimeOnly.MinValue);
         if (profile.PhasedRetirementDate is DateOnly phased) PhasedRetirementDate = phased.ToDateTime(TimeOnly.MinValue);
         if (profile.TargetRetirementDate is DateOnly target) TargetRetirementDate = target.ToDateTime(TimeOnly.MinValue);
+
+        // Prefer the household label, then the person's name, so a shared plan reads correctly.
+        HeaderTitle = FirstNonEmpty(profile.HouseholdName, profile.DisplayName) ?? "Profile";
         NotifyCompletionChanged();
     }
+
+    private static string? FirstNonEmpty(params string?[] values) =>
+        values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim();
 
     private static RetirementAccountEditorItem ToEditor(ProfileAccount account) =>
         RetirementAccountEditorItem.FromAccount(new RetirementAccount(
