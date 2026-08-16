@@ -166,6 +166,7 @@
                             <Label Text="Not set" IsVisible="{Binding HasNoBirthDate}" />
                             <DatePicker AutomationId="ProfileBirthDatePicker"
                                         Date="{Binding BirthDate, Mode=TwoWay}"
+                                        MaximumDate="{Binding MaximumBirthDate}"
                                         IsVisible="{Binding HasBirthDate}"
                                         Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}"
                                         TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
@@ -238,8 +239,8 @@
                                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" />
-                                                <Button Grid.Column="2" Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveAccountCommand}" CommandParameter="{Binding .}" />
+                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} account.'}" />
+                                                <Button Grid.Column="2" Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveAccountCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} account.'}" />
                                             </Grid>
                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
                                                 <Entry Text="{Binding Name, Mode=TwoWay}" Placeholder="Account name" />

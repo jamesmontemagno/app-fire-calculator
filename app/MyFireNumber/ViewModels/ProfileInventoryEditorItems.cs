@@ -39,14 +39,37 @@ public sealed partial class ProfileDebtEditorItem : ObservableObject
     [ObservableProperty] private string rateText = "0";
     [ObservableProperty] private string minimumPaymentText = "0";
 
-    public bool TryCreate(out ProfileDebt debt)
+    /// <summary>
+    /// Applies the same constraints as <see cref="DebtEditorItem.TryCreateDebt"/>: a positive balance
+    /// and payment and a 0-100% rate. Anything looser would let the profile store debts that a linked
+    /// Debt Payoff scenario immediately rejects.
+    /// </summary>
+    public bool TryCreate(out ProfileDebt debt, out string validationError)
     {
         debt = new ProfileDebt(Id, Name.Trim(), 0, 0, 0);
-        if (string.IsNullOrWhiteSpace(Name) ||
-            !TryNonNegative(BalanceText, out var balance) ||
-            !TryNonNegative(RateText, out var rate) ||
-            !TryNonNegative(MinimumPaymentText, out var minimum))
+        validationError = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(Name))
         {
+            validationError = "Name is required.";
+            return false;
+        }
+
+        if (!TryParse(BalanceText, out var balance) || balance <= 0)
+        {
+            validationError = "Balance must be greater than zero.";
+            return false;
+        }
+
+        if (!TryParse(RateText, out var rate) || rate is < 0 or > 100)
+        {
+            validationError = "Interest rate must be between 0% and 100%.";
+            return false;
+        }
+
+        if (!TryParse(MinimumPaymentText, out var minimum) || minimum <= 0)
+        {
+            validationError = "Minimum payment must be greater than zero.";
             return false;
         }
 
@@ -63,6 +86,6 @@ public sealed partial class ProfileDebtEditorItem : ObservableObject
         MinimumPaymentText = debt.MinimumPayment.ToString("0.##", CultureInfo.CurrentCulture)
     };
 
-    private static bool TryNonNegative(string text, out double value) =>
-        double.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out value) && value >= 0;
+    private static bool TryParse(string text, out double value) =>
+        double.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out value);
 }

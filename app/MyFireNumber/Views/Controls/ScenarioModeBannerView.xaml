@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MyFireNumber.Views.Controls.ScenarioModeBannerView"
+             AutomationId="ScenarioModeBanner"
+             IsVisible="{Binding IsLinkedProfile}">
+    <Border Padding="{StaticResource CardPaddingCompact}"
+            Background="{AppThemeBinding Light={StaticResource SurfaceAccentSoftLight}, Dark={StaticResource SurfaceAccentSoftDark}}"
+            Stroke="{AppThemeBinding Light={StaticResource BorderAccentAltLight}, Dark={StaticResource BorderAccentAltDark}}"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 8">
+        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+            <Label Text="&#xf0c1;"
+                   FontFamily="FontAwesomeSolid"
+                   FontSize="14"
+                   VerticalTextAlignment="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                   SemanticProperties.Description="Linked to Profile" />
+            <Label Grid.Column="1"
+                   AutomationId="ScenarioModeBannerText"
+                   Text="{Binding ScenarioDataModeText}"
+                   FontSize="12"
+                   LineHeight="1.25"
+                   VerticalTextAlignment="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+            <Button Grid.Column="2"
+                    AutomationId="UnlinkFromProfileButton"
+                    Text="Unlink"
+                    FontSize="12"
+                    Padding="12,6"
+                    Command="{Binding UnlinkFromProfileCommand}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                    SemanticProperties.Description="Make this linked scenario an independent standalone snapshot." />
+        </Grid>
+    </Border>
+</ContentView>

@@ -430,7 +430,17 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
             return;
         }
 
-        await LoadResolvedInputsAsync(currentDraft);
+        // Callers include fire-and-forget lifecycle and input-change paths, so a storage or
+        // serialization failure here would otherwise surface as an unobserved task exception.
+        try
+        {
+            await LoadResolvedInputsAsync(currentDraft);
+        }
+        catch (Exception)
+        {
+            linkedResolutionValid = false;
+            ValidationMessage = "Your Profile data could not be read. Try again, or unlink this scenario to keep editing it directly.";
+        }
     }
 
     /// <summary>

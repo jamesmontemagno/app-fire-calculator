@@ -12,6 +12,8 @@ namespace MyFireNumber.Views;
 /// </summary>
 public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
 {
+    private const string ScenarioModeRootId = "ScenarioModeRoot";
+
     private readonly IAdvancedAssumptionsSessionState advancedAssumptionsState;
     private ICalculatorViewModel? calculatorViewModel;
     private Window? subscribedWindow;
@@ -30,60 +32,22 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
 
     private void AddScenarioModeBanner()
     {
-        if (Content is null || Content is Grid { StyleId: "ScenarioModeRoot" })
+        if (Content is null || Content is Grid { StyleId: ScenarioModeRootId })
         {
             return;
         }
 
         var originalContent = Content;
-        var status = new Label
-        {
-            FontSize = 12,
-            VerticalTextAlignment = TextAlignment.Center
-        };
-        status.SetBinding(Label.TextProperty, "ScenarioDataModeText");
-
-        var unlink = new Button
-        {
-            Text = "Unlink",
-            FontSize = 12,
-            Padding = new Thickness(12, 6)
-        };
-        SemanticProperties.SetDescription(unlink, "Make this linked scenario an independent standalone snapshot.");
-        unlink.SetBinding(Button.CommandProperty, "UnlinkFromProfileCommand");
-
-        var bannerContent = new Grid
-        {
-            ColumnDefinitions =
-            {
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Auto)
-            },
-            ColumnSpacing = 12
-        };
-        bannerContent.Add(status);
-        bannerContent.Add(unlink, 1);
-
-        var banner = new Border
-        {
-            Padding = new Thickness(16, 8),
-            Background = new SolidColorBrush(Color.FromArgb("#E8F3EF")),
-            Stroke = new SolidColorBrush(Color.FromArgb("#2B6F57")),
-            StrokeThickness = 1,
-            Content = bannerContent
-        };
-        banner.SetBinding(IsVisibleProperty, "IsLinkedProfile");
-
         var root = new Grid
         {
-            StyleId = "ScenarioModeRoot",
+            StyleId = ScenarioModeRootId,
             RowDefinitions =
             {
                 new RowDefinition(GridLength.Auto),
                 new RowDefinition(GridLength.Star)
             }
         };
-        root.Add(banner);
+        root.Add(new ScenarioModeBannerView { Margin = new Thickness(16, 8, 16, 0) });
         root.Add(originalContent, 0, 1);
         Content = root;
     }

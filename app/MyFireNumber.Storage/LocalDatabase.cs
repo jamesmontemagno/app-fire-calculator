@@ -1,3 +1,6 @@
+using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
+using MyFireNumber.Core.Profile;
 using SQLite;
 
 namespace MyFireNumber.Storage;
@@ -91,6 +94,11 @@ public sealed class LocalDatabase
         var preferences = await connection.Table<CalculatorPreferenceEntity>().ToListAsync();
         var activity = await connection.Table<RecentActivityEntity>().ToListAsync();
         var corruptPayloads = await connection.Table<CorruptPayloadEntity>().ToListAsync();
+        var profile = await connection.Table<ProfileEntity>().FirstOrDefaultAsync();
+        var profileAccounts = await connection.Table<ProfileAccountEntity>().ToListAsync();
+        var profileIncome = await connection.Table<ProfileIncomeEntity>().ToListAsync();
+        var profileExpenses = await connection.Table<ProfileExpenseEntity>().ToListAsync();
+        var profileDebts = await connection.Table<ProfileDebtEntity>().ToListAsync();
 
         return new LocalDataArchive(
             1,
@@ -99,7 +107,14 @@ public sealed class LocalDatabase
             plans.Select(ToRecord).ToArray(),
             preferences.Select(item => new CalculatorPreferenceRecord(item.CalculatorId, item.IsVisible, item.SortOrder)).ToArray(),
             activity.Select(ToRecord).ToArray(),
-            corruptPayloads.Select(ToRecord).ToArray());
+            corruptPayloads.Select(ToRecord).ToArray())
+        {
+            Profile = ToRecord(profile),
+            ProfileAccounts = profileAccounts.Select(ToRecord).ToArray(),
+            ProfileIncome = profileIncome.Select(ToRecord).ToArray(),
+            ProfileExpenses = profileExpenses.Select(ToRecord).ToArray(),
+            ProfileDebts = profileDebts.Select(ToRecord).ToArray()
+        };
     }
 
     public async Task ImportAsync(LocalDataArchive archive, CancellationToken cancellationToken = default)
@@ -119,6 +134,11 @@ public sealed class LocalDatabase
             database.DeleteAll<CalculatorPreferenceEntity>();
             database.DeleteAll<RecentActivityEntity>();
             database.DeleteAll<CorruptPayloadEntity>();
+            database.DeleteAll<ProfileEntity>();
+            database.DeleteAll<ProfileAccountEntity>();
+            database.DeleteAll<ProfileIncomeEntity>();
+            database.DeleteAll<ProfileExpenseEntity>();
+            database.DeleteAll<ProfileDebtEntity>();
 
             database.InsertAll(archive.Drafts.Select(ToEntity));
             database.InsertAll(archive.Plans.Select(ToEntity));
@@ -130,6 +150,11 @@ public sealed class LocalDatabase
             }));
             database.InsertAll(archive.RecentActivity.Select(ToEntity));
             database.InsertAll(archive.CorruptPayloads.Select(ToEntity));
+            database.Insert(ToEntity(archive.Profile));
+            database.InsertAll(archive.ProfileAccounts.Select(ToEntity));
+            database.InsertAll(archive.ProfileIncome.Select(ToEntity));
+            database.InsertAll(archive.ProfileExpenses.Select(ToEntity));
+            database.InsertAll(archive.ProfileDebts.Select(ToEntity));
         });
     }
 
@@ -139,7 +164,11 @@ public sealed class LocalDatabase
             archive.Plans is null ||
             archive.CalculatorPreferences is null ||
             archive.RecentActivity is null ||
-            archive.CorruptPayloads is null)
+            archive.CorruptPayloads is null ||
+            archive.ProfileAccounts is null ||
+            archive.ProfileIncome is null ||
+            archive.ProfileExpenses is null ||
+            archive.ProfileDebts is null)
         {
             throw new InvalidDataException("The archive is missing required local data.");
         }
@@ -151,6 +180,19 @@ public sealed class LocalDatabase
             archive.CorruptPayloads.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.SourceId) || string.IsNullOrWhiteSpace(item.CalculatorId) || string.IsNullOrWhiteSpace(item.PayloadJson)))
         {
             throw new InvalidDataException("The archive contains invalid local data.");
+        }
+
+        if (archive.ProfileAccounts.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Balance < 0 || item.AnnualContribution < 0) ||
+            archive.ProfileIncome.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Amount < 0) ||
+            archive.ProfileExpenses.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Amount < 0) ||
+            archive.ProfileDebts.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Balance < 0 || item.Rate < 0 || item.MinimumPayment < 0))
+        {
+            throw new InvalidDataException("The archive contains invalid profile data.");
+        }
+
+        if (!ProfileAgeCalculator.TryValidate(archive.Profile, out var profileError))
+        {
+            throw new InvalidDataException($"The archive contains invalid profile data. {profileError}");
         }
     }
 
@@ -234,6 +276,100 @@ public sealed class LocalDatabase
         OriginalUpdatedAtUtc = FormatDate(item.OriginalUpdatedAtUtc),
         QuarantinedAtUtc = FormatDate(item.QuarantinedAtUtc)
     };
+
+    private static FinancialProfile ToRecord(ProfileEntity? item) => item is null
+        ? FinancialProfile.Empty
+        : new FinancialProfile(
+            item.DisplayName,
+            item.HouseholdName,
+            item.HouseholdSize,
+            ParseDateOnly(item.BirthDate),
+            ParseDateOnly(item.PhasedRetirementDate),
+            ParseDateOnly(item.TargetRetirementDate),
+            item.AnnualIncome,
+            item.AnnualExpenses);
+
+    private static ProfileAccount ToRecord(ProfileAccountEntity item) => new(
+        item.Id,
+        item.Name,
+        Enum.Parse<RetirementAccountType>(item.Type),
+        item.Balance,
+        item.AnnualContribution,
+        item.AnnualReturn,
+        item.AvailableAge,
+        item.WithdrawalRate,
+        item.PayoutYears,
+        item.EffectiveWithdrawalTaxRate);
+
+    private static ProfileIncome ToRecord(ProfileIncomeEntity item) =>
+        new(item.Id, item.Name, item.Amount, Enum.Parse<CurrencyPeriod>(item.Period), item.Category);
+
+    private static ProfileExpense ToRecord(ProfileExpenseEntity item) =>
+        new(item.Id, item.Name, item.Amount, Enum.Parse<CurrencyPeriod>(item.Period), item.Category);
+
+    private static ProfileDebt ToRecord(ProfileDebtEntity item) =>
+        new(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment);
+
+    private static ProfileEntity ToEntity(FinancialProfile item) => new()
+    {
+        Id = 1,
+        DisplayName = item.DisplayName,
+        HouseholdName = item.HouseholdName,
+        HouseholdSize = item.HouseholdSize,
+        BirthDate = FormatDateOnly(item.BirthDate),
+        PhasedRetirementDate = FormatDateOnly(item.PhasedRetirementDate),
+        TargetRetirementDate = FormatDateOnly(item.TargetRetirementDate),
+        AnnualIncome = item.AnnualIncome,
+        AnnualExpenses = item.AnnualExpenses
+    };
+
+    private static ProfileAccountEntity ToEntity(ProfileAccount item) => new()
+    {
+        Id = item.Id,
+        Name = item.Name,
+        Type = item.Type.ToString(),
+        Balance = item.Balance,
+        AnnualContribution = item.AnnualContribution,
+        AnnualReturn = item.AnnualReturn,
+        AvailableAge = item.AvailableAge,
+        WithdrawalRate = item.WithdrawalRate,
+        PayoutYears = item.PayoutYears,
+        EffectiveWithdrawalTaxRate = item.EffectiveWithdrawalTaxRate
+    };
+
+    private static ProfileIncomeEntity ToEntity(ProfileIncome item) => new()
+    {
+        Id = item.Id,
+        Name = item.Name,
+        Amount = item.Amount,
+        Period = item.Period.ToString(),
+        Category = item.Category
+    };
+
+    private static ProfileExpenseEntity ToEntity(ProfileExpense item) => new()
+    {
+        Id = item.Id,
+        Name = item.Name,
+        Amount = item.Amount,
+        Period = item.Period.ToString(),
+        Category = item.Category
+    };
+
+    private static ProfileDebtEntity ToEntity(ProfileDebt item) => new()
+    {
+        Id = item.Id,
+        Name = item.Name,
+        Balance = item.Balance,
+        Rate = item.Rate,
+        MinimumPayment = item.MinimumPayment
+    };
+
+    private static DateOnly? ParseDateOnly(string? value) => string.IsNullOrWhiteSpace(value)
+        ? null
+        : DateOnly.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
+
+    private static string? FormatDateOnly(DateOnly? value) =>
+        value?.ToString("O", System.Globalization.CultureInfo.InvariantCulture);
 
     private static DateTime ParseDate(string value) => DateTime.Parse(
         value,

@@ -62,7 +62,23 @@ public sealed record LocalDataArchive(
     IReadOnlyList<PlanRecord> Plans,
     IReadOnlyList<CalculatorPreferenceRecord> CalculatorPreferences,
     IReadOnlyList<RecentActivityRecord> RecentActivity,
-    IReadOnlyList<CorruptPayloadRecord> CorruptPayloads);
+    IReadOnlyList<CorruptPayloadRecord> CorruptPayloads)
+{
+    /// <summary>
+    /// The stored profile, or <see cref="FinancialProfile.Empty"/> for an archive written before
+    /// profiles existed. Restoring an empty profile still clears the destination profile so an
+    /// import never blends two people's data.
+    /// </summary>
+    public FinancialProfile Profile { get; init; } = FinancialProfile.Empty;
+
+    public IReadOnlyList<ProfileAccount> ProfileAccounts { get; init; } = [];
+
+    public IReadOnlyList<ProfileIncome> ProfileIncome { get; init; } = [];
+
+    public IReadOnlyList<ProfileExpense> ProfileExpenses { get; init; } = [];
+
+    public IReadOnlyList<ProfileDebt> ProfileDebts { get; init; } = [];
+}
 
 public interface ILocalDataArchiveRepository
 {

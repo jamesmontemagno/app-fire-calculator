@@ -15,9 +15,11 @@ public sealed partial class ProfileViewModel(
     IProfileIncomeRepository profileIncomeRepository,
     IProfileExpenseRepository profileExpenseRepository,
     IProfileDebtRepository profileDebtRepository,
+    ILocalDateProvider localDateProvider,
     INavigationService navigationService) : ObservableObject
 {
     private bool isLoaded;
+    private long loadedDataRevision = -1;
 
     public ObservableCollection<RetirementAccountEditorItem> Accounts { get; } = [];
     public ObservableCollection<ProfileRecurringEditorItem> Income { get; } = [];
@@ -42,6 +44,9 @@ public sealed partial class ProfileViewModel(
     public bool HasNoBirthDate => !HasBirthDate;
     public bool HasNoPhasedRetirementDate => !HasPhasedRetirementDate;
     public bool HasNoTargetRetirementDate => !HasTargetRetirementDate;
+
+    /// <summary>Keeps the birth-date picker from offering a future date the age math cannot use.</summary>
+    public DateTime MaximumBirthDate => localDateProvider.Today.ToDateTime(TimeOnly.MinValue);
     public bool IsProfileComplete => HasBirthDate && HasTargetRetirementDate &&
         !string.IsNullOrWhiteSpace(AnnualIncomeText) && !string.IsNullOrWhiteSpace(AnnualExpensesText);
     public string CompletionText => IsProfileComplete
@@ -52,7 +57,7 @@ public sealed partial class ProfileViewModel(
     partial void OnHasBirthDateChanged(bool value)
     {
         OnPropertyChanged(nameof(HasNoBirthDate));
-        OnPropertyChanged(nameof(IsProfileComplete));
+        NotifyCompletionChanged();
     }
 
     partial void OnHasPhasedRetirementDateChanged(bool value) => OnPropertyChanged(nameof(HasNoPhasedRetirementDate));
@@ -60,30 +65,66 @@ public sealed partial class ProfileViewModel(
     partial void OnHasTargetRetirementDateChanged(bool value)
     {
         OnPropertyChanged(nameof(HasNoTargetRetirementDate));
-        OnPropertyChanged(nameof(IsProfileComplete));
+        NotifyCompletionChanged();
     }
-    partial void OnAnnualIncomeTextChanged(string value) => OnPropertyChanged(nameof(IsProfileComplete));
-    partial void OnAnnualExpensesTextChanged(string value) => OnPropertyChanged(nameof(IsProfileComplete));
+    partial void OnAnnualIncomeTextChanged(string value) => NotifyCompletionChanged();
+    partial void OnAnnualExpensesTextChanged(string value) => NotifyCompletionChanged();
+
+    /// <summary>
+    /// <see cref="CompletionText"/> is derived from <see cref="IsProfileComplete"/>, so both have to
+    /// be raised together or the completion card keeps stale guidance until the next save.
+    /// </summary>
+    private void NotifyCompletionChanged()
+    {
+        OnPropertyChanged(nameof(IsProfileComplete));
+        OnPropertyChanged(nameof(CompletionText));
+    }
+
+    /// <summary>
+    /// Drops the loaded state so the next appearance re-reads storage. Reset and import replace the
+    /// profile tables underneath this singleton view model, and without this the editor collections
+    /// would keep -- and re-save -- data the user just deleted.
+    /// </summary>
+    public void Invalidate() => isLoaded = false;
 
     public async Task LoadAsync()
     {
-        if (isLoaded)
+        if (isLoaded && loadedDataRevision == profileService.DataRevision)
         {
             return;
         }
 
         await profileService.LoadAsync();
         ApplyProfile(profileService.Current);
-        var accounts = await profileAccountRepository.ListAsync();
+
         Accounts.Clear();
-        foreach (var account in accounts)
+        Income.Clear();
+        Expenses.Clear();
+        Debts.Clear();
+
+        foreach (var account in await profileAccountRepository.ListAsync())
         {
             Accounts.Add(ToEditor(account));
         }
-        foreach (var item in await profileIncomeRepository.ListAsync()) Income.Add(ProfileRecurringEditorItem.FromIncome(item));
-        foreach (var item in await profileExpenseRepository.ListAsync()) Expenses.Add(ProfileRecurringEditorItem.FromExpense(item));
-        foreach (var item in await profileDebtRepository.ListAsync()) Debts.Add(ProfileDebtEditorItem.FromDebt(item));
 
+        foreach (var item in await profileIncomeRepository.ListAsync())
+        {
+            Income.Add(ProfileRecurringEditorItem.FromIncome(item));
+        }
+
+        foreach (var item in await profileExpenseRepository.ListAsync())
+        {
+            Expenses.Add(ProfileRecurringEditorItem.FromExpense(item));
+        }
+
+        foreach (var item in await profileDebtRepository.ListAsync())
+        {
+            Debts.Add(ProfileDebtEditorItem.FromDebt(item));
+        }
+
+        ValidationMessage = string.Empty;
+        StatusMessage = string.Empty;
+        loadedDataRevision = profileService.DataRevision;
         isLoaded = true;
     }
 
@@ -95,6 +136,10 @@ public sealed partial class ProfileViewModel(
             return;
         }
 
+        // Each inventory category is validated and persisted exactly once, independently of the
+        // others. Nesting these loops inside the account loop saved every item once per account and
+        // skipped them entirely for a profile with no accounts.
+        var accounts = new List<ProfileAccount>(Accounts.Count);
         foreach (var editor in Accounts)
         {
             if (!editor.TryCreateAccount(out var account, out var error))
@@ -104,35 +149,7 @@ public sealed partial class ProfileViewModel(
                 return;
             }
 
-            foreach (var item in Income)
-            {
-                if (string.IsNullOrWhiteSpace(item.Name) || !item.TryGetAmount(out var amount))
-                {
-                    ValidationMessage = "Each income item needs a name and non-negative amount.";
-                    return;
-                }
-                await profileIncomeRepository.SaveAsync(new ProfileIncome(item.Id, item.Name, amount, item.Period, item.Category));
-            }
-            foreach (var item in Expenses)
-            {
-                if (string.IsNullOrWhiteSpace(item.Name) || !item.TryGetAmount(out var amount))
-                {
-                    ValidationMessage = "Each expense needs a name and non-negative amount.";
-                    return;
-                }
-                await profileExpenseRepository.SaveAsync(new ProfileExpense(item.Id, item.Name, amount, item.Period, item.Category));
-            }
-            foreach (var item in Debts)
-            {
-                if (!item.TryCreate(out var debt))
-                {
-                    ValidationMessage = "Each debt needs a name and valid non-negative values.";
-                    return;
-                }
-                await profileDebtRepository.SaveAsync(debt);
-            }
-
-            await profileAccountRepository.SaveAsync(new ProfileAccount(
+            accounts.Add(new ProfileAccount(
                 account.Id,
                 account.Name,
                 account.Type,
@@ -145,11 +162,68 @@ public sealed partial class ProfileViewModel(
                 account.EffectiveWithdrawalTaxRate));
         }
 
+        var income = new List<ProfileIncome>(Income.Count);
+        foreach (var item in Income)
+        {
+            if (string.IsNullOrWhiteSpace(item.Name) || !item.TryGetAmount(out var amount))
+            {
+                ValidationMessage = "Each income item needs a name and non-negative amount.";
+                return;
+            }
+
+            income.Add(new ProfileIncome(item.Id, item.Name, amount, item.Period, item.Category));
+        }
+
+        var expenses = new List<ProfileExpense>(Expenses.Count);
+        foreach (var item in Expenses)
+        {
+            if (string.IsNullOrWhiteSpace(item.Name) || !item.TryGetAmount(out var amount))
+            {
+                ValidationMessage = "Each expense needs a name and non-negative amount.";
+                return;
+            }
+
+            expenses.Add(new ProfileExpense(item.Id, item.Name, amount, item.Period, item.Category));
+        }
+
+        var debts = new List<ProfileDebt>(Debts.Count);
+        foreach (var item in Debts)
+        {
+            if (!item.TryCreate(out var debt, out var debtError))
+            {
+                ValidationMessage = $"Debt {item.Name}: {debtError}";
+                return;
+            }
+
+            debts.Add(debt);
+        }
+
+        // Everything is validated before anything is written, so a late failure cannot leave the
+        // profile half-saved.
+        foreach (var account in accounts)
+        {
+            await profileAccountRepository.SaveAsync(account);
+        }
+
+        foreach (var item in income)
+        {
+            await profileIncomeRepository.SaveAsync(item);
+        }
+
+        foreach (var item in expenses)
+        {
+            await profileExpenseRepository.SaveAsync(item);
+        }
+
+        foreach (var debt in debts)
+        {
+            await profileDebtRepository.SaveAsync(debt);
+        }
+
         await profileService.SaveAsync(profile);
         ValidationMessage = string.Empty;
         StatusMessage = "Profile saved on this device.";
-        OnPropertyChanged(nameof(IsProfileComplete));
-        OnPropertyChanged(nameof(CompletionText));
+        NotifyCompletionChanged();
     }
 
     [RelayCommand]
@@ -244,7 +318,7 @@ public sealed partial class ProfileViewModel(
             annualIncome,
             annualExpenses);
 
-        if (!ProfileAgeCalculator.TryValidate(profile, out var validationError))
+        if (!ProfileAgeCalculator.TryValidate(profile, localDateProvider.Today, out var validationError))
         {
             ValidationMessage = validationError;
             return false;
@@ -266,7 +340,7 @@ public sealed partial class ProfileViewModel(
         if (profile.BirthDate is DateOnly birth) BirthDate = birth.ToDateTime(TimeOnly.MinValue);
         if (profile.PhasedRetirementDate is DateOnly phased) PhasedRetirementDate = phased.ToDateTime(TimeOnly.MinValue);
         if (profile.TargetRetirementDate is DateOnly target) TargetRetirementDate = target.ToDateTime(TimeOnly.MinValue);
-        OnPropertyChanged(nameof(CompletionText));
+        NotifyCompletionChanged();
     }
 
     private static RetirementAccountEditorItem ToEditor(ProfileAccount account) =>

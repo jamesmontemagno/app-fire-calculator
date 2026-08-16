@@ -17,9 +17,18 @@ public interface IProfileService
 {
     FinancialProfile Current { get; }
 
+    /// <summary>
+    /// Increments whenever the profile is replaced from outside the Profile editor, such as a data
+    /// reset or backup import, so cached editor state knows it must reload.
+    /// </summary>
+    long DataRevision { get; }
+
     Task LoadAsync(CancellationToken cancellationToken = default);
 
     Task SaveAsync(FinancialProfile profile, CancellationToken cancellationToken = default);
+
+    /// <summary>Reloads the profile and signals that any cached editor state is stale.</summary>
+    Task NotifyExternalChangeAsync(CancellationToken cancellationToken = default);
 
     int? DerivedCurrentAge { get; }
 
@@ -33,12 +42,13 @@ public sealed class ProfileService(
     ILocalDateProvider localDateProvider) : IProfileService
 {
     private FinancialProfile current = FinancialProfile.Empty;
+    private long dataRevision;
 
     public FinancialProfile Current => current;
 
-    public int? DerivedCurrentAge => current.BirthDate is DateOnly birthDate
-        ? ProfileAgeCalculator.AgeOn(birthDate, localDateProvider.Today)
-        : null;
+    public long DataRevision => Interlocked.Read(ref dataRevision);
+
+    public int? DerivedCurrentAge => DeriveAge(localDateProvider.Today);
 
     public int? DerivedPhasedRetirementAge => DeriveAge(current.PhasedRetirementDate);
 
@@ -55,7 +65,17 @@ public sealed class ProfileService(
         current = profile;
     }
 
-    private int? DeriveAge(DateOnly? date) => current.BirthDate is DateOnly birthDate && date is DateOnly targetDate
-        ? ProfileAgeCalculator.AgeOn(birthDate, targetDate)
-        : null;
+    public async Task NotifyExternalChangeAsync(CancellationToken cancellationToken = default)
+    {
+        Interlocked.Increment(ref dataRevision);
+        await LoadAsync(cancellationToken);
+    }
+
+    // Returns null rather than throwing for a date that precedes the birth date. Validation rejects
+    // those profiles, but imported or otherwise unexpected data must not crash age derivation on a
+    // startup or calculator-default path.
+    private int? DeriveAge(DateOnly? date) =>
+        current.BirthDate is DateOnly birthDate && date is DateOnly targetDate && targetDate >= birthDate
+            ? ProfileAgeCalculator.AgeOn(birthDate, targetDate)
+            : null;
 }

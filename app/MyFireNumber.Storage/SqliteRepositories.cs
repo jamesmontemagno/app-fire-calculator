@@ -291,6 +291,9 @@ public sealed class SqliteProfileDebtRepository(LocalDatabase database) : IProfi
     public async Task SaveAsync(ProfileDebt item, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(item.Id); ArgumentException.ThrowIfNullOrWhiteSpace(item.Name);
+        ArgumentOutOfRangeException.ThrowIfNegative(item.Balance);
+        ArgumentOutOfRangeException.ThrowIfNegative(item.Rate);
+        ArgumentOutOfRangeException.ThrowIfNegative(item.MinimumPayment);
         await database.InitializeAsync(cancellationToken);
         await database.Connection.InsertOrReplaceAsync(new ProfileDebtEntity { Id = item.Id, Name = item.Name.Trim(), Balance = item.Balance, Rate = item.Rate, MinimumPayment = item.MinimumPayment });
     }

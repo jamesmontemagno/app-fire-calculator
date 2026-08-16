@@ -32,4 +32,17 @@ public sealed class SqliteProfileInventoryRepositoryTests : IAsyncLifetime
         Assert.Single(await expenses.ListAsync());
         Assert.Single(await debts.ListAsync());
     }
+
+    [Fact]
+    public async Task SaveAsync_RejectsNegativeDebtValues()
+    {
+        var repository = new SqliteProfileDebtRepository(new LocalDatabase(databasePath));
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => repository.SaveAsync(new ProfileDebt("card", "Card", -1, 0.2, 150)));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => repository.SaveAsync(new ProfileDebt("card", "Card", 100, -0.2, 150)));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => repository.SaveAsync(new ProfileDebt("card", "Card", 100, 0.2, -150)));
+    }
 }

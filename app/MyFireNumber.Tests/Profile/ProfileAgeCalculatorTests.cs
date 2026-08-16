@@ -55,4 +55,25 @@ public sealed class ProfileAgeCalculatorTests
         Assert.False(valid);
         Assert.Contains("on or after", message);
     }
+
+    [Fact]
+    public void TryValidate_RejectsBirthDateInTheFuture()
+    {
+        var today = new DateOnly(2026, 8, 16);
+        var profile = FinancialProfile.Empty with { BirthDate = today.AddDays(1) };
+
+        var valid = ProfileAgeCalculator.TryValidate(profile, today, out var message);
+
+        Assert.False(valid);
+        Assert.Contains("future", message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void TryValidate_AcceptsBirthDateOfToday()
+    {
+        var today = new DateOnly(2026, 8, 16);
+        var profile = FinancialProfile.Empty with { BirthDate = today };
+
+        Assert.True(ProfileAgeCalculator.TryValidate(profile, today, out _));
+    }
 }

@@ -72,7 +72,14 @@ public static class ProfileAgeCalculator
             ? new DateOnly(year, 2, 28)
             : new DateOnly(year, birthDate.Month, birthDate.Day);
 
-    public static bool TryValidate(FinancialProfile profile, out string validationMessage)
+    public static bool TryValidate(FinancialProfile profile, out string validationMessage) =>
+        TryValidate(profile, today: null, out validationMessage);
+
+    /// <summary>
+    /// Validates a profile. Supply <paramref name="today"/> to reject a birth date in the future,
+    /// which <see cref="AgeOn"/> cannot evaluate and would otherwise throw during resolution.
+    /// </summary>
+    public static bool TryValidate(FinancialProfile profile, DateOnly? today, out string validationMessage)
     {
         validationMessage = string.Empty;
         if (profile.HouseholdSize is <= 0)
@@ -90,6 +97,12 @@ public static class ProfileAgeCalculator
         if (profile.BirthDate is not DateOnly birthDate)
         {
             return true;
+        }
+
+        if (today is DateOnly currentDate && birthDate > currentDate)
+        {
+            validationMessage = "Birth date cannot be in the future.";
+            return false;
         }
 
         if (profile.PhasedRetirementDate is DateOnly phasedDate && phasedDate <= birthDate)
