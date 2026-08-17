@@ -333,7 +333,6 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
             CreateLabelledAxis(
                 "Age",
                 result.Projections
-                    .Where((_, index) => index % Math.Max(1, result.Projections.Count / 6) == 0)
                     .Select(point => point.Age.ToString(CultureInfo.CurrentCulture)))
         ];
         ProjectionChartDescription = $"Retirement cash-flow projection through age {draft.PlanThroughAge}. Ending balance is {FormatCurrency(result.EndingBalance)}.";
