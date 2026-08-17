@@ -209,7 +209,9 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
         {
             InflationRate = defaults.InflationRate,
             CurrentAge = defaults.CurrentAge,
-            SemiRetirementAge = profileService.DerivedPhasedRetirementAge ?? defaults.RetirementAge
+            SemiRetirementAge = profileService.DerivedPhasedRetirementAge ?? defaults.RetirementAge,
+            Accounts = [],
+            IncomeSources = []
         };
     }
 }
