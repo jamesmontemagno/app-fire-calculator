@@ -152,7 +152,7 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                            <Label Text="&#xf0d6;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" />
+                            <Label Text="&#xf0d6;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" SemanticProperties.Description="Recurring income" />
                             <Label Grid.Column="1" Text="Recurring income" Style="{StaticResource CalculatorSectionHeading}" />
                             <Button Grid.Column="2" Text="Add" Command="{Binding AddIncomeCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
@@ -162,10 +162,9 @@
                                 <DataTemplate x:DataType="viewModels:ProfileRecurringEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
                                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                            <Grid ColumnDefinitions="*,32,44" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <Grid.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" /></Grid.GestureRecognizers>
+                                            <Grid ColumnDefinitions="*,Auto,44" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} income.'}" />
                                                 <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveIncomeCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} income.'}" />
                                             </Grid>
                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
@@ -202,7 +201,7 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                            <Label Text="&#xf53d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" />
+                            <Label Text="&#xf53d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" SemanticProperties.Description="Recurring expenses" />
                             <Label Grid.Column="1" Text="Recurring expenses" Style="{StaticResource CalculatorSectionHeading}" />
                             <Button Grid.Column="2" Text="Add" Command="{Binding AddExpenseCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
@@ -212,10 +211,9 @@
                                 <DataTemplate x:DataType="viewModels:ProfileRecurringEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
                                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                            <Grid ColumnDefinitions="*,32,44" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <Grid.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" /></Grid.GestureRecognizers>
+                                            <Grid ColumnDefinitions="*,Auto,44" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} expense.'}" />
                                                 <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveExpenseCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} expense.'}" />
                                             </Grid>
                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
@@ -252,7 +250,7 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                            <Label Text="&#xf1c0;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" />
+                            <Label Text="&#xf1c0;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" SemanticProperties.Description="Accounts" />
                             <Label Grid.Column="1" Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
                             <Button Grid.Column="2" Text="Add" Command="{Binding AddAccountCommand}" SemanticProperties.Description="Add a reusable account."><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
@@ -343,7 +341,7 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                            <Label Text="&#xf09d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" />
+                            <Label Text="&#xf09d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" SemanticProperties.Description="Debts" />
                             <Label Grid.Column="1" Text="Debts" Style="{StaticResource CalculatorSectionHeading}" />
                             <Button Grid.Column="2" Text="Add" Command="{Binding AddDebtCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
@@ -353,10 +351,9 @@
                                 <DataTemplate x:DataType="viewModels:ProfileDebtEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
                                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                            <Grid ColumnDefinitions="*,32,44" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <Grid.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" /></Grid.GestureRecognizers>
+                                            <Grid ColumnDefinitions="*,Auto,44" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} debt.'}" />
                                                 <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} debt.'}" />
                                             </Grid>
                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
