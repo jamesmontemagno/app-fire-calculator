@@ -114,6 +114,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<QuizPage>();
 		builder.Services.AddTransient<WelcomePage>();
 		builder.Services.AddTransient<DefaultsOnboardingPage>();
+		builder.Services.AddTransient<TimelineOnboardingPage>();
 		builder.Services.AddTransient<WithdrawalRateOnboardingPage>();
 		builder.Services.AddTransient<OnboardingChoicePage>();
 		builder.Services.AddTransient<RetirementAnnualDetailsPage>();
@@ -137,6 +138,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<QuizViewModel>();
 		builder.Services.AddTransient<WelcomeViewModel>();
 		builder.Services.AddTransient<DefaultsOnboardingViewModel>();
+		builder.Services.AddTransient<TimelineOnboardingViewModel>();
 		builder.Services.AddTransient<WithdrawalRateOnboardingViewModel>();
 		builder.Services.AddTransient<OnboardingChoiceViewModel>();
 		builder.Services.AddTransient<RetirementAnnualDetailsViewModel>();

@@ -76,4 +76,58 @@ public sealed class ProfileAgeCalculatorTests
 
         Assert.True(ProfileAgeCalculator.TryValidate(profile, today, out _));
     }
+
+    [Theory]
+    [InlineData(1990, 8, 16, 55, 2045, 8, 16)]
+    [InlineData(1990, 12, 31, 65, 2055, 12, 31)]
+    [InlineData(2000, 2, 29, 55, 2055, 2, 28)]
+    [InlineData(2000, 2, 29, 60, 2060, 2, 29)]
+    public void DateAtAge_ReturnsBirthdayInTheTargetYear(
+        int birthYear,
+        int birthMonth,
+        int birthDay,
+        int age,
+        int expectedYear,
+        int expectedMonth,
+        int expectedDay)
+    {
+        var date = ProfileAgeCalculator.DateAtAge(new DateOnly(birthYear, birthMonth, birthDay), age);
+
+        Assert.Equal(new DateOnly(expectedYear, expectedMonth, expectedDay), date);
+    }
+
+    [Fact]
+    public void DateAtAge_RoundTripsThroughAgeOn()
+    {
+        var birthDate = new DateOnly(1988, 3, 7);
+
+        var retirementDate = ProfileAgeCalculator.DateAtAge(birthDate, 62);
+
+        Assert.Equal(62, ProfileAgeCalculator.AgeOn(birthDate, retirementDate));
+    }
+
+    [Theory]
+    [InlineData(30, 30, 90)]
+    [InlineData(20, 30, 90)]
+    [InlineData(64, 64, 90)]
+    public void RetirementAgeRange_StartsAtTheLaterOfTheFloorAndCurrentAge(
+        int currentAge,
+        int expectedMinimum,
+        int expectedMaximum)
+    {
+        var range = ProfileAgeCalculator.RetirementAgeRange(currentAge, 30, 90);
+
+        Assert.Equal(expectedMinimum, range.Minimum);
+        Assert.Equal(expectedMaximum, range.Maximum);
+    }
+
+    [Fact]
+    public void RetirementAgeRange_NeverInvertsForSomeoneOlderThanTheCeiling()
+    {
+        var range = ProfileAgeCalculator.RetirementAgeRange(105, 30, 90);
+
+        Assert.Equal(90, range.Minimum);
+        Assert.Equal(90, range.Maximum);
+        Assert.True(range.Minimum <= range.Maximum);
+    }
 }

@@ -45,7 +45,6 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
     {
         get
         {
-            var profile = profileService.Current;
             return new(
                 Preferences.Default.Get(ExpectedReturnKey, 0.07),
                 Preferences.Default.Get(InflationRateKey, 0.03),
@@ -53,8 +52,10 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
                 profileService.DerivedCurrentAge ?? Preferences.Default.Get(CurrentAgeKey, 30),
                 profileService.DerivedTargetRetirementAge ?? Preferences.Default.Get(RetirementAgeKey, 55))
             {
-                AnnualIncome = profile.AnnualIncome ?? Preferences.Default.Get(AnnualIncomeKey, StandardFireDraft.Default.AnnualIncome),
-                AnnualExpenses = profile.AnnualExpenses ?? Preferences.Default.Get(AnnualExpensesKey, StandardFireDraft.Default.AnnualExpenses)
+                // Effective values so a new scenario starts from the same income and spending a
+                // linked plan would resolve, whether the user itemised them or answered once.
+                AnnualIncome = profileService.EffectiveAnnualIncome ?? Preferences.Default.Get(AnnualIncomeKey, StandardFireDraft.Default.AnnualIncome),
+                AnnualExpenses = profileService.EffectiveAnnualExpenses ?? Preferences.Default.Get(AnnualExpensesKey, StandardFireDraft.Default.AnnualExpenses)
             };
         }
     }

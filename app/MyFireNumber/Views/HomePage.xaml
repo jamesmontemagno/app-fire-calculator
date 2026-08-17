@@ -22,6 +22,14 @@
                            SemanticProperties.Description="Financial progress" />
                     <VerticalStackLayout Grid.Column="1" Spacing="{StaticResource SpaceSm}">
                     <Label Text="MY FIRE NUMBER"
+                           IsVisible="{Binding HasNoGreeting}"
+                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                           FontAttributes="Bold"
+                           FontSize="12"
+                           CharacterSpacing="1.2" />
+                    <Label Text="{Binding Greeting}"
+                           AutomationId="HomeGreeting"
+                           IsVisible="{Binding HasGreeting}"
                            TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                            FontAttributes="Bold"
                            FontSize="12"

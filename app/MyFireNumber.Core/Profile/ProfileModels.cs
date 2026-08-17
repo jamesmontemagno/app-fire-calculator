@@ -56,6 +56,19 @@ public sealed record ProfileAccount(
 
 public static class ProfileAgeCalculator
 {
+    /// <summary>
+    /// The selectable retirement-age range for a person of <paramref name="currentAge"/>.
+    /// <para>The minimum never exceeds the maximum: someone already older than
+    /// <paramref name="ceiling"/> would otherwise produce an inverted range that a slider cannot
+    /// represent and that <see cref="Math.Clamp(int, int, int)"/> rejects.</para>
+    /// </summary>
+    public static (int Minimum, int Maximum) RetirementAgeRange(int currentAge, int floor, int ceiling)
+    {
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(floor, ceiling);
+        var minimum = Math.Min(Math.Max(floor, currentAge), ceiling);
+        return (minimum, ceiling);
+    }
+
     public static int AgeOn(DateOnly birthDate, DateOnly date)
     {
         if (date < birthDate)
@@ -71,6 +84,17 @@ public static class ProfileAgeCalculator
         birthDate.Month == 2 && birthDate.Day == 29 && !DateTime.IsLeapYear(year)
             ? new DateOnly(year, 2, 28)
             : new DateOnly(year, birthDate.Month, birthDate.Day);
+
+    /// <summary>
+    /// The date the person turns <paramref name="age"/>. Onboarding asks for a retirement age
+    /// because it is quicker to answer than a calendar date, while the profile stores dates, so this
+    /// is the single conversion both use.
+    /// </summary>
+    public static DateOnly DateAtAge(DateOnly birthDate, int age)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(age);
+        return BirthdayInYear(birthDate, birthDate.Year + age);
+    }
 
     public static bool TryValidate(FinancialProfile profile, out string validationMessage) =>
         TryValidate(profile, today: null, out validationMessage);
