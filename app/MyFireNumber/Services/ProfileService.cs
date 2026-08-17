@@ -24,8 +24,7 @@ public interface IProfileService
     long DataRevision { get; }
 
     /// <summary>
-    /// Annual income for new scenarios, applying the same itemised-wins-over-household rule that
-    /// linked plans use, so both routes agree. Null when the user has provided neither.
+    /// Annual income from the itemized Profile income collection. Null when no income is entered.
     /// </summary>
     double? EffectiveAnnualIncome { get; }
 
@@ -83,8 +82,7 @@ public sealed class ProfileService(
         await profileRepository.SaveAsync(profile, cancellationToken);
         current = profile;
 
-        // Re-read the inventory so a saved household figure does not keep overriding, or being
-        // overridden by, a stale itemised total.
+        // Re-read the inventory so calculator defaults immediately use the newly saved itemized totals.
         await LoadAsync(cancellationToken);
     }
 

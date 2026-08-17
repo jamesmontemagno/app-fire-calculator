@@ -1,5 +1,4 @@
 using MyFireNumber.Core.Calculations;
-using MyFireNumber.Core.Presentation;
 using MyFireNumber.Core.Profile;
 using SQLite;
 
@@ -7,9 +6,6 @@ namespace MyFireNumber.Storage;
 
 public sealed class LocalDatabase
 {
-    private const string SchemaVersionKey = "schema-version";
-    private const int CurrentSchemaVersion = 5;
-
     private readonly SQLiteAsyncConnection connection;
     private readonly SemaphoreSlim initializationLock = new(1, 1);
     private bool isInitialized;
@@ -36,29 +32,7 @@ public sealed class LocalDatabase
                 return;
             }
 
-            await connection.CreateTableAsync<SchemaMetadataEntity>();
-
-            var schemaVersion = await connection.Table<SchemaMetadataEntity>()
-                .Where(entry => entry.Key == SchemaVersionKey)
-                .FirstOrDefaultAsync();
-
-            if (schemaVersion is null)
-            {
-                await CreateCurrentSchemaAsync();
-                await connection.InsertAsync(new SchemaMetadataEntity
-                {
-                    Key = SchemaVersionKey,
-                    Value = CurrentSchemaVersion.ToString(System.Globalization.CultureInfo.InvariantCulture)
-                });
-            }
-            else if (!int.TryParse(schemaVersion.Value, out var storedVersion) || storedVersion > CurrentSchemaVersion)
-            {
-                throw new InvalidOperationException("The local data schema is not supported by this version of My Fire Number.");
-            }
-            else
-            {
-                await ApplyMigrationsAsync(storedVersion, schemaVersion);
-            }
+            await CreateCurrentSchemaAsync();
 
             isInitialized = true;
         }
@@ -101,7 +75,6 @@ public sealed class LocalDatabase
         var profileDebts = await connection.Table<ProfileDebtEntity>().ToListAsync();
 
         return new LocalDataArchive(
-            1,
             DateTime.UtcNow,
             drafts.Select(ToRecord).ToArray(),
             plans.Select(ToRecord).ToArray(),
@@ -120,11 +93,6 @@ public sealed class LocalDatabase
     public async Task ImportAsync(LocalDataArchive archive, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(archive);
-        if (archive.Version != 1)
-        {
-            throw new InvalidDataException($"Archive version {archive.Version} is not supported.");
-        }
-
         ValidateArchive(archive);
         await InitializeAsync(cancellationToken);
         await connection.RunInTransactionAsync(database =>
@@ -183,8 +151,20 @@ public sealed class LocalDatabase
         }
 
         if (archive.ProfileAccounts.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Balance < 0 || item.AnnualContribution < 0) ||
-            archive.ProfileIncome.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Amount < 0) ||
-            archive.ProfileExpenses.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Amount < 0) ||
+            archive.ProfileIncome.Any(item =>
+                string.IsNullOrWhiteSpace(item.Id) ||
+                string.IsNullOrWhiteSpace(item.Name) ||
+                item.AnnualAmount < 0 ||
+                item.StartAge is < 18 or > 100 ||
+                item.EndAge < item.StartAge ||
+                item.EndAge > 100 ||
+                item.AnnualGrowth is < -1 or > 1 ||
+                item.TaxRate is < 0 or > 1) ||
+            archive.ProfileExpenses.Any(item =>
+                string.IsNullOrWhiteSpace(item.Id) ||
+                string.IsNullOrWhiteSpace(item.Name) ||
+                item.AnnualAmount < 0 ||
+                item.StartAge is < 18 or > 100) ||
             archive.ProfileDebts.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Balance < 0 || item.Rate < 0 || item.MinimumPayment < 0))
         {
             throw new InvalidDataException("The archive contains invalid profile data.");
@@ -289,7 +269,7 @@ public sealed class LocalDatabase
             item.AnnualIncome,
             item.AnnualExpenses);
 
-    private static ProfileAccount ToRecord(ProfileAccountEntity item) => new(
+    private static RetirementAccount ToRecord(ProfileAccountEntity item) => new(
         item.Id,
         item.Name,
         Enum.Parse<RetirementAccountType>(item.Type),
@@ -301,13 +281,20 @@ public sealed class LocalDatabase
         item.PayoutYears,
         item.EffectiveWithdrawalTaxRate);
 
-    private static ProfileIncome ToRecord(ProfileIncomeEntity item) =>
-        new(item.Id, item.Name, item.Amount, Enum.Parse<CurrencyPeriod>(item.Period), item.Category);
+    private static RetirementIncomeSource ToRecord(ProfileIncomeEntity item) => new(
+        item.Id,
+        item.Name,
+        item.AnnualAmount,
+        item.StartAge,
+        item.EndAge,
+        item.AnnualGrowth,
+        item.IsAfterTax,
+        item.TaxRate);
 
-    private static ProfileExpense ToRecord(ProfileExpenseEntity item) =>
-        new(item.Id, item.Name, item.Amount, Enum.Parse<CurrencyPeriod>(item.Period), item.Category);
+    private static RetirementExpense ToRecord(ProfileExpenseEntity item) =>
+        new(item.Id, item.Name, item.AnnualAmount, item.StartAge);
 
-    private static ProfileDebt ToRecord(ProfileDebtEntity item) =>
+    private static DebtItem ToRecord(ProfileDebtEntity item) =>
         new(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment);
 
     private static ProfileEntity ToEntity(FinancialProfile item) => new()
@@ -323,7 +310,7 @@ public sealed class LocalDatabase
         AnnualExpenses = item.AnnualExpenses
     };
 
-    private static ProfileAccountEntity ToEntity(ProfileAccount item) => new()
+    private static ProfileAccountEntity ToEntity(RetirementAccount item) => new()
     {
         Id = item.Id,
         Name = item.Name,
@@ -337,25 +324,27 @@ public sealed class LocalDatabase
         EffectiveWithdrawalTaxRate = item.EffectiveWithdrawalTaxRate
     };
 
-    private static ProfileIncomeEntity ToEntity(ProfileIncome item) => new()
+    private static ProfileIncomeEntity ToEntity(RetirementIncomeSource item) => new()
     {
         Id = item.Id,
         Name = item.Name,
-        Amount = item.Amount,
-        Period = item.Period.ToString(),
-        Category = item.Category
+        AnnualAmount = item.AnnualAmount,
+        StartAge = item.StartAge,
+        EndAge = item.EndAge,
+        AnnualGrowth = item.AnnualGrowth,
+        IsAfterTax = item.IsAfterTax,
+        TaxRate = item.TaxRate
     };
 
-    private static ProfileExpenseEntity ToEntity(ProfileExpense item) => new()
+    private static ProfileExpenseEntity ToEntity(RetirementExpense item) => new()
     {
         Id = item.Id,
         Name = item.Name,
-        Amount = item.Amount,
-        Period = item.Period.ToString(),
-        Category = item.Category
+        AnnualAmount = item.AnnualAmount,
+        StartAge = item.StartAge
     };
 
-    private static ProfileDebtEntity ToEntity(ProfileDebt item) => new()
+    private static ProfileDebtEntity ToEntity(DebtItem item) => new()
     {
         Id = item.Id,
         Name = item.Name,
@@ -394,62 +383,6 @@ public sealed class LocalDatabase
         await connection.CreateTableAsync<ProfileDebtEntity>();
     }
 
-    private async Task ApplyMigrationsAsync(int storedVersion, SchemaMetadataEntity schemaVersion)
-    {
-        if (storedVersion < 1)
-        {
-            await connection.CreateTableAsync<DraftEntity>();
-            await connection.CreateTableAsync<PlanEntity>();
-            await connection.CreateTableAsync<CalculatorPreferenceEntity>();
-        }
-
-        if (storedVersion < 2)
-        {
-            await connection.CreateTableAsync<RecentActivityEntity>();
-        }
-
-        if (storedVersion < 3)
-        {
-            await connection.CreateTableAsync<CorruptPayloadEntity>();
-        }
-
-        if (storedVersion < 4)
-        {
-            await connection.CreateTableAsync<ProfileEntity>();
-            await connection.CreateTableAsync<ProfileAccountEntity>();
-        }
-
-        if (storedVersion < 5)
-        {
-            await connection.CreateTableAsync<ProfileIncomeEntity>();
-            await connection.CreateTableAsync<ProfileExpenseEntity>();
-            await connection.CreateTableAsync<ProfileDebtEntity>();
-            await AddColumnIfMissingAsync("drafts", "DataMode", "TEXT NOT NULL DEFAULT 'Standalone'");
-            await AddColumnIfMissingAsync("drafts", "ProfileRevision", "INTEGER NULL");
-            await AddColumnIfMissingAsync("plans", "DataMode", "TEXT NOT NULL DEFAULT 'Standalone'");
-            await AddColumnIfMissingAsync("plans", "ProfileRevision", "INTEGER NULL");
-        }
-
-        if (storedVersion != CurrentSchemaVersion)
-        {
-            schemaVersion.Value = CurrentSchemaVersion.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            await connection.UpdateAsync(schemaVersion);
-        }
-    }
-
-    private async Task AddColumnIfMissingAsync(string tableName, string columnName, string definition)
-    {
-        var columns = await connection.GetTableInfoAsync(tableName);
-        if (columns.Count == 0)
-        {
-            return;
-        }
-
-        if (columns.All(column => !string.Equals(column.Name, columnName, StringComparison.OrdinalIgnoreCase)))
-        {
-            await connection.ExecuteAsync($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {definition}");
-        }
-    }
 }
 
 [Table("drafts")]
@@ -530,16 +463,6 @@ internal sealed class RecentActivityEntity
 
     [NotNull]
     public string LastOpenedAtUtc { get; set; } = string.Empty;
-}
-
-[Table("schema_metadata")]
-internal sealed class SchemaMetadataEntity
-{
-    [PrimaryKey]
-    public string Key { get; set; } = string.Empty;
-
-    [NotNull]
-    public string Value { get; set; } = string.Empty;
 }
 
 [Table("corrupt_payloads")]
@@ -629,9 +552,12 @@ internal sealed class ProfileIncomeEntity
 {
     [PrimaryKey] public string Id { get; set; } = string.Empty;
     [NotNull] public string Name { get; set; } = string.Empty;
-    public double Amount { get; set; }
-    [NotNull] public string Period { get; set; } = string.Empty;
-    public string? Category { get; set; }
+    public double AnnualAmount { get; set; }
+    public int StartAge { get; set; }
+    public int EndAge { get; set; }
+    public double AnnualGrowth { get; set; }
+    public bool IsAfterTax { get; set; }
+    public double TaxRate { get; set; }
 }
 
 [Table("profile_expenses")]
@@ -639,9 +565,8 @@ internal sealed class ProfileExpenseEntity
 {
     [PrimaryKey] public string Id { get; set; } = string.Empty;
     [NotNull] public string Name { get; set; } = string.Empty;
-    public double Amount { get; set; }
-    [NotNull] public string Period { get; set; } = string.Empty;
-    public string? Category { get; set; }
+    public double AnnualAmount { get; set; }
+    public int StartAge { get; set; }
 }
 
 [Table("profile_debts")]

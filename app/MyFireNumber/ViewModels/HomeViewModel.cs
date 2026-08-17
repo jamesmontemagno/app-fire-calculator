@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyFireNumber.Core.Books;
 using MyFireNumber.Core.Calculators;
+using MyFireNumber.Core.Profile;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
 using System.Collections.ObjectModel;
@@ -30,6 +31,8 @@ public partial class HomeViewModel : ObservableObject
     private readonly IExternalLinkService externalLinkService;
     private readonly IErrorPresentationService errorPresentationService;
     private readonly IProfileService profileService;
+    private readonly IProfileScenarioResolver profileScenarioResolver;
+    private readonly IScenarioModePromptService scenarioModePromptService;
 
     public HomeViewModel(
         ICalculatorCatalog catalog,
@@ -42,7 +45,9 @@ public partial class HomeViewModel : ObservableObject
         IAppBehaviorPreferencesService behaviorPreferencesService,
         IExternalLinkService externalLinkService,
         IErrorPresentationService errorPresentationService,
-        IProfileService profileService)
+        IProfileService profileService,
+        IProfileScenarioResolver profileScenarioResolver,
+        IScenarioModePromptService scenarioModePromptService)
     {
         this.catalog = catalog;
         this.recommendedBookCatalog = recommendedBookCatalog;
@@ -55,6 +60,8 @@ public partial class HomeViewModel : ObservableObject
         this.externalLinkService = externalLinkService;
         this.errorPresentationService = errorPresentationService;
         this.profileService = profileService;
+        this.profileScenarioResolver = profileScenarioResolver;
+        this.scenarioModePromptService = scenarioModePromptService;
     }
 
     public ObservableCollection<CalculatorDefinition> FeaturedCalculators { get; } = [];
@@ -165,11 +172,21 @@ public partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenCalculatorAsync(CalculatorDefinition definition)
     {
+        var canChooseProfileLink = definition.Id == "retirement-cash-flow"
+            || await profileScenarioResolver.HasCompatibleDataAsync(definition.Id);
+        var dataMode = canChooseProfileLink
+            ? await scenarioModePromptService.ChooseAsync(definition.Title)
+            : ScenarioDataMode.Standalone;
+        if (dataMode is null)
+        {
+            return;
+        }
+
         await recentActivityRepository.TrackAsync(new RecentActivityRecord(
             RecentActivityKind.Calculator,
             definition.Id,
             DateTime.UtcNow));
-        await navigationService.GoToAsync(CalculatorRoutes.Build(definition.Id));
+        await navigationService.GoToAsync(CalculatorRoutes.Build(definition.Id, dataMode: dataMode));
     }
 
     [RelayCommand]

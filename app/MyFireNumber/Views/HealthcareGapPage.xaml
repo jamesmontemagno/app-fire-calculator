@@ -43,7 +43,7 @@
                             <controls:NumericInputView Header="Medicare age" HelpText="The expected age when Medicare coverage begins." Placeholder="65" Text="{Binding MedicareAgeText}" />
                             <controls:NumericInputView Grid.Column="1" Header="Deductible" HelpText="Expected deductible, in dollars." Placeholder="2500" Text="{Binding AnnualDeductibleText}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                             <controls:NumericInputView Grid.Row="1" Header="Out-of-pocket costs" HelpText="Expected medical costs beyond premiums and deductibles, in dollars." Placeholder="2000" Text="{Binding AnnualOutOfPocketText}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
-                            <controls:PercentageInputView Grid.Row="1" Grid.Column="1" Header="Medical inflation" HelpText="Expected annual increase in medical costs." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding InflationRateText}" />
+                            <controls:PercentageInputView Grid.Row="1" Grid.Column="1" Header="Medical inflation" HelpText="Expected annual increase in medical costs." Placeholder="3" Minimum="0" Maximum="10" Step="0.1" Text="{Binding InflationRateText}" />
                         </Grid>
                     </controls:AdvancedAssumptionsExpander>
                 </VerticalStackLayout>

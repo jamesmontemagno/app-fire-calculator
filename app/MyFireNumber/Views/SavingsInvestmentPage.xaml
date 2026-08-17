@@ -53,8 +53,8 @@
                     <controls:NumericInputView Header="{Binding ContributionAmountHeader}" HelpText="The amount you invest at the selected frequency, in dollars." Placeholder="500" Text="{Binding InvestmentContributionText}" />
                     <controls:AdvancedAssumptionsExpander>
                         <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
-                            <controls:PercentageInputView Header="Expected return" HelpText="Expected average annual investment return before inflation." Placeholder="7" Minimum="0" Maximum="15" Text="{Binding ExpectedReturnText}" />
-                            <controls:PercentageInputView Grid.Column="1" Header="Inflation" HelpText="Expected annual increase in the cost of living." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding InflationRateText}" />
+                            <controls:PercentageInputView Header="Expected return" HelpText="Expected average annual investment return before inflation." Placeholder="7" Minimum="0" Maximum="15" Step="0.1" Text="{Binding ExpectedReturnText}" />
+                            <controls:PercentageInputView Grid.Column="1" Header="Inflation" HelpText="Expected annual increase in the cost of living." Placeholder="3" Minimum="0" Maximum="10" Step="0.1" Text="{Binding InflationRateText}" />
                         </Grid>
                     </controls:AdvancedAssumptionsExpander>
                 </VerticalStackLayout>

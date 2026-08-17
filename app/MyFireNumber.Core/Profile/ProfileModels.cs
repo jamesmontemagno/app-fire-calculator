@@ -1,5 +1,3 @@
-using MyFireNumber.Core.Calculations;
-
 namespace MyFireNumber.Core.Profile;
 
 public sealed record FinancialProfile(
@@ -27,31 +25,6 @@ public sealed record FinancialProfile(
         TargetRetirementDate is not null &&
         AnnualIncome is not null &&
         AnnualExpenses is not null;
-}
-
-public sealed record ProfileAccount(
-    string Id,
-    string Name,
-    RetirementAccountType Type,
-    double Balance,
-    double AnnualContribution,
-    double AnnualReturn,
-    int AvailableAge,
-    double WithdrawalRate,
-    int PayoutYears,
-    double EffectiveWithdrawalTaxRate)
-{
-    public RetirementAccount CreateScenarioAccount(string name) => new(
-        Guid.NewGuid().ToString("N"),
-        name,
-        Type,
-        Balance,
-        AnnualContribution,
-        AnnualReturn,
-        AvailableAge,
-        WithdrawalRate,
-        PayoutYears,
-        EffectiveWithdrawalTaxRate);
 }
 
 public static class ProfileAgeCalculator

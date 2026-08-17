@@ -34,7 +34,11 @@ public sealed class ProfileScenarioResolver(
             "debt-payoff" => snapshot.Debts.Count > 0,
             "healthcare-gap" => snapshot.Profile.BirthDate is not null,
             "withdrawal-rate" => false,
-            "retirement-cash-flow" => snapshot.Accounts.Count > 0 || snapshot.Expenses.Count > 0,
+            "retirement-cash-flow" =>
+                snapshot.Profile.BirthDate is not null &&
+                snapshot.Profile.PhasedRetirementDate is not null &&
+                snapshot.Accounts.Count > 0 &&
+                snapshot.EffectiveAnnualExpenses is not null,
             _ => snapshot.Accounts.Count > 0 || snapshot.Income.Count > 0 || snapshot.Expenses.Count > 0
         };
     }

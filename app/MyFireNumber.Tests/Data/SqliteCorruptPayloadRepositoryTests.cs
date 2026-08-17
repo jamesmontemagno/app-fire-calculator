@@ -1,5 +1,4 @@
 using MyFireNumber.Storage;
-using SQLite;
 
 namespace MyFireNumber.Tests.Data;
 
@@ -57,27 +56,5 @@ public sealed class SqliteCorruptPayloadRepositoryTests : IAsyncLifetime
         Assert.Equal("Recovery plan", quarantined.DisplayName);
         Assert.Equal("{not-json", quarantined.PayloadJson);
         Assert.Equal(createdAt, quarantined.OriginalCreatedAtUtc);
-    }
-
-    [Fact]
-    public async Task InitializeAsync_UpgradesVersionTwoDatabaseForRecoveryStorage()
-    {
-        var legacyConnection = new SQLiteAsyncConnection(databasePath);
-        await legacyConnection.ExecuteAsync(
-            "CREATE TABLE schema_metadata (Key TEXT PRIMARY KEY NOT NULL, Value TEXT NOT NULL)");
-        await legacyConnection.ExecuteAsync(
-            "INSERT INTO schema_metadata (Key, Value) VALUES ('schema-version', '2')");
-        await legacyConnection.CloseAsync();
-
-        var recovery = new SqliteCorruptPayloadRepository(new LocalDatabase(databasePath));
-        var payloads = await recovery.ListAsync();
-
-        var inspectionConnection = new SQLiteAsyncConnection(databasePath);
-        var schemaVersion = await inspectionConnection.ExecuteScalarAsync<string>(
-            "SELECT Value FROM schema_metadata WHERE Key = 'schema-version'");
-        await inspectionConnection.CloseAsync();
-
-        Assert.Empty(payloads);
-        Assert.Equal("5", schemaVersion);
     }
 }

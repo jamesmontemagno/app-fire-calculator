@@ -45,14 +45,12 @@
                                        Text="{Binding RetirementAgeText}"
                                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                             </Grid>
-                            <Slider AutomationId="OnboardingRetirementAgeSlider"
-                                    Maximum="{Binding MaximumRetirementAge}"
-                                    Minimum="{Binding MinimumAllowedRetirementAge}"
-                                    Value="{Binding RetirementAge, Mode=TwoWay}"
-                                    MinimumTrackColor="{StaticResource FixedAccent}"
-                                    MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                                    ThumbColor="{StaticResource FixedAccent}"
-                                    SemanticProperties.Description="The age you plan to stop working entirely" />
+                            <controls:SteppedSlider AutomationId="OnboardingRetirementAgeSlider"
+                                                   Maximum="{Binding MaximumRetirementAge}"
+                                                   Minimum="{Binding MinimumAllowedRetirementAge}"
+                                                   StepSize="1"
+                                                   Value="{Binding RetirementAge, Mode=TwoWay}"
+                                                   SemanticProperties.Description="The age you plan to stop working entirely" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="6">
@@ -83,15 +81,13 @@
                                        Text="{Binding PhasedRetirementAgeText}"
                                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                             </Grid>
-                            <Slider AutomationId="OnboardingPhasedRetirementAgeSlider"
-                                    IsVisible="{Binding HasPhasedRetirement}"
-                                    Maximum="{Binding MaximumRetirementAge}"
-                                    Minimum="{Binding MinimumAllowedRetirementAge}"
-                                    Value="{Binding PhasedRetirementAge, Mode=TwoWay}"
-                                    MinimumTrackColor="{StaticResource FixedAccent}"
-                                    MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                                    ThumbColor="{StaticResource FixedAccent}"
-                                    SemanticProperties.Description="The age you plan to move to part-time work" />
+                            <controls:SteppedSlider AutomationId="OnboardingPhasedRetirementAgeSlider"
+                                                   IsVisible="{Binding HasPhasedRetirement}"
+                                                   Maximum="{Binding MaximumRetirementAge}"
+                                                   Minimum="{Binding MinimumAllowedRetirementAge}"
+                                                   StepSize="1"
+                                                   Value="{Binding PhasedRetirementAge, Mode=TwoWay}"
+                                                   SemanticProperties.Description="The age you plan to move to part-time work" />
                             <Button AutomationId="OnboardingRemovePhasedRetirementButton"
                                     Text="Remove phased retirement"
                                     FontSize="12"

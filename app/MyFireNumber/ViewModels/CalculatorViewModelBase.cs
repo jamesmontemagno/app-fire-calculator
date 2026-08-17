@@ -91,13 +91,15 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLinkedProfile))]
+    [NotifyPropertyChangedFor(nameof(CanEditProfileOwnedFields))]
     [NotifyPropertyChangedFor(nameof(ScenarioDataModeText))]
     private ScenarioDataMode scenarioDataMode;
 
     public bool IsLinkedProfile => ScenarioDataMode == ScenarioDataMode.LinkedProfile;
+    public bool CanEditProfileOwnedFields => !IsLinkedProfile;
 
     public string ScenarioDataModeText => IsLinkedProfile
-        ? "Linked to Profile — compatible values update when Profile changes."
+        ? "Linked to Profile. Profile-owned fields are read-only here and update when Profile changes; calculator-specific assumptions remain editable."
         : "Standalone snapshot — values are independent from Profile.";
 
     private long? resolvedProfileRevision;
@@ -415,8 +417,10 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
         if (!resolution.IsValid)
         {
             linkedResolutionValid = false;
-            ValidationMessage = string.Join(Environment.NewLine, resolution.Errors);
+            resolvedProfileRevision = resolution.ProfileRevision;
+            LoadInputs(resolution.Draft);
             ProjectionSeries = [];
+            ValidationMessage = string.Join(Environment.NewLine, resolution.Errors);
             return;
         }
 

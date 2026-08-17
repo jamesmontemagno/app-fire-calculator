@@ -1,5 +1,4 @@
 using MyFireNumber.Core.Calculations;
-using MyFireNumber.Core.Presentation;
 using MyFireNumber.Core.Profile;
 
 namespace MyFireNumber.Tests.Profile;
@@ -15,8 +14,8 @@ public sealed class ProfileDraftResolverTests
                 Account("one", 100_000, 10_000),
                 Account("two", 50_000, 5_000)
             ],
-            income: [new ProfileIncome("salary", "Salary", 10_000, CurrencyPeriod.Monthly, null)],
-            expenses: [new ProfileExpense("living", "Living", 4_000, CurrencyPeriod.Monthly, null)]);
+            income: [Income("salary", 120_000)],
+            expenses: [Expense("living", 48_000)]);
 
         var result = ProfileDraftResolver.Resolve(
             StandardFireDraft.Default,
@@ -35,8 +34,8 @@ public sealed class ProfileDraftResolverTests
     {
         var before = Snapshot(
             accounts: [Account("one", 100_000, 10_000), Account("two", 50_000, 5_000)],
-            income: [new ProfileIncome("salary", "Salary", 100_000, CurrencyPeriod.Annual, null)],
-            expenses: [new ProfileExpense("living", "Living", 40_000, CurrencyPeriod.Annual, null)]);
+            income: [Income("salary", 100_000)],
+            expenses: [Expense("living", 40_000)]);
         var after = before with { Accounts = [before.Accounts[0]], Revision = 2 };
 
         var first = ProfileDraftResolver.Resolve(StandardFireDraft.Default, before, new DateOnly(2026, 1, 1));
@@ -51,8 +50,8 @@ public sealed class ProfileDraftResolverTests
     {
         var snapshot = Snapshot(
             accounts: [],
-            income: [new ProfileIncome("salary", "Salary", 100_000, CurrencyPeriod.Annual, null)],
-            expenses: [new ProfileExpense("living", "Living", 40_000, CurrencyPeriod.Annual, null)]);
+            income: [Income("salary", 100_000)],
+            expenses: [Expense("living", 40_000)]);
 
         var result = ProfileDraftResolver.Resolve(StandardFireDraft.Default, snapshot, new DateOnly(2026, 1, 1));
 
@@ -63,7 +62,7 @@ public sealed class ProfileDraftResolverTests
     [Fact]
     public void Resolve_MapsProfileDebts()
     {
-        var snapshot = Snapshot(debts: [new ProfileDebt("card", "Card", 5_000, 0.2, 150)]);
+        var snapshot = Snapshot(debts: [new DebtItem("card", "Card", 5_000, 0.2, 150)]);
 
         var result = ProfileDraftResolver.Resolve(DebtPayoffDraft.Default, snapshot, new DateOnly(2026, 1, 1));
 
@@ -72,12 +71,12 @@ public sealed class ProfileDraftResolverTests
     }
 
     [Fact]
-    public void Resolve_PrefersItemisedIncomeOverTheHouseholdFigure()
+    public void Resolve_UsesItemisedIncomeAndExpenses()
     {
         var snapshot = Snapshot(
             accounts: [Account("one", 100_000, 10_000)],
-            income: [new ProfileIncome("salary", "Salary", 100_000, CurrencyPeriod.Annual, null)],
-            expenses: [new ProfileExpense("living", "Living", 40_000, CurrencyPeriod.Annual, null)]) with
+            income: [Income("salary", 100_000)],
+            expenses: [Expense("living", 40_000)]) with
         {
             Profile = FinancialProfile.Empty with { AnnualIncome = 55_000, AnnualExpenses = 22_000 }
         };
@@ -90,7 +89,7 @@ public sealed class ProfileDraftResolverTests
     }
 
     [Fact]
-    public void Resolve_FallsBackToTheHouseholdFigureWhenNothingIsItemised()
+    public void Resolve_IgnoresLegacyHouseholdFiguresWhenNothingIsItemised()
     {
         var snapshot = Snapshot(accounts: [Account("one", 100_000, 10_000)]) with
         {
@@ -99,9 +98,11 @@ public sealed class ProfileDraftResolverTests
 
         var result = ProfileDraftResolver.Resolve(StandardFireDraft.Default, snapshot, new DateOnly(2026, 1, 1));
 
-        Assert.True(result.IsValid);
-        Assert.Equal(55_000, result.Draft.AnnualIncome);
-        Assert.Equal(22_000, result.Draft.AnnualExpenses);
+        Assert.False(result.IsValid);
+        Assert.Equal(StandardFireDraft.Default.AnnualIncome, result.Draft.AnnualIncome);
+        Assert.Equal(StandardFireDraft.Default.AnnualExpenses, result.Draft.AnnualExpenses);
+        Assert.Contains(result.Errors, error => error.Contains("income", StringComparison.OrdinalIgnoreCase));
+        Assert.Contains(result.Errors, error => error.Contains("expense", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
@@ -109,7 +110,7 @@ public sealed class ProfileDraftResolverTests
     {
         var snapshot = Snapshot(
             accounts: [Account("one", 100_000, 10_000)],
-            expenses: [new ProfileExpense("living", "Living", 40_000, CurrencyPeriod.Annual, null)]);
+            expenses: [Expense("living", 40_000)]);
 
         var result = ProfileDraftResolver.Resolve(StandardFireDraft.Default, snapshot, new DateOnly(2026, 1, 1));
 
@@ -121,7 +122,7 @@ public sealed class ProfileDraftResolverTests
     public void EffectiveValues_MatchWhatTheResolverApplies()
     {
         var itemised = Snapshot(
-            income: [new ProfileIncome("a", "A", 1_000, CurrencyPeriod.Monthly, null)]) with
+            income: [Income("a", 12_000)]) with
         {
             Profile = FinancialProfile.Empty with { AnnualIncome = 99_000 }
         };
@@ -132,16 +133,44 @@ public sealed class ProfileDraftResolverTests
 
         Assert.Equal(12_000, itemised.EffectiveAnnualIncome);
         Assert.True(itemised.IsIncomeItemised);
-        Assert.Equal(99_000, householdOnly.EffectiveAnnualIncome);
+        Assert.Null(householdOnly.EffectiveAnnualIncome);
         Assert.False(householdOnly.IsIncomeItemised);
         Assert.Null(Snapshot().EffectiveAnnualIncome);
     }
 
+    [Fact]
+    public void Resolve_MapsCompleteRetirementInventoryWithoutDoubleCountingExpenses()
+    {
+        var account = Account("brokerage", 100_000, 5_000);
+        var income = Income("pension", 24_000);
+        var expense = Expense("healthcare", 12_000);
+        var snapshot = Snapshot(accounts: [account], income: [income], expenses: [expense]) with
+        {
+            Profile = FinancialProfile.Empty with
+            {
+                BirthDate = new DateOnly(1980, 1, 1),
+                PhasedRetirementDate = new DateOnly(2035, 1, 1),
+                AnnualExpenses = 50_000
+            }
+        };
+
+        var result = ProfileDraftResolver.Resolve(
+            DeferredCompensationDraft.Default,
+            snapshot,
+            new DateOnly(2026, 1, 1));
+
+        Assert.True(result.IsValid);
+        Assert.Equal(0, result.Draft.AnnualExpenses);
+        Assert.Equal([account], result.Draft.Accounts);
+        Assert.Equal([income], result.Draft.IncomeSources);
+        Assert.Equal([expense], result.Draft.AdditionalExpenses);
+    }
+
     private static ProfileFinancialSnapshot Snapshot(
-        IReadOnlyList<ProfileAccount>? accounts = null,
-        IReadOnlyList<ProfileIncome>? income = null,
-        IReadOnlyList<ProfileExpense>? expenses = null,
-        IReadOnlyList<ProfileDebt>? debts = null) => new(
+        IReadOnlyList<RetirementAccount>? accounts = null,
+        IReadOnlyList<RetirementIncomeSource>? income = null,
+        IReadOnlyList<RetirementExpense>? expenses = null,
+        IReadOnlyList<DebtItem>? debts = null) => new(
         FinancialProfile.Empty,
         accounts ?? [],
         income ?? [],
@@ -149,6 +178,12 @@ public sealed class ProfileDraftResolverTests
         debts ?? [],
         1);
 
-    private static ProfileAccount Account(string id, double balance, double contribution) => new(
+    private static RetirementAccount Account(string id, double balance, double contribution) => new(
         id, id, RetirementAccountType.Taxable, balance, contribution, 0.07, 18, 0.04, 1, 0);
+
+    private static RetirementIncomeSource Income(string id, double annualAmount) => new(
+        id, id, annualAmount, 55, 65, 0, true, 0);
+
+    private static RetirementExpense Expense(string id, double annualAmount) => new(
+        id, id, annualAmount, 55);
 }

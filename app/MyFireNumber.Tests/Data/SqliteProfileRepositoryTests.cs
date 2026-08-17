@@ -35,7 +35,7 @@ public sealed class SqliteProfileRepositoryTests : IAsyncLifetime
             new DateOnly(2045, 8, 16),
             120_000,
             72_000);
-        var account = new ProfileAccount(
+        var account = new RetirementAccount(
             "brokerage",
             "Brokerage",
             RetirementAccountType.Taxable,
@@ -61,7 +61,7 @@ public sealed class SqliteProfileRepositoryTests : IAsyncLifetime
         var profileRepository = new SqliteProfileRepository(database);
         var accountRepository = new SqliteProfileAccountRepository(database);
         await profileRepository.SaveAsync(FinancialProfile.Empty with { DisplayName = "Alex" });
-        await accountRepository.SaveAsync(new ProfileAccount(
+        await accountRepository.SaveAsync(new RetirementAccount(
             "cash",
             "Cash",
             RetirementAccountType.Savings,

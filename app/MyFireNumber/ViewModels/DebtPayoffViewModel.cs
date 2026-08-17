@@ -39,6 +39,7 @@ public sealed partial class DebtPayoffViewModel : CalculatorViewModelBase<DebtPa
     private DebtPayoffMode debtPayoffMode = DebtPayoffMode.FixedBudget;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsSnowballStrategy), nameof(IsAvalancheStrategy))]
     private DebtPayoffStrategy debtPayoffStrategy = DebtPayoffStrategy.Snowball;
 
     [ObservableProperty]
@@ -77,6 +78,8 @@ public sealed partial class DebtPayoffViewModel : CalculatorViewModelBase<DebtPa
     public bool IsFixedDebtPayoff => DebtPayoffMode == DebtPayoffMode.FixedBudget;
 
     public bool IsTargetDebtPayoff => DebtPayoffMode == DebtPayoffMode.TargetTimeline;
+    public bool IsSnowballStrategy => DebtPayoffStrategy == DebtPayoffStrategy.Snowball;
+    public bool IsAvalancheStrategy => DebtPayoffStrategy == DebtPayoffStrategy.Avalanche;
 
     protected override string CalculatorId => "debt-payoff";
 
@@ -99,6 +102,11 @@ public sealed partial class DebtPayoffViewModel : CalculatorViewModelBase<DebtPa
     [RelayCommand]
     private void AddDebt()
     {
+        if (IsLinkedProfile)
+        {
+            return;
+        }
+
         DebtItems.Add(new DebtEditorItem
         {
             Name = "New debt",
@@ -111,7 +119,7 @@ public sealed partial class DebtPayoffViewModel : CalculatorViewModelBase<DebtPa
     [RelayCommand]
     private void RemoveDebt(DebtEditorItem? debt)
     {
-        if (debt is not null)
+        if (!IsLinkedProfile && debt is not null)
         {
             DebtItems.Remove(debt);
         }
@@ -320,7 +328,9 @@ public sealed partial class DebtPayoffViewModel : CalculatorViewModelBase<DebtPa
         DebtItems.Clear();
         foreach (var debt in debts)
         {
-            DebtItems.Add(DebtEditorItem.FromDebt(debt));
+            var editor = DebtEditorItem.FromDebt(debt);
+            editor.IsReadOnly = IsLinkedProfile;
+            DebtItems.Add(editor);
         }
     }
 }

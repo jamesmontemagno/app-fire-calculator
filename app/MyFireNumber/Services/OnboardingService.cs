@@ -15,9 +15,9 @@ public interface IOnboardingService
 
 public sealed class OnboardingService : IOnboardingService
 {
-    private const string WelcomeSeenKey = "onboarding-welcome-seen";
-    private const string CompletionKey = "onboarding-completed";
-    private const string RecommendationKey = "onboarding-recommendation-calculator";
+    private const string WelcomeSeenKey = "onboarding-v2-welcome-seen";
+    private const string CompletionKey = "onboarding-v2-completed";
+    private const string RecommendationKey = "onboarding-v2-recommendation-calculator";
 
     public bool HasSeenWelcome => Preferences.Default.Get(WelcomeSeenKey, false);
     public bool IsComplete => Preferences.Default.Get(CompletionKey, false);

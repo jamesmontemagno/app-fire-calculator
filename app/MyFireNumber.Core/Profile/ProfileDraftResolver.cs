@@ -77,14 +77,16 @@ public static class ProfileDraftResolver
             },
             DebtPayoffDraft draft => draft with
             {
-                Debts = snapshot.Debts.Select(debt => debt.ToDebtItem()).ToArray()
+                Debts = snapshot.Debts.ToArray()
             },
             DeferredCompensationDraft draft => draft with
             {
                 CurrentAge = CurrentAge(snapshot, today, draft.CurrentAge),
                 SemiRetirementAge = PhasedAge(snapshot, draft.SemiRetirementAge),
-                AnnualExpenses = snapshot.EffectiveAnnualExpenses ?? draft.AnnualExpenses,
-                Accounts = snapshot.Accounts.Select(ToRetirementAccount).ToArray()
+                AnnualExpenses = 0,
+                Accounts = snapshot.Accounts.ToArray(),
+                IncomeSources = snapshot.Income.ToArray(),
+                AdditionalExpenses = snapshot.Expenses.ToArray()
             },
             _ => source
         };
@@ -118,14 +120,27 @@ public static class ProfileDraftResolver
         // profile that only answered the onboarding income question is still linkable.
         if (draft is StandardFireDraft or LeanFireDraft or FatFireDraft && snapshot.EffectiveAnnualIncome is null)
         {
-            errors.Add("Add your household income or a recurring income item to Profile to use linked mode.");
+            errors.Add("Add at least one income source to Profile to use linked mode.");
+        }
+
+        if (draft is DeferredCompensationDraft)
+        {
+            if (snapshot.Profile.BirthDate is null)
+            {
+                errors.Add("Add your birth date to Profile to use linked mode.");
+            }
+
+            if (snapshot.Profile.PhasedRetirementDate is null)
+            {
+                errors.Add("Add your phased retirement date to Profile to use linked mode.");
+            }
         }
 
         if (draft is StandardFireDraft or LeanFireDraft or FatFireDraft or CoastFireDraft or
             BaristaFireDraft or ReverseFireDraft or DeferredCompensationDraft &&
             snapshot.EffectiveAnnualExpenses is null)
         {
-            errors.Add("Add your household spending or a recurring expense to Profile to use linked mode.");
+            errors.Add("Add at least one expense to Profile to use linked mode.");
         }
 
         if (snapshot.Accounts.Any(account => account.Balance < 0 || account.AnnualContribution < 0))
@@ -133,14 +148,20 @@ public static class ProfileDraftResolver
             errors.Add("Profile accounts contain invalid negative values.");
         }
 
-        if (snapshot.Income.Any(item => item.Amount < 0))
+        if (snapshot.Income.Any(item =>
+                item.AnnualAmount < 0 ||
+                item.StartAge is < 18 or > 100 ||
+                item.EndAge < item.StartAge ||
+                item.EndAge > 100 ||
+                item.AnnualGrowth is < -1 or > 1 ||
+                item.TaxRate is < 0 or > 1))
         {
-            errors.Add("Profile income contains an invalid negative value.");
+            errors.Add("Profile income contains invalid amount, age, growth, or tax values.");
         }
 
-        if (snapshot.Expenses.Any(item => item.Amount < 0))
+        if (snapshot.Expenses.Any(item => item.AnnualAmount < 0 || item.StartAge is < 18 or > 100))
         {
-            errors.Add("Profile expenses contain an invalid negative value.");
+            errors.Add("Profile expenses contain an invalid amount or start age.");
         }
 
         if (snapshot.Debts.Any(debt => debt.Balance < 0 || debt.MinimumPayment < 0 || debt.Rate < 0))
@@ -166,24 +187,12 @@ public static class ProfileDraftResolver
             ? ProfileAgeCalculator.AgeOn(birthDate, date)
             : fallback;
 
-    private static RetirementAccount ToRetirementAccount(ProfileAccount account) => new(
-        account.Id,
-        account.Name,
-        account.Type,
-        account.Balance,
-        account.AnnualContribution,
-        account.AnnualReturn,
-        account.AvailableAge,
-        account.WithdrawalRate,
-        account.PayoutYears,
-        account.EffectiveWithdrawalTaxRate);
-
     private static string[] SourcesFor<TDraft>(TDraft draft) => draft switch
     {
         DebtPayoffDraft => ["Profile debts"],
         HealthcareGapDraft => ["Profile timeline"],
         WithdrawalRateDraft => [],
-        DeferredCompensationDraft => ["Profile timeline", "Profile accounts", "Profile expenses"],
+        DeferredCompensationDraft => ["Profile timeline", "Profile accounts", "Profile income", "Profile expenses"],
         _ => ["Profile timeline", "Profile accounts", "Profile income", "Profile expenses"]
     };
 }

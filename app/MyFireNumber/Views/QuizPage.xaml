@@ -46,7 +46,6 @@
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                         <ProgressBar Progress="{Binding QuestionProgress}"
-                                     ProgressColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                      SemanticProperties.Description="{Binding QuestionProgressText}" />
                     </VerticalStackLayout>
 

@@ -23,7 +23,7 @@ public sealed class DeferredCompensationDraftTests
         Assert.Equal(RetirementAccountType.Traditional, inputs.Accounts[1].Type);
         Assert.Single(inputs.IncomeSources);
         Assert.True(inputs.WithdrawOnlyAfterRetirement);
-        Assert.True(inputs.ReinvestSurplus);
+        Assert.False(inputs.ReinvestSurplus);
     }
 
     [Fact]

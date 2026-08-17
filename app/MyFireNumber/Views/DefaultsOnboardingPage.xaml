@@ -97,14 +97,12 @@
                                        Text="{Binding HouseholdSizeText}"
                                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                             </Grid>
-                            <Slider AutomationId="OnboardingHouseholdSizeSlider"
-                                    Minimum="1"
-                                    Maximum="{Binding MaximumHouseholdSize}"
-                                    Value="{Binding HouseholdSize, Mode=TwoWay}"
-                                    MinimumTrackColor="{StaticResource FixedAccent}"
-                                    MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                                    ThumbColor="{StaticResource FixedAccent}"
-                                    SemanticProperties.Description="Number of people your plan supports" />
+                            <controls:SteppedSlider AutomationId="OnboardingHouseholdSizeSlider"
+                                                   Minimum="1"
+                                                   Maximum="{Binding MaximumHouseholdSize}"
+                                                   StepSize="1"
+                                                   Value="{Binding HouseholdSize, Mode=TwoWay}"
+                                                   SemanticProperties.Description="Number of people your plan supports" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="6">
@@ -116,14 +114,12 @@
                                         Text="{Binding AnnualIncomeText, Mode=OneWay}"
                                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                             </Grid>
-                            <Slider AutomationId="OnboardingAnnualIncomeSlider"
-                                    Minimum="0"
-                                    Maximum="{Binding MaximumAnnualIncome}"
-                                    Value="{Binding AnnualIncome, Mode=TwoWay}"
-                                    MinimumTrackColor="{StaticResource FixedAccent}"
-                                    MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                                    ThumbColor="{StaticResource FixedAccent}"
-                                    SemanticProperties.Description="Current annual after-tax income in dollars" />
+                            <controls:SteppedSlider AutomationId="OnboardingAnnualIncomeSlider"
+                                                   Minimum="0"
+                                                   Maximum="{Binding MaximumAnnualIncome}"
+                                                   StepSize="1000"
+                                                   Value="{Binding AnnualIncome, Mode=TwoWay}"
+                                                   SemanticProperties.Description="Current annual after-tax income in dollars" />
                         </VerticalStackLayout>
 
                         <VerticalStackLayout Spacing="6">
@@ -135,14 +131,12 @@
                                         Text="{Binding AnnualExpensesText, Mode=OneWay}"
                                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                             </Grid>
-                            <Slider AutomationId="OnboardingAnnualExpensesSlider"
-                                    Minimum="0"
-                                    Maximum="{Binding MaximumAnnualExpenses}"
-                                    Value="{Binding AnnualExpenses, Mode=TwoWay}"
-                                    MinimumTrackColor="{StaticResource FixedAccent}"
-                                    MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                                    ThumbColor="{StaticResource FixedAccent}"
-                                    SemanticProperties.Description="Current annual expenses in dollars" />
+                            <controls:SteppedSlider AutomationId="OnboardingAnnualExpensesSlider"
+                                                   Minimum="0"
+                                                   Maximum="{Binding MaximumAnnualExpenses}"
+                                                   StepSize="1000"
+                                                   Value="{Binding AnnualExpenses, Mode=TwoWay}"
+                                                   SemanticProperties.Description="Current annual expenses in dollars" />
                         </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>

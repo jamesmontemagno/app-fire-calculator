@@ -84,7 +84,9 @@ public partial class CalculatorCatalogViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenCalculatorAsync(CalculatorDefinition definition)
     {
-        var dataMode = await profileScenarioResolver.HasCompatibleDataAsync(definition.Id)
+        var canChooseProfileLink = definition.Id == "retirement-cash-flow"
+            || await profileScenarioResolver.HasCompatibleDataAsync(definition.Id);
+        var dataMode = canChooseProfileLink
             ? await scenarioModePromptService.ChooseAsync(definition.Title)
             : ScenarioDataMode.Standalone;
         if (dataMode is null)
