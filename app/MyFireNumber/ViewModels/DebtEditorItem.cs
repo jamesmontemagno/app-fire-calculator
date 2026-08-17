@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MyFireNumber.Core.Calculations;
 using System.Globalization;
 
@@ -20,6 +21,17 @@ public sealed partial class DebtEditorItem : ObservableObject
 
     [ObservableProperty]
     private string minimumPaymentText = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditable))]
+    private bool isReadOnly;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
+    private bool isExpanded;
+
+    public bool IsEditable => !IsReadOnly;
+    public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
 
     public event EventHandler? Changed;
 
@@ -51,6 +63,9 @@ public sealed partial class DebtEditorItem : ObservableObject
     partial void OnBalanceTextChanged(string value) => Changed?.Invoke(this, EventArgs.Empty);
     partial void OnRateTextChanged(string value) => Changed?.Invoke(this, EventArgs.Empty);
     partial void OnMinimumPaymentTextChanged(string value) => Changed?.Invoke(this, EventArgs.Empty);
+
+    [RelayCommand]
+    private void ToggleExpanded() => IsExpanded = !IsExpanded;
 
     private bool SetDebt(out DebtItem debt, double balance, double rate, double minimumPayment)
     {

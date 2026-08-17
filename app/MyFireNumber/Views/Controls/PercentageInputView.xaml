@@ -30,10 +30,11 @@
                    TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                    SemanticProperties.Description="Percentage" />
         </Grid>
-        <Slider Grid.Row="2"
-                Minimum="{Binding Minimum, Source={x:Reference Root}}"
-                Maximum="{Binding Maximum, Source={x:Reference Root}}"
-                Value="{Binding Text, Source={x:Reference Root}, Mode=TwoWay, Converter={StaticResource NumericTextConverter}}"
-                SemanticProperties.Description="{Binding HelpText, Source={x:Reference Root}}" />
+        <local:SteppedSlider Grid.Row="2"
+                             Minimum="{Binding Minimum, Source={x:Reference Root}}"
+                             Maximum="{Binding Maximum, Source={x:Reference Root}}"
+                             StepSize="{Binding Step, Source={x:Reference Root}}"
+                             Value="{Binding Text, Source={x:Reference Root}, Mode=TwoWay, Converter={StaticResource NumericTextConverter}}"
+                             SemanticProperties.Description="{Binding HelpText, Source={x:Reference Root}}" />
     </Grid>
 </ContentView>

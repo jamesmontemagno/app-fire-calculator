@@ -1,5 +1,4 @@
 using MyFireNumber.Core.Calculations;
-using MyFireNumber.Core.Presentation;
 using MyFireNumber.Core.Profile;
 using SQLite;
 
@@ -8,7 +7,7 @@ namespace MyFireNumber.Storage;
 public sealed class LocalDatabase
 {
     private const string SchemaVersionKey = "schema-version";
-    private const int CurrentSchemaVersion = 5;
+    private const int CurrentSchemaVersion = 6;
 
     private readonly SQLiteAsyncConnection connection;
     private readonly SemaphoreSlim initializationLock = new(1, 1);
@@ -101,7 +100,7 @@ public sealed class LocalDatabase
         var profileDebts = await connection.Table<ProfileDebtEntity>().ToListAsync();
 
         return new LocalDataArchive(
-            1,
+            2,
             DateTime.UtcNow,
             drafts.Select(ToRecord).ToArray(),
             plans.Select(ToRecord).ToArray(),
@@ -120,7 +119,7 @@ public sealed class LocalDatabase
     public async Task ImportAsync(LocalDataArchive archive, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(archive);
-        if (archive.Version != 1)
+        if (archive.Version != 2)
         {
             throw new InvalidDataException($"Archive version {archive.Version} is not supported.");
         }
@@ -183,8 +182,20 @@ public sealed class LocalDatabase
         }
 
         if (archive.ProfileAccounts.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Balance < 0 || item.AnnualContribution < 0) ||
-            archive.ProfileIncome.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Amount < 0) ||
-            archive.ProfileExpenses.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Amount < 0) ||
+            archive.ProfileIncome.Any(item =>
+                string.IsNullOrWhiteSpace(item.Id) ||
+                string.IsNullOrWhiteSpace(item.Name) ||
+                item.AnnualAmount < 0 ||
+                item.StartAge is < 18 or > 100 ||
+                item.EndAge < item.StartAge ||
+                item.EndAge > 100 ||
+                item.AnnualGrowth is < -1 or > 1 ||
+                item.TaxRate is < 0 or > 1) ||
+            archive.ProfileExpenses.Any(item =>
+                string.IsNullOrWhiteSpace(item.Id) ||
+                string.IsNullOrWhiteSpace(item.Name) ||
+                item.AnnualAmount < 0 ||
+                item.StartAge is < 18 or > 100) ||
             archive.ProfileDebts.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Balance < 0 || item.Rate < 0 || item.MinimumPayment < 0))
         {
             throw new InvalidDataException("The archive contains invalid profile data.");
@@ -289,7 +300,7 @@ public sealed class LocalDatabase
             item.AnnualIncome,
             item.AnnualExpenses);
 
-    private static ProfileAccount ToRecord(ProfileAccountEntity item) => new(
+    private static RetirementAccount ToRecord(ProfileAccountEntity item) => new(
         item.Id,
         item.Name,
         Enum.Parse<RetirementAccountType>(item.Type),
@@ -301,13 +312,20 @@ public sealed class LocalDatabase
         item.PayoutYears,
         item.EffectiveWithdrawalTaxRate);
 
-    private static ProfileIncome ToRecord(ProfileIncomeEntity item) =>
-        new(item.Id, item.Name, item.Amount, Enum.Parse<CurrencyPeriod>(item.Period), item.Category);
+    private static RetirementIncomeSource ToRecord(ProfileIncomeEntity item) => new(
+        item.Id,
+        item.Name,
+        item.AnnualAmount,
+        item.StartAge,
+        item.EndAge,
+        item.AnnualGrowth,
+        item.IsAfterTax,
+        item.TaxRate);
 
-    private static ProfileExpense ToRecord(ProfileExpenseEntity item) =>
-        new(item.Id, item.Name, item.Amount, Enum.Parse<CurrencyPeriod>(item.Period), item.Category);
+    private static RetirementExpense ToRecord(ProfileExpenseEntity item) =>
+        new(item.Id, item.Name, item.AnnualAmount, item.StartAge);
 
-    private static ProfileDebt ToRecord(ProfileDebtEntity item) =>
+    private static DebtItem ToRecord(ProfileDebtEntity item) =>
         new(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment);
 
     private static ProfileEntity ToEntity(FinancialProfile item) => new()
@@ -323,7 +341,7 @@ public sealed class LocalDatabase
         AnnualExpenses = item.AnnualExpenses
     };
 
-    private static ProfileAccountEntity ToEntity(ProfileAccount item) => new()
+    private static ProfileAccountEntity ToEntity(RetirementAccount item) => new()
     {
         Id = item.Id,
         Name = item.Name,
@@ -337,25 +355,27 @@ public sealed class LocalDatabase
         EffectiveWithdrawalTaxRate = item.EffectiveWithdrawalTaxRate
     };
 
-    private static ProfileIncomeEntity ToEntity(ProfileIncome item) => new()
+    private static ProfileIncomeEntity ToEntity(RetirementIncomeSource item) => new()
     {
         Id = item.Id,
         Name = item.Name,
-        Amount = item.Amount,
-        Period = item.Period.ToString(),
-        Category = item.Category
+        AnnualAmount = item.AnnualAmount,
+        StartAge = item.StartAge,
+        EndAge = item.EndAge,
+        AnnualGrowth = item.AnnualGrowth,
+        IsAfterTax = item.IsAfterTax,
+        TaxRate = item.TaxRate
     };
 
-    private static ProfileExpenseEntity ToEntity(ProfileExpense item) => new()
+    private static ProfileExpenseEntity ToEntity(RetirementExpense item) => new()
     {
         Id = item.Id,
         Name = item.Name,
-        Amount = item.Amount,
-        Period = item.Period.ToString(),
-        Category = item.Category
+        AnnualAmount = item.AnnualAmount,
+        StartAge = item.StartAge
     };
 
-    private static ProfileDebtEntity ToEntity(ProfileDebt item) => new()
+    private static ProfileDebtEntity ToEntity(DebtItem item) => new()
     {
         Id = item.Id,
         Name = item.Name,
@@ -428,6 +448,14 @@ public sealed class LocalDatabase
             await AddColumnIfMissingAsync("drafts", "ProfileRevision", "INTEGER NULL");
             await AddColumnIfMissingAsync("plans", "DataMode", "TEXT NOT NULL DEFAULT 'Standalone'");
             await AddColumnIfMissingAsync("plans", "ProfileRevision", "INTEGER NULL");
+        }
+
+        if (storedVersion < 6)
+        {
+            await connection.DropTableAsync<ProfileIncomeEntity>();
+            await connection.DropTableAsync<ProfileExpenseEntity>();
+            await connection.CreateTableAsync<ProfileIncomeEntity>();
+            await connection.CreateTableAsync<ProfileExpenseEntity>();
         }
 
         if (storedVersion != CurrentSchemaVersion)
@@ -629,9 +657,12 @@ internal sealed class ProfileIncomeEntity
 {
     [PrimaryKey] public string Id { get; set; } = string.Empty;
     [NotNull] public string Name { get; set; } = string.Empty;
-    public double Amount { get; set; }
-    [NotNull] public string Period { get; set; } = string.Empty;
-    public string? Category { get; set; }
+    public double AnnualAmount { get; set; }
+    public int StartAge { get; set; }
+    public int EndAge { get; set; }
+    public double AnnualGrowth { get; set; }
+    public bool IsAfterTax { get; set; }
+    public double TaxRate { get; set; }
 }
 
 [Table("profile_expenses")]
@@ -639,9 +670,8 @@ internal sealed class ProfileExpenseEntity
 {
     [PrimaryKey] public string Id { get; set; } = string.Empty;
     [NotNull] public string Name { get; set; } = string.Empty;
-    public double Amount { get; set; }
-    [NotNull] public string Period { get; set; } = string.Empty;
-    public string? Category { get; set; }
+    public double AnnualAmount { get; set; }
+    public int StartAge { get; set; }
 }
 
 [Table("profile_debts")]

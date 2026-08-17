@@ -198,14 +198,14 @@ public sealed class SqliteProfileRepository(LocalDatabase database) : IProfileRe
 
 public sealed class SqliteProfileAccountRepository(LocalDatabase database) : IProfileAccountRepository
 {
-    public async Task<IReadOnlyList<ProfileAccount>> ListAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<RetirementAccount>> ListAsync(CancellationToken cancellationToken = default)
     {
         await database.InitializeAsync(cancellationToken);
         var entities = await database.Connection.Table<ProfileAccountEntity>().OrderBy(account => account.Name).ToListAsync();
         return entities.Select(ToRecord).ToArray();
     }
 
-    public async Task SaveAsync(ProfileAccount account, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(RetirementAccount account, CancellationToken cancellationToken = default)
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(account.Id);
             ArgumentException.ThrowIfNullOrWhiteSpace(account.Name);
@@ -232,7 +232,7 @@ public sealed class SqliteProfileAccountRepository(LocalDatabase database) : IPr
             await database.Connection.DeleteAsync<ProfileAccountEntity>(id);
         }
 
-    private static ProfileAccount ToRecord(ProfileAccountEntity entity) => new(
+    private static RetirementAccount ToRecord(ProfileAccountEntity entity) => new(
             entity.Id,
             entity.Name,
             Enum.Parse<RetirementAccountType>(entity.Type),
@@ -247,48 +247,89 @@ public sealed class SqliteProfileAccountRepository(LocalDatabase database) : IPr
 
 public sealed class SqliteProfileIncomeRepository(LocalDatabase database) : IProfileIncomeRepository
 {
-    public async Task<IReadOnlyList<ProfileIncome>> ListAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<RetirementIncomeSource>> ListAsync(CancellationToken cancellationToken = default)
     {
         await database.InitializeAsync(cancellationToken);
         var items = await database.Connection.Table<ProfileIncomeEntity>().OrderBy(item => item.Name).ToListAsync();
-        return items.Select(item => new ProfileIncome(item.Id, item.Name, item.Amount, Enum.Parse<MyFireNumber.Core.Presentation.CurrencyPeriod>(item.Period), item.Category)).ToArray();
+        return items.Select(item => new RetirementIncomeSource(
+            item.Id,
+            item.Name,
+            item.AnnualAmount,
+            item.StartAge,
+            item.EndAge,
+            item.AnnualGrowth,
+            item.IsAfterTax,
+            item.TaxRate)).ToArray();
     }
-    public async Task SaveAsync(ProfileIncome item, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(RetirementIncomeSource item, CancellationToken cancellationToken = default)
     {
-        Validate(item.Id, item.Name, item.Amount);
+        Validate(item);
         await database.InitializeAsync(cancellationToken);
-        await database.Connection.InsertOrReplaceAsync(new ProfileIncomeEntity { Id = item.Id, Name = item.Name.Trim(), Amount = item.Amount, Period = item.Period.ToString(), Category = item.Category });
+        await database.Connection.InsertOrReplaceAsync(new ProfileIncomeEntity
+        {
+            Id = item.Id,
+            Name = item.Name.Trim(),
+            AnnualAmount = item.AnnualAmount,
+            StartAge = item.StartAge,
+            EndAge = item.EndAge,
+            AnnualGrowth = item.AnnualGrowth,
+            IsAfterTax = item.IsAfterTax,
+            TaxRate = item.TaxRate
+        });
     }
     public async Task DeleteAsync(string id, CancellationToken cancellationToken = default) { await database.InitializeAsync(cancellationToken); await database.Connection.DeleteAsync<ProfileIncomeEntity>(id); }
-    private static void Validate(string id, string name, double amount) { ArgumentException.ThrowIfNullOrWhiteSpace(id); ArgumentException.ThrowIfNullOrWhiteSpace(name); ArgumentOutOfRangeException.ThrowIfNegative(amount); }
+
+    private static void Validate(RetirementIncomeSource item)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(item.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(item.Name);
+        ArgumentOutOfRangeException.ThrowIfNegative(item.AnnualAmount);
+        ArgumentOutOfRangeException.ThrowIfLessThan(item.StartAge, 18);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(item.EndAge, 100);
+        ArgumentOutOfRangeException.ThrowIfLessThan(item.EndAge, item.StartAge);
+        ArgumentOutOfRangeException.ThrowIfLessThan(item.AnnualGrowth, -1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(item.AnnualGrowth, 1);
+        ArgumentOutOfRangeException.ThrowIfNegative(item.TaxRate);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(item.TaxRate, 1);
+    }
 }
 
 public sealed class SqliteProfileExpenseRepository(LocalDatabase database) : IProfileExpenseRepository
 {
-    public async Task<IReadOnlyList<ProfileExpense>> ListAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<RetirementExpense>> ListAsync(CancellationToken cancellationToken = default)
     {
         await database.InitializeAsync(cancellationToken);
         var items = await database.Connection.Table<ProfileExpenseEntity>().OrderBy(item => item.Name).ToListAsync();
-        return items.Select(item => new ProfileExpense(item.Id, item.Name, item.Amount, Enum.Parse<MyFireNumber.Core.Presentation.CurrencyPeriod>(item.Period), item.Category)).ToArray();
+        return items.Select(item => new RetirementExpense(item.Id, item.Name, item.AnnualAmount, item.StartAge)).ToArray();
     }
-    public async Task SaveAsync(ProfileExpense item, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(RetirementExpense item, CancellationToken cancellationToken = default)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(item.Id); ArgumentException.ThrowIfNullOrWhiteSpace(item.Name); ArgumentOutOfRangeException.ThrowIfNegative(item.Amount);
+        ArgumentException.ThrowIfNullOrWhiteSpace(item.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(item.Name);
+        ArgumentOutOfRangeException.ThrowIfNegative(item.AnnualAmount);
+        ArgumentOutOfRangeException.ThrowIfLessThan(item.StartAge, 18);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(item.StartAge, 100);
         await database.InitializeAsync(cancellationToken);
-        await database.Connection.InsertOrReplaceAsync(new ProfileExpenseEntity { Id = item.Id, Name = item.Name.Trim(), Amount = item.Amount, Period = item.Period.ToString(), Category = item.Category });
+        await database.Connection.InsertOrReplaceAsync(new ProfileExpenseEntity
+        {
+            Id = item.Id,
+            Name = item.Name.Trim(),
+            AnnualAmount = item.AnnualAmount,
+            StartAge = item.StartAge
+        });
     }
     public async Task DeleteAsync(string id, CancellationToken cancellationToken = default) { await database.InitializeAsync(cancellationToken); await database.Connection.DeleteAsync<ProfileExpenseEntity>(id); }
 }
 
 public sealed class SqliteProfileDebtRepository(LocalDatabase database) : IProfileDebtRepository
 {
-    public async Task<IReadOnlyList<ProfileDebt>> ListAsync(CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<DebtItem>> ListAsync(CancellationToken cancellationToken = default)
     {
         await database.InitializeAsync(cancellationToken);
         var items = await database.Connection.Table<ProfileDebtEntity>().OrderBy(item => item.Name).ToListAsync();
-        return items.Select(item => new ProfileDebt(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment)).ToArray();
+        return items.Select(item => new DebtItem(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment)).ToArray();
     }
-    public async Task SaveAsync(ProfileDebt item, CancellationToken cancellationToken = default)
+    public async Task SaveAsync(DebtItem item, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(item.Id); ArgumentException.ThrowIfNullOrWhiteSpace(item.Name);
         ArgumentOutOfRangeException.ThrowIfNegative(item.Balance);

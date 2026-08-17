@@ -19,6 +19,13 @@ public partial class PercentageInputView : ContentView
 
     public static readonly BindableProperty MaximumProperty = BindableProperty.Create(nameof(Maximum), typeof(double), typeof(PercentageInputView), 15d);
 
+    public static readonly BindableProperty StepProperty = BindableProperty.Create(
+        nameof(Step),
+        typeof(double),
+        typeof(PercentageInputView),
+        0.1d,
+        validateValue: static (_, value) => (double)value > 0);
+
     public PercentageInputView()
     {
         InitializeComponent();
@@ -58,5 +65,11 @@ public partial class PercentageInputView : ContentView
     {
         get => (double)GetValue(MaximumProperty);
         set => SetValue(MaximumProperty, value);
+    }
+
+    public double Step
+    {
+        get => (double)GetValue(StepProperty);
+        set => SetValue(StepProperty, value);
     }
 }

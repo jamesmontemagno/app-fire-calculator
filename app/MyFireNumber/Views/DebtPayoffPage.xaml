@@ -33,7 +33,7 @@
                 <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                         <Label Text="Your debts" Style="{StaticResource CalculatorSectionHeading}" />
-                        <Button Grid.Column="1" Text="Add debt" Command="{Binding AddDebtCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Add another debt to this payoff plan." />
+                        <Button Grid.Column="1" AutomationId="AddDebtButton" Text="Add" Command="{Binding AddDebtCommand}" IsVisible="{Binding CanEditProfileOwnedFields}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Add another debt to this payoff plan."><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource PrimaryDarkText}" Size="12" /></Button.ImageSource></Button>
                     </Grid>
                     <controls:FieldHelpView Header="Debt details" HelpText="For each debt, enter its balance, annual interest rate, and required minimum payment." />
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding DebtItems}" Spacing="{StaticResource SpaceSm}">
@@ -41,37 +41,55 @@
                             <DataTemplate x:DataType="viewModels:DebtEditorItem">
                                 <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceWarningSoftLight}, Dark={StaticResource SurfaceWarningSoftDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderWarningSoftLight}, Dark={StaticResource BorderWarningSoftDark}}" StrokeShape="RoundRectangle 8">
                                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                                            <Entry Text="{Binding Name}" Placeholder="Debt name" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" SemanticProperties.Description="Debt name" />
-                                            <Button Grid.Column="1" Text="Remove" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" Background="{AppThemeBinding Light={StaticResource SurfaceDangerLight}, Dark={StaticResource SurfaceDangerDark}}" TextColor="{AppThemeBinding Light={StaticResource TextDangerLight}, Dark={StaticResource TextDangerDark}}" FontSize="12" SemanticProperties.Description="Remove this debt from the payoff plan." />
+                                        <Grid ColumnDefinitions="*,44" ColumnSpacing="{StaticResource SpaceSm}">
+                                            <Entry Text="{Binding Name}" IsEnabled="{Binding IsEditable}" Placeholder="Debt name" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" SemanticProperties.Description="Debt name" />
+                                            <Button Grid.Column="1" AutomationId="RemoveDebtButton" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" IsVisible="{Binding IsEditable}" Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:DebtPayoffViewModel}}, Path=RemoveDebtCommand}" CommandParameter="{Binding .}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Padding="0" SemanticProperties.Description="Remove this debt from the payoff plan." />
                                         </Grid>
-                                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                            <VerticalStackLayout Spacing="3"><Label Text="Balance" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding BalanceText}" Keyboard="Numeric" Placeholder="5000" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" SemanticProperties.Description="Current debt balance in dollars." /></VerticalStackLayout>
-                                            <VerticalStackLayout Grid.Column="1" Spacing="3"><Label Text="Rate (%)" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding RateText}" Keyboard="Numeric" Placeholder="19.99" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" SemanticProperties.Description="Annual interest rate percentage." /></VerticalStackLayout>
-                                            <VerticalStackLayout Grid.Column="2" Spacing="3"><Label Text="Minimum" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding MinimumPaymentText}" Keyboard="Numeric" Placeholder="150" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" SemanticProperties.Description="Minimum monthly payment in dollars." /></VerticalStackLayout>
-                                        </Grid>
+                                        <controls:NumericInputView Header="Balance"
+                                                                   IsEnabled="{Binding IsEditable}"
+                                                                   HelpText="Current amount owed. Enter the exact balance because useful debt ranges vary too widely for a slider."
+                                                                   Placeholder="5000"
+                                                                   Text="{Binding BalanceText, Mode=TwoWay}" />
+                                        <controls:PercentageInputView AutomationId="DebtRateInput"
+                                                                      Header="Interest rate"
+                                                                      IsEnabled="{Binding IsEditable}"
+                                                                      HelpText="Annual percentage rate, adjustable in quarter-point increments."
+                                                                      Placeholder="19.99"
+                                                                      Minimum="0"
+                                                                      Maximum="100"
+                                                                      Step="0.25"
+                                                                      Text="{Binding RateText, Mode=TwoWay}" />
+                                        <controls:NumericInputView Header="Minimum monthly payment"
+                                                                   IsEnabled="{Binding IsEditable}"
+                                                                   HelpText="Required minimum payment. Enter the exact amount because it depends on the lender and balance."
+                                                                   Placeholder="150"
+                                                                   PeriodSuffix="/mo"
+                                                                   Text="{Binding MinimumPaymentText, Mode=TwoWay}" />
                                     </VerticalStackLayout>
                                 </Border>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
                     </VerticalStackLayout>
-                    <controls:AdvancedAssumptionsExpander Title="Advanced payment strategy">
-                        <VerticalStackLayout Margin="0,12,0,0" Spacing="{StaticResource SpaceMd}">
-                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                <Button Text="Fixed budget" Command="{Binding SetDebtPayoffModeCommand}" CommandParameter="fixed" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Use a fixed total monthly debt budget."><Button.Triggers><DataTrigger TargetType="Button" Binding="{Binding IsFixedDebtPayoff}" Value="True"><Setter Property="Background" Value="{StaticResource Primary}" /><Setter Property="TextColor" Value="{StaticResource White}" /></DataTrigger></Button.Triggers></Button>
-                                <Button Grid.Column="1" Text="Target timeline" Command="{Binding SetDebtPayoffModeCommand}" CommandParameter="target" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Calculate the payment required for a target payoff timeline."><Button.Triggers><DataTrigger TargetType="Button" Binding="{Binding IsTargetDebtPayoff}" Value="True"><Setter Property="Background" Value="{StaticResource Primary}" /><Setter Property="TextColor" Value="{StaticResource White}" /></DataTrigger></Button.Triggers></Button>
-                            </Grid>
-                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                <Button Text="Snowball" Command="{Binding SetDebtStrategyCommand}" CommandParameter="snowball" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Pay the smallest debt first." />
-                                <Button Grid.Column="1" Text="Avalanche" Command="{Binding SetDebtStrategyCommand}" CommandParameter="avalanche" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Pay the highest interest rate first." />
-                            </Grid>
-                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
-                                <controls:NumericInputView IsVisible="{Binding IsFixedDebtPayoff}" Header="Monthly debt budget" HelpText="Total amount available for debt payments each month, in dollars." Placeholder="1000" Text="{Binding DebtMonthlyBudgetText}" />
-                                <controls:NumericInputView IsVisible="{Binding IsTargetDebtPayoff}" Header="Target months" HelpText="Months in which you aim to eliminate all debt." Placeholder="36" Text="{Binding DebtTargetMonthsText}" />
-                                <controls:NumericInputView Grid.Column="1" Header="Extra monthly payment" HelpText="Additional monthly amount paid beyond minimums, in dollars." Placeholder="0" Text="{Binding DebtExtraPaymentText}" />
-                            </Grid>
-                        </VerticalStackLayout>
-                    </controls:AdvancedAssumptionsExpander>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                    <Label Text="Payoff strategy" Style="{StaticResource CalculatorSectionHeading}" />
+                    <Label Text="Choose how much to pay and which debt to prioritize first." Style="{StaticResource CalculatorSupportingText}" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                        <Button Text="Fixed budget" Command="{Binding SetDebtPayoffModeCommand}" CommandParameter="fixed" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Use a fixed total monthly debt budget."><Button.Triggers><DataTrigger TargetType="Button" Binding="{Binding IsFixedDebtPayoff}" Value="True"><Setter Property="Background" Value="{StaticResource Primary}" /><Setter Property="TextColor" Value="{StaticResource White}" /></DataTrigger></Button.Triggers></Button>
+                        <Button Grid.Column="1" Text="Target timeline" Command="{Binding SetDebtPayoffModeCommand}" CommandParameter="target" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Calculate the payment required for a target payoff timeline."><Button.Triggers><DataTrigger TargetType="Button" Binding="{Binding IsTargetDebtPayoff}" Value="True"><Setter Property="Background" Value="{StaticResource Primary}" /><Setter Property="TextColor" Value="{StaticResource White}" /></DataTrigger></Button.Triggers></Button>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                        <Button Text="Snowball" Command="{Binding SetDebtStrategyCommand}" CommandParameter="snowball" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Pay the smallest debt first."><Button.Triggers><DataTrigger TargetType="Button" Binding="{Binding IsSnowballStrategy}" Value="True"><Setter Property="Background" Value="{StaticResource Primary}" /><Setter Property="TextColor" Value="{StaticResource White}" /></DataTrigger></Button.Triggers></Button>
+                        <Button Grid.Column="1" Text="Avalanche" Command="{Binding SetDebtStrategyCommand}" CommandParameter="avalanche" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Pay the highest interest rate first."><Button.Triggers><DataTrigger TargetType="Button" Binding="{Binding IsAvalancheStrategy}" Value="True"><Setter Property="Background" Value="{StaticResource Primary}" /><Setter Property="TextColor" Value="{StaticResource White}" /></DataTrigger></Button.Triggers></Button>
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
+                        <controls:NumericInputView IsVisible="{Binding IsFixedDebtPayoff}" Header="Monthly debt budget" HelpText="Total amount available for debt payments each month, in dollars." Placeholder="1000" Text="{Binding DebtMonthlyBudgetText}" />
+                        <controls:NumericInputView IsVisible="{Binding IsTargetDebtPayoff}" Header="Target months" HelpText="Months in which you aim to eliminate all debt." Placeholder="36" Text="{Binding DebtTargetMonthsText}" />
+                        <controls:NumericInputView Grid.Column="1" Header="Extra monthly payment" HelpText="Additional monthly amount paid beyond minimums, in dollars." Placeholder="0" Text="{Binding DebtExtraPaymentText}" />
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 

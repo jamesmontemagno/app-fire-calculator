@@ -1,5 +1,4 @@
 using MyFireNumber.Core.Calculations;
-using MyFireNumber.Core.Presentation;
 using MyFireNumber.Core.Profile;
 using MyFireNumber.Storage;
 
@@ -62,13 +61,13 @@ public sealed class LocalDataArchiveRepositoryTests : IAsyncLifetime
         var profile = new FinancialProfile("Alex", "Alex household", 2, new DateOnly(1990, 8, 16), null, new DateOnly(2045, 8, 16), 120_000, 72_000);
         await new SqliteProfileRepository(database).SaveAsync(profile);
         await new SqliteProfileAccountRepository(database).SaveAsync(
-            new ProfileAccount("brokerage", "Brokerage", RetirementAccountType.Taxable, 50_000, 6_000, 0.07, 18, 0.04, 1, 0.15));
+            new RetirementAccount("brokerage", "Brokerage", RetirementAccountType.Taxable, 50_000, 6_000, 0.07, 18, 0.04, 1, 0.15));
         await new SqliteProfileIncomeRepository(database).SaveAsync(
-            new ProfileIncome("salary", "Salary", 10_000, CurrencyPeriod.Monthly, "Work"));
+            new RetirementIncomeSource("salary", "Salary", 120_000, 45, 65, 0.02, false, 0.25));
         await new SqliteProfileExpenseRepository(database).SaveAsync(
-            new ProfileExpense("housing", "Housing", 2_500, CurrencyPeriod.Monthly, "Home"));
+            new RetirementExpense("housing", "Housing", 30_000, 45));
         await new SqliteProfileDebtRepository(database).SaveAsync(
-            new ProfileDebt("card", "Card", 5_000, 0.2, 150));
+            new DebtItem("card", "Card", 5_000, 0.2, 150));
 
         var archive = await database.ExportAsync();
         await database.ClearAsync();
@@ -88,7 +87,7 @@ public sealed class LocalDataArchiveRepositoryTests : IAsyncLifetime
         var archive = await database.ExportAsync();
 
         await new SqliteProfileRepository(database).SaveAsync(FinancialProfile.Empty with { DisplayName = "Existing" });
-        await new SqliteProfileDebtRepository(database).SaveAsync(new ProfileDebt("card", "Card", 5_000, 0.2, 150));
+        await new SqliteProfileDebtRepository(database).SaveAsync(new DebtItem("card", "Card", 5_000, 0.2, 150));
 
         await database.ImportAsync(archive);
 
@@ -102,7 +101,7 @@ public sealed class LocalDataArchiveRepositoryTests : IAsyncLifetime
         var database = new LocalDatabase(databasePath);
         var archive = (await database.ExportAsync()) with
         {
-            ProfileDebts = [new ProfileDebt("card", "Card", -1, 0.2, 150)]
+            ProfileDebts = [new DebtItem("card", "Card", -1, 0.2, 150)]
         };
 
         await Assert.ThrowsAsync<InvalidDataException>(() => database.ImportAsync(archive));

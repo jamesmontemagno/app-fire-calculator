@@ -74,7 +74,7 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     private bool withdrawOnlyAfterRetirement = true;
 
     [ObservableProperty]
-    private bool reinvestRetirementSurplus = true;
+    private bool reinvestRetirementSurplus;
 
     [ObservableProperty]
     private IReadOnlyList<ISeries> retirementBucketSeries = [];
@@ -98,7 +98,16 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     protected override string ExportFailureMessage => "The Retirement Cash Flow workbook could not be created locally.";
 
     partial void OnRetirementCurrentAgeTextChanged(string value) => OnDraftInputChanged();
-    partial void OnRetirementSemiAgeTextChanged(string value) => OnDraftInputChanged();
+    public double RetirementPlanThroughMinimum =>
+        int.TryParse(RetirementSemiAgeText, NumberStyles.Integer, CultureInfo.CurrentCulture, out var semiAge)
+            ? Math.Clamp(semiAge, 18, 100)
+            : 18;
+
+    partial void OnRetirementSemiAgeTextChanged(string value)
+    {
+        OnPropertyChanged(nameof(RetirementPlanThroughMinimum));
+        OnDraftInputChanged();
+    }
     partial void OnRetirementPlanThroughAgeTextChanged(string value) => OnDraftInputChanged();
     partial void OnRetirementInflationTextChanged(string value) => OnDraftInputChanged();
     partial void OnWithdrawOnlyAfterRetirementChanged(bool value) => OnDraftInputChanged();
@@ -107,6 +116,11 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     [RelayCommand]
     private async Task AddRetirementAccountAsync()
     {
+        if (IsLinkedProfile)
+        {
+            return;
+        }
+
         var type = await promptService.ChooseAccountTypeAsync();
         if (type is null)
         {
@@ -123,9 +137,9 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     }
 
     [RelayCommand]
-    private async Task RemoveRetirementAccountAsync(RetirementAccountEditorItem? account)
+    private void RemoveRetirementAccount(RetirementAccountEditorItem? account)
     {
-        if (account is not null && await ConfirmDeleteAsync("account", account.Name))
+        if (!IsLinkedProfile && account is not null)
         {
             RetirementAccounts.Remove(account);
         }
@@ -134,6 +148,11 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     [RelayCommand]
     private async Task AddRetirementIncomeAsync()
     {
+        if (IsLinkedProfile)
+        {
+            return;
+        }
+
         var isAfterTax = await promptService.ChooseIncomeTaxTreatmentAsync();
         if (isAfterTax is null)
         {
@@ -151,9 +170,9 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     }
 
     [RelayCommand]
-    private async Task RemoveRetirementIncomeAsync(RetirementIncomeEditorItem? income)
+    private void RemoveRetirementIncome(RetirementIncomeEditorItem? income)
     {
-        if (income is not null && await ConfirmDeleteAsync("income source", income.Name))
+        if (!IsLinkedProfile && income is not null)
         {
             RetirementIncomeSources.Remove(income);
         }
@@ -162,6 +181,11 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     [RelayCommand]
     private void AddRetirementExpense()
     {
+        if (IsLinkedProfile)
+        {
+            return;
+        }
+
         RetirementAdditionalExpenses.Add(new RetirementExpenseEditorItem
         {
             Name = "New retirement expense",
@@ -171,20 +195,13 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     }
 
     [RelayCommand]
-    private async Task RemoveRetirementExpenseAsync(RetirementExpenseEditorItem? expense)
+    private void RemoveRetirementExpense(RetirementExpenseEditorItem? expense)
     {
-        if (expense is not null && await ConfirmDeleteAsync("expense", expense.Name))
+        if (!IsLinkedProfile && expense is not null)
         {
             RetirementAdditionalExpenses.Remove(expense);
         }
     }
-
-    private Task<bool> ConfirmDeleteAsync(string itemType, string name) =>
-        ConfirmationService.ConfirmAsync(
-            $"Delete {itemType}?",
-            $"Delete \"{name}\" from this cash-flow plan?",
-            "Delete",
-            "Cancel");
 
     [RelayCommand]
     private async Task ViewRetirementAnnualDetailsAsync()
@@ -488,7 +505,9 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
         RetirementAccounts.Clear();
         foreach (var account in accounts)
         {
-            RetirementAccounts.Add(RetirementAccountEditorItem.FromAccount(account));
+            var editor = RetirementAccountEditorItem.FromAccount(account);
+            editor.IsReadOnly = IsLinkedProfile;
+            RetirementAccounts.Add(editor);
         }
     }
 
@@ -497,7 +516,9 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
         RetirementIncomeSources.Clear();
         foreach (var income in incomeSources)
         {
-            RetirementIncomeSources.Add(RetirementIncomeEditorItem.FromIncome(income));
+            var editor = RetirementIncomeEditorItem.FromIncome(income);
+            editor.IsReadOnly = IsLinkedProfile;
+            RetirementIncomeSources.Add(editor);
         }
     }
 
@@ -506,7 +527,9 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
         RetirementAdditionalExpenses.Clear();
         foreach (var expense in expenses)
         {
-            RetirementAdditionalExpenses.Add(RetirementExpenseEditorItem.FromExpense(expense));
+            var editor = RetirementExpenseEditorItem.FromExpense(expense);
+            editor.IsReadOnly = IsLinkedProfile;
+            RetirementAdditionalExpenses.Add(editor);
         }
     }
 }

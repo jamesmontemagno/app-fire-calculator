@@ -47,6 +47,7 @@ public abstract class CalculatorPageBase : ContentPage, IQueryAttributable
                 new RowDefinition(GridLength.Star)
             }
         };
+        Content = null;
         root.Add(new ScenarioModeBannerView { Margin = new Thickness(16, 8, 16, 0) });
         root.Add(originalContent, 0, 1);
         Content = root;

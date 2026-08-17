@@ -107,6 +107,18 @@
                                </Button>
                            </Grid>
                        </Border>
+                       <VerticalStackLayout Spacing="4">
+                           <Label Text="Currency"
+                                  TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
+                                  FontSize="13" />
+                           <Picker AutomationId="CurrencyPicker"
+                                   ItemsSource="{Binding CurrencyOptions}"
+                                   SelectedItem="{Binding SelectedCurrencyOption}"
+                                   Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                                   TitleColor="{AppThemeBinding Light={StaticResource TextMutedAltLight}, Dark={StaticResource TextMutedAltDark}}"
+                                   SemanticProperties.Description="Currency used to display calculator results" />
+                       </VerticalStackLayout>
                    </VerticalStackLayout>
                 </Border>
                 <Border Padding="{StaticResource CardPadding}"
@@ -198,47 +210,6 @@
                             <Label Grid.Row="5" Text="Show recommended books on Home" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                             <Switch AutomationId="RecommendedBooksSwitch" Grid.Row="5" Grid.Column="1" IsToggled="{Binding ShowRecommendedBooks}" />
                         </Grid>
-                    </VerticalStackLayout>
-                </Border>
-                <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
-                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                        StrokeShape="RoundRectangle 12">
-                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
-                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
-                            <Label Text="&#xf1ec;"
-                                   FontFamily="FontAwesomeSolid"
-                                   VerticalTextAlignment="Center"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
-                                   SemanticProperties.Description="Calculator display" />
-                            <Label Grid.Column="1"
-                                   Text="Calculator display"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
-                                   FontAttributes="Bold"
-                                   FontSize="18" />
-                        </Grid>
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Currency"
-                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
-                                   FontSize="13" />
-                            <Picker AutomationId="CurrencyPicker"
-                                    ItemsSource="{Binding CurrencyOptions}"
-                                    SelectedItem="{Binding SelectedCurrencyOption}"
-                                    Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
-                                    TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
-                                    TitleColor="{AppThemeBinding Light={StaticResource TextMutedAltLight}, Dark={StaticResource TextMutedAltDark}}"
-                                    SemanticProperties.Description="Currency used to display calculator results" />
-                        </VerticalStackLayout>
-                        <Label Text="Your age, retirement date, income, spending, and planning assumptions now live in Profile, so every calculator starts from one set of numbers."
-                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
-                               FontSize="13"
-                               LineHeight="1.3" />
-                        <Button AutomationId="OpenProfileFromSettingsButton"
-                                Text="Open Profile"
-                                Command="{Binding OpenProfileCommand}"
-                                Background="Transparent"
-                                TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
-                                SemanticProperties.Description="Open Profile to edit your planning details." />
                     </VerticalStackLayout>
                 </Border>
                 <Border Padding="{StaticResource CardPadding}"

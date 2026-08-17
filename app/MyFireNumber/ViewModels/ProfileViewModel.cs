@@ -1,13 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyFireNumber.Core.Calculations;
-using MyFireNumber.Core.Presentation;
 using MyFireNumber.Core.Profile;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Globalization;
 
 namespace MyFireNumber.ViewModels;
@@ -21,21 +19,20 @@ public sealed partial class ProfileViewModel(
     ICalculatorDefaultsService calculatorDefaultsService,
     ILocalDateProvider localDateProvider,
     INavigationService navigationService,
-    IConfirmationService confirmationService) : ObservableObject
+    IConfirmationService confirmationService,
+    IRetirementCashFlowPromptService promptService) : ObservableObject
 {
     private bool isLoaded;
     private bool isTrackingCollections;
     private long loadedDataRevision = -1;
 
     public ObservableCollection<RetirementAccountEditorItem> Accounts { get; } = [];
-    public ObservableCollection<ProfileRecurringEditorItem> Income { get; } = [];
-    public ObservableCollection<ProfileRecurringEditorItem> Expenses { get; } = [];
-    public ObservableCollection<ProfileDebtEditorItem> Debts { get; } = [];
+    public ObservableCollection<RetirementIncomeEditorItem> Income { get; } = [];
+    public ObservableCollection<RetirementExpenseEditorItem> Expenses { get; } = [];
+    public ObservableCollection<DebtEditorItem> Debts { get; } = [];
     [ObservableProperty] private string displayName = string.Empty;
     [ObservableProperty] private string householdName = string.Empty;
     [ObservableProperty] private string householdSizeText = string.Empty;
-    [ObservableProperty] private string annualIncomeText = string.Empty;
-    [ObservableProperty] private string annualExpensesText = string.Empty;
     [ObservableProperty] private DateTime birthDate = DateTime.Today.AddYears(-30);
     [ObservableProperty] private DateTime phasedRetirementDate = DateTime.Today.AddYears(25);
     [ObservableProperty] private DateTime targetRetirementDate = DateTime.Today.AddYears(30);
@@ -59,28 +56,18 @@ public sealed partial class ProfileViewModel(
     public bool HasNoPhasedRetirementDate => !HasPhasedRetirementDate;
     public bool HasNoTargetRetirementDate => !HasTargetRetirementDate;
 
-    /// <summary>
-    /// Explains which figure calculators will actually use, because the itemised list silently wins
-    /// over the single household figure and a user editing both deserves to see that.
-    /// </summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasIncomeOverride))]
-    private string incomeOverrideText = string.Empty;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(HasExpenseOverride))]
-    private string expenseOverrideText = string.Empty;
-
-    public bool HasIncomeOverride => !string.IsNullOrWhiteSpace(IncomeOverrideText);
-    public bool HasExpenseOverride => !string.IsNullOrWhiteSpace(ExpenseOverrideText);
+    [ObservableProperty] private string accountsSummary = "No accounts yet.";
+    [ObservableProperty] private string incomeSummary = "No income yet.";
+    [ObservableProperty] private string expensesSummary = "No expenses yet.";
+    [ObservableProperty] private string debtsSummary = "No debts yet.";
 
     /// <summary>Keeps the birth-date picker from offering a future date the age math cannot use.</summary>
     public DateTime MaximumBirthDate => localDateProvider.Today.ToDateTime(TimeOnly.MinValue);
     public bool IsProfileComplete => HasBirthDate && HasTargetRetirementDate &&
-        !string.IsNullOrWhiteSpace(AnnualIncomeText) && !string.IsNullOrWhiteSpace(AnnualExpensesText);
+        Income.Count > 0 && Expenses.Count > 0;
     public string CompletionText => IsProfileComplete
         ? "Your essential planning details are set."
-        : "Add your birth date, target retirement date, income, and spending to personalize new calculations.";
+        : "Add your birth date, target retirement date, income, and expenses to personalize new calculations.";
 
     partial void OnValidationMessageChanged(string value) => OnPropertyChanged(nameof(HasValidationMessage));
     partial void OnHasBirthDateChanged(bool value)
@@ -96,9 +83,6 @@ public sealed partial class ProfileViewModel(
         OnPropertyChanged(nameof(HasNoTargetRetirementDate));
         NotifyCompletionChanged();
     }
-    partial void OnAnnualIncomeTextChanged(string value) => NotifyCompletionChanged();
-    partial void OnAnnualExpensesTextChanged(string value) => NotifyCompletionChanged();
-
     /// <summary>
     /// <see cref="CompletionText"/> is derived from <see cref="IsProfileComplete"/>, so both have to
     /// be raised together or the completion card keeps stale guidance until the next save.
@@ -120,7 +104,7 @@ public sealed partial class ProfileViewModel(
     /// Subscribes once so the override notices follow the lists, including edits to an existing
     /// item's amount or period, not just additions and removals.
     /// </summary>
-    private void TrackRecurringCollections()
+    private void TrackInventoryCollections()
     {
         if (isTrackingCollections)
         {
@@ -128,60 +112,101 @@ public sealed partial class ProfileViewModel(
         }
 
         isTrackingCollections = true;
-        Income.CollectionChanged += OnRecurringCollectionChanged;
-        Expenses.CollectionChanged += OnRecurringCollectionChanged;
+        Accounts.CollectionChanged += OnAccountsCollectionChanged;
+        Income.CollectionChanged += OnIncomeCollectionChanged;
+        Expenses.CollectionChanged += OnExpenseCollectionChanged;
+        Debts.CollectionChanged += OnDebtsCollectionChanged;
     }
 
-    private void OnRecurringCollectionChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
+    private void OnAccountsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
     {
-        foreach (var item in eventArgs.OldItems?.OfType<ProfileRecurringEditorItem>() ?? [])
+        UpdateItemHandlers<RetirementAccountEditorItem>(eventArgs, OnInventoryItemChanged);
+        UpdateInventorySummaries();
+    }
+
+    private void OnIncomeCollectionChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
+    {
+        UpdateItemHandlers<RetirementIncomeEditorItem>(eventArgs, OnInventoryItemChanged);
+        UpdateInventorySummaries();
+        NotifyCompletionChanged();
+    }
+
+    private void OnExpenseCollectionChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
+    {
+        UpdateItemHandlers<RetirementExpenseEditorItem>(eventArgs, OnInventoryItemChanged);
+        UpdateInventorySummaries();
+        NotifyCompletionChanged();
+    }
+
+    private void OnDebtsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
+    {
+        UpdateItemHandlers<DebtEditorItem>(eventArgs, OnInventoryItemChanged);
+        UpdateInventorySummaries();
+    }
+
+    private static void UpdateItemHandlers<TItem>(
+        NotifyCollectionChangedEventArgs eventArgs,
+        EventHandler handler)
+        where TItem : class
+    {
+        foreach (var item in eventArgs.OldItems?.OfType<TItem>() ?? [])
         {
-            item.PropertyChanged -= OnRecurringItemChanged;
+            switch (item)
+            {
+                case RetirementAccountEditorItem account: account.Changed -= handler; break;
+                case RetirementIncomeEditorItem income: income.Changed -= handler; break;
+                case RetirementExpenseEditorItem expense: expense.Changed -= handler; break;
+                case DebtEditorItem debt: debt.Changed -= handler; break;
+            }
         }
 
-        foreach (var item in eventArgs.NewItems?.OfType<ProfileRecurringEditorItem>() ?? [])
+        foreach (var item in eventArgs.NewItems?.OfType<TItem>() ?? [])
         {
-            item.PropertyChanged += OnRecurringItemChanged;
-        }
-
-        UpdateOverrideNotices();
-    }
-
-    private void OnRecurringItemChanged(object? sender, PropertyChangedEventArgs eventArgs)
-    {
-        if (eventArgs.PropertyName is nameof(ProfileRecurringEditorItem.AmountText)
-            or nameof(ProfileRecurringEditorItem.Period))
-        {
-            UpdateOverrideNotices();
+            switch (item)
+            {
+                case RetirementAccountEditorItem account: account.Changed += handler; break;
+                case RetirementIncomeEditorItem income: income.Changed += handler; break;
+                case RetirementExpenseEditorItem expense: expense.Changed += handler; break;
+                case DebtEditorItem debt: debt.Changed += handler; break;
+            }
         }
     }
 
-    /// <summary>
-    /// Recomputes the notices that tell the user the itemised lists are overriding the single
-    /// household figures. Kept live so adding a first income item immediately explains why the
-    /// household number above it stopped mattering.
-    /// </summary>
-    private void UpdateOverrideNotices()
+    private void OnInventoryItemChanged(object? sender, EventArgs eventArgs) => UpdateInventorySummaries();
+
+    private void UpdateInventorySummaries()
     {
-        IncomeOverrideText = BuildOverrideText(Income, "income");
-        ExpenseOverrideText = BuildOverrideText(Expenses, "spending");
+        var accountBalance = Accounts.Sum(item => ParseAmount(item.BalanceText));
+        var contributions = Accounts.Sum(item => ParseAmount(item.AnnualContributionText));
+        AccountsSummary = Accounts.Count == 0
+            ? "No accounts yet."
+            : $"{CountLabel(Accounts.Count, "account")} | {FormatCurrency(accountBalance)} balance | {FormatCurrency(contributions)}/yr contributions";
+
+        var annualIncome = Income.Sum(item => ParseAmount(item.AnnualAmountText));
+        IncomeSummary = Income.Count == 0
+            ? "No income yet."
+            : $"{CountLabel(Income.Count, "source")} | {FormatCurrency(annualIncome)}/yr total";
+
+        var annualExpenses = Expenses.Sum(item => ParseAmount(item.AnnualAmountText));
+        ExpensesSummary = Expenses.Count == 0
+            ? "No expenses yet."
+            : $"{CountLabel(Expenses.Count, "expense")} | {FormatCurrency(annualExpenses)}/yr total";
+
+        var debtBalance = Debts.Sum(item => ParseAmount(item.BalanceText));
+        var minimumPayments = Debts.Sum(item => ParseAmount(item.MinimumPaymentText));
+        DebtsSummary = Debts.Count == 0
+            ? "No debts yet."
+            : $"{CountLabel(Debts.Count, "debt")} | {FormatCurrency(debtBalance)} balance | {FormatCurrency(minimumPayments)}/mo minimum";
     }
 
-    private static string BuildOverrideText(
-        IReadOnlyCollection<ProfileRecurringEditorItem> items,
-        string noun)
-    {
-        if (items.Count == 0)
-        {
-            return string.Empty;
-        }
+    private static string CountLabel(int count, string singular) =>
+        $"{count} {(count == 1 ? singular : $"{singular}s")}";
 
-        var total = items.Sum(item => item.TryGetAmount(out var amount)
-            ? CurrencyPeriodMath.Convert(amount, item.Period, CurrencyPeriod.Annual)
-            : 0);
-        var label = items.Count == 1 ? "entry" : "entries";
-        return $"Your {items.Count} {noun} {label} total {total.ToString("C0", CultureInfo.CurrentCulture)} a year, and calculators use that instead of the figure above.";
-    }
+    private static double ParseAmount(string text) =>
+        double.TryParse(text, NumberStyles.Number, CultureInfo.CurrentCulture, out var amount) ? amount : 0;
+
+    private static string FormatCurrency(double amount) =>
+        amount.ToString("C0", CultureInfo.CurrentCulture);
 
     public async Task LoadAsync()
     {
@@ -190,12 +215,13 @@ public sealed partial class ProfileViewModel(
             return;
         }
 
-        TrackRecurringCollections();
+        TrackInventoryCollections();
 
         await profileService.LoadAsync();
         ApplyProfile(profileService.Current);
         ApplyAssumptions();
 
+        DetachInventoryItemHandlers();
         Accounts.Clear();
         Income.Clear();
         Expenses.Clear();
@@ -208,23 +234,47 @@ public sealed partial class ProfileViewModel(
 
         foreach (var item in await profileIncomeRepository.ListAsync())
         {
-            Income.Add(ProfileRecurringEditorItem.FromIncome(item));
+            Income.Add(RetirementIncomeEditorItem.FromIncome(item));
         }
 
         foreach (var item in await profileExpenseRepository.ListAsync())
         {
-            Expenses.Add(ProfileRecurringEditorItem.FromExpense(item));
+            Expenses.Add(RetirementExpenseEditorItem.FromExpense(item));
         }
 
         foreach (var item in await profileDebtRepository.ListAsync())
         {
-            Debts.Add(ProfileDebtEditorItem.FromDebt(item));
+            Debts.Add(DebtEditorItem.FromDebt(item));
         }
 
+        UpdateInventorySummaries();
         ValidationMessage = string.Empty;
         StatusMessage = string.Empty;
         loadedDataRevision = profileService.DataRevision;
         isLoaded = true;
+    }
+
+    private void DetachInventoryItemHandlers()
+    {
+        foreach (var item in Accounts)
+        {
+            item.Changed -= OnInventoryItemChanged;
+        }
+
+        foreach (var item in Income)
+        {
+            item.Changed -= OnInventoryItemChanged;
+        }
+
+        foreach (var item in Expenses)
+        {
+            item.Changed -= OnInventoryItemChanged;
+        }
+
+        foreach (var item in Debts)
+        {
+            item.Changed -= OnInventoryItemChanged;
+        }
     }
 
     private void ApplyAssumptions()
@@ -295,7 +345,7 @@ public sealed partial class ProfileViewModel(
         // Each inventory category is validated and persisted exactly once, independently of the
         // others. Nesting these loops inside the account loop saved every item once per account and
         // skipped them entirely for a profile with no accounts.
-        var accounts = new List<ProfileAccount>(Accounts.Count);
+        var accounts = new List<RetirementAccount>(Accounts.Count);
         foreach (var editor in Accounts)
         {
             if (!editor.TryCreateAccount(out var account, out var error))
@@ -305,49 +355,42 @@ public sealed partial class ProfileViewModel(
                 return;
             }
 
-            accounts.Add(new ProfileAccount(
-                account.Id,
-                account.Name,
-                account.Type,
-                account.Balance,
-                account.AnnualContribution,
-                account.AnnualReturn,
-                account.AvailableAge,
-                account.WithdrawalRate,
-                account.PayoutYears,
-                account.EffectiveWithdrawalTaxRate));
+            accounts.Add(account);
         }
 
-        var income = new List<ProfileIncome>(Income.Count);
+        var income = new List<RetirementIncomeSource>(Income.Count);
         foreach (var item in Income)
         {
-            if (string.IsNullOrWhiteSpace(item.Name) || !item.TryGetAmount(out var amount))
+            if (!item.TryCreateIncome(out var source, out var incomeError))
             {
-                ValidationMessage = "Each income item needs a name and non-negative amount.";
+                item.IsExpanded = true;
+                ValidationMessage = $"Income {item.Name}: {incomeError}";
                 return;
             }
 
-            income.Add(new ProfileIncome(item.Id, item.Name, amount, item.Period, item.Category));
+            income.Add(source);
         }
 
-        var expenses = new List<ProfileExpense>(Expenses.Count);
+        var expenses = new List<RetirementExpense>(Expenses.Count);
         foreach (var item in Expenses)
         {
-            if (string.IsNullOrWhiteSpace(item.Name) || !item.TryGetAmount(out var amount))
+            if (!item.TryCreateExpense(out var expense, out var expenseError))
             {
-                ValidationMessage = "Each expense needs a name and non-negative amount.";
+                item.IsExpanded = true;
+                ValidationMessage = $"Expense {item.Name}: {expenseError}";
                 return;
             }
 
-            expenses.Add(new ProfileExpense(item.Id, item.Name, amount, item.Period, item.Category));
+            expenses.Add(expense);
         }
 
-        var debts = new List<ProfileDebt>(Debts.Count);
+        var debts = new List<DebtItem>(Debts.Count);
         foreach (var item in Debts)
         {
-            if (!item.TryCreate(out var debt, out var debtError))
+            if (!item.TryCreateDebt(out var debt))
             {
-                ValidationMessage = $"Debt {item.Name}: {debtError}";
+                item.IsExpanded = true;
+                ValidationMessage = $"Debt {item.Name}: enter a name, positive balance and minimum payment, and a rate from 0% to 100%.";
                 return;
             }
 
@@ -388,21 +431,49 @@ public sealed partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private void AddAccount()
+    private async Task AddAccountAsync()
     {
-        Accounts.Add(new RetirementAccountEditorItem
+        var type = await promptService.ChooseAccountTypeAsync();
+        if (type is null)
         {
-            Name = "New account",
+            return;
+        }
+
+        var expectedReturn = TryPercent(ExpectedReturnText, 0, 15, out var parsedReturn)
+            ? parsedReturn
+            : 0.07;
+        Accounts.Add(RetirementAccountEditorItem.CreateNew(type.Value, expectedReturn));
+    }
+
+    [RelayCommand]
+    private void AddIncome()
+    {
+        var (startAge, endAge) = DefaultRetirementAgeRange();
+        Income.Add(new RetirementIncomeEditorItem
+        {
+            Name = "New income",
+            StartAgeText = startAge.ToString(CultureInfo.CurrentCulture),
+            EndAgeText = endAge.ToString(CultureInfo.CurrentCulture),
             IsExpanded = true
         });
     }
 
-    [RelayCommand] private void AddIncome() => Income.Add(new ProfileRecurringEditorItem { Name = "New income", IsExpanded = true });
-    [RelayCommand] private void AddExpense() => Expenses.Add(new ProfileRecurringEditorItem { Name = "New expense", IsExpanded = true });
-    [RelayCommand] private void AddDebt() => Debts.Add(new ProfileDebtEditorItem { Name = "New debt", IsExpanded = true });
+    [RelayCommand]
+    private void AddExpense()
+    {
+        var (startAge, _) = DefaultRetirementAgeRange();
+        Expenses.Add(new RetirementExpenseEditorItem
+        {
+            Name = "New expense",
+            StartAgeText = startAge.ToString(CultureInfo.CurrentCulture),
+            IsExpanded = true
+        });
+    }
+
+    [RelayCommand] private void AddDebt() => Debts.Add(new DebtEditorItem { Name = "New debt", IsExpanded = true });
 
     [RelayCommand]
-    private async Task RemoveIncomeAsync(ProfileRecurringEditorItem? item)
+    private async Task RemoveIncomeAsync(RetirementIncomeEditorItem? item)
     {
         if (item is null || !await ConfirmDeleteAsync("income", item.Name)) return;
         Income.Remove(item);
@@ -410,7 +481,7 @@ public sealed partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private async Task RemoveExpenseAsync(ProfileRecurringEditorItem? item)
+    private async Task RemoveExpenseAsync(RetirementExpenseEditorItem? item)
     {
         if (item is null || !await ConfirmDeleteAsync("expense", item.Name)) return;
         Expenses.Remove(item);
@@ -418,7 +489,7 @@ public sealed partial class ProfileViewModel(
     }
 
     [RelayCommand]
-    private async Task RemoveDebtAsync(ProfileDebtEditorItem? item)
+    private async Task RemoveDebtAsync(DebtEditorItem? item)
     {
         if (item is null || !await ConfirmDeleteAsync("debt", item.Name)) return;
         Debts.Remove(item);
@@ -444,6 +515,20 @@ public sealed partial class ProfileViewModel(
             "Delete",
             "Cancel");
 
+    private (int StartAge, int EndAge) DefaultRetirementAgeRange()
+    {
+        var today = localDateProvider.Today;
+        var startAge = HasBirthDate
+            ? ProfileAgeCalculator.AgeOn(DateOnly.FromDateTime(BirthDate), today)
+            : 45;
+        var endAge = HasBirthDate && HasTargetRetirementDate
+            ? ProfileAgeCalculator.AgeOn(
+                DateOnly.FromDateTime(BirthDate),
+                DateOnly.FromDateTime(TargetRetirementDate))
+            : 65;
+        return (Math.Clamp(startAge, 18, 100), Math.Clamp(Math.Max(startAge, endAge), 18, 100));
+    }
+
     [RelayCommand]
     private Task OpenSettingsAsync() => navigationService.GoToAsync("settings");
 
@@ -468,11 +553,9 @@ public sealed partial class ProfileViewModel(
     private bool TryCreateProfile(out FinancialProfile profile)
     {
         profile = FinancialProfile.Empty;
-        if (!TryOptionalPositiveInt(HouseholdSizeText, out var householdSize) ||
-            !TryOptionalNonNegative(AnnualIncomeText, out var annualIncome) ||
-            !TryOptionalNonNegative(AnnualExpensesText, out var annualExpenses))
+        if (!TryOptionalPositiveInt(HouseholdSizeText, out var householdSize))
         {
-            ValidationMessage = "Household size must be a whole number, and income and spending must be zero or more.";
+            ValidationMessage = "Household size must be a whole number.";
             return false;
         }
 
@@ -483,8 +566,8 @@ public sealed partial class ProfileViewModel(
             HasBirthDate ? DateOnly.FromDateTime(BirthDate) : null,
             HasPhasedRetirementDate ? DateOnly.FromDateTime(PhasedRetirementDate) : null,
             HasTargetRetirementDate ? DateOnly.FromDateTime(TargetRetirementDate) : null,
-            annualIncome,
-            annualExpenses);
+            null,
+            null);
 
         if (!ProfileAgeCalculator.TryValidate(profile, localDateProvider.Today, out var validationError))
         {
@@ -500,8 +583,6 @@ public sealed partial class ProfileViewModel(
         DisplayName = profile.DisplayName ?? string.Empty;
         HouseholdName = profile.HouseholdName ?? string.Empty;
         HouseholdSizeText = profile.HouseholdSize?.ToString(CultureInfo.CurrentCulture) ?? string.Empty;
-        AnnualIncomeText = profile.AnnualIncome?.ToString("0.##", CultureInfo.CurrentCulture) ?? string.Empty;
-        AnnualExpensesText = profile.AnnualExpenses?.ToString("0.##", CultureInfo.CurrentCulture) ?? string.Empty;
         HasBirthDate = profile.BirthDate is not null;
         HasPhasedRetirementDate = profile.PhasedRetirementDate is not null;
         HasTargetRetirementDate = profile.TargetRetirementDate is not null;
@@ -517,18 +598,8 @@ public sealed partial class ProfileViewModel(
     private static string? FirstNonEmpty(params string?[] values) =>
         values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value))?.Trim();
 
-    private static RetirementAccountEditorItem ToEditor(ProfileAccount account) =>
-        RetirementAccountEditorItem.FromAccount(new RetirementAccount(
-            account.Id,
-            account.Name,
-            account.Type,
-            account.Balance,
-            account.AnnualContribution,
-            account.AnnualReturn,
-            account.AvailableAge,
-            account.WithdrawalRate,
-            account.PayoutYears,
-            account.EffectiveWithdrawalTaxRate));
+    private static RetirementAccountEditorItem ToEditor(RetirementAccount account) =>
+        RetirementAccountEditorItem.FromAccount(account);
 
     private static bool TryOptionalPositiveInt(string value, out int? result)
     {
@@ -547,20 +618,4 @@ public sealed partial class ProfileViewModel(
         return true;
     }
 
-    private static bool TryOptionalNonNegative(string value, out double? result)
-    {
-        result = null;
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return true;
-        }
-
-        if (!double.TryParse(value, NumberStyles.Number, CultureInfo.CurrentCulture, out var parsed) || parsed < 0)
-        {
-            return false;
-        }
-
-        result = parsed;
-        return true;
-    }
 }

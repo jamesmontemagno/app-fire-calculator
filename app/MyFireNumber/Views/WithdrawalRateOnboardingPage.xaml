@@ -53,14 +53,12 @@
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                         </Grid>
-                        <Slider AutomationId="OnboardingWithdrawalRateSlider"
-                                Minimum="1"
-                                Maximum="10"
-                                Value="{Binding WithdrawalRatePercent}"
-                                MinimumTrackColor="{StaticResource FixedAccent}"
-                                MaximumTrackColor="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                                ThumbColor="{StaticResource FixedAccent}"
-                                SemanticProperties.Description="Planned annual withdrawal rate percentage" />
+                        <controls:SteppedSlider AutomationId="OnboardingWithdrawalRateSlider"
+                                               Minimum="1"
+                                               Maximum="10"
+                                               StepSize="0.1"
+                                               Value="{Binding WithdrawalRatePercent}"
+                                               SemanticProperties.Description="Planned annual withdrawal rate percentage" />
                     </VerticalStackLayout>
                 </Border>
 

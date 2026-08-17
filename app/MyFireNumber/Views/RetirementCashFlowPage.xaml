@@ -11,6 +11,9 @@
              Shell.NavBarIsVisible="True"
              Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
              SafeAreaEdges="All">
+    <views:CalculatorPageBase.Resources>
+        <controls:NumericTextConverter x:Key="NumericTextConverter" />
+    </views:CalculatorPageBase.Resources>
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding SavePlanAndCloseCommand}"
@@ -46,15 +49,26 @@
                         <Label Text="Scenario" Style="{StaticResource CalculatorSectionHeading}" />
                         <controls:PeriodToggleView />
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
-                            <controls:NumericInputView Header="Current age" HelpText="Your age today, in years." Placeholder="45" Text="{Binding RetirementCurrentAgeText}" />
-                            <controls:NumericInputView Grid.Column="1" Header="Semi-retirement age" HelpText="The age when your plan changes from full-time work." Placeholder="55" Text="{Binding RetirementSemiAgeText}" />
+                            <controls:NumericInputView Header="Current age" IsEnabled="{Binding CanEditProfileOwnedFields}" HelpText="Your age today, in years." Placeholder="45" Text="{Binding RetirementCurrentAgeText}" />
+                            <controls:NumericInputView Grid.Column="1" Header="Semi-retirement age" IsEnabled="{Binding CanEditProfileOwnedFields}" HelpText="The age when your plan changes from full-time work." Placeholder="55" Text="{Binding RetirementSemiAgeText}" />
                         </Grid>
-                        <controls:NumericInputView Header="Expenses" HelpText="Expected spending in retirement." Placeholder="80000" Text="{Binding RetirementExpensesText}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
+                        <controls:NumericInputView Header="Expenses" IsEnabled="{Binding CanEditProfileOwnedFields}" HelpText="Expected spending in retirement. Itemized Profile expenses replace this aggregate amount in linked mode." Placeholder="80000" Text="{Binding RetirementExpensesText}" PeriodSuffix="{Binding DisplayPeriodSuffix}" />
                         <controls:AdvancedAssumptionsExpander>
                             <VerticalStackLayout Margin="0,12,0,0" Spacing="{StaticResource SpaceMd}">
                                 <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
-                                    <controls:NumericInputView Header="Plan through age" HelpText="The last age included in the cash-flow plan." Placeholder="90" Text="{Binding RetirementPlanThroughAgeText}" />
-                                    <controls:PercentageInputView Grid.Column="1" Header="Inflation rate" HelpText="Expected annual increase in expenses." Placeholder="3" Minimum="0" Maximum="10" Text="{Binding RetirementInflationText}" />
+                                    <VerticalStackLayout Spacing="0">
+                                        <controls:NumericInputView Header="Plan through age"
+                                                                   HelpText="The last age included in the cash-flow plan."
+                                                                   Placeholder="90"
+                                                                   Text="{Binding RetirementPlanThroughAgeText}" />
+                                        <controls:SteppedSlider AutomationId="RetirementPlanThroughAgeSlider"
+                                                                Minimum="{Binding RetirementPlanThroughMinimum}"
+                                                                Maximum="100"
+                                                                StepSize="1"
+                                                                Value="{Binding RetirementPlanThroughAgeText, Mode=TwoWay, Converter={StaticResource NumericTextConverter}}"
+                                                                SemanticProperties.Description="Plan-through age, adjustable in one-year increments." />
+                                    </VerticalStackLayout>
+                                    <controls:PercentageInputView Grid.Column="1" Header="Inflation rate" HelpText="Expected annual increase in expenses." Placeholder="3" Minimum="0" Maximum="10" Step="0.1" Text="{Binding RetirementInflationText}" />
                                 </Grid>
                                 <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,Auto" RowSpacing="{StaticResource SpaceSm}">
                                     <Label Text="Withdraw only after semi-retirement" VerticalTextAlignment="Center" />
@@ -76,7 +90,7 @@
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf1c0;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextWarningAltLight}, Dark={StaticResource TextWarningAltDark}}" SemanticProperties.Description="Retirement accounts" />
                             <Label Grid.Column="1" Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
-                            <Button Grid.Column="2" Text="Add" Command="{Binding AddRetirementAccountCommand}" Background="{StaticResource FixedWarningSurface}" TextColor="{StaticResource FixedWarning}" FontSize="12" SemanticProperties.Description="Add a retirement account.">
+                            <Button Grid.Column="2" AutomationId="AddRetirementAccountButton" Text="Add" IsVisible="{Binding CanEditProfileOwnedFields}" Command="{Binding AddRetirementAccountCommand}" Background="{StaticResource FixedWarningSurface}" TextColor="{StaticResource FixedWarning}" FontSize="12" SemanticProperties.Description="Add a retirement account.">
                                 <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWarning}" Size="12" /></Button.ImageSource>
                             </Button>
                         </Grid>
@@ -86,13 +100,12 @@
                                 <DataTemplate x:DataType="viewModels:RetirementAccountEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceWarningSoftLight}, Dark={StaticResource SurfaceWarningSoftDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderWarningSoftLight}, Dark={StaticResource BorderWarningSoftDark}}" StrokeShape="RoundRectangle 8">
                                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                            <Grid ColumnDefinitions="*,32,44" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <Grid.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" /></Grid.GestureRecognizers>
+                                            <Grid ColumnDefinitions="*,44,44" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} account.'}" />
-                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextWarningAltLight}, Dark={StaticResource TextWarningAltDark}}" />
-                                                <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveRetirementAccountCommand}" CommandParameter="{Binding .}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Padding="0" SemanticProperties.Description="Remove this retirement account." />
+                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" TextColor="{AppThemeBinding Light={StaticResource TextWarningAltLight}, Dark={StaticResource TextWarningAltDark}}" Padding="0" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} account.'}" />
+                                                <Button Grid.Column="2" AutomationId="RemoveRetirementAccountButton" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" IsVisible="{Binding IsEditable}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveRetirementAccountCommand}" CommandParameter="{Binding .}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Padding="0" SemanticProperties.Description="Remove this retirement account." />
                                             </Grid>
-                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" IsEnabled="{Binding IsEditable}" Spacing="{StaticResource SpaceSm}">
                                             <Entry Text="{Binding Name, Mode=TwoWay}" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Placeholder="Account name" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Retirement account name" />
                                             <Picker Title="Account type" ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding Type, Mode=TwoWay}" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" TitleColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Retirement account type" />
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
@@ -123,7 +136,7 @@
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf0d6;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" SemanticProperties.Description="Retirement income" />
                             <Label Grid.Column="1" Text="Income sources" Style="{StaticResource CalculatorSectionHeading}" />
-                            <Button Grid.Column="2" Text="Add" Command="{Binding AddRetirementIncomeCommand}" Background="{StaticResource FixedAccentSurface}" TextColor="{StaticResource FixedAccentStrong}" FontSize="12" SemanticProperties.Description="Add a retirement income source.">
+                            <Button Grid.Column="2" AutomationId="AddRetirementIncomeButton" Text="Add" IsVisible="{Binding CanEditProfileOwnedFields}" Command="{Binding AddRetirementIncomeCommand}" Background="{StaticResource FixedAccentSurface}" TextColor="{StaticResource FixedAccentStrong}" FontSize="12" SemanticProperties.Description="Add a retirement income source.">
                                 <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedAccentStrong}" Size="12" /></Button.ImageSource>
                             </Button>
                         </Grid>
@@ -133,13 +146,12 @@
                                 <DataTemplate x:DataType="viewModels:RetirementIncomeEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceAccentTintPaleLight}, Dark={StaticResource SurfaceAccentTintPaleDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderAccentAltLight}, Dark={StaticResource BorderAccentAltDark}}" StrokeShape="RoundRectangle 8">
                                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                            <Grid ColumnDefinitions="*,32,44" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <Grid.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" /></Grid.GestureRecognizers>
+                                            <Grid ColumnDefinitions="*,44,44" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextAccentStrongLight}, Dark={StaticResource TextAccentStrongDark}}" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} income source.'}" />
-                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
-                                                <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveRetirementIncomeCommand}" CommandParameter="{Binding .}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Padding="0" SemanticProperties.Description="Remove this retirement income source." />
+                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" Padding="0" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} income source.'}" />
+                                                <Button Grid.Column="2" AutomationId="RemoveRetirementIncomeButton" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" IsVisible="{Binding IsEditable}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveRetirementIncomeCommand}" CommandParameter="{Binding .}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Padding="0" SemanticProperties.Description="Remove this retirement income source." />
                                             </Grid>
-                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" IsEnabled="{Binding IsEditable}" Spacing="{StaticResource SpaceSm}">
                                             <Entry Text="{Binding Name, Mode=TwoWay}" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Placeholder="Income name" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Retirement income source name" />
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <VerticalStackLayout Spacing="3"><Label Text="Annual amount" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding AnnualAmountText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Placeholder="0" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Annual retirement income amount in dollars, before or after tax as selected" /></VerticalStackLayout>
@@ -170,7 +182,7 @@
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf53d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextDangerAltLight}, Dark={StaticResource TextDangerAltDark}}" SemanticProperties.Description="Additional retirement expenses" />
                             <Label Grid.Column="1" Text="Additional expenses" Style="{StaticResource CalculatorSectionHeading}" />
-                            <Button Grid.Column="2" Text="Add" Command="{Binding AddRetirementExpenseCommand}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" FontSize="12" SemanticProperties.Description="Add an additional retirement expense.">
+                            <Button Grid.Column="2" AutomationId="AddRetirementExpenseButton" Text="Add" IsVisible="{Binding CanEditProfileOwnedFields}" Command="{Binding AddRetirementExpenseCommand}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" FontSize="12" SemanticProperties.Description="Add an additional retirement expense.">
                                 <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedDanger}" Size="12" /></Button.ImageSource>
                             </Button>
                         </Grid>
@@ -181,13 +193,12 @@
                                 <DataTemplate x:DataType="viewModels:RetirementExpenseEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceDangerSoftLight}, Dark={StaticResource SurfaceDangerSoftDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderDangerLight}, Dark={StaticResource BorderDangerDark}}" StrokeShape="RoundRectangle 8">
                                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                            <Grid ColumnDefinitions="*,32,44" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <Grid.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" /></Grid.GestureRecognizers>
+                                            <Grid ColumnDefinitions="*,44,44" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextDangerLight}, Dark={StaticResource TextDangerDark}}" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} additional expense.'}" />
-                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextDangerAltLight}, Dark={StaticResource TextDangerAltDark}}" />
-                                                <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveRetirementExpenseCommand}" CommandParameter="{Binding .}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Padding="0" SemanticProperties.Description="Remove this additional retirement expense." />
+                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" TextColor="{AppThemeBinding Light={StaticResource TextDangerAltLight}, Dark={StaticResource TextDangerAltDark}}" Padding="0" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} additional expense.'}" />
+                                                <Button Grid.Column="2" AutomationId="RemoveRetirementExpenseButton" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" IsVisible="{Binding IsEditable}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveRetirementExpenseCommand}" CommandParameter="{Binding .}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Padding="0" SemanticProperties.Description="Remove this additional retirement expense." />
                                             </Grid>
-                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" IsEnabled="{Binding IsEditable}" Spacing="{StaticResource SpaceSm}">
                                             <Entry Text="{Binding Name, Mode=TwoWay}" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Placeholder="Expense name" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Additional retirement expense name" />
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <VerticalStackLayout Spacing="3"><Label Text="Annual amount" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding AnnualAmountText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Placeholder="0" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Additional annual expense amount in dollars" /></VerticalStackLayout>

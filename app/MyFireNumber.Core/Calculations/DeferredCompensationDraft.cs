@@ -31,7 +31,7 @@ public sealed record DeferredCompensationDraft(
         ],
         AdditionalExpenses: [],
         WithdrawOnlyAfterRetirement: true,
-        ReinvestSurplus: true);
+        ReinvestSurplus: false);
 
     public DeferredCompensationInputs ToInputs(int currentYear = 0) => new(
         CurrentAge,

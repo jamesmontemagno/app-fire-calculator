@@ -46,7 +46,12 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
     private bool isExpanded;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditable))]
+    private bool isReadOnly;
+
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
+    public bool IsEditable => !IsReadOnly;
     public bool UsesPayoutSchedule => Type == RetirementAccountType.Deferred;
     public bool UsesWithdrawalRate => !UsesPayoutSchedule;
 
@@ -66,6 +71,18 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
     };
 
     public event EventHandler? Changed;
+
+    public static RetirementAccountEditorItem CreateNew(
+        RetirementAccountType type,
+        double expectedAnnualReturn = 0.07) => new()
+    {
+        Name = SuggestedName(type),
+        Type = type,
+        AnnualReturnText = Format(SuggestedAnnualReturn(type, expectedAnnualReturn) * 100),
+        AvailableAgeText = SuggestedAvailableAge(type).ToString(CultureInfo.CurrentCulture),
+        WithdrawalTaxRateText = Format(RetirementTaxDefaults.WithdrawalTaxRateFor(type) * 100),
+        IsExpanded = true
+    };
 
     public static RetirementAccountEditorItem FromAccount(RetirementAccount account) => new()
     {
@@ -188,6 +205,24 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
         _ => 59
     };
 
+    private static string SuggestedName(RetirementAccountType type) => type switch
+    {
+        RetirementAccountType.Deferred => "Deferred compensation",
+        RetirementAccountType.Traditional => "Traditional 401(k) or IRA",
+        RetirementAccountType.Roth => "Roth IRA",
+        RetirementAccountType.Taxable => "Taxable brokerage",
+        RetirementAccountType.Savings => "Savings account",
+        RetirementAccountType.Hsa => "HSA",
+        _ => "Other account"
+    };
+
+    private static double SuggestedAnnualReturn(RetirementAccountType type, double expectedAnnualReturn) => type switch
+    {
+        RetirementAccountType.Savings => 0.04,
+        RetirementAccountType.Other => 0.05,
+        _ => expectedAnnualReturn
+    };
+
     partial void OnBalanceTextChanged(string value) => RaiseChanged();
     partial void OnAnnualContributionTextChanged(string value) => RaiseChanged();
     partial void OnAnnualReturnTextChanged(string value) => RaiseChanged();
@@ -246,8 +281,13 @@ public sealed partial class RetirementIncomeEditorItem : ObservableObject
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
     private bool isExpanded;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditable))]
+    private bool isReadOnly;
+
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
     public bool RequiresTaxRate => !IsAfterTax;
+    public bool IsEditable => !IsReadOnly;
 
     public event EventHandler? Changed;
 
@@ -359,7 +399,12 @@ public sealed partial class RetirementExpenseEditorItem : ObservableObject
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
     private bool isExpanded;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsEditable))]
+    private bool isReadOnly;
+
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
+    public bool IsEditable => !IsReadOnly;
 
     public event EventHandler? Changed;
 

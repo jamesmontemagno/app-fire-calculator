@@ -146,6 +146,7 @@
                                                               Placeholder="7"
                                                               Minimum="0"
                                                               Maximum="15"
+                                                              Step="0.1"
                                                               Text="{Binding ExpectedReturnText}" />
                                 <controls:PercentageInputView Grid.Column="1"
                                                               Header="Inflation"
@@ -153,6 +154,7 @@
                                                               Placeholder="3"
                                                               Minimum="0"
                                                               Maximum="10"
+                                                              Step="0.1"
                                                               Text="{Binding InflationRateText}" />
                                 <controls:PercentageInputView Grid.Row="1"
                                                               Grid.ColumnSpan="2"
@@ -161,6 +163,7 @@
                                                               Placeholder="4"
                                                               Minimum="2"
                                                               Maximum="6"
+                                                              Step="0.1"
                                                               Text="{Binding WithdrawalRateText}" />
                             </Grid>
                         </VerticalStackLayout>

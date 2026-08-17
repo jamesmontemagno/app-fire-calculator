@@ -146,9 +146,6 @@ public partial class SettingsViewModel : ObservableObject
     /// Sends the user to Profile, which now owns their age, retirement date, income, spending, and
     /// planning assumptions. Settings keeps only app-level preferences such as currency and theme.
     /// </summary>
-    [RelayCommand]
-    private Task OpenProfileAsync() => navigationService.GoToAsync("//profile");
-
     public async Task LoadAsync()
     {
         var storedPreferences = await preferencesRepository.ListAsync();
