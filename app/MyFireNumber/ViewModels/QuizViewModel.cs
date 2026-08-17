@@ -198,8 +198,9 @@ public partial class QuizViewModel : ObservableObject
             RecentActivityKind.Calculator,
             option.CalculatorId,
             DateTime.UtcNow));
+        await navigationService.GoToAsync("//home");
         await navigationService.GoToAsync(
-            CalculatorRoutes.Build(option.CalculatorId, returnHomeAfterSave: true, routePrefix: "../"));
+            CalculatorRoutes.Build(option.CalculatorId, returnHomeAfterSave: true));
     }
 
     private bool SaveCurrentAnswer()

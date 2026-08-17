@@ -21,6 +21,6 @@ public partial class WelcomeViewModel : ObservableObject
     private async Task GetStartedAsync()
     {
         onboardingService.MarkWelcomeSeen();
-        await navigationService.GoToAsync("../onboarding-defaults");
+        await navigationService.GoToAsync("onboarding-defaults");
     }
 }

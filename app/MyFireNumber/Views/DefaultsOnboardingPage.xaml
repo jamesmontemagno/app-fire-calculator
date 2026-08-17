@@ -66,13 +66,13 @@
                                         SemanticProperties.Description="Continue without sharing a birth date." />
                                 <Button Grid.Column="1"
                                         AutomationId="OnboardingUseBirthDateButton"
-                                        Text="Add"
-                                        FontSize="12"
-                                        Padding="12,4"
+                                        Text="Add birth date"
+                                        FontAttributes="Bold"
+                                        Padding="14,8"
                                         IsVisible="{Binding HasNoBirthDate}"
                                         Command="{Binding UseBirthDateCommand}"
-                                        Background="Transparent"
-                                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                                        Background="{StaticResource FixedAccent}"
+                                        TextColor="{StaticResource FixedWhite}"
                                         SemanticProperties.Description="Add your birth date." />
                             </Grid>
                             <DatePicker AutomationId="OnboardingBirthDatePicker"

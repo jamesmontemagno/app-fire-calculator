@@ -29,8 +29,13 @@ The app already opts into DevFlow when `MauiDevFlowEnabled=true`:
 
 - `MyFireNumber.csproj` conditionally references `Microsoft.Maui.DevFlow.Agent` and defines
   `MAUI_DEVFLOW`.
-- `MauiProgram.cs` conditionally calls `AddMauiDevFlowAgent()`.
+- `MauiProgram.cs` conditionally calls `AddMauiDevFlowAgent()` for every configured target:
+  Android, iOS, Mac Catalyst, and Windows.
 - `.mauidevflow` supplies the broker port, which the CLI discovers automatically.
+
+DevFlow is experimental. Current runtime support is strongest on Mac Catalyst and iOS Simulator;
+Android requires ADB reverse port forwarding, and Windows support remains in progress. Keep the
+agent opt-in to Debug builds with `MauiDevFlowEnabled=true`; never enable it for Release builds.
 
 Use this CLI flow:
 
@@ -59,6 +64,19 @@ maui devflow wait \
 maui devflow list
 maui devflow ui status
 maui devflow ui tree --depth 4 --format compact
+```
+
+For Mac Catalyst, use `--wait-platform maccatalyst`, then launch the built app bundle directly:
+
+```bash
+dotnet build app/MyFireNumber/MyFireNumber.csproj \
+  -f net10.0-maccatalyst \
+  -p:MauiDevFlowEnabled=true
+open "app/MyFireNumber/bin/Debug/net10.0-maccatalyst/maccatalyst-arm64/My Fire #.app"
+maui devflow wait \
+  --project app/MyFireNumber/MyFireNumber.csproj \
+  --wait-platform maccatalyst \
+  --timeout 120
 ```
 
 Drive the app with stable `AutomationId` or text selectors rather than ephemeral tree IDs whenever

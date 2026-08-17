@@ -41,9 +41,9 @@ public partial class WithdrawalRateOnboardingViewModel : ObservableObject
         {
             WithdrawalRate = WithdrawalRatePercent / 100
         });
-        await navigationService.GoToAsync("../onboarding-choice");
+        await navigationService.GoToAsync("onboarding-choice");
     }
 
     [RelayCommand]
-    private Task SkipAsync() => navigationService.GoToAsync("../onboarding-choice");
+    private Task SkipAsync() => navigationService.GoToAsync("onboarding-choice");
 }

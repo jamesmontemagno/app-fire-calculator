@@ -228,6 +228,96 @@
                     </VerticalStackLayout>
                 </Border>
 
+                 <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Button Grid.Column="1" Text="Add" Command="{Binding AddAccountCommand}" SemanticProperties.Description="Add a reusable account." />
+                        </Grid>
+                        <Label Text="Accounts stay on this device. Adding one to a scenario creates an independent copy."
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Accounts}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView>
+                                <Label Text="No reusable accounts yet." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            </BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:RetirementAccountEditorItem">
+                                    <Border Padding="{StaticResource CardPaddingCompact}"
+                                            Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 8">
+                                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} account.'}" />
+                                                <Button Grid.Column="2" Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveAccountCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} account.'}" />
+                                            </Grid>
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                                <VerticalStackLayout Spacing="3">
+                                                    <Label Text="Account name" Style="{StaticResource FormFieldLabel}" />
+                                                    <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="401(k)" SemanticProperties.Description="Account name" />
+                                                </VerticalStackLayout>
+                                                <VerticalStackLayout Spacing="3">
+                                                    <Label Text="Account type" Style="{StaticResource FormFieldLabel}" />
+                                                    <Picker Title="Account type" ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding Type, Mode=TwoWay}" Style="{StaticResource FormPicker}" SemanticProperties.Description="Account type" />
+                                                </VerticalStackLayout>
+                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                    <controls:NumericInputView Header="Balance"
+                                                                               HelpText="What this account is worth today."
+                                                                               Placeholder="0"
+                                                                               Text="{Binding BalanceText, Mode=TwoWay}" />
+                                                    <controls:NumericInputView Grid.Column="1"
+                                                                               Header="Contribution"
+                                                                               HelpText="How much you add to this account each year."
+                                                                               Placeholder="0"
+                                                                               PeriodSuffix="/yr"
+                                                                               Text="{Binding AnnualContributionText, Mode=TwoWay}" />
+                                                </Grid>
+                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                    <controls:NumericInputView Header="Expected return"
+                                                                               HelpText="Expected average annual return for this account."
+                                                                               Placeholder="5"
+                                                                               PeriodSuffix="%"
+                                                                               Text="{Binding AnnualReturnText, Mode=TwoWay}" />
+                                                    <controls:NumericInputView Grid.Column="1"
+                                                                               Header="Available age"
+                                                                               HelpText="Age when you can withdraw from this account without penalty."
+                                                                               Placeholder="59"
+                                                                               Text="{Binding AvailableAgeText, Mode=TwoWay}" />
+                                                </Grid>
+                                                <controls:NumericInputView IsVisible="{Binding UsesWithdrawalRate}"
+                                                                           Header="Withdrawal rate"
+                                                                           HelpText="Share of the remaining balance withdrawn each year."
+                                                                           Placeholder="4"
+                                                                           PeriodSuffix="%"
+                                                                           Text="{Binding WithdrawalRateText, Mode=TwoWay}" />
+                                                <controls:NumericInputView IsVisible="{Binding UsesPayoutSchedule}"
+                                                                           Header="Payout years"
+                                                                           HelpText="Number of years the balance is paid out over."
+                                                                           Placeholder="5"
+                                                                           Text="{Binding PayoutYearsText, Mode=TwoWay}" />
+                                                <VerticalStackLayout Spacing="3">
+                                                    <controls:NumericInputView Header="Withdrawal tax rate"
+                                                                               HelpText="Flat estimated tax rate applied to withdrawals from this account."
+                                                                               Placeholder="0"
+                                                                               PeriodSuffix="%"
+                                                                               Text="{Binding WithdrawalTaxRateText, Mode=TwoWay}" />
+                                                    <Label Text="{Binding WithdrawalTaxHelpText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                                </VerticalStackLayout>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+
                 <Border Padding="{StaticResource CardPadding}"
                         Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                         Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
@@ -339,95 +429,7 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Border Padding="{StaticResource CardPadding}"
-                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
-                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                        StrokeShape="RoundRectangle 12">
-                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
-                            <Button Grid.Column="1" Text="Add" Command="{Binding AddAccountCommand}" SemanticProperties.Description="Add a reusable account." />
-                        </Grid>
-                        <Label Text="Accounts stay on this device. Adding one to a scenario creates an independent copy."
-                               FontSize="12"
-                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Accounts}" Spacing="{StaticResource SpaceSm}">
-                            <BindableLayout.EmptyView>
-                                <Label Text="No reusable accounts yet." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                            </BindableLayout.EmptyView>
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="viewModels:RetirementAccountEditorItem">
-                                    <Border Padding="{StaticResource CardPaddingCompact}"
-                                            Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
-                                            StrokeThickness="0"
-                                            StrokeShape="RoundRectangle 8">
-                                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                                <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} account.'}" />
-                                                <Button Grid.Column="2" Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveAccountCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} account.'}" />
-                                            </Grid>
-                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
-                                                <VerticalStackLayout Spacing="3">
-                                                    <Label Text="Account name" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="401(k)" SemanticProperties.Description="Account name" />
-                                                </VerticalStackLayout>
-                                                <VerticalStackLayout Spacing="3">
-                                                    <Label Text="Account type" Style="{StaticResource FormFieldLabel}" />
-                                                    <Picker Title="Account type" ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding Type, Mode=TwoWay}" Style="{StaticResource FormPicker}" SemanticProperties.Description="Account type" />
-                                                </VerticalStackLayout>
-                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                                    <controls:NumericInputView Header="Balance"
-                                                                               HelpText="What this account is worth today."
-                                                                               Placeholder="0"
-                                                                               Text="{Binding BalanceText, Mode=TwoWay}" />
-                                                    <controls:NumericInputView Grid.Column="1"
-                                                                               Header="Contribution"
-                                                                               HelpText="How much you add to this account each year."
-                                                                               Placeholder="0"
-                                                                               PeriodSuffix="/yr"
-                                                                               Text="{Binding AnnualContributionText, Mode=TwoWay}" />
-                                                </Grid>
-                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                                    <controls:NumericInputView Header="Expected return"
-                                                                               HelpText="Expected average annual return for this account."
-                                                                               Placeholder="5"
-                                                                               PeriodSuffix="%"
-                                                                               Text="{Binding AnnualReturnText, Mode=TwoWay}" />
-                                                    <controls:NumericInputView Grid.Column="1"
-                                                                               Header="Available age"
-                                                                               HelpText="Age when you can withdraw from this account without penalty."
-                                                                               Placeholder="59"
-                                                                               Text="{Binding AvailableAgeText, Mode=TwoWay}" />
-                                                </Grid>
-                                                <controls:NumericInputView IsVisible="{Binding UsesWithdrawalRate}"
-                                                                           Header="Withdrawal rate"
-                                                                           HelpText="Share of the remaining balance withdrawn each year."
-                                                                           Placeholder="4"
-                                                                           PeriodSuffix="%"
-                                                                           Text="{Binding WithdrawalRateText, Mode=TwoWay}" />
-                                                <controls:NumericInputView IsVisible="{Binding UsesPayoutSchedule}"
-                                                                           Header="Payout years"
-                                                                           HelpText="Number of years the balance is paid out over."
-                                                                           Placeholder="5"
-                                                                           Text="{Binding PayoutYearsText, Mode=TwoWay}" />
-                                                <VerticalStackLayout Spacing="3">
-                                                    <controls:NumericInputView Header="Withdrawal tax rate"
-                                                                               HelpText="Flat estimated tax rate applied to withdrawals from this account."
-                                                                               Placeholder="0"
-                                                                               PeriodSuffix="%"
-                                                                               Text="{Binding WithdrawalTaxRateText, Mode=TwoWay}" />
-                                                    <Label Text="{Binding WithdrawalTaxHelpText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                                </VerticalStackLayout>
-                                            </VerticalStackLayout>
-                                        </VerticalStackLayout>
-                                    </Border>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
-                        </VerticalStackLayout>
-                    </VerticalStackLayout>
-                </Border>
-
+               
                 <Label Text="{Binding ValidationMessage}" IsVisible="{Binding HasValidationMessage}" TextColor="{StaticResource FixedDanger}" />
                 <Label Text="{Binding StatusMessage}" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                 <Button AutomationId="SaveProfileButton" Text="Save profile" Command="{Binding SaveCommand}" />
