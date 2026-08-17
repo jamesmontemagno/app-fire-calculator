@@ -12,7 +12,7 @@
                           Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                           SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Command="{Binding SavePlanCommand}"
+        <ToolbarItem Command="{Binding SavePlanAndCloseCommand}"
                      SemanticProperties.Description="Save the current calculator values as a plan.">
             <ToolbarItem.IconImageSource>
                 <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Size="18" />
@@ -76,7 +76,7 @@
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
                     <Entry Text="{Binding PlanNameText}" Placeholder="My Coast FIRE Plan" Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}" SemanticProperties.Description="Name for this saved Coast FIRE plan" />
-                    <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />
+                    <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanAndCloseCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />
                     <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Create a Coast FIRE workbook on this device and open the native share sheet." />
                     <Label IsVisible="{Binding HasPlanStatusMessage}" Text="{Binding PlanStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
                     <Label IsVisible="{Binding HasExportStatusMessage}" Text="{Binding ExportStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />

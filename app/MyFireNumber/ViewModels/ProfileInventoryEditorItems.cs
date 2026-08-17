@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using MyFireNumber.Core.Presentation;
 using MyFireNumber.Core.Profile;
 using System.Globalization;
@@ -14,6 +15,14 @@ public sealed partial class ProfileRecurringEditorItem : ObservableObject
     [ObservableProperty] private string amountText = "0";
     [ObservableProperty] private CurrencyPeriod period = CurrencyPeriod.Monthly;
     [ObservableProperty] private string category = string.Empty;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
+    private bool isExpanded;
+
+    public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
+
+    [RelayCommand]
+    private void ToggleExpanded() => IsExpanded = !IsExpanded;
 
     public bool TryGetAmount(out double amount) =>
         double.TryParse(AmountText, NumberStyles.Number, CultureInfo.CurrentCulture, out amount) && amount >= 0;
@@ -38,6 +47,14 @@ public sealed partial class ProfileDebtEditorItem : ObservableObject
     [ObservableProperty] private string balanceText = "0";
     [ObservableProperty] private string rateText = "0";
     [ObservableProperty] private string minimumPaymentText = "0";
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
+    private bool isExpanded;
+
+    public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
+
+    [RelayCommand]
+    private void ToggleExpanded() => IsExpanded = !IsExpanded;
 
     /// <summary>
     /// Applies the same constraints as <see cref="DebtEditorItem.TryCreateDebt"/>: a positive balance

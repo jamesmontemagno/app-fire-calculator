@@ -24,8 +24,8 @@
         </ToolbarItem>
     </ContentPage.ToolbarItems>
 
-    <Grid>
-        <ScrollView>
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
             <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceMd}">
                     <Label Text="&#xf2bd;"
@@ -151,33 +151,42 @@
                         Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
-                        <Grid ColumnDefinitions="*,Auto"><Label Text="Recurring income" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Add" Command="{Binding AddIncomeCommand}" /></Grid>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Label Text="&#xf0d6;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" Text="Recurring income" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Button Grid.Column="2" Text="Add" Command="{Binding AddIncomeCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                        </Grid>
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Income}" Spacing="{StaticResource SpaceSm}">
                             <BindableLayout.EmptyView><Label Text="No recurring income yet." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:ProfileRecurringEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
                                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <VerticalStackLayout Spacing="3">
-                                                    <Label Text="Income name" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Salary" SemanticProperties.Description="Name of this recurring income" />
-                                                </VerticalStackLayout>
-                                                <Button Grid.Column="1" Text="Delete" VerticalOptions="End" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveIncomeCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} income.'}" />
+                                            <Grid ColumnDefinitions="*,32,44" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <Grid.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" /></Grid.GestureRecognizers>
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveIncomeCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} income.'}" />
                                             </Grid>
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                            <VerticalStackLayout Spacing="3">
+                                                <Label Text="Income name" Style="{StaticResource FormFieldLabel}" />
+                                                <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Salary" SemanticProperties.Description="Name of this recurring income" />
+                                            </VerticalStackLayout>
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <controls:NumericInputView Header="Amount"
-                                                                           HelpText="Recurring income amount for the period you choose."
+                                                                           HelpText="After-tax income received for the period you choose."
                                                                            Placeholder="0"
                                                                            Text="{Binding AmountText, Mode=TwoWay}" />
                                                 <VerticalStackLayout Grid.Column="1" Spacing="3">
-                                                    <Label Text="How often" Style="{StaticResource FormFieldLabel}" />
+                                                    <Label Text="How often" Style="{StaticResource FormFieldLabel}" FontSize="12" />
                                                     <Picker Title="How often" ItemsSource="{Binding Periods}" SelectedItem="{Binding Period, Mode=TwoWay}" Style="{StaticResource FormPicker}" SemanticProperties.Description="How often this income is received" />
                                                 </VerticalStackLayout>
                                             </Grid>
                                             <VerticalStackLayout Spacing="3">
                                                 <Label Text="Category (optional)" Style="{StaticResource FormFieldLabel}" />
                                                 <Entry Text="{Binding Category, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Work" SemanticProperties.Description="Category for this income" />
+                                            </VerticalStackLayout>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
                                     </Border>
@@ -192,33 +201,42 @@
                         Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
-                        <Grid ColumnDefinitions="*,Auto"><Label Text="Recurring expenses" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Add" Command="{Binding AddExpenseCommand}" /></Grid>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Label Text="&#xf53d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" Text="Recurring expenses" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Button Grid.Column="2" Text="Add" Command="{Binding AddExpenseCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                        </Grid>
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Expenses}" Spacing="{StaticResource SpaceSm}">
                             <BindableLayout.EmptyView><Label Text="No recurring expenses yet." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:ProfileRecurringEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
                                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <VerticalStackLayout Spacing="3">
-                                                    <Label Text="Expense name" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Housing" SemanticProperties.Description="Name of this recurring expense" />
-                                                </VerticalStackLayout>
-                                                <Button Grid.Column="1" Text="Delete" VerticalOptions="End" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveExpenseCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} expense.'}" />
+                                            <Grid ColumnDefinitions="*,32,44" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <Grid.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" /></Grid.GestureRecognizers>
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveExpenseCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} expense.'}" />
                                             </Grid>
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                            <VerticalStackLayout Spacing="3">
+                                                <Label Text="Expense name" Style="{StaticResource FormFieldLabel}" />
+                                                <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Housing" SemanticProperties.Description="Name of this recurring expense" />
+                                            </VerticalStackLayout>
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <controls:NumericInputView Header="Amount"
                                                                            HelpText="Recurring expense amount for the period you choose."
                                                                            Placeholder="0"
                                                                            Text="{Binding AmountText, Mode=TwoWay}" />
                                                 <VerticalStackLayout Grid.Column="1" Spacing="3">
-                                                    <Label Text="How often" Style="{StaticResource FormFieldLabel}" />
+                                                    <Label Text="How often" Style="{StaticResource FormFieldLabel}" FontSize="12" />
                                                     <Picker Title="How often" ItemsSource="{Binding Periods}" SelectedItem="{Binding Period, Mode=TwoWay}" Style="{StaticResource FormPicker}" SemanticProperties.Description="How often this expense is paid" />
                                                 </VerticalStackLayout>
                                             </Grid>
                                             <VerticalStackLayout Spacing="3">
                                                 <Label Text="Category (optional)" Style="{StaticResource FormFieldLabel}" />
                                                 <Entry Text="{Binding Category, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Home" SemanticProperties.Description="Category for this expense" />
+                                            </VerticalStackLayout>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
                                     </Border>
@@ -233,9 +251,10 @@
                         Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
-                            <Button Grid.Column="1" Text="Add" Command="{Binding AddAccountCommand}" SemanticProperties.Description="Add a reusable account." />
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Label Text="&#xf1c0;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Button Grid.Column="2" Text="Add" Command="{Binding AddAccountCommand}" SemanticProperties.Description="Add a reusable account."><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
                         <Label Text="Accounts stay on this device. Adding one to a scenario creates an independent copy."
                                FontSize="12"
@@ -254,7 +273,7 @@
                                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
                                                 <Button Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} account.'}" />
-                                                <Button Grid.Column="2" Text="Delete" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveAccountCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} account.'}" />
+                                                <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveAccountCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} account.'}" />
                                             </Grid>
                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
                                                 <VerticalStackLayout Spacing="3">
@@ -323,20 +342,28 @@
                         Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
-                        <Grid ColumnDefinitions="*,Auto"><Label Text="Debts" Style="{StaticResource CalculatorSectionHeading}" /><Button Grid.Column="1" Text="Add" Command="{Binding AddDebtCommand}" /></Grid>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Label Text="&#xf09d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" />
+                            <Label Grid.Column="1" Text="Debts" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Button Grid.Column="2" Text="Add" Command="{Binding AddDebtCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                        </Grid>
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Debts}" Spacing="{StaticResource SpaceSm}">
                             <BindableLayout.EmptyView><Label Text="No debts saved." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:ProfileDebtEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
                                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
-                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <VerticalStackLayout Spacing="3">
-                                                    <Label Text="Debt name" Style="{StaticResource FormFieldLabel}" />
-                                                    <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Credit card" SemanticProperties.Description="Name of this debt" />
-                                                </VerticalStackLayout>
-                                                <Button Grid.Column="1" Text="Delete" VerticalOptions="End" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} debt.'}" />
+                                            <Grid ColumnDefinitions="*,32,44" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <Grid.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleExpandedCommand}" /></Grid.GestureRecognizers>
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                                <Label Grid.Column="1" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} debt.'}" />
                                             </Grid>
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                            <VerticalStackLayout Spacing="3">
+                                                <Label Text="Debt name" Style="{StaticResource FormFieldLabel}" />
+                                                <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Credit card" SemanticProperties.Description="Name of this debt" />
+                                            </VerticalStackLayout>
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <controls:NumericInputView Header="Balance"
                                                                            HelpText="Amount still owed on this debt."
@@ -354,6 +381,7 @@
                                                                        Placeholder="150"
                                                                        PeriodSuffix="/mo"
                                                                        Text="{Binding MinimumPaymentText, Mode=TwoWay}" />
+                                            </VerticalStackLayout>
                                         </VerticalStackLayout>
                                     </Border>
                                 </DataTemplate>
@@ -429,11 +457,21 @@
                     </VerticalStackLayout>
                 </Border>
 
-               
-                <Label Text="{Binding ValidationMessage}" IsVisible="{Binding HasValidationMessage}" TextColor="{StaticResource FixedDanger}" />
-                <Label Text="{Binding StatusMessage}" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
-                <Button AutomationId="SaveProfileButton" Text="Save profile" Command="{Binding SaveCommand}" />
             </VerticalStackLayout>
         </ScrollView>
+        <Border Grid.Row="1"
+                Padding="16,10"
+                Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
+                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                    <Label Text="{Binding ValidationMessage}" IsVisible="{Binding HasValidationMessage}" TextColor="{StaticResource FixedDanger}" />
+                    <Label Text="{Binding StatusMessage}" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" AutomationId="SaveProfileButton" Text="Save profile" Command="{Binding SaveCommand}">
+                    <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="{StaticResource FixedWhite}" Size="14" /></Button.ImageSource>
+                </Button>
+            </Grid>
+        </Border>
     </Grid>
 </ContentPage>

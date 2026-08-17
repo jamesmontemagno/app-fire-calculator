@@ -26,6 +26,7 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     ];
 
     private readonly IDeferredCompensationExportService exportService;
+    private readonly IRetirementCashFlowPromptService promptService;
 
     // Recurring amount. Delegates to a Core periodic field instead of holding its own text, so the
     // canonical amount is the single source of truth and the monthly/annual toggle only changes how
@@ -38,10 +39,12 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
 
     public RetirementCashFlowViewModel(
         CalculatorViewModelServices services,
-        IDeferredCompensationExportService exportService)
+        IDeferredCompensationExportService exportService,
+        IRetirementCashFlowPromptService promptService)
         : base(services)
     {
         this.exportService = exportService;
+        this.promptService = promptService;
         RetirementAccounts.CollectionChanged += OnRetirementAccountsChanged;
         RetirementIncomeSources.CollectionChanged += OnRetirementIncomeSourcesChanged;
         RetirementAdditionalExpenses.CollectionChanged += OnRetirementExpensesChanged;
@@ -102,41 +105,55 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     partial void OnReinvestRetirementSurplusChanged(bool value) => OnDraftInputChanged();
 
     [RelayCommand]
-    private void AddRetirementAccount()
+    private async Task AddRetirementAccountAsync()
     {
+        var type = await promptService.ChooseAccountTypeAsync();
+        if (type is null)
+        {
+            return;
+        }
+
         RetirementAccounts.Add(new RetirementAccountEditorItem
         {
             Name = "New retirement account",
             AvailableAgeText = RetirementSemiAgeText,
+            Type = type.Value,
             IsExpanded = true
         });
     }
 
     [RelayCommand]
-    private void RemoveRetirementAccount(RetirementAccountEditorItem? account)
+    private async Task RemoveRetirementAccountAsync(RetirementAccountEditorItem? account)
     {
-        if (account is not null)
+        if (account is not null && await ConfirmDeleteAsync("account", account.Name))
         {
             RetirementAccounts.Remove(account);
         }
     }
 
     [RelayCommand]
-    private void AddRetirementIncome()
+    private async Task AddRetirementIncomeAsync()
     {
+        var isAfterTax = await promptService.ChooseIncomeTaxTreatmentAsync();
+        if (isAfterTax is null)
+        {
+            return;
+        }
+
         RetirementIncomeSources.Add(new RetirementIncomeEditorItem
         {
             Name = "New retirement income",
             StartAgeText = RetirementSemiAgeText,
             EndAgeText = RetirementPlanThroughAgeText,
+            IsAfterTax = isAfterTax.Value,
             IsExpanded = true
         });
     }
 
     [RelayCommand]
-    private void RemoveRetirementIncome(RetirementIncomeEditorItem? income)
+    private async Task RemoveRetirementIncomeAsync(RetirementIncomeEditorItem? income)
     {
-        if (income is not null)
+        if (income is not null && await ConfirmDeleteAsync("income source", income.Name))
         {
             RetirementIncomeSources.Remove(income);
         }
@@ -154,13 +171,20 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
     }
 
     [RelayCommand]
-    private void RemoveRetirementExpense(RetirementExpenseEditorItem? expense)
+    private async Task RemoveRetirementExpenseAsync(RetirementExpenseEditorItem? expense)
     {
-        if (expense is not null)
+        if (expense is not null && await ConfirmDeleteAsync("expense", expense.Name))
         {
             RetirementAdditionalExpenses.Remove(expense);
         }
     }
+
+    private Task<bool> ConfirmDeleteAsync(string itemType, string name) =>
+        ConfirmationService.ConfirmAsync(
+            $"Delete {itemType}?",
+            $"Delete \"{name}\" from this cash-flow plan?",
+            "Delete",
+            "Cancel");
 
     [RelayCommand]
     private async Task ViewRetirementAnnualDetailsAsync()

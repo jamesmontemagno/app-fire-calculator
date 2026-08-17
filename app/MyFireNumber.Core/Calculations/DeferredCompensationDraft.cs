@@ -20,15 +20,8 @@ public sealed record DeferredCompensationDraft(
         PlanThroughAge: 90,
         AnnualExpenses: 80_000,
         InflationRate: 0.03,
-        Accounts:
-        [
-            new RetirementAccount("savings", "Savings", RetirementAccountType.Savings, 300_000, 0, 0.05, 18, 0.04, 1, 0),
-            new RetirementAccount("401k", "401(k)", RetirementAccountType.Traditional, 500_000, 23_500, 0.07, 60, 0.04, 1, 0.25)
-        ],
-        IncomeSources:
-        [
-            new RetirementIncomeSource("part-time-income", "Part-time income", 20_000, 55, 65, 0, true, 0.25)
-        ],
+        Accounts: [],
+        IncomeSources: [],
         AdditionalExpenses: [],
         WithdrawOnlyAfterRetirement: true,
         ReinvestSurplus: true);

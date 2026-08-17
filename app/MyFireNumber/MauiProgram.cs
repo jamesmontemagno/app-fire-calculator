@@ -69,6 +69,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IProfileService, ProfileService>();
 		builder.Services.AddSingleton<IProfileScenarioResolver, ProfileScenarioResolver>();
 		builder.Services.AddSingleton<IScenarioModePromptService, ScenarioModePromptService>();
+		builder.Services.AddSingleton<IRetirementCashFlowPromptService, RetirementCashFlowPromptService>();
 		builder.Services.AddSingleton<IThemeService, ThemeService>();
 		builder.Services.AddSingleton<INavigationService, ShellNavigationService>();
 		builder.Services.AddSingleton<IBaristaFireExportService, BaristaFireExportService>();

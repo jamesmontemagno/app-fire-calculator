@@ -13,7 +13,7 @@
              SafeAreaEdges="All">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Command="{Binding SavePlanCommand}"
+        <ToolbarItem Command="{Binding SavePlanAndCloseCommand}"
                      SemanticProperties.Description="Save the current calculator values as a plan.">
             <ToolbarItem.IconImageSource>
                 <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Size="18" />
@@ -62,7 +62,7 @@
                                     <Label Grid.Row="1" Text="Reinvest annual surplus" VerticalTextAlignment="Center" />
                                     <Switch Grid.Row="1" Grid.Column="1" IsToggled="{Binding ReinvestRetirementSurplus}" SemanticProperties.Description="Reinvest annual retirement cash-flow surplus" />
                                 </Grid>
-                                <Label Text="Default scenario: $300,000 savings, $500,000 401(k), and $20,000 part-time income from age 55 to 65." Style="{StaticResource CalculatorSupportingText}" />
+                                <Label Text="Add only the accounts, income, and expenses that apply to your plan." Style="{StaticResource CalculatorSupportingText}" />
                             </VerticalStackLayout>
                         </controls:AdvancedAssumptionsExpander>
                     </VerticalStackLayout>
@@ -81,6 +81,7 @@
                             </Button>
                         </Grid>
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding RetirementAccounts}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView><Label Text="No accounts yet. Add one to model its balance, return, availability, and taxes." Style="{StaticResource CalculatorSupportingText}" /></BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:RetirementAccountEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceWarningSoftLight}, Dark={StaticResource SurfaceWarningSoftDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderWarningSoftLight}, Dark={StaticResource BorderWarningSoftDark}}" StrokeShape="RoundRectangle 8">
@@ -127,6 +128,7 @@
                             </Button>
                         </Grid>
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding RetirementIncomeSources}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView><Label Text="No income sources yet. Add one and choose whether its amount is before or after tax." Style="{StaticResource CalculatorSupportingText}" /></BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:RetirementIncomeEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceAccentTintPaleLight}, Dark={StaticResource SurfaceAccentTintPaleDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderAccentAltLight}, Dark={StaticResource BorderAccentAltDark}}" StrokeShape="RoundRectangle 8">
@@ -140,7 +142,7 @@
                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
                                             <Entry Text="{Binding Name, Mode=TwoWay}" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Placeholder="Income name" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Retirement income source name" />
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <VerticalStackLayout Spacing="3"><Label Text="Annual amount" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding AnnualAmountText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Placeholder="0" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Annual retirement income amount in dollars" /></VerticalStackLayout>
+                                                <VerticalStackLayout Spacing="3"><Label Text="Annual amount" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding AnnualAmountText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Placeholder="0" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Annual retirement income amount in dollars, before or after tax as selected" /></VerticalStackLayout>
                                                 <VerticalStackLayout Grid.Column="1" Spacing="3"><Label Text="Growth (%)" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding AnnualGrowthText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Placeholder="0" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Annual retirement income growth percentage" /></VerticalStackLayout>
                                             </Grid>
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
@@ -149,7 +151,7 @@
                                             </Grid>
                                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                                                <VerticalStackLayout IsVisible="{Binding RequiresTaxRate}" Spacing="3"><Label Text="Tax rate (%)" FontAttributes="Bold" FontSize="12" /><Entry Text="{Binding TaxRateText, Mode=TwoWay}" Keyboard="Numeric" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Placeholder="0" PlaceholderColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" SemanticProperties.Description="Income tax rate percentage" /></VerticalStackLayout>
-                                                <HorizontalStackLayout Grid.Column="1" Spacing="{StaticResource SpaceSm}" VerticalOptions="Center"><Label Text="After tax" VerticalTextAlignment="Center" /><Switch IsToggled="{Binding IsAfterTax, Mode=TwoWay}" SemanticProperties.Description="Income amount is after tax" /></HorizontalStackLayout>
+                                                <HorizontalStackLayout Grid.Column="1" Spacing="{StaticResource SpaceSm}" VerticalOptions="Center"><Label Text="Amount is after tax" VerticalTextAlignment="Center" FontSize="12" /><Switch IsToggled="{Binding IsAfterTax, Mode=TwoWay}" SemanticProperties.Description="Income amount is after tax" /></HorizontalStackLayout>
                                             </Grid>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
@@ -174,6 +176,7 @@
                         </Grid>
                         <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding RetirementAdditionalExpenses}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView><Label Text="No additional expenses yet." Style="{StaticResource CalculatorSupportingText}" /></BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:RetirementExpenseEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceDangerSoftLight}, Dark={StaticResource SurfaceDangerSoftDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderDangerLight}, Dark={StaticResource BorderDangerDark}}" StrokeShape="RoundRectangle 8">

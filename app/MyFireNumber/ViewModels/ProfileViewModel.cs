@@ -20,7 +20,8 @@ public sealed partial class ProfileViewModel(
     IProfileDebtRepository profileDebtRepository,
     ICalculatorDefaultsService calculatorDefaultsService,
     ILocalDateProvider localDateProvider,
-    INavigationService navigationService) : ObservableObject
+    INavigationService navigationService,
+    IConfirmationService confirmationService) : ObservableObject
 {
     private bool isLoaded;
     private bool isTrackingCollections;
@@ -396,14 +397,14 @@ public sealed partial class ProfileViewModel(
         });
     }
 
-    [RelayCommand] private void AddIncome() => Income.Add(new ProfileRecurringEditorItem { Name = "New income" });
-    [RelayCommand] private void AddExpense() => Expenses.Add(new ProfileRecurringEditorItem { Name = "New expense" });
-    [RelayCommand] private void AddDebt() => Debts.Add(new ProfileDebtEditorItem { Name = "New debt" });
+    [RelayCommand] private void AddIncome() => Income.Add(new ProfileRecurringEditorItem { Name = "New income", IsExpanded = true });
+    [RelayCommand] private void AddExpense() => Expenses.Add(new ProfileRecurringEditorItem { Name = "New expense", IsExpanded = true });
+    [RelayCommand] private void AddDebt() => Debts.Add(new ProfileDebtEditorItem { Name = "New debt", IsExpanded = true });
 
     [RelayCommand]
     private async Task RemoveIncomeAsync(ProfileRecurringEditorItem? item)
     {
-        if (item is null) return;
+        if (item is null || !await ConfirmDeleteAsync("income", item.Name)) return;
         Income.Remove(item);
         await profileIncomeRepository.DeleteAsync(item.Id);
     }
@@ -411,7 +412,7 @@ public sealed partial class ProfileViewModel(
     [RelayCommand]
     private async Task RemoveExpenseAsync(ProfileRecurringEditorItem? item)
     {
-        if (item is null) return;
+        if (item is null || !await ConfirmDeleteAsync("expense", item.Name)) return;
         Expenses.Remove(item);
         await profileExpenseRepository.DeleteAsync(item.Id);
     }
@@ -419,7 +420,7 @@ public sealed partial class ProfileViewModel(
     [RelayCommand]
     private async Task RemoveDebtAsync(ProfileDebtEditorItem? item)
     {
-        if (item is null) return;
+        if (item is null || !await ConfirmDeleteAsync("debt", item.Name)) return;
         Debts.Remove(item);
         await profileDebtRepository.DeleteAsync(item.Id);
     }
@@ -427,7 +428,7 @@ public sealed partial class ProfileViewModel(
     [RelayCommand]
     private async Task RemoveAccountAsync(RetirementAccountEditorItem? account)
     {
-        if (account is null)
+        if (account is null || !await ConfirmDeleteAsync("account", account.Name))
         {
             return;
         }
@@ -435,6 +436,13 @@ public sealed partial class ProfileViewModel(
         Accounts.Remove(account);
         await profileAccountRepository.DeleteAsync(account.Id);
     }
+
+    private Task<bool> ConfirmDeleteAsync(string itemType, string name) =>
+        confirmationService.ConfirmAsync(
+            $"Delete {itemType}?",
+            $"Delete \"{name}\" from your Profile?",
+            "Delete",
+            "Cancel");
 
     [RelayCommand]
     private Task OpenSettingsAsync() => navigationService.GoToAsync("settings");

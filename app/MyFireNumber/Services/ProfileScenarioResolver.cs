@@ -42,20 +42,24 @@ public sealed class ProfileScenarioResolver(
 
 public interface IScenarioModePromptService
 {
-    Task<ScenarioDataMode> ChooseAsync(string calculatorTitle);
+    Task<ScenarioDataMode?> ChooseAsync(string calculatorTitle);
 }
 
 public sealed class ScenarioModePromptService : IScenarioModePromptService
 {
-    public async Task<ScenarioDataMode> ChooseAsync(string calculatorTitle)
+    public async Task<ScenarioDataMode?> ChooseAsync(string calculatorTitle)
     {
         var choice = await Shell.Current.DisplayActionSheetAsync(
             $"Start {calculatorTitle}",
-            "Standalone snapshot",
+            "Cancel",
             null,
+            "Standalone snapshot",
             "Linked Profile");
-        return string.Equals(choice, "Linked Profile", StringComparison.Ordinal)
-            ? ScenarioDataMode.LinkedProfile
-            : ScenarioDataMode.Standalone;
+        return choice switch
+        {
+            "Linked Profile" => ScenarioDataMode.LinkedProfile,
+            "Standalone snapshot" => ScenarioDataMode.Standalone,
+            _ => null
+        };
     }
 }
