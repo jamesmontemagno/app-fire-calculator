@@ -81,6 +81,8 @@ can also create signed Android App Bundles and iOS archives. See
 [Mobile Release Secrets](docs/MOBILE_RELEASE_SECRETS.md) for the required credentials and setup
 steps.
 
+For Debug-time native UI inspection and automation, see [MAUI DevFlow](docs/MAUI_DEVFLOW.md).
+
 ## 🛠️ Tech Stack
 
 - **React 19** - UI framework

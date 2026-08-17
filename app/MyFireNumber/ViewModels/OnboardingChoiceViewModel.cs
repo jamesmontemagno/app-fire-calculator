@@ -22,7 +22,7 @@ public partial class OnboardingChoiceViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private Task TakeQuizAsync() => navigationService.GoToAsync("../quiz");
+    private Task TakeQuizAsync() => navigationService.GoToAsync("quiz");
 
     [RelayCommand]
     private async Task StartStandardFireAsync()

@@ -144,11 +144,11 @@ public partial class TimelineOnboardingViewModel : ObservableObject
             }
         }
 
-        await navigationService.GoToAsync("../onboarding-withdrawal-rate");
+        await navigationService.GoToAsync("onboarding-withdrawal-rate");
     }
 
     [RelayCommand]
-    private Task SkipAsync() => navigationService.GoToAsync("../onboarding-withdrawal-rate");
+    private Task SkipAsync() => navigationService.GoToAsync("onboarding-withdrawal-rate");
 
     private static void RoundSliderValue(double value, Action<double> update, double increment)
     {

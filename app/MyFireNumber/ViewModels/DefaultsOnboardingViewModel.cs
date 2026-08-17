@@ -149,10 +149,10 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
             // above still apply, and Profile can be completed later.
         }
 
-        await navigationService.GoToAsync("../onboarding-timeline");
+        await navigationService.GoToAsync("onboarding-timeline");
     }
     [RelayCommand]
-    private Task SkipAsync() => navigationService.GoToAsync("../onboarding-timeline");
+    private Task SkipAsync() => navigationService.GoToAsync("onboarding-timeline");
 
     private static void RoundSliderValue(double value, Action<double> update, double increment)
     {

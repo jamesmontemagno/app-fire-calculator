@@ -97,4 +97,34 @@ public partial class AppShell : Shell
 		};
 		await GoToAsync(route);
 	}
+
+	protected override void OnNavigating(ShellNavigatingEventArgs args)
+	{
+		base.OnNavigating(args);
+
+		if (args.Source != ShellNavigationSource.Pop
+			|| onboardingService.IsComplete
+			|| !IsOnboardingPage(CurrentPage))
+		{
+			return;
+		}
+
+		var navigationStack = Navigation.NavigationStack;
+		var hasEarlierOnboardingPage = navigationStack
+			.Take(Math.Max(0, navigationStack.Count - 1))
+			.Any(IsOnboardingPage);
+
+		if (!hasEarlierOnboardingPage)
+		{
+			args.Cancel();
+		}
+	}
+
+	private static bool IsOnboardingPage(Page page) =>
+		page is WelcomePage
+			or DefaultsOnboardingPage
+			or TimelineOnboardingPage
+			or WithdrawalRateOnboardingPage
+			or OnboardingChoicePage
+			or QuizPage;
 }
