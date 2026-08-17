@@ -211,7 +211,8 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
             CurrentAge = defaults.CurrentAge,
             SemiRetirementAge = profileService.DerivedPhasedRetirementAge ?? defaults.RetirementAge,
             Accounts = [],
-            IncomeSources = []
+            IncomeSources = [],
+            AdditionalExpenses = []
         };
     }
 }
