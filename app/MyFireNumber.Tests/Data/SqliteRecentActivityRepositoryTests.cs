@@ -1,5 +1,4 @@
 using MyFireNumber.Storage;
-using SQLite;
 
 namespace MyFireNumber.Tests.Data;
 
@@ -38,31 +37,5 @@ public sealed class SqliteRecentActivityRepositoryTests : IAsyncLifetime
             item => Assert.Equal("standard-fire", item.ItemId),
             item => Assert.Equal("coast-fire", item.ItemId));
         Assert.Collection(plans, item => Assert.Equal("plan-1", item.ItemId));
-    }
-
-    [Fact]
-    public async Task InitializeAsync_UpgradesVersionOneDatabaseForRecentActivity()
-    {
-        var legacyConnection = new SQLiteAsyncConnection(databasePath);
-        await legacyConnection.ExecuteAsync(
-            "CREATE TABLE schema_metadata (Key TEXT PRIMARY KEY NOT NULL, Value TEXT NOT NULL)");
-        await legacyConnection.ExecuteAsync(
-            "INSERT INTO schema_metadata (Key, Value) VALUES ('schema-version', '1')");
-        await legacyConnection.CloseAsync();
-
-        var repository = new SqliteRecentActivityRepository(new LocalDatabase(databasePath));
-        await repository.TrackAsync(new RecentActivityRecord(
-            RecentActivityKind.Calculator,
-            "standard-fire",
-            DateTime.UtcNow));
-
-        var activities = await repository.ListAsync(RecentActivityKind.Calculator, 3);
-        var inspectionConnection = new SQLiteAsyncConnection(databasePath);
-        var schemaVersion = await inspectionConnection.ExecuteScalarAsync<string>(
-            "SELECT Value FROM schema_metadata WHERE Key = 'schema-version'");
-        await inspectionConnection.CloseAsync();
-
-        Assert.Equal("6", schemaVersion);
-        Assert.Collection(activities, activity => Assert.Equal("standard-fire", activity.ItemId));
     }
 }

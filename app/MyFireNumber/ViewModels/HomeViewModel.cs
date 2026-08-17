@@ -31,6 +31,7 @@ public partial class HomeViewModel : ObservableObject
     private readonly IExternalLinkService externalLinkService;
     private readonly IErrorPresentationService errorPresentationService;
     private readonly IProfileService profileService;
+    private readonly IProfileScenarioResolver profileScenarioResolver;
     private readonly IScenarioModePromptService scenarioModePromptService;
 
     public HomeViewModel(
@@ -45,6 +46,7 @@ public partial class HomeViewModel : ObservableObject
         IExternalLinkService externalLinkService,
         IErrorPresentationService errorPresentationService,
         IProfileService profileService,
+        IProfileScenarioResolver profileScenarioResolver,
         IScenarioModePromptService scenarioModePromptService)
     {
         this.catalog = catalog;
@@ -58,6 +60,7 @@ public partial class HomeViewModel : ObservableObject
         this.externalLinkService = externalLinkService;
         this.errorPresentationService = errorPresentationService;
         this.profileService = profileService;
+        this.profileScenarioResolver = profileScenarioResolver;
         this.scenarioModePromptService = scenarioModePromptService;
     }
 
@@ -169,7 +172,9 @@ public partial class HomeViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenCalculatorAsync(CalculatorDefinition definition)
     {
-        var dataMode = definition.Id == "retirement-cash-flow"
+        var canChooseProfileLink = definition.Id == "retirement-cash-flow"
+            || await profileScenarioResolver.HasCompatibleDataAsync(definition.Id);
+        var dataMode = canChooseProfileLink
             ? await scenarioModePromptService.ChooseAsync(definition.Title)
             : ScenarioDataMode.Standalone;
         if (dataMode is null)

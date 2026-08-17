@@ -57,7 +57,6 @@ public sealed record CorruptPayloadRecord(
     DateTime QuarantinedAtUtc);
 
 public sealed record LocalDataArchive(
-    int Version,
     DateTime ExportedAtUtc,
     IReadOnlyList<DraftRecord> Drafts,
     IReadOnlyList<PlanRecord> Plans,

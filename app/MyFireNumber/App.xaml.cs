@@ -12,12 +12,10 @@ public partial class App : Application
 		IThemeService themeService,
 		IAppBehaviorPreferencesService behaviorPreferencesService,
 		ITemporaryExportCleanupService temporaryExportCleanupService,
-		IProfileService profileService,
-		IAppDataVersionService appDataVersionService)
+		IProfileService profileService)
 	{
 		InitializeComponent();
 		this.services = services;
-		appDataVersionService.EnsureCurrentVersion();
 		temporaryExportCleanupService.RemoveStaleFiles();
 		themeService.Apply(behaviorPreferencesService.Current.HighContrast
 			? ThemePreference.Dark

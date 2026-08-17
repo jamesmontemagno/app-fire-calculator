@@ -43,7 +43,7 @@
                                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                                         <Grid ColumnDefinitions="*,44" ColumnSpacing="{StaticResource SpaceSm}">
                                             <Entry Text="{Binding Name}" IsEnabled="{Binding IsEditable}" Placeholder="Debt name" Background="{AppThemeBinding Light={StaticResource SurfaceCardFlatLight}, Dark={StaticResource SurfaceCardFlatDark}}" SemanticProperties.Description="Debt name" />
-                                            <Button Grid.Column="1" AutomationId="RemoveDebtButton" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" IsVisible="{Binding IsEditable}" Command="{Binding Source={RelativeSource AncestorType={x:Type viewModels:DebtPayoffViewModel}}, Path=RemoveDebtCommand}" CommandParameter="{Binding .}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Padding="0" SemanticProperties.Description="Remove this debt from the payoff plan." />
+                                            <Button Grid.Column="1" AutomationId="RemoveDebtButton" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" IsVisible="{Binding IsEditable}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Padding="0" SemanticProperties.Description="Remove this debt from the payoff plan." />
                                         </Grid>
                                         <controls:NumericInputView Header="Balance"
                                                                    IsEnabled="{Binding IsEditable}"

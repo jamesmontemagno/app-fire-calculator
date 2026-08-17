@@ -51,7 +51,6 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IRecommendedBookCatalog, RecommendedBookCatalog>();
 		builder.Services.AddSingleton<IConfirmationService, ConfirmationService>();
 		builder.Services.AddSingleton<IAppResetService, AppResetService>();
-		builder.Services.AddSingleton<IAppDataVersionService, AppDataVersionService>();
 		builder.Services.AddSingleton<IAppDataTransferService, AppDataTransferService>();
 		builder.Services.AddSingleton<ICalculatorDefaultsService, CalculatorDefaultsService>();
 		builder.Services.AddSingleton<IAppBehaviorPreferencesService, AppBehaviorPreferencesService>();
@@ -83,7 +82,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<ISavingsInvestmentExportService, SavingsInvestmentExportService>();
 		builder.Services.AddSingleton<IStandardFireExportService, StandardFireExportService>();
 		builder.Services.AddSingleton<IWithdrawalRateExportService, WithdrawalRateExportService>();
-		builder.Services.AddSingleton(_ => new LocalDatabase(Path.Combine(FileSystem.AppDataDirectory, "my-fire-number-v3.db3")));
+		builder.Services.AddSingleton(_ => new LocalDatabase(Path.Combine(FileSystem.AppDataDirectory, "my-fire-number-v4.db3")));
 		builder.Services.AddSingleton<IDraftRepository, SqliteDraftRepository>();
 		builder.Services.AddSingleton<IPlanRepository, SqlitePlanRepository>();
 		builder.Services.AddSingleton<ICalculatorPreferencesRepository, SqliteCalculatorPreferencesRepository>();

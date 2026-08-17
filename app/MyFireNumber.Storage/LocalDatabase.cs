@@ -6,9 +6,6 @@ namespace MyFireNumber.Storage;
 
 public sealed class LocalDatabase
 {
-    private const string SchemaVersionKey = "schema-version";
-    private const int CurrentSchemaVersion = 6;
-
     private readonly SQLiteAsyncConnection connection;
     private readonly SemaphoreSlim initializationLock = new(1, 1);
     private bool isInitialized;
@@ -35,29 +32,7 @@ public sealed class LocalDatabase
                 return;
             }
 
-            await connection.CreateTableAsync<SchemaMetadataEntity>();
-
-            var schemaVersion = await connection.Table<SchemaMetadataEntity>()
-                .Where(entry => entry.Key == SchemaVersionKey)
-                .FirstOrDefaultAsync();
-
-            if (schemaVersion is null)
-            {
-                await CreateCurrentSchemaAsync();
-                await connection.InsertAsync(new SchemaMetadataEntity
-                {
-                    Key = SchemaVersionKey,
-                    Value = CurrentSchemaVersion.ToString(System.Globalization.CultureInfo.InvariantCulture)
-                });
-            }
-            else if (!int.TryParse(schemaVersion.Value, out var storedVersion) || storedVersion > CurrentSchemaVersion)
-            {
-                throw new InvalidOperationException("The local data schema is not supported by this version of My Fire Number.");
-            }
-            else
-            {
-                await ApplyMigrationsAsync(storedVersion, schemaVersion);
-            }
+            await CreateCurrentSchemaAsync();
 
             isInitialized = true;
         }
@@ -100,7 +75,6 @@ public sealed class LocalDatabase
         var profileDebts = await connection.Table<ProfileDebtEntity>().ToListAsync();
 
         return new LocalDataArchive(
-            2,
             DateTime.UtcNow,
             drafts.Select(ToRecord).ToArray(),
             plans.Select(ToRecord).ToArray(),
@@ -119,11 +93,6 @@ public sealed class LocalDatabase
     public async Task ImportAsync(LocalDataArchive archive, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(archive);
-        if (archive.Version != 2)
-        {
-            throw new InvalidDataException($"Archive version {archive.Version} is not supported.");
-        }
-
         ValidateArchive(archive);
         await InitializeAsync(cancellationToken);
         await connection.RunInTransactionAsync(database =>
@@ -414,70 +383,6 @@ public sealed class LocalDatabase
         await connection.CreateTableAsync<ProfileDebtEntity>();
     }
 
-    private async Task ApplyMigrationsAsync(int storedVersion, SchemaMetadataEntity schemaVersion)
-    {
-        if (storedVersion < 1)
-        {
-            await connection.CreateTableAsync<DraftEntity>();
-            await connection.CreateTableAsync<PlanEntity>();
-            await connection.CreateTableAsync<CalculatorPreferenceEntity>();
-        }
-
-        if (storedVersion < 2)
-        {
-            await connection.CreateTableAsync<RecentActivityEntity>();
-        }
-
-        if (storedVersion < 3)
-        {
-            await connection.CreateTableAsync<CorruptPayloadEntity>();
-        }
-
-        if (storedVersion < 4)
-        {
-            await connection.CreateTableAsync<ProfileEntity>();
-            await connection.CreateTableAsync<ProfileAccountEntity>();
-        }
-
-        if (storedVersion < 5)
-        {
-            await connection.CreateTableAsync<ProfileIncomeEntity>();
-            await connection.CreateTableAsync<ProfileExpenseEntity>();
-            await connection.CreateTableAsync<ProfileDebtEntity>();
-            await AddColumnIfMissingAsync("drafts", "DataMode", "TEXT NOT NULL DEFAULT 'Standalone'");
-            await AddColumnIfMissingAsync("drafts", "ProfileRevision", "INTEGER NULL");
-            await AddColumnIfMissingAsync("plans", "DataMode", "TEXT NOT NULL DEFAULT 'Standalone'");
-            await AddColumnIfMissingAsync("plans", "ProfileRevision", "INTEGER NULL");
-        }
-
-        if (storedVersion < 6)
-        {
-            await connection.DropTableAsync<ProfileIncomeEntity>();
-            await connection.DropTableAsync<ProfileExpenseEntity>();
-            await connection.CreateTableAsync<ProfileIncomeEntity>();
-            await connection.CreateTableAsync<ProfileExpenseEntity>();
-        }
-
-        if (storedVersion != CurrentSchemaVersion)
-        {
-            schemaVersion.Value = CurrentSchemaVersion.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            await connection.UpdateAsync(schemaVersion);
-        }
-    }
-
-    private async Task AddColumnIfMissingAsync(string tableName, string columnName, string definition)
-    {
-        var columns = await connection.GetTableInfoAsync(tableName);
-        if (columns.Count == 0)
-        {
-            return;
-        }
-
-        if (columns.All(column => !string.Equals(column.Name, columnName, StringComparison.OrdinalIgnoreCase)))
-        {
-            await connection.ExecuteAsync($"ALTER TABLE \"{tableName}\" ADD COLUMN \"{columnName}\" {definition}");
-        }
-    }
 }
 
 [Table("drafts")]
@@ -558,16 +463,6 @@ internal sealed class RecentActivityEntity
 
     [NotNull]
     public string LastOpenedAtUtc { get; set; } = string.Empty;
-}
-
-[Table("schema_metadata")]
-internal sealed class SchemaMetadataEntity
-{
-    [PrimaryKey]
-    public string Key { get; set; } = string.Empty;
-
-    [NotNull]
-    public string Value { get; set; } = string.Empty;
 }
 
 [Table("corrupt_payloads")]

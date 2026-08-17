@@ -1,6 +1,5 @@
 using MyFireNumber.Core.Calculations;
 using MyFireNumber.Storage;
-using SQLite;
 
 namespace MyFireNumber.Tests.Data;
 
@@ -47,26 +46,5 @@ public sealed class SqliteProfileInventoryRepositoryTests : IAsyncLifetime
             () => repository.SaveAsync(new DebtItem("card", "Card", 100, -0.2, 150)));
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
             () => repository.SaveAsync(new DebtItem("card", "Card", 100, 0.2, -150)));
-    }
-
-    [Fact]
-    public async Task SchemaSix_ClearsOnlyLegacyIncomeAndExpenses()
-    {
-        var connection = new SQLiteAsyncConnection(databasePath);
-        await connection.ExecuteAsync("CREATE TABLE schema_metadata (Key TEXT PRIMARY KEY, Value TEXT NOT NULL)");
-        await connection.ExecuteAsync("INSERT INTO schema_metadata (Key, Value) VALUES ('schema-version', '5')");
-        await connection.ExecuteAsync("CREATE TABLE profile_income (Id TEXT PRIMARY KEY, Name TEXT NOT NULL, Amount REAL, Period TEXT NOT NULL, Category TEXT)");
-        await connection.ExecuteAsync("CREATE TABLE profile_expenses (Id TEXT PRIMARY KEY, Name TEXT NOT NULL, Amount REAL, Period TEXT NOT NULL, Category TEXT)");
-        await connection.ExecuteAsync("CREATE TABLE profile_debts (Id TEXT PRIMARY KEY, Name TEXT NOT NULL, Balance REAL, Rate REAL, MinimumPayment REAL)");
-        await connection.ExecuteAsync("INSERT INTO profile_income VALUES ('salary', 'Salary', 1000, 'Monthly', 'Work')");
-        await connection.ExecuteAsync("INSERT INTO profile_expenses VALUES ('home', 'Housing', 1000, 'Monthly', 'Home')");
-        await connection.ExecuteAsync("INSERT INTO profile_debts VALUES ('card', 'Card', 5000, 0.2, 150)");
-        await connection.CloseAsync();
-
-        var database = new LocalDatabase(databasePath);
-
-        Assert.Empty(await new SqliteProfileIncomeRepository(database).ListAsync());
-        Assert.Empty(await new SqliteProfileExpenseRepository(database).ListAsync());
-        Assert.Equal("card", Assert.Single(await new SqliteProfileDebtRepository(database).ListAsync()).Id);
     }
 }

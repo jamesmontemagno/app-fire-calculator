@@ -41,20 +41,6 @@ public sealed class LocalDataArchiveRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ImportAsync_RejectsUnsupportedVersionBeforeMutation()
-    {
-        var database = new LocalDatabase(databasePath);
-        var repository = new SqliteDraftRepository(database);
-        var now = new DateTime(2026, 8, 9, 12, 0, 0, DateTimeKind.Utc);
-        await repository.SaveAsync(new DraftRecord("standard-fire", 1, "{}", now));
-
-        var invalidArchive = (await database.ExportAsync()) with { Version = 99 };
-
-        await Assert.ThrowsAsync<InvalidDataException>(() => database.ImportAsync(invalidArchive));
-        Assert.NotNull(await repository.GetAsync("standard-fire"));
-    }
-
-    [Fact]
     public async Task ExportAndImport_RoundTripsProfileAndInventory()
     {
         var database = new LocalDatabase(databasePath);
