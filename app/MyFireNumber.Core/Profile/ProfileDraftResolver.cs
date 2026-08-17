@@ -19,8 +19,8 @@ public static class ProfileDraftResolver
                 RetirementAge = TargetAge(snapshot, draft.RetirementAge),
                 CurrentSavings = snapshot.TotalAccountBalance,
                 AnnualContribution = snapshot.TotalAnnualContributions,
-                AnnualIncome = snapshot.TotalAnnualIncome,
-                AnnualExpenses = snapshot.TotalAnnualExpenses
+                AnnualIncome = snapshot.EffectiveAnnualIncome ?? draft.AnnualIncome,
+                AnnualExpenses = snapshot.EffectiveAnnualExpenses ?? draft.AnnualExpenses
             },
             LeanFireDraft draft => draft with
             {
@@ -28,8 +28,8 @@ public static class ProfileDraftResolver
                 RetirementAge = TargetAge(snapshot, draft.RetirementAge),
                 CurrentSavings = snapshot.TotalAccountBalance,
                 AnnualContribution = snapshot.TotalAnnualContributions,
-                AnnualIncome = snapshot.TotalAnnualIncome,
-                AnnualExpenses = snapshot.TotalAnnualExpenses
+                AnnualIncome = snapshot.EffectiveAnnualIncome ?? draft.AnnualIncome,
+                AnnualExpenses = snapshot.EffectiveAnnualExpenses ?? draft.AnnualExpenses
             },
             FatFireDraft draft => draft with
             {
@@ -37,8 +37,8 @@ public static class ProfileDraftResolver
                 RetirementAge = TargetAge(snapshot, draft.RetirementAge),
                 CurrentSavings = snapshot.TotalAccountBalance,
                 AnnualContribution = snapshot.TotalAnnualContributions,
-                AnnualIncome = snapshot.TotalAnnualIncome,
-                AnnualExpenses = snapshot.TotalAnnualExpenses
+                AnnualIncome = snapshot.EffectiveAnnualIncome ?? draft.AnnualIncome,
+                AnnualExpenses = snapshot.EffectiveAnnualExpenses ?? draft.AnnualExpenses
             },
             CoastFireDraft draft => draft with
             {
@@ -46,28 +46,28 @@ public static class ProfileDraftResolver
                 RetirementAge = TargetAge(snapshot, draft.RetirementAge),
                 CurrentSavings = snapshot.TotalAccountBalance,
                 AnnualContribution = snapshot.TotalAnnualContributions,
-                AnnualExpenses = snapshot.TotalAnnualExpenses
+                AnnualExpenses = snapshot.EffectiveAnnualExpenses ?? draft.AnnualExpenses
             },
             BaristaFireDraft draft => draft with
             {
                 CurrentAge = CurrentAge(snapshot, today, draft.CurrentAge),
                 CurrentSavings = snapshot.TotalAccountBalance,
                 AnnualContribution = snapshot.TotalAnnualContributions,
-                AnnualExpenses = snapshot.TotalAnnualExpenses
+                AnnualExpenses = snapshot.EffectiveAnnualExpenses ?? draft.AnnualExpenses
             },
             ReverseFireDraft draft => draft with
             {
                 CurrentAge = CurrentAge(snapshot, today, draft.CurrentAge),
                 TargetRetirementAge = TargetAge(snapshot, draft.TargetRetirementAge),
                 CurrentSavings = snapshot.TotalAccountBalance,
-                AnnualExpenses = snapshot.TotalAnnualExpenses
+                AnnualExpenses = snapshot.EffectiveAnnualExpenses ?? draft.AnnualExpenses
             },
             SavingsInvestmentDraft draft => draft with
             {
                 StartingAmount = snapshot.TotalAccountBalance,
                 ContributionAmount = snapshot.TotalAnnualContributions / 12,
                 ContributionFrequency = ContributionFrequency.Monthly,
-                AnnualIncome = snapshot.TotalAnnualIncome,
+                AnnualIncome = snapshot.EffectiveAnnualIncome ?? draft.AnnualIncome,
                 CurrentAge = CurrentAge(snapshot, today, draft.CurrentAge)
             },
             HealthcareGapDraft draft => draft with
@@ -83,7 +83,7 @@ public static class ProfileDraftResolver
             {
                 CurrentAge = CurrentAge(snapshot, today, draft.CurrentAge),
                 SemiRetirementAge = PhasedAge(snapshot, draft.SemiRetirementAge),
-                AnnualExpenses = snapshot.TotalAnnualExpenses,
+                AnnualExpenses = snapshot.EffectiveAnnualExpenses ?? draft.AnnualExpenses,
                 Accounts = snapshot.Accounts.Select(ToRetirementAccount).ToArray()
             },
             _ => source
@@ -114,16 +114,18 @@ public static class ProfileDraftResolver
             errors.Add("Add at least one account to Profile to use linked mode.");
         }
 
-        if (draft is StandardFireDraft or LeanFireDraft or FatFireDraft && snapshot.Income.Count == 0)
+        // Either source satisfies the requirement now that both feed the same effective value, so a
+        // profile that only answered the onboarding income question is still linkable.
+        if (draft is StandardFireDraft or LeanFireDraft or FatFireDraft && snapshot.EffectiveAnnualIncome is null)
         {
-            errors.Add("Add at least one recurring income item to Profile to use linked mode.");
+            errors.Add("Add your household income or a recurring income item to Profile to use linked mode.");
         }
 
         if (draft is StandardFireDraft or LeanFireDraft or FatFireDraft or CoastFireDraft or
             BaristaFireDraft or ReverseFireDraft or DeferredCompensationDraft &&
-            snapshot.Expenses.Count == 0)
+            snapshot.EffectiveAnnualExpenses is null)
         {
-            errors.Add("Add at least one recurring expense to Profile to use linked mode.");
+            errors.Add("Add your household spending or a recurring expense to Profile to use linked mode.");
         }
 
         if (snapshot.Accounts.Any(account => account.Balance < 0 || account.AnnualContribution < 0))

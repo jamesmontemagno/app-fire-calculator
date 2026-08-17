@@ -1,10 +1,13 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.Core.Profile;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Globalization;
 
 namespace MyFireNumber.ViewModels;
@@ -20,13 +23,13 @@ public sealed partial class ProfileViewModel(
     INavigationService navigationService) : ObservableObject
 {
     private bool isLoaded;
+    private bool isTrackingCollections;
     private long loadedDataRevision = -1;
 
     public ObservableCollection<RetirementAccountEditorItem> Accounts { get; } = [];
     public ObservableCollection<ProfileRecurringEditorItem> Income { get; } = [];
     public ObservableCollection<ProfileRecurringEditorItem> Expenses { get; } = [];
     public ObservableCollection<ProfileDebtEditorItem> Debts { get; } = [];
-
     [ObservableProperty] private string displayName = string.Empty;
     [ObservableProperty] private string householdName = string.Empty;
     [ObservableProperty] private string householdSizeText = string.Empty;
@@ -54,6 +57,21 @@ public sealed partial class ProfileViewModel(
     public bool HasNoBirthDate => !HasBirthDate;
     public bool HasNoPhasedRetirementDate => !HasPhasedRetirementDate;
     public bool HasNoTargetRetirementDate => !HasTargetRetirementDate;
+
+    /// <summary>
+    /// Explains which figure calculators will actually use, because the itemised list silently wins
+    /// over the single household figure and a user editing both deserves to see that.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasIncomeOverride))]
+    private string incomeOverrideText = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasExpenseOverride))]
+    private string expenseOverrideText = string.Empty;
+
+    public bool HasIncomeOverride => !string.IsNullOrWhiteSpace(IncomeOverrideText);
+    public bool HasExpenseOverride => !string.IsNullOrWhiteSpace(ExpenseOverrideText);
 
     /// <summary>Keeps the birth-date picker from offering a future date the age math cannot use.</summary>
     public DateTime MaximumBirthDate => localDateProvider.Today.ToDateTime(TimeOnly.MinValue);
@@ -97,12 +115,81 @@ public sealed partial class ProfileViewModel(
     /// </summary>
     public void Invalidate() => isLoaded = false;
 
+    /// <summary>
+    /// Subscribes once so the override notices follow the lists, including edits to an existing
+    /// item's amount or period, not just additions and removals.
+    /// </summary>
+    private void TrackRecurringCollections()
+    {
+        if (isTrackingCollections)
+        {
+            return;
+        }
+
+        isTrackingCollections = true;
+        Income.CollectionChanged += OnRecurringCollectionChanged;
+        Expenses.CollectionChanged += OnRecurringCollectionChanged;
+    }
+
+    private void OnRecurringCollectionChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
+    {
+        foreach (var item in eventArgs.OldItems?.OfType<ProfileRecurringEditorItem>() ?? [])
+        {
+            item.PropertyChanged -= OnRecurringItemChanged;
+        }
+
+        foreach (var item in eventArgs.NewItems?.OfType<ProfileRecurringEditorItem>() ?? [])
+        {
+            item.PropertyChanged += OnRecurringItemChanged;
+        }
+
+        UpdateOverrideNotices();
+    }
+
+    private void OnRecurringItemChanged(object? sender, PropertyChangedEventArgs eventArgs)
+    {
+        if (eventArgs.PropertyName is nameof(ProfileRecurringEditorItem.AmountText)
+            or nameof(ProfileRecurringEditorItem.Period))
+        {
+            UpdateOverrideNotices();
+        }
+    }
+
+    /// <summary>
+    /// Recomputes the notices that tell the user the itemised lists are overriding the single
+    /// household figures. Kept live so adding a first income item immediately explains why the
+    /// household number above it stopped mattering.
+    /// </summary>
+    private void UpdateOverrideNotices()
+    {
+        IncomeOverrideText = BuildOverrideText(Income, "income");
+        ExpenseOverrideText = BuildOverrideText(Expenses, "spending");
+    }
+
+    private static string BuildOverrideText(
+        IReadOnlyCollection<ProfileRecurringEditorItem> items,
+        string noun)
+    {
+        if (items.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var total = items.Sum(item => item.TryGetAmount(out var amount)
+            ? CurrencyPeriodMath.Convert(amount, item.Period, CurrencyPeriod.Annual)
+            : 0);
+        var label = items.Count == 1 ? "entry" : "entries";
+        return $"Your {items.Count} {noun} {label} total {total.ToString("C0", CultureInfo.CurrentCulture)} a year, and calculators use that instead of the figure above.";
+    }
+
     public async Task LoadAsync()
     {
         if (isLoaded && loadedDataRevision == profileService.DataRevision)
         {
             return;
         }
+
+        TrackRecurringCollections();
 
         await profileService.LoadAsync();
         ApplyProfile(profileService.Current);

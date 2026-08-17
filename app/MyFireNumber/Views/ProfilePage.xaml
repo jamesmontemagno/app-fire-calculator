@@ -284,12 +284,24 @@
                                                    Placeholder="120000"
                                                    PeriodSuffix="/yr"
                                                    Text="{Binding AnnualIncomeText, Mode=TwoWay}" />
+                        <Label AutomationId="ProfileIncomeOverrideNotice"
+                               Text="{Binding IncomeOverrideText}"
+                               IsVisible="{Binding HasIncomeOverride}"
+                               FontSize="11"
+                               LineHeight="1.3"
+                               TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                         <controls:NumericInputView AutomationId="ProfileAnnualExpensesInput"
                                                    Header="Annual household spending"
                                                    HelpText="What your household spends each year, before retirement."
                                                    Placeholder="72000"
                                                    PeriodSuffix="/yr"
                                                    Text="{Binding AnnualExpensesText, Mode=TwoWay}" />
+                        <Label AutomationId="ProfileExpenseOverrideNotice"
+                               Text="{Binding ExpenseOverrideText}"
+                               IsVisible="{Binding HasExpenseOverride}"
+                               FontSize="11"
+                               LineHeight="1.3"
+                               TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                     </VerticalStackLayout>
                 </Border>
 

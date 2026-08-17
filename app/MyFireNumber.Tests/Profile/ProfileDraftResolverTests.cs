@@ -71,6 +71,72 @@ public sealed class ProfileDraftResolverTests
         Assert.Collection(result.Draft.Debts, debt => Assert.Equal("card", debt.Id));
     }
 
+    [Fact]
+    public void Resolve_PrefersItemisedIncomeOverTheHouseholdFigure()
+    {
+        var snapshot = Snapshot(
+            accounts: [Account("one", 100_000, 10_000)],
+            income: [new ProfileIncome("salary", "Salary", 100_000, CurrencyPeriod.Annual, null)],
+            expenses: [new ProfileExpense("living", "Living", 40_000, CurrencyPeriod.Annual, null)]) with
+        {
+            Profile = FinancialProfile.Empty with { AnnualIncome = 55_000, AnnualExpenses = 22_000 }
+        };
+
+        var result = ProfileDraftResolver.Resolve(StandardFireDraft.Default, snapshot, new DateOnly(2026, 1, 1));
+
+        Assert.True(result.IsValid);
+        Assert.Equal(100_000, result.Draft.AnnualIncome);
+        Assert.Equal(40_000, result.Draft.AnnualExpenses);
+    }
+
+    [Fact]
+    public void Resolve_FallsBackToTheHouseholdFigureWhenNothingIsItemised()
+    {
+        var snapshot = Snapshot(accounts: [Account("one", 100_000, 10_000)]) with
+        {
+            Profile = FinancialProfile.Empty with { AnnualIncome = 55_000, AnnualExpenses = 22_000 }
+        };
+
+        var result = ProfileDraftResolver.Resolve(StandardFireDraft.Default, snapshot, new DateOnly(2026, 1, 1));
+
+        Assert.True(result.IsValid);
+        Assert.Equal(55_000, result.Draft.AnnualIncome);
+        Assert.Equal(22_000, result.Draft.AnnualExpenses);
+    }
+
+    [Fact]
+    public void Resolve_BlocksOnlyWhenNeitherSourceHasIncome()
+    {
+        var snapshot = Snapshot(
+            accounts: [Account("one", 100_000, 10_000)],
+            expenses: [new ProfileExpense("living", "Living", 40_000, CurrencyPeriod.Annual, null)]);
+
+        var result = ProfileDraftResolver.Resolve(StandardFireDraft.Default, snapshot, new DateOnly(2026, 1, 1));
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, error => error.Contains("income", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void EffectiveValues_MatchWhatTheResolverApplies()
+    {
+        var itemised = Snapshot(
+            income: [new ProfileIncome("a", "A", 1_000, CurrencyPeriod.Monthly, null)]) with
+        {
+            Profile = FinancialProfile.Empty with { AnnualIncome = 99_000 }
+        };
+        var householdOnly = Snapshot() with
+        {
+            Profile = FinancialProfile.Empty with { AnnualIncome = 99_000 }
+        };
+
+        Assert.Equal(12_000, itemised.EffectiveAnnualIncome);
+        Assert.True(itemised.IsIncomeItemised);
+        Assert.Equal(99_000, householdOnly.EffectiveAnnualIncome);
+        Assert.False(householdOnly.IsIncomeItemised);
+        Assert.Null(Snapshot().EffectiveAnnualIncome);
+    }
+
     private static ProfileFinancialSnapshot Snapshot(
         IReadOnlyList<ProfileAccount>? accounts = null,
         IReadOnlyList<ProfileIncome>? income = null,

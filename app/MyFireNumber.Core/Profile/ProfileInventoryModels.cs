@@ -51,6 +51,27 @@ public sealed record ProfileFinancialSnapshot(
     public double TotalAnnualContributions => Accounts.Sum(account => account.AnnualContribution);
     public double TotalAnnualIncome => Income.Sum(item => item.AnnualAmount);
     public double TotalAnnualExpenses => Expenses.Sum(item => item.AnnualAmount);
+
+    /// <summary>
+    /// The income every calculator should use. Itemised entries win when the user has added any,
+    /// because they are the more specific answer; the single household figure from onboarding is the
+    /// fallback. Null when neither has been provided.
+    /// <para>This precedence has to live in one place: linked plans read the itemised totals while
+    /// new scenarios read the household figure, so without a shared rule the same profile produces
+    /// two different numbers depending on how the scenario was created.</para>
+    /// </summary>
+    public double? EffectiveAnnualIncome =>
+        Income.Count > 0 ? TotalAnnualIncome : Profile.AnnualIncome;
+
+    /// <inheritdoc cref="EffectiveAnnualIncome"/>
+    public double? EffectiveAnnualExpenses =>
+        Expenses.Count > 0 ? TotalAnnualExpenses : Profile.AnnualExpenses;
+
+    /// <summary>Whether itemised entries are overriding the single household income figure.</summary>
+    public bool IsIncomeItemised => Income.Count > 0;
+
+    /// <inheritdoc cref="IsIncomeItemised"/>
+    public bool AreExpensesItemised => Expenses.Count > 0;
 }
 
 public sealed record ProfileResolution<TDraft>(
