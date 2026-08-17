@@ -42,22 +42,19 @@ public partial class CalculatorCatalogViewModel : ObservableObject
     private readonly IRecentActivityRepository recentActivityRepository;
     private readonly IProfileScenarioResolver profileScenarioResolver;
     private readonly IScenarioModePromptService scenarioModePromptService;
-    private readonly IDraftRepository draftRepository;
 
     public CalculatorCatalogViewModel(
         ICalculatorCatalog catalog,
         INavigationService navigationService,
         IRecentActivityRepository recentActivityRepository,
         IProfileScenarioResolver profileScenarioResolver,
-        IScenarioModePromptService scenarioModePromptService,
-        IDraftRepository draftRepository)
+        IScenarioModePromptService scenarioModePromptService)
     {
         this.catalog = catalog;
         this.navigationService = navigationService;
         this.recentActivityRepository = recentActivityRepository;
         this.profileScenarioResolver = profileScenarioResolver;
         this.scenarioModePromptService = scenarioModePromptService;
-        this.draftRepository = draftRepository;
     }
 
     [ObservableProperty]
@@ -87,12 +84,14 @@ public partial class CalculatorCatalogViewModel : ObservableObject
     [RelayCommand]
     private async Task OpenCalculatorAsync(CalculatorDefinition definition)
     {
-        var existingDraft = await draftRepository.GetAsync(definition.Id);
-        ScenarioDataMode? dataMode = existingDraft is null
-            ? await profileScenarioResolver.HasCompatibleDataAsync(definition.Id)
-                ? await scenarioModePromptService.ChooseAsync(definition.Title)
-                : ScenarioDataMode.Standalone
-            : null;
+        var dataMode = await profileScenarioResolver.HasCompatibleDataAsync(definition.Id)
+            ? await scenarioModePromptService.ChooseAsync(definition.Title)
+            : ScenarioDataMode.Standalone;
+        if (dataMode is null)
+        {
+            return;
+        }
+
         await recentActivityRepository.TrackAsync(new RecentActivityRecord(
             RecentActivityKind.Calculator,
             definition.Id,

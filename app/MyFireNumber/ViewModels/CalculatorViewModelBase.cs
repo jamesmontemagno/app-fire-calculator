@@ -58,6 +58,8 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
         confirmationService = services.ConfirmationService;
     }
 
+    protected IConfirmationService ConfirmationService => confirmationService;
+
     [ObservableProperty]
     private string title = string.Empty;
 
@@ -329,7 +331,7 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
             }
             else
             {
-                await LoadDraftAsync();
+                await LoadDraftAsync(requestedMode);
             }
         }
         catch (JsonException)
@@ -376,7 +378,7 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
         IsLoadedPlan = true;
     }
 
-    private async Task LoadDraftAsync()
+    private async Task LoadDraftAsync(ScenarioDataMode? requestedMode)
     {
         var savedDraft = behaviorPreferences.Current.RestoreDrafts
             ? await draftRepository.GetAsync(CalculatorId)
@@ -395,7 +397,7 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
             return;
         }
 
-        ScenarioDataMode = savedDraft.DataMode;
+        ScenarioDataMode = requestedMode ?? savedDraft.DataMode;
         await LoadResolvedInputsAsync(JsonSerializer.Deserialize<TDraft>(savedDraft.PayloadJson) ?? DefaultDraft);
     }
 

@@ -12,7 +12,7 @@
                           Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                           SafeAreaEdges="All">
     <ContentPage.ToolbarItems>
-        <ToolbarItem Command="{Binding SavePlanCommand}"
+        <ToolbarItem Command="{Binding SavePlanAndCloseCommand}"
                      SemanticProperties.Description="Save the current calculator values as a plan.">
             <ToolbarItem.IconImageSource>
                 <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Size="18" />
@@ -213,7 +213,7 @@
                            Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                            SemanticProperties.Description="{Binding PlanNameDescription}" />
                     <Button Text="{Binding SavePlanActionText}"
-                            Command="{Binding SavePlanCommand}"
+                            Command="{Binding SavePlanAndCloseCommand}"
                             SemanticProperties.Description="{Binding SavePlanActionDescription}" />
                     <Button Text="Export to Excel"
                             Command="{Binding ExportCommand}"
