@@ -60,7 +60,8 @@ public static class DeferredCompensationCalculator
             var additionalExpenseTotal = 0d;
             foreach (var expense in inputs.AdditionalExpenses)
             {
-                var amount = age >= expense.StartAge ? Math.Max(0, expense.AnnualAmount) * inflationMultiplier : 0;
+                var isActive = age >= expense.StartAge && age <= expense.EndAge;
+                var amount = isActive ? Math.Max(0, expense.AnnualAmount) * inflationMultiplier : 0;
                 expensesByItem[expense.Id] = RoundNonNegative(amount);
                 additionalExpenseTotal += amount;
             }

@@ -396,6 +396,9 @@ public sealed partial class RetirementExpenseEditorItem : ObservableObject
     private string startAgeText = "55";
 
     [ObservableProperty]
+    private string endAgeText = "90";
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
     private bool isExpanded;
 
@@ -413,12 +416,13 @@ public sealed partial class RetirementExpenseEditorItem : ObservableObject
         Id = expense.Id,
         Name = expense.Name,
         AnnualAmountText = expense.AnnualAmount.ToString("0.##", CultureInfo.CurrentCulture),
-        StartAgeText = expense.StartAge.ToString(CultureInfo.CurrentCulture)
+        StartAgeText = expense.StartAge.ToString(CultureInfo.CurrentCulture),
+        EndAgeText = expense.EndAge.ToString(CultureInfo.CurrentCulture)
     };
 
     public bool TryCreateExpense(out RetirementExpense expense, out string validationError)
     {
-        expense = new RetirementExpense(Id, Name.Trim(), 0, 0);
+        expense = new RetirementExpense(Id, Name.Trim(), 0, 0, 0);
         validationError = string.Empty;
         if (string.IsNullOrWhiteSpace(expense.Name))
         {
@@ -440,13 +444,27 @@ public sealed partial class RetirementExpenseEditorItem : ObservableObject
             return false;
         }
 
-        expense = new RetirementExpense(Id, Name.Trim(), amount, startAge);
+        if (!int.TryParse(EndAgeText, NumberStyles.Integer, CultureInfo.CurrentCulture, out var endAge)
+            || endAge is < 18 or > 100)
+        {
+            validationError = "End age must be a whole number from 18 to 100.";
+            return false;
+        }
+
+        if (endAge < startAge)
+        {
+            validationError = "End age must be the same as or later than start age.";
+            return false;
+        }
+
+        expense = new RetirementExpense(Id, Name.Trim(), amount, startAge, endAge);
         return true;
     }
 
     partial void OnNameChanged(string value) => RaiseChanged();
     partial void OnAnnualAmountTextChanged(string value) => RaiseChanged();
     partial void OnStartAgeTextChanged(string value) => RaiseChanged();
+    partial void OnEndAgeTextChanged(string value) => RaiseChanged();
 
     [RelayCommand]
     private void ToggleExpanded() => IsExpanded = !IsExpanded;

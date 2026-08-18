@@ -24,8 +24,8 @@ public sealed class SqliteProfileInventoryRepositoryTests : IAsyncLifetime
         var debts = new SqliteProfileDebtRepository(database);
 
         var incomeItem = new RetirementIncomeSource("salary", "Salary", 120_000, 45, 65, 0.02, false, 0.25);
-        var expenseItem = new RetirementExpense("home", "Housing", 30_000, 45);
-        var debtItem = new DebtItem("card", "Card", 5_000, 0.2, 150);
+        var expenseItem = new RetirementExpense("home", "Housing", 30_000, 45, 75);
+        var debtItem = new DebtItem("card", "Card", 5_000, 0.2, 150, 75);
         await income.SaveAsync(incomeItem);
         await expenses.SaveAsync(expenseItem);
         await debts.SaveAsync(debtItem);
@@ -33,6 +33,15 @@ public sealed class SqliteProfileInventoryRepositoryTests : IAsyncLifetime
         Assert.Equal(incomeItem, Assert.Single(await income.ListAsync()));
         Assert.Equal(expenseItem, Assert.Single(await expenses.ListAsync()));
         Assert.Equal(debtItem, Assert.Single(await debts.ListAsync()));
+    }
+
+    [Fact]
+    public async Task ExpenseSaveAsync_RejectsAnEndAgeBeforeTheStartAge()
+    {
+        var repository = new SqliteProfileExpenseRepository(new LocalDatabase(databasePath));
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => repository.SaveAsync(new RetirementExpense("home", "Housing", 30_000, 75, 74)));
     }
 
     [Fact]
@@ -46,5 +55,7 @@ public sealed class SqliteProfileInventoryRepositoryTests : IAsyncLifetime
             () => repository.SaveAsync(new DebtItem("card", "Card", 100, -0.2, 150)));
         await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
             () => repository.SaveAsync(new DebtItem("card", "Card", 100, 0.2, -150)));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
+            () => repository.SaveAsync(new DebtItem("card", "Card", 100, 0.2, 150, -25)));
     }
 }

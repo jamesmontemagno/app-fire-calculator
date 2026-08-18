@@ -77,7 +77,8 @@ public static class ProfileDraftResolver
             },
             DebtPayoffDraft draft => draft with
             {
-                Debts = snapshot.Debts.ToArray()
+                Debts = snapshot.Debts.ToArray(),
+                MonthlyBudget = snapshot.Debts.Sum(debt => debt.MinimumPayment + debt.ExtraMonthlyPayment)
             },
             DeferredCompensationDraft draft => draft with
             {
@@ -159,12 +160,20 @@ public static class ProfileDraftResolver
             errors.Add("Profile income contains invalid amount, age, growth, or tax values.");
         }
 
-        if (snapshot.Expenses.Any(item => item.AnnualAmount < 0 || item.StartAge is < 18 or > 100))
+        if (snapshot.Expenses.Any(item =>
+                item.AnnualAmount < 0 ||
+                item.StartAge is < 18 or > 100 ||
+                item.EndAge < item.StartAge ||
+                item.EndAge > 100))
         {
-            errors.Add("Profile expenses contain an invalid amount or start age.");
+            errors.Add("Profile expenses contain an invalid amount or age range.");
         }
 
-        if (snapshot.Debts.Any(debt => debt.Balance < 0 || debt.MinimumPayment < 0 || debt.Rate < 0))
+        if (snapshot.Debts.Any(debt =>
+                debt.Balance < 0 ||
+                debt.MinimumPayment < 0 ||
+                debt.ExtraMonthlyPayment < 0 ||
+                debt.Rate < 0))
         {
             errors.Add("Profile debts contain invalid negative values.");
         }

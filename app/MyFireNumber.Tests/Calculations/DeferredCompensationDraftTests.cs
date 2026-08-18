@@ -41,7 +41,7 @@ public sealed class DeferredCompensationDraftTests
             ],
             AdditionalExpenses =
             [
-                new RetirementExpense("travel", "Travel", 10_000, 60)
+                new RetirementExpense("travel", "Travel", 10_000, 60, 70)
             ]
         };
 

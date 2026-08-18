@@ -110,7 +110,13 @@ public sealed record WithdrawalResult(
     IReadOnlyList<WithdrawalProjection> WithdrawalProjections,
     IReadOnlyList<WithdrawalRateAnalysis> RateAnalysis);
 
-public sealed record DebtItem(string Id, string Name, double Balance, double Rate, double MinimumPayment);
+public sealed record DebtItem(
+    string Id,
+    string Name,
+    double Balance,
+    double Rate,
+    double MinimumPayment,
+    double ExtraMonthlyPayment = 0);
 
 public sealed record DebtBalance(string Name, double Balance);
 
@@ -271,7 +277,12 @@ public sealed record RetirementIncomeSource(
     bool IsAfterTax,
     double TaxRate);
 
-public sealed record RetirementExpense(string Id, string Name, double AnnualAmount, int StartAge);
+public sealed record RetirementExpense(
+    string Id,
+    string Name,
+    double AnnualAmount,
+    int StartAge,
+    int EndAge);
 
 public sealed record DeferredCompensationInputs(
     int CurrentAge,

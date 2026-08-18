@@ -233,15 +233,19 @@
                                                 <Label Text="Expense name" Style="{StaticResource FormFieldLabel}" />
                                                 <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Housing" SemanticProperties.Description="Name of this expense" />
                                             </VerticalStackLayout>
+                                            <controls:NumericInputView Header="Annual amount"
+                                                                       HelpText="Annual cost while this expense is active."
+                                                                       Placeholder="0"
+                                                                       Text="{Binding AnnualAmountText, Mode=TwoWay}" />
                                             <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
-                                                <controls:NumericInputView Header="Annual amount"
-                                                                           HelpText="Annual cost while this expense is active."
-                                                                           Placeholder="0"
-                                                                           Text="{Binding AnnualAmountText, Mode=TwoWay}" />
-                                                <controls:NumericInputView Grid.Column="1" Header="Start age"
+                                                <controls:NumericInputView Header="Start age"
                                                                            HelpText="Age when this expense starts."
                                                                            Placeholder="55"
                                                                            Text="{Binding StartAgeText, Mode=TwoWay}" />
+                                                <controls:NumericInputView Grid.Column="1" Header="End age"
+                                                                           HelpText="Last age when this expense applies."
+                                                                           Placeholder="90"
+                                                                           Text="{Binding EndAgeText, Mode=TwoWay}" />
                                             </Grid>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
@@ -387,11 +391,20 @@
                                                                            PeriodSuffix="%"
                                                                            Text="{Binding RateText, Mode=TwoWay}" />
                                             </Grid>
-                                            <controls:NumericInputView Header="Minimum payment"
-                                                                       HelpText="Smallest payment you must make each month."
-                                                                       Placeholder="150"
-                                                                       PeriodSuffix="/mo"
-                                                                       Text="{Binding MinimumPaymentText, Mode=TwoWay}" />
+                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <controls:NumericInputView Header="Minimum payment"
+                                                                           HelpText="Smallest payment you must make each month."
+                                                                           Placeholder="150"
+                                                                           PeriodSuffix="/mo"
+                                                                           Text="{Binding MinimumPaymentText, Mode=TwoWay}" />
+                                                <controls:NumericInputView Grid.Column="1"
+                                                                           AutomationId="ProfileDebtExtraPaymentInput"
+                                                                           Header="Usual extra payment"
+                                                                           HelpText="Additional amount you currently pay toward this debt each month."
+                                                                           Placeholder="0"
+                                                                           PeriodSuffix="/mo"
+                                                                           Text="{Binding ExtraMonthlyPaymentText, Mode=TwoWay}" />
+                                            </Grid>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
                                     </Border>

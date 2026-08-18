@@ -49,6 +49,7 @@ export default function RetirementExpenseListInput({
       type: 'healthcare',
       annualAmount: 0,
       startAge: currentAge,
+      endAge: Math.max(currentAge, 90),
     }])
     setExpandedIds(new Set([id]))
   }
@@ -132,7 +133,7 @@ export default function RetirementExpenseListInput({
                         {formatCurrency(expense.annualAmount)}/yr
                       </span>
                       <span className="block text-xs text-content-subtle">
-                        {typeLabel} · starts at age {expense.startAge}
+                        {typeLabel} · ages {expense.startAge}–{expense.endAge}
                       </span>
                     </span>
                   </button>
@@ -147,59 +148,69 @@ export default function RetirementExpenseListInput({
                 </div>
 
                 {expanded && (
-                  <div className="px-4 pb-4 pt-3 border-t border-border-subtle grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <label
-                        htmlFor={`expense-name-${expense.id}`}
-                        className="block text-sm font-medium text-content-muted mb-1.5"
-                      >
-                        Expense name
-                      </label>
-                      <input
-                        id={`expense-name-${expense.id}`}
-                        type="text"
-                        maxLength={80}
-                        value={expense.name}
-                        onChange={event => updateExpense(expense.id, 'name', event.target.value)}
-                        placeholder="e.g., Medicare premiums"
-                        className="w-full px-3 py-2.5 bg-surface-raised border border-border-strong rounded-control text-content focus:ring-2 focus-visible:ring-ring focus-visible:border-accent"
+                  <div className="px-4 pb-4 pt-3 border-t border-border-subtle space-y-4">
+                    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                      <div>
+                        <label
+                          htmlFor={`expense-name-${expense.id}`}
+                          className="block text-sm font-medium text-content-muted mb-1.5"
+                        >
+                          Expense name
+                        </label>
+                        <input
+                          id={`expense-name-${expense.id}`}
+                          type="text"
+                          maxLength={80}
+                          value={expense.name}
+                          onChange={event => updateExpense(expense.id, 'name', event.target.value)}
+                          placeholder="e.g., Medicare premiums"
+                          className="w-full px-3 py-2.5 bg-surface-raised border border-border-strong rounded-control text-content focus:ring-2 focus-visible:ring-ring focus-visible:border-accent"
+                        />
+                      </div>
+                      <div>
+                        <label
+                          htmlFor={`expense-type-${expense.id}`}
+                          className="block text-sm font-medium text-content-muted mb-1.5"
+                        >
+                          Expense type
+                        </label>
+                        <select
+                          id={`expense-type-${expense.id}`}
+                          value={expense.type}
+                          onChange={event => updateExpense(
+                            expense.id,
+                            'type',
+                            event.target.value as RetirementExpenseType,
+                          )}
+                          className="w-full px-3 py-2.5 bg-surface-raised border border-border-strong rounded-control text-content focus:ring-2 focus-visible:ring-ring focus-visible:border-accent"
+                        >
+                          {EXPENSE_TYPES.map(type => (
+                            <option key={type.value} value={type.value}>{type.label}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <CurrencyInput
+                        label="Amount"
+                        value={expense.annualAmount}
+                        onChange={value => updateExpense(expense.id, 'annualAmount', value)}
+                        tooltip="Enter today’s cost. It grows with the scenario inflation rate."
+                        periodic
                       />
                     </div>
-                    <div>
-                      <label
-                        htmlFor={`expense-type-${expense.id}`}
-                        className="block text-sm font-medium text-content-muted mb-1.5"
-                      >
-                        Expense type
-                      </label>
-                      <select
-                        id={`expense-type-${expense.id}`}
-                        value={expense.type}
-                        onChange={event => updateExpense(
-                          expense.id,
-                          'type',
-                          event.target.value as RetirementExpenseType,
-                        )}
-                        className="w-full px-3 py-2.5 bg-surface-raised border border-border-strong rounded-control text-content focus:ring-2 focus-visible:ring-ring focus-visible:border-accent"
-                      >
-                        {EXPENSE_TYPES.map(type => (
-                          <option key={type.value} value={type.value}>{type.label}</option>
-                        ))}
-                      </select>
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      <AgeInput
+                        label="Starts at age"
+                        value={expense.startAge}
+                        onChange={value => updateExpense(expense.id, 'startAge', value)}
+                        tooltip="The first age when this annual expense is included."
+                      />
+                      <AgeInput
+                        label="Ends at age"
+                        value={expense.endAge}
+                        onChange={value => updateExpense(expense.id, 'endAge', value)}
+                        tooltip="The last age when this annual expense is included."
+                      />
                     </div>
-                    <CurrencyInput
-                      label="Amount"
-                      value={expense.annualAmount}
-                      onChange={value => updateExpense(expense.id, 'annualAmount', value)}
-                      tooltip="Enter today’s cost. It grows with the scenario inflation rate."
-                      periodic
-                    />
-                    <AgeInput
-                      label="Starts at age"
-                      value={expense.startAge}
-                      onChange={value => updateExpense(expense.id, 'startAge', value)}
-                      tooltip="This annual expense is included from this age through the end of the plan."
-                    />
                   </div>
                 )}
               </div>

@@ -190,7 +190,8 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
                 Guid.NewGuid().ToString("N"),
                 "Current expenses",
                 AnnualExpenses,
-                startAge));
+                startAge,
+                90));
         }
     }
 

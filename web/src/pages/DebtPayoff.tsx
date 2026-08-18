@@ -140,7 +140,7 @@ export default function DebtPayoff() {
                 ) : (
                   <InputGroup label="Target payoff timeline" value={params.debtMonths} onChange={value => setParam('debtMonths', value)} tooltip="The maximum number of months for the payoff plan." suffix="months" min={1} max={360} />
                 )}
-                <CurrencyInput label="Extra monthly payment" value={params.debtExtra} onChange={value => setParam('debtExtra', value)} tooltip="Additional money to apply after the regular monthly budget." />
+                <CurrencyInput label="Additional what-if payment" value={params.debtExtra} onChange={value => setParam('debtExtra', value)} tooltip="Optional amount to add on top of the regular monthly debt budget." />
               </div>
               {params.debtMode === 'fixed' && params.debtBudget < totalMinPayments && totalMinPayments > 0 && <p className="text-sm text-danger">Your monthly budget must cover at least {formatCurrency(totalMinPayments)} in minimum payments.</p>}
             </CardContent>

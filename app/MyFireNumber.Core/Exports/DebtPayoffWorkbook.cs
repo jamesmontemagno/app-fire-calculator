@@ -73,15 +73,15 @@ public static class DebtPayoffWorkbook
     {
         var rows = new List<Row>
         {
-            new(CreateTextCell("A1", "Debt"), CreateTextCell("B1", "Balance"), CreateTextCell("C1", "Rate"), CreateTextCell("D1", "Minimum payment"))
+            new(CreateTextCell("A1", "Debt"), CreateTextCell("B1", "Balance"), CreateTextCell("C1", "Rate"), CreateTextCell("D1", "Minimum payment"), CreateTextCell("E1", "Usual extra payment"))
         };
         for (var index = 0; index < debts.Count; index++)
         {
             var row = index + 2;
             var debt = debts[index];
-            rows.Add(new Row(CreateTextCell($"A{row}", debt.Name), CreateNumberCell($"B{row}", debt.Balance, CurrencyStyleIndex), CreateNumberCell($"C{row}", debt.Rate, PercentageStyleIndex), CreateNumberCell($"D{row}", debt.MinimumPayment, CurrencyStyleIndex)));
+            rows.Add(new Row(CreateTextCell($"A{row}", debt.Name), CreateNumberCell($"B{row}", debt.Balance, CurrencyStyleIndex), CreateNumberCell($"C{row}", debt.Rate, PercentageStyleIndex), CreateNumberCell($"D{row}", debt.MinimumPayment, CurrencyStyleIndex), CreateNumberCell($"E{row}", debt.ExtraMonthlyPayment, CurrencyStyleIndex)));
         }
-        AddWorksheet(workbookPart, sheets, "Debt List", 3, rows, 28, 18, 14, 20);
+        AddWorksheet(workbookPart, sheets, "Debt List", 3, rows, 28, 18, 14, 20, 20);
     }
 
     private static void AddProjectionSheet(WorkbookPart workbookPart, Sheets sheets, IReadOnlyList<DebtPayoffMonth> projections)

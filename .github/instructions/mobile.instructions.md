@@ -101,6 +101,10 @@ If the Run target cannot remain attached, build with `MauiDevFlowEnabled=true`, 
 for a full-device capture is `maui apple simulator screenshot <udid> <output-path>`, but prefer
 `maui devflow ui screenshot` for app UI evidence.
 
+Hot Reload is not reliable for this repository. Do not use `runHotReload` to validate source or
+XAML changes. Stop the active debug session, rebuild, relaunch, and reconnect DevFlow before checking
+the visual tree so validation always runs against the current binaries.
+
 After every MAUI UI change, launch the app and verify it with `maui devflow ui tree`. Query actual
 runtime foreground, background, and placeholder colors with `maui devflow ui property`, especially
 for native input controls, and capture a screenshot when visual confirmation is needed. A successful

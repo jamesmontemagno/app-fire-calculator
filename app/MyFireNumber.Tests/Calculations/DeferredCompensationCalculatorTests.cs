@@ -166,6 +166,28 @@ public class DeferredCompensationCalculatorTests
     }
 
     [Fact]
+    public void AdditionalExpense_AppliesOnlyThroughItsEndAge()
+    {
+        var inputs = new DeferredCompensationInputs(
+            CurrentAge: 60,
+            SemiRetirementAge: 60,
+            PlanThroughAge: 62,
+            AnnualExpenses: 0,
+            InflationRate: 0,
+            Accounts: [],
+            IncomeSources: [],
+            AdditionalExpenses: [new RetirementExpense("travel", "Travel", 10_000, 60, 61)],
+            WithdrawOnlyAfterRetirement: true,
+            ReinvestSurplus: false);
+
+        var result = DeferredCompensationCalculator.Calculate(inputs);
+
+        Assert.Equal(10_000, result.Projections[0].AdditionalExpenses);
+        Assert.Equal(10_000, result.Projections[1].AdditionalExpenses);
+        Assert.Equal(0, result.Projections[2].AdditionalExpenses);
+    }
+
+    [Fact]
     public void RetirementYears_CountsOnlyYearsAtOrAfterRetirement()
     {
         var inputs = new DeferredCompensationInputs(

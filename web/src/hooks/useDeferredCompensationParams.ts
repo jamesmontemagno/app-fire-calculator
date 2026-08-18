@@ -273,13 +273,16 @@ const sanitizeAdditionalExpenses = (value: string | null): RetirementExpense[] =
       const type = EXPENSE_TYPES.includes(expense.type as RetirementExpenseType)
         ? expense.type as RetirementExpenseType
         : 'custom'
+      const startAge = Math.min(120, Math.max(0, Math.floor(numeric(expense.startAge, 0))))
+      const endAge = Math.min(120, Math.max(startAge, Math.floor(numeric(expense.endAge, 90))))
 
       return [{
         id: typeof expense.id === 'string' ? expense.id.slice(0, 80) : `expense-${index}`,
         name: typeof expense.name === 'string' ? expense.name.slice(0, 80) : `Expense ${index + 1}`,
         type,
         annualAmount: Math.max(0, numeric(expense.annualAmount, 0)),
-        startAge: Math.min(120, Math.max(0, Math.floor(numeric(expense.startAge, 0)))),
+        startAge,
+        endAge,
       }]
     }).slice(0, 20)
   } catch {
