@@ -62,12 +62,15 @@ public sealed class ProfileDraftResolverTests
     [Fact]
     public void Resolve_MapsProfileDebts()
     {
-        var snapshot = Snapshot(debts: [new DebtItem("card", "Card", 5_000, 0.2, 150)]);
+        var snapshot = Snapshot(debts: [new DebtItem("card", "Card", 5_000, 0.2, 150, 50)]);
+        var source = DebtPayoffDraft.Default with { MonthlyBudget = 1_000, ExtraPayment = 25 };
 
-        var result = ProfileDraftResolver.Resolve(DebtPayoffDraft.Default, snapshot, new DateOnly(2026, 1, 1));
+        var result = ProfileDraftResolver.Resolve(source, snapshot, new DateOnly(2026, 1, 1));
 
         Assert.True(result.IsValid);
         Assert.Collection(result.Draft.Debts, debt => Assert.Equal("card", debt.Id));
+        Assert.Equal(200, result.Draft.MonthlyBudget);
+        Assert.Equal(25, result.Draft.ExtraPayment);
     }
 
     [Fact]
@@ -185,5 +188,5 @@ public sealed class ProfileDraftResolverTests
         id, id, annualAmount, 55, 65, 0, true, 0);
 
     private static RetirementExpense Expense(string id, double annualAmount) => new(
-        id, id, annualAmount, 55);
+        id, id, annualAmount, 55, 90);
 }

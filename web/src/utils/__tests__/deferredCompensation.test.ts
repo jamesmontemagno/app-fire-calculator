@@ -54,6 +54,7 @@ const expense = (overrides: Partial<RetirementExpense> = {}): RetirementExpense 
   type: 'custom',
   annualAmount: 10_000,
   startAge: 0,
+  endAge: 200,
   ...overrides,
 })
 
@@ -129,16 +130,18 @@ describe('expense inflation', () => {
     })
   })
 
-  it('starts additional expenses only at their own age, then inflates from today', () => {
+  it('applies additional expenses only within their age range, inflated from today', () => {
     // The multiplier is anchored to the plan start, not to the expense start, so an expense
     // beginning at 65 enters at its year-20 inflated value rather than its entered value.
     const result = calculateDeferredCompensation(
-      plan({ additionalExpenses: [expense({ annualAmount: 10_000, startAge: 65 })] }),
+      plan({ additionalExpenses: [expense({ annualAmount: 10_000, startAge: 65, endAge: 66 })] }),
     )
     const before = result.projections.find((p) => p.age === 64)!
     const at = result.projections.find((p) => p.age === 65)!
+    const after = result.projections.find((p) => p.age === 67)!
     expect(before.additionalExpenses).toBe(0)
     expect(at.additionalExpenses).toBe(Math.round(10_000 * Math.pow(1.03, 20)))
+    expect(after.additionalExpenses).toBe(0)
   })
 
   it('totals core and additional expenses', () => {

@@ -51,9 +51,9 @@ public sealed class LocalDataArchiveRepositoryTests : IAsyncLifetime
         await new SqliteProfileIncomeRepository(database).SaveAsync(
             new RetirementIncomeSource("salary", "Salary", 120_000, 45, 65, 0.02, false, 0.25));
         await new SqliteProfileExpenseRepository(database).SaveAsync(
-            new RetirementExpense("housing", "Housing", 30_000, 45));
+            new RetirementExpense("housing", "Housing", 30_000, 45, 75));
         await new SqliteProfileDebtRepository(database).SaveAsync(
-            new DebtItem("card", "Card", 5_000, 0.2, 150));
+            new DebtItem("card", "Card", 5_000, 0.2, 150, 75));
 
         var archive = await database.ExportAsync();
         await database.ClearAsync();
@@ -63,7 +63,7 @@ public sealed class LocalDataArchiveRepositoryTests : IAsyncLifetime
         Assert.Single(await new SqliteProfileAccountRepository(database).ListAsync());
         Assert.Single(await new SqliteProfileIncomeRepository(database).ListAsync());
         Assert.Single(await new SqliteProfileExpenseRepository(database).ListAsync());
-        Assert.Single(await new SqliteProfileDebtRepository(database).ListAsync());
+        Assert.Equal(75, Assert.Single(await new SqliteProfileDebtRepository(database).ListAsync()).ExtraMonthlyPayment);
     }
 
     [Fact]

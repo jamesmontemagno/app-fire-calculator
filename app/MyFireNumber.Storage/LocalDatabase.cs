@@ -164,8 +164,16 @@ public sealed class LocalDatabase
                 string.IsNullOrWhiteSpace(item.Id) ||
                 string.IsNullOrWhiteSpace(item.Name) ||
                 item.AnnualAmount < 0 ||
-                item.StartAge is < 18 or > 100) ||
-            archive.ProfileDebts.Any(item => string.IsNullOrWhiteSpace(item.Id) || string.IsNullOrWhiteSpace(item.Name) || item.Balance < 0 || item.Rate < 0 || item.MinimumPayment < 0))
+                item.StartAge is < 18 or > 100 ||
+                item.EndAge < item.StartAge ||
+                item.EndAge > 100) ||
+            archive.ProfileDebts.Any(item =>
+                string.IsNullOrWhiteSpace(item.Id) ||
+                string.IsNullOrWhiteSpace(item.Name) ||
+                item.Balance < 0 ||
+                item.Rate < 0 ||
+                item.MinimumPayment < 0 ||
+                item.ExtraMonthlyPayment < 0))
         {
             throw new InvalidDataException("The archive contains invalid profile data.");
         }
@@ -292,10 +300,10 @@ public sealed class LocalDatabase
         item.TaxRate);
 
     private static RetirementExpense ToRecord(ProfileExpenseEntity item) =>
-        new(item.Id, item.Name, item.AnnualAmount, item.StartAge);
+        new(item.Id, item.Name, item.AnnualAmount, item.StartAge, item.EndAge);
 
     private static DebtItem ToRecord(ProfileDebtEntity item) =>
-        new(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment);
+        new(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment, item.ExtraMonthlyPayment);
 
     private static ProfileEntity ToEntity(FinancialProfile item) => new()
     {
@@ -341,7 +349,8 @@ public sealed class LocalDatabase
         Id = item.Id,
         Name = item.Name,
         AnnualAmount = item.AnnualAmount,
-        StartAge = item.StartAge
+        StartAge = item.StartAge,
+        EndAge = item.EndAge
     };
 
     private static ProfileDebtEntity ToEntity(DebtItem item) => new()
@@ -350,7 +359,8 @@ public sealed class LocalDatabase
         Name = item.Name,
         Balance = item.Balance,
         Rate = item.Rate,
-        MinimumPayment = item.MinimumPayment
+        MinimumPayment = item.MinimumPayment,
+        ExtraMonthlyPayment = item.ExtraMonthlyPayment
     };
 
     private static DateOnly? ParseDateOnly(string? value) => string.IsNullOrWhiteSpace(value)
@@ -567,6 +577,7 @@ internal sealed class ProfileExpenseEntity
     [NotNull] public string Name { get; set; } = string.Empty;
     public double AnnualAmount { get; set; }
     public int StartAge { get; set; }
+    public int EndAge { get; set; }
 }
 
 [Table("profile_debts")]
@@ -577,4 +588,5 @@ internal sealed class ProfileDebtEntity
     public double Balance { get; set; }
     public double Rate { get; set; }
     public double MinimumPayment { get; set; }
+    public double ExtraMonthlyPayment { get; set; }
 }

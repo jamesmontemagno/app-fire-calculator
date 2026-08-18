@@ -617,5 +617,6 @@ public class SharedParityFixtureTests
         Id: expense.GetProperty("id").GetString()!,
         Name: expense.GetProperty("name").GetString()!,
         AnnualAmount: expense.GetProperty("annualAmount").GetDouble(),
-        StartAge: expense.GetProperty("startAge").GetInt32());
+        StartAge: expense.GetProperty("startAge").GetInt32(),
+        EndAge: expense.GetProperty("endAge").GetInt32());
 }

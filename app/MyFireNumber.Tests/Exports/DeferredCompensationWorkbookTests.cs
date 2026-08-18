@@ -26,7 +26,7 @@ public sealed class DeferredCompensationWorkbookTests : IDisposable
             ],
             AdditionalExpenses =
             [
-                new RetirementExpense("travel", "Custom Travel", 12_000, 60)
+                new RetirementExpense("travel", "Custom Travel", 12_000, 60, 70)
             ]
         };
         var result = DeferredCompensationCalculator.Calculate(draft.ToInputs(2026));
@@ -56,7 +56,9 @@ public sealed class DeferredCompensationWorkbookTests : IDisposable
         Assert.Equal("0.04", GetCell(workbookPart, sheets[3], "H3").CellValue!.Text);
         Assert.Equal("Custom Pension", GetCell(workbookPart, sheets[4], "A2").InlineString!.Text!.Text);
         Assert.Equal("Annual amount", GetCellText(workbookPart, sheets[5], "B1"));
+        Assert.Equal("End age", GetCellText(workbookPart, sheets[5], "D1"));
         Assert.Equal("Custom Travel", GetCell(workbookPart, sheets[5], "A2").InlineString!.Text!.Text);
+        Assert.Equal("70", GetCell(workbookPart, sheets[5], "D2").CellValue!.Text);
     }
 
     public void Dispose()

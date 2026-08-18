@@ -12,7 +12,7 @@ public sealed class DebtPayoffWorkbookTests : IDisposable
     [Fact]
     public void Create_WritesDebtListAndPayoffProjection()
     {
-        var draft = DebtPayoffDraft.Default with { Debts = [new DebtItem("card", "Credit card", 1_000, 0, 100)], MonthlyBudget = 500 };
+        var draft = DebtPayoffDraft.Default with { Debts = [new DebtItem("card", "Credit card", 1_000, 0, 100, 50)], MonthlyBudget = 500 };
         var result = FinancialCalculator.CalculateSnowballPayoff(draft.Debts, draft.MonthlyBudget);
 
         DebtPayoffWorkbook.Create(workbookPath, draft, result, new DateTimeOffset(2026, 8, 9, 12, 0, 0, TimeSpan.Zero));
@@ -23,6 +23,8 @@ public sealed class DebtPayoffWorkbookTests : IDisposable
 
         Assert.Equal(["Inputs", "Results", "Debt List", "Payoff Projection"], sheets.Select(sheet => sheet.Name!.Value));
         Assert.Equal("Credit card", GetCell(workbookPart, sheets[2], "A2").InlineString!.Text!.Text);
+        Assert.Equal("Usual extra payment", GetCell(workbookPart, sheets[2], "E1").InlineString!.Text!.Text);
+        Assert.Equal("50", GetCell(workbookPart, sheets[2], "E2").CellValue!.Text);
         Assert.Equal("2", GetCell(workbookPart, sheets[1], "B5").CellValue!.Text);
         Assert.Equal("1", GetCell(workbookPart, sheets[3], "A2").CellValue!.Text);
     }

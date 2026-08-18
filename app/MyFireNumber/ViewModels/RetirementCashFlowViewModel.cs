@@ -190,6 +190,7 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
         {
             Name = "New retirement expense",
             StartAgeText = RetirementSemiAgeText,
+            EndAgeText = RetirementPlanThroughAgeText,
             IsExpanded = true
         });
     }

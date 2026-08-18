@@ -88,7 +88,7 @@
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
                         <controls:NumericInputView IsVisible="{Binding IsFixedDebtPayoff}" Header="Monthly debt budget" HelpText="Total amount available for debt payments each month, in dollars." Placeholder="1000" Text="{Binding DebtMonthlyBudgetText}" />
                         <controls:NumericInputView IsVisible="{Binding IsTargetDebtPayoff}" Header="Target months" HelpText="Months in which you aim to eliminate all debt." Placeholder="36" Text="{Binding DebtTargetMonthsText}" />
-                        <controls:NumericInputView Grid.Column="1" Header="Extra monthly payment" HelpText="Additional monthly amount paid beyond minimums, in dollars." Placeholder="0" Text="{Binding DebtExtraPaymentText}" />
+                        <controls:NumericInputView Grid.Column="1" Header="Additional what-if payment" HelpText="Optional amount to add on top of your current monthly debt budget." Placeholder="0" Text="{Binding DebtExtraPaymentText}" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>

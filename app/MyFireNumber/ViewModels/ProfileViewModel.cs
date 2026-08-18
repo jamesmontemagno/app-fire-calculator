@@ -194,9 +194,10 @@ public sealed partial class ProfileViewModel(
 
         var debtBalance = Debts.Sum(item => ParseAmount(item.BalanceText));
         var minimumPayments = Debts.Sum(item => ParseAmount(item.MinimumPaymentText));
+        var extraPayments = Debts.Sum(item => ParseAmount(item.ExtraMonthlyPaymentText));
         DebtsSummary = Debts.Count == 0
             ? "No debts yet."
-            : $"{CountLabel(Debts.Count, "debt")} | {FormatCurrency(debtBalance)} balance | {FormatCurrency(minimumPayments)}/mo minimum";
+            : $"{CountLabel(Debts.Count, "debt")} | {FormatCurrency(debtBalance)} balance | {FormatCurrency(minimumPayments + extraPayments)}/mo current payments";
     }
 
     private static string CountLabel(int count, string singular) =>
@@ -390,7 +391,7 @@ public sealed partial class ProfileViewModel(
             if (!item.TryCreateDebt(out var debt))
             {
                 item.IsExpanded = true;
-                ValidationMessage = $"Debt {item.Name}: enter a name, positive balance and minimum payment, and a rate from 0% to 100%.";
+                ValidationMessage = $"Debt {item.Name}: enter a name, positive balance and minimum payment, non-negative extra payment, and a rate from 0% to 100%.";
                 return;
             }
 
@@ -466,6 +467,7 @@ public sealed partial class ProfileViewModel(
         {
             Name = "New expense",
             StartAgeText = startAge.ToString(CultureInfo.CurrentCulture),
+            EndAgeText = Math.Max(startAge, 90).ToString(CultureInfo.CurrentCulture),
             IsExpanded = true
         });
     }

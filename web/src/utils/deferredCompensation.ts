@@ -70,6 +70,7 @@ export interface RetirementExpense {
   type: RetirementExpenseType
   annualAmount: number
   startAge: number
+  endAge: number
 }
 
 export interface RetirementCashFlowPoint {
@@ -263,7 +264,7 @@ export function calculateDeferredCompensation({
     const coreExpenses = Math.max(0, annualExpenses) * inflationMultiplier
     let additionalExpenseTotal = 0
     for (const expense of additionalExpenses) {
-      const amount = age >= expense.startAge
+      const amount = age >= expense.startAge && age <= expense.endAge
         ? Math.max(0, expense.annualAmount) * inflationMultiplier
         : 0
       expensesByItem[expense.id] = round(amount)

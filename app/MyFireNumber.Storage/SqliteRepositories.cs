@@ -300,7 +300,7 @@ public sealed class SqliteProfileExpenseRepository(LocalDatabase database) : IPr
     {
         await database.InitializeAsync(cancellationToken);
         var items = await database.Connection.Table<ProfileExpenseEntity>().OrderBy(item => item.Name).ToListAsync();
-        return items.Select(item => new RetirementExpense(item.Id, item.Name, item.AnnualAmount, item.StartAge)).ToArray();
+        return items.Select(item => new RetirementExpense(item.Id, item.Name, item.AnnualAmount, item.StartAge, item.EndAge)).ToArray();
     }
     public async Task SaveAsync(RetirementExpense item, CancellationToken cancellationToken = default)
     {
@@ -308,14 +308,16 @@ public sealed class SqliteProfileExpenseRepository(LocalDatabase database) : IPr
         ArgumentException.ThrowIfNullOrWhiteSpace(item.Name);
         ArgumentOutOfRangeException.ThrowIfNegative(item.AnnualAmount);
         ArgumentOutOfRangeException.ThrowIfLessThan(item.StartAge, 18);
-        ArgumentOutOfRangeException.ThrowIfGreaterThan(item.StartAge, 100);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(item.EndAge, 100);
+        ArgumentOutOfRangeException.ThrowIfLessThan(item.EndAge, item.StartAge);
         await database.InitializeAsync(cancellationToken);
         await database.Connection.InsertOrReplaceAsync(new ProfileExpenseEntity
         {
             Id = item.Id,
             Name = item.Name.Trim(),
             AnnualAmount = item.AnnualAmount,
-            StartAge = item.StartAge
+            StartAge = item.StartAge,
+            EndAge = item.EndAge
         });
     }
     public async Task DeleteAsync(string id, CancellationToken cancellationToken = default) { await database.InitializeAsync(cancellationToken); await database.Connection.DeleteAsync<ProfileExpenseEntity>(id); }
@@ -327,7 +329,7 @@ public sealed class SqliteProfileDebtRepository(LocalDatabase database) : IProfi
     {
         await database.InitializeAsync(cancellationToken);
         var items = await database.Connection.Table<ProfileDebtEntity>().OrderBy(item => item.Name).ToListAsync();
-        return items.Select(item => new DebtItem(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment)).ToArray();
+        return items.Select(item => new DebtItem(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment, item.ExtraMonthlyPayment)).ToArray();
     }
     public async Task SaveAsync(DebtItem item, CancellationToken cancellationToken = default)
     {
@@ -335,8 +337,17 @@ public sealed class SqliteProfileDebtRepository(LocalDatabase database) : IProfi
         ArgumentOutOfRangeException.ThrowIfNegative(item.Balance);
         ArgumentOutOfRangeException.ThrowIfNegative(item.Rate);
         ArgumentOutOfRangeException.ThrowIfNegative(item.MinimumPayment);
+        ArgumentOutOfRangeException.ThrowIfNegative(item.ExtraMonthlyPayment);
         await database.InitializeAsync(cancellationToken);
-        await database.Connection.InsertOrReplaceAsync(new ProfileDebtEntity { Id = item.Id, Name = item.Name.Trim(), Balance = item.Balance, Rate = item.Rate, MinimumPayment = item.MinimumPayment });
+        await database.Connection.InsertOrReplaceAsync(new ProfileDebtEntity
+        {
+            Id = item.Id,
+            Name = item.Name.Trim(),
+            Balance = item.Balance,
+            Rate = item.Rate,
+            MinimumPayment = item.MinimumPayment,
+            ExtraMonthlyPayment = item.ExtraMonthlyPayment
+        });
     }
     public async Task DeleteAsync(string id, CancellationToken cancellationToken = default) { await database.InitializeAsync(cancellationToken); await database.Connection.DeleteAsync<ProfileDebtEntity>(id); }
 }
