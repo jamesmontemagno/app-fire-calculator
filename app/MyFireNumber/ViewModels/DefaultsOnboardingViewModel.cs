@@ -1,7 +1,9 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using MyFireNumber.Core.Calculations;
 using MyFireNumber.Core.Profile;
 using MyFireNumber.Services;
+using MyFireNumber.Storage;
 using System.Globalization;
 
 namespace MyFireNumber.ViewModels;
@@ -13,6 +15,8 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
     private readonly ICurrencyPreferencesService currencyPreferencesService;
     private readonly ILocalDateProvider localDateProvider;
     private readonly INavigationService navigationService;
+    private readonly IProfileExpenseRepository profileExpenseRepository;
+    private readonly IProfileIncomeRepository profileIncomeRepository;
     private readonly IProfileService profileService;
 
     public DefaultsOnboardingViewModel(
@@ -20,12 +24,16 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
         ICurrencyPreferencesService currencyPreferencesService,
         ILocalDateProvider localDateProvider,
         INavigationService navigationService,
+        IProfileExpenseRepository profileExpenseRepository,
+        IProfileIncomeRepository profileIncomeRepository,
         IProfileService profileService)
     {
         this.calculatorDefaultsService = calculatorDefaultsService;
         this.currencyPreferencesService = currencyPreferencesService;
         this.localDateProvider = localDateProvider;
         this.navigationService = navigationService;
+        this.profileExpenseRepository = profileExpenseRepository;
+        this.profileIncomeRepository = profileIncomeRepository;
         this.profileService = profileService;
 
         var defaults = calculatorDefaultsService.Current;
@@ -142,6 +150,9 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
                 AnnualIncome = AnnualIncome,
                 AnnualExpenses = AnnualExpenses
             });
+
+            await CreateMissingCashFlowItemsAsync(currentAge, defaults.RetirementAge);
+            await profileService.NotifyExternalChangeAsync();
         }
         catch (Exception)
         {
@@ -151,6 +162,38 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
 
         await navigationService.GoToAsync("onboarding-timeline");
     }
+
+    private async Task CreateMissingCashFlowItemsAsync(int currentAge, double retirementAge)
+    {
+        var startAge = Math.Clamp(currentAge, 18, 100);
+        var endAge = Math.Clamp(
+            Math.Max(startAge, (int)Math.Round(retirementAge)),
+            startAge,
+            100);
+
+        if (AnnualIncome > 0 && (await profileIncomeRepository.ListAsync()).Count == 0)
+        {
+            await profileIncomeRepository.SaveAsync(new RetirementIncomeSource(
+                Guid.NewGuid().ToString("N"),
+                "Current after-tax income",
+                AnnualIncome,
+                startAge,
+                endAge,
+                0,
+                true,
+                0));
+        }
+
+        if (AnnualExpenses > 0 && (await profileExpenseRepository.ListAsync()).Count == 0)
+        {
+            await profileExpenseRepository.SaveAsync(new RetirementExpense(
+                Guid.NewGuid().ToString("N"),
+                "Current expenses",
+                AnnualExpenses,
+                startAge));
+        }
+    }
+
     [RelayCommand]
     private Task SkipAsync() => navigationService.GoToAsync("onboarding-timeline");
 
