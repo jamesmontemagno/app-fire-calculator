@@ -1,0 +1,389 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.AccountsPage"
+             x:DataType="viewModels:AccountsViewModel"
+             Title="Accounts"
+             Shell.NavBarIsVisible="False"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+             SafeAreaEdges="Container">
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceMd}">
+                    <Label Text="&#xf555;"
+                           FontFamily="FontAwesomeSolid"
+                           FontSize="28"
+                           VerticalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                           SemanticProperties.Description="Accounts" />
+                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                        <Label Text="Accounts"
+                               FontSize="30"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                               SemanticProperties.HeadingLevel="Level1" />
+                        <Label Text="Your accounts, income, expenses, and debts. Stays on this device."
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    </VerticalStackLayout>
+                </Grid>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Label Text="Overview" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Total assets" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label AutomationId="AccountsTotalAssetsLabel" Text="{Binding TotalAssetsText}" FontAttributes="Bold" FontSize="20" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="Total debts" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label AutomationId="AccountsTotalDebtsLabel" Text="{Binding TotalDebtsText}" FontAttributes="Bold" FontSize="20" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="1" Grid.ColumnSpan="2" Spacing="2">
+                                <Label Text="Net worth" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label AutomationId="AccountsNetWorthLabel" Text="{Binding NetWorthText}" FontAttributes="Bold" FontSize="24" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                                <Label Text="{Binding NetWorthChangeText}" IsVisible="{Binding HasNetWorthChange}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="2" Spacing="2">
+                                <Label Text="Annual income" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualIncomeTotalText}" FontAttributes="Bold" FontSize="16" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="2">
+                                <Label Text="Annual expenses" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualExpensesTotalText}" FontAttributes="Bold" FontSize="16" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="3" Spacing="2">
+                                <Label Text="Annual cash flow" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualCashFlowText}" FontAttributes="Bold" FontSize="16" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="3" Grid.Column="1" Spacing="2">
+                                <Label Text="Annual contributions" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualContributionsText}" FontAttributes="Bold" FontSize="16" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <Border Padding="{StaticResource CardPaddingCompact}"
+                                Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                StrokeThickness="0"
+                                StrokeShape="RoundRectangle 8">
+                            <VerticalStackLayout Spacing="4">
+                                <Label AutomationId="AccountsLastCheckInLabel" Text="{Binding LastCheckInText}" FontSize="13" FontAttributes="Bold" />
+                                <Label Text="{Binding NextCheckInText}" IsVisible="{Binding HasCompletedCheckIn}" FontSize="12"
+                                       TextColor="{StaticResource FixedWarning}" />
+                            </VerticalStackLayout>
+                        </Border>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Button AutomationId="StartCheckInButton" Text="Start monthly check-in" Command="{Binding StartCheckInCommand}"
+                                    SemanticProperties.Description="Start a guided monthly check-in for accounts and debts">
+                                <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf14a;" Color="{StaticResource FixedWhite}" Size="14" /></Button.ImageSource>
+                            </Button>
+                            <Button Grid.Column="1" AutomationId="ViewHistoryButton" Text="History &amp; trends" Command="{Binding ViewHistoryCommand}"
+                                                    SemanticProperties.Description="View account history and trend charts">
+                                <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf201;" Color="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Size="14" /></Button.ImageSource>
+                            </Button>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Label Text="&#xf0d6;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" AutomationProperties.ExcludedWithChildren="True" />
+                            <Label Grid.Column="1" Text="Income" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Button Grid.Column="2" AutomationId="AddAccountsIncomeButton" Text="Add" Command="{Binding AddIncomeCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                        </Grid>
+                        <Label Text="{Binding IncomeSummary}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Income}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView><Label Text="Add income such as salary, pension, Social Security, or rental income." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:RetirementIncomeEditorItem">
+                                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
+                                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                            <Grid ColumnDefinitions="*,Auto,44" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="1" AutomationId="{Binding Name, StringFormat='ExpandIncome{0}Button'}" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} income.'}" />
+                                                <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveIncomeCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} income.'}" />
+                                            </Grid>
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                            <VerticalStackLayout Spacing="3">
+                                                <Label Text="Income name" Style="{StaticResource FormFieldLabel}" />
+                                                <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Salary" SemanticProperties.Description="Name of this income" />
+                                            </VerticalStackLayout>
+                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <controls:NumericInputView Header="Annual amount"
+                                                                           HelpText="Annual income available during this part of retirement."
+                                                                           Placeholder="0"
+                                                                           Text="{Binding AnnualAmountText, Mode=TwoWay}" />
+                                                <controls:NumericInputView Grid.Column="1" Header="Annual growth"
+                                                                           HelpText="Expected yearly change in this income."
+                                                                           Placeholder="0"
+                                                                           PeriodSuffix="%"
+                                                                           Text="{Binding AnnualGrowthText, Mode=TwoWay}" />
+                                            </Grid>
+                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <controls:NumericInputView Header="Start age" HelpText="Age when this income starts." Placeholder="55" Text="{Binding StartAgeText, Mode=TwoWay}" />
+                                                <controls:NumericInputView Grid.Column="1" Header="End age" HelpText="Last age this income is received." Placeholder="65" Text="{Binding EndAgeText, Mode=TwoWay}" />
+                                            </Grid>
+                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <Label Text="Amount is after tax" VerticalTextAlignment="Center" />
+                                                <Switch Grid.Column="1" IsToggled="{Binding IsAfterTax, Mode=TwoWay}" SemanticProperties.Description="Income amount is after tax" />
+                                            </Grid>
+                                            <controls:NumericInputView IsVisible="{Binding RequiresTaxRate}" Header="Tax rate" HelpText="Estimated flat tax rate applied to this income." Placeholder="25" PeriodSuffix="%" Text="{Binding TaxRateText, Mode=TwoWay}" />
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Label Text="&#xf53d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" AutomationProperties.ExcludedWithChildren="True" />
+                            <Label Grid.Column="1" Text="Expenses" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Button Grid.Column="2" AutomationId="AddAccountsExpenseButton" Text="Add" Command="{Binding AddExpenseCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                        </Grid>
+                        <Label Text="{Binding ExpensesSummary}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Expenses}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView><Label Text="Add the expenses your plans should include." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:RetirementExpenseEditorItem">
+                                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
+                                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                            <Grid ColumnDefinitions="*,Auto,44" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="1" AutomationId="{Binding Name, StringFormat='ExpandExpense{0}Button'}" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} expense.'}" />
+                                                <Button Grid.Column="2" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveExpenseCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} expense.'}" />
+                                            </Grid>
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                            <VerticalStackLayout Spacing="3">
+                                                <Label Text="Expense name" Style="{StaticResource FormFieldLabel}" />
+                                                <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Housing" SemanticProperties.Description="Name of this expense" />
+                                            </VerticalStackLayout>
+                                            <controls:NumericInputView Header="Annual amount"
+                                                                       HelpText="Annual cost while this expense is active."
+                                                                       Placeholder="0"
+                                                                       Text="{Binding AnnualAmountText, Mode=TwoWay}" />
+                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <controls:NumericInputView Header="Start age"
+                                                                           HelpText="Age when this expense starts."
+                                                                           Placeholder="55"
+                                                                           Text="{Binding StartAgeText, Mode=TwoWay}" />
+                                                <controls:NumericInputView Grid.Column="1" Header="End age"
+                                                                           HelpText="Last age when this expense applies."
+                                                                           Placeholder="90"
+                                                                           Text="{Binding EndAgeText, Mode=TwoWay}" />
+                                            </Grid>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                 <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Label Text="&#xf1c0;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" AutomationProperties.ExcludedWithChildren="True" />
+                            <Label Grid.Column="1" Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Button Grid.Column="2" AutomationId="AddAccountsAccountButton" Text="Add" Command="{Binding AddAccountCommand}" SemanticProperties.Description="Add a reusable account."><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                        </Grid>
+                        <Label Text="{Binding AccountsSummary}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <Label Text="Accounts stay on this device. Linked retirement plans use these exact account details and update when Accounts changes."
+                               FontSize="11"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Accounts}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView>
+                                <Label Text="No reusable accounts yet." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            </BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:RetirementAccountEditorItem">
+                                    <Border Padding="{StaticResource CardPaddingCompact}"
+                                            Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                                            StrokeThickness="0"
+                                            StrokeShape="RoundRectangle 8">
+                                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                            <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="1" AutomationId="{Binding Name, StringFormat='ExpandAccount{0}Button'}" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} account.'}" />
+                                                <Button Grid.Column="2" AutomationId="{Binding Name, StringFormat='AccountHistory{0}Button'}" Text="&#xf201;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedAccentSurface}" TextColor="{StaticResource FixedAccentStrong}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ViewAccountDetailCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='View history for {0} account.'}" />
+                                                <Button Grid.Column="3" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveAccountCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} account.'}" />
+                                            </Grid>
+                                            <Label Text="{Binding FreshnessText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                            <Label Text="Overdue for a monthly update" IsVisible="{Binding IsOverdue}" FontSize="11" TextColor="{StaticResource FixedWarning}" />
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                                <VerticalStackLayout Spacing="3">
+                                                    <Label Text="Account name" Style="{StaticResource FormFieldLabel}" />
+                                                    <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="401(k)" SemanticProperties.Description="Account name" />
+                                                </VerticalStackLayout>
+                                                <VerticalStackLayout Spacing="3">
+                                                    <Label Text="Account type" Style="{StaticResource FormFieldLabel}" />
+                                                    <Picker Title="Account type" ItemsSource="{Binding AccountTypes}" SelectedItem="{Binding Type, Mode=TwoWay}" Style="{StaticResource FormPicker}" SemanticProperties.Description="Account type" />
+                                                </VerticalStackLayout>
+                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                    <controls:NumericInputView Header="Balance"
+                                                                               HelpText="What this account is worth today."
+                                                                               Placeholder="0"
+                                                                               Text="{Binding BalanceText, Mode=TwoWay}" />
+                                                    <controls:NumericInputView Grid.Column="1"
+                                                                               Header="Contribution"
+                                                                               HelpText="How much you add to this account each year."
+                                                                               Placeholder="0"
+                                                                               PeriodSuffix="/yr"
+                                                                               Text="{Binding AnnualContributionText, Mode=TwoWay}" />
+                                                </Grid>
+                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                    <controls:NumericInputView Header="Expected return"
+                                                                               HelpText="Expected average annual return for this account."
+                                                                               Placeholder="5"
+                                                                               PeriodSuffix="%"
+                                                                               Text="{Binding AnnualReturnText, Mode=TwoWay}" />
+                                                    <controls:NumericInputView Grid.Column="1"
+                                                                               Header="Available age"
+                                                                               HelpText="Age when you can withdraw from this account without penalty."
+                                                                               Placeholder="59"
+                                                                               Text="{Binding AvailableAgeText, Mode=TwoWay}" />
+                                                </Grid>
+                                                <controls:NumericInputView IsVisible="{Binding UsesWithdrawalRate}"
+                                                                           Header="Withdrawal rate"
+                                                                           HelpText="Share of the remaining balance withdrawn each year."
+                                                                           Placeholder="4"
+                                                                           PeriodSuffix="%"
+                                                                           Text="{Binding WithdrawalRateText, Mode=TwoWay}" />
+                                                <controls:NumericInputView IsVisible="{Binding UsesPayoutSchedule}"
+                                                                           Header="Payout years"
+                                                                           HelpText="Number of years the balance is paid out over."
+                                                                           Placeholder="5"
+                                                                           Text="{Binding PayoutYearsText, Mode=TwoWay}" />
+                                                <VerticalStackLayout Spacing="3">
+                                                    <controls:NumericInputView Header="Withdrawal tax rate"
+                                                                               HelpText="Flat estimated tax rate applied to withdrawals from this account."
+                                                                               Placeholder="0"
+                                                                               PeriodSuffix="%"
+                                                                               Text="{Binding WithdrawalTaxRateText, Mode=TwoWay}" />
+                                                    <Label Text="{Binding WithdrawalTaxHelpText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                                </VerticalStackLayout>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Label Text="&#xf09d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" AutomationProperties.ExcludedWithChildren="True" />
+                            <Label Grid.Column="1" Text="Debts" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Button Grid.Column="2" AutomationId="AddAccountsDebtButton" Text="Add" Command="{Binding AddDebtCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                        </Grid>
+                        <Label Text="{Binding DebtsSummary}"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        <VerticalStackLayout BindableLayout.ItemsSource="{Binding Debts}" Spacing="{StaticResource SpaceSm}">
+                            <BindableLayout.EmptyView><Label Text="No debts saved." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="viewModels:DebtEditorItem">
+                                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
+                                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                            <Grid ColumnDefinitions="*,Auto,Auto,44" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
+                                                <Button Grid.Column="1" AutomationId="{Binding Name, StringFormat='ExpandDebt{0}Button'}" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} debt.'}" />
+                                                <Button Grid.Column="2" AutomationId="{Binding Name, StringFormat='DebtHistory{0}Button'}" Text="&#xf201;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedAccentSurface}" TextColor="{StaticResource FixedAccentStrong}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ViewDebtDetailCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='View history for {0} debt.'}" />
+                                                <Button Grid.Column="3" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} debt.'}" />
+                                            </Grid>
+                                            <Label Text="{Binding FreshnessText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                            <Label Text="Overdue for a monthly update" IsVisible="{Binding IsOverdue}" FontSize="11" TextColor="{StaticResource FixedWarning}" />
+                                            <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
+                                            <VerticalStackLayout Spacing="3">
+                                                <Label Text="Debt name" Style="{StaticResource FormFieldLabel}" />
+                                                <Entry Text="{Binding Name, Mode=TwoWay}" Style="{StaticResource FormEntry}" Placeholder="Credit card" SemanticProperties.Description="Name of this debt" />
+                                            </VerticalStackLayout>
+                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <controls:NumericInputView Header="Balance"
+                                                                           HelpText="Amount still owed on this debt."
+                                                                           Placeholder="5000"
+                                                                           Text="{Binding BalanceText, Mode=TwoWay}" />
+                                                <controls:NumericInputView Grid.Column="1"
+                                                                           Header="Interest rate"
+                                                                           HelpText="Annual interest rate charged on this debt."
+                                                                           Placeholder="19.99"
+                                                                           PeriodSuffix="%"
+                                                                           Text="{Binding RateText, Mode=TwoWay}" />
+                                            </Grid>
+                                            <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                                                <controls:NumericInputView Header="Minimum payment"
+                                                                           HelpText="Smallest payment you must make each month."
+                                                                           Placeholder="150"
+                                                                           PeriodSuffix="/mo"
+                                                                           Text="{Binding MinimumPaymentText, Mode=TwoWay}" />
+                                                <controls:NumericInputView Grid.Column="1"
+                                                                           AutomationId="AccountsDebtExtraPaymentInput"
+                                                                           Header="Usual extra payment"
+                                                                           HelpText="Additional amount you currently pay toward this debt each month."
+                                                                           Placeholder="0"
+                                                                           PeriodSuffix="/mo"
+                                                                           Text="{Binding ExtraMonthlyPaymentText, Mode=TwoWay}" />
+                                            </Grid>
+                                            </VerticalStackLayout>
+                                        </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                    </VerticalStackLayout>
+                </Border>
+
+                <controls:EducationalDisclaimerView />
+
+            </VerticalStackLayout>
+        </ScrollView>
+        <Border Grid.Row="1"
+                Padding="16,10"
+                Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceMd}">
+                <VerticalStackLayout Spacing="2" VerticalOptions="Center">
+                    <Label Text="{Binding ValidationMessage}" IsVisible="{Binding HasValidationMessage}" TextColor="{StaticResource FixedDanger}" />
+                    <Label Text="{Binding StatusMessage}" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" AutomationId="SaveAccountsButton" Text="Save" Command="{Binding SaveCommand}">
+                    <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="{StaticResource FixedWhite}" Size="14" /></Button.ImageSource>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>

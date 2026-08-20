@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.AccountItemDetailPage"
+             x:DataType="viewModels:AccountItemDetailViewModel"
+             Title="{Binding ItemName}"
+             Shell.NavBarIsVisible="True"
+             Shell.TabBarIsVisible="False"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+             SafeAreaEdges="Container">
+    <ScrollView>
+        <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
+            <VerticalStackLayout Spacing="2">
+                <Label Text="{Binding ItemName}"
+                       FontSize="26"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                       SemanticProperties.HeadingLevel="Level1" />
+                <Label Text="{Binding ItemTypeLabel}"
+                       FontSize="13"
+                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+            </VerticalStackLayout>
+
+            <!-- Current value -->
+            <Border Padding="{StaticResource CardPadding}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                    StrokeShape="RoundRectangle 12">
+                <VerticalStackLayout Spacing="{StaticResource SpaceXs}">
+                    <Label Text="Current balance" Style="{StaticResource CalculatorSectionHeading}" />
+                    <Label Text="{Binding CurrentBalanceText}"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                    <Label Text="{Binding FreshnessText}"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Label Text="Overdue for a monthly update"
+                           IsVisible="{Binding IsOverdue}"
+                           FontSize="12"
+                           TextColor="{StaticResource FixedWarning}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Time-range selector -->
+            <Border Padding="{StaticResource CardPaddingCompact}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12">
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="{StaticResource SpaceXs}">
+                    <Button AutomationId="ItemDetailRangeThreeMonthsButton"
+                            Text="3 mo"
+                            Padding="6,10"
+                            Command="{Binding SetRangeCommand}"
+                            CommandParameter="{x:Static viewModels:HistoryRange.ThreeMonths}"
+                            Background="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding SelectedRange}" Value="ThreeMonths">
+                                <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button AutomationId="ItemDetailRangeSixMonthsButton"
+                            Grid.Column="1"
+                            Text="6 mo"
+                            Padding="6,10"
+                            Command="{Binding SetRangeCommand}"
+                            CommandParameter="{x:Static viewModels:HistoryRange.SixMonths}"
+                            Background="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding SelectedRange}" Value="SixMonths">
+                                <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button AutomationId="ItemDetailRangeOneYearButton"
+                            Grid.Column="2"
+                            Text="1 yr"
+                            Padding="6,10"
+                            Command="{Binding SetRangeCommand}"
+                            CommandParameter="{x:Static viewModels:HistoryRange.OneYear}"
+                            Background="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding SelectedRange}" Value="OneYear">
+                                <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button AutomationId="ItemDetailRangeAllButton"
+                            Grid.Column="3"
+                            Text="All"
+                            Padding="6,10"
+                            Command="{Binding SetRangeCommand}"
+                            CommandParameter="{x:Static viewModels:HistoryRange.All}"
+                            Background="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding SelectedRange}" Value="All">
+                                <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- No history yet in the selected range -->
+            <Border Padding="{StaticResource CardPadding}"
+                    IsVisible="{Binding HasNoHistory}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                    StrokeShape="RoundRectangle 12">
+                <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                    <Label Text="No history yet" Style="{StaticResource CalculatorSectionHeading}" />
+                    <Label Text="Complete a monthly check-in that includes this item to start building its history."
+                           Style="{StaticResource CalculatorSupportingText}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Padding="{StaticResource CardPadding}"
+                    IsVisible="{Binding HasHistory}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                    StrokeShape="RoundRectangle 12">
+                <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                    <Label Text="Balance history" Style="{StaticResource CalculatorSectionHeading}" />
+                    <lvc:CartesianChart Series="{Binding Series}"
+                                        XAxes="{Binding XAxes}"
+                                        AnimationsSpeed="{Binding ChartAnimationsSpeed}"
+                                        HeightRequest="240"
+                                        IsVisible="{Binding HasTrendData}"
+                                        SemanticProperties.Description="{Binding SummaryText}" />
+                    <Label Text="{Binding SummaryText}" Style="{StaticResource CalculatorSupportingText}" />
+                    <Label Text="{Binding RangeDescription}"
+                           IsVisible="{Binding HasTrendData}"
+                           Style="{StaticResource CalculatorSupportingText}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <controls:EducationalDisclaimerView />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

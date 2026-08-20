@@ -3,6 +3,7 @@ namespace MyFireNumber.Services;
 public enum LaunchDestination
 {
     Home,
+    Accounts,
     Calculators,
     Plans
 }

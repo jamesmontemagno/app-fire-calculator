@@ -368,6 +368,50 @@ public sealed class SqliteProfileFinancialSnapshotRepository(
         DateTime.UtcNow.Ticks);
 }
 
+public sealed class SqliteFinancialCheckInRepository(LocalDatabase database) : IFinancialCheckInRepository
+{
+    public async Task<IReadOnlyList<FinancialCheckIn>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        await database.InitializeAsync(cancellationToken);
+        var entities = await database.Connection.Table<FinancialCheckInEntity>()
+            .OrderBy(item => item.CompletedAtUtc)
+            .ToListAsync();
+        return entities.Select(LocalDatabase.ToFinancialCheckIn).ToArray();
+    }
+
+    public async Task<FinancialCheckIn?> GetLatestAsync(CancellationToken cancellationToken = default)
+    {
+        await database.InitializeAsync(cancellationToken);
+        var entity = await database.Connection.Table<FinancialCheckInEntity>()
+            .OrderByDescending(item => item.CompletedAtUtc)
+            .FirstOrDefaultAsync();
+        return entity is null ? null : LocalDatabase.ToFinancialCheckIn(entity);
+    }
+
+    public async Task SaveAsync(FinancialCheckIn checkIn, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(checkIn.Id);
+        ArgumentOutOfRangeException.ThrowIfNegative(checkIn.AnnualIncome);
+        ArgumentOutOfRangeException.ThrowIfNegative(checkIn.AnnualExpenses);
+        foreach (var account in checkIn.Accounts)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(account.AccountId);
+            ArgumentException.ThrowIfNullOrWhiteSpace(account.Name);
+            ArgumentOutOfRangeException.ThrowIfNegative(account.Balance);
+        }
+
+        foreach (var debt in checkIn.Debts)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(debt.DebtId);
+            ArgumentException.ThrowIfNullOrWhiteSpace(debt.Name);
+            ArgumentOutOfRangeException.ThrowIfNegative(debt.Balance);
+        }
+
+        await database.InitializeAsync(cancellationToken);
+        await database.Connection.InsertOrReplaceAsync(LocalDatabase.ToFinancialCheckInEntity(checkIn));
+    }
+}
+
 public sealed class SqliteRecentActivityRepository(LocalDatabase database) : IRecentActivityRepository
 {
     private const int MaximumEntriesPerKind = 20;

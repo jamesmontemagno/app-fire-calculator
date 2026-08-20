@@ -92,4 +92,51 @@ public sealed class LocalDataArchiveRepositoryTests : IAsyncLifetime
 
         await Assert.ThrowsAsync<InvalidDataException>(() => database.ImportAsync(archive));
     }
+
+    [Fact]
+    public async Task ExportAndImport_RoundTripsFinancialCheckIns()
+    {
+        var database = new LocalDatabase(databasePath);
+        var checkIn = new FinancialCheckIn(
+            "check-in-1",
+            new DateTime(2025, 5, 1, 0, 0, 0, DateTimeKind.Utc),
+            [new AccountBalanceEntry("401k", "401(k)", RetirementAccountType.Traditional, 100_000)],
+            [new DebtBalanceEntry("card", "Card", 2_000)],
+            90_000,
+            60_000);
+        await new SqliteFinancialCheckInRepository(database).SaveAsync(checkIn);
+
+        var archive = await database.ExportAsync();
+        await database.ClearAsync();
+        await database.ImportAsync(archive);
+
+        var restored = Assert.Single(await new SqliteFinancialCheckInRepository(database).ListAsync());
+        Assert.Equal(checkIn.Id, restored.Id);
+        Assert.Equal(checkIn.CompletedAtUtc, restored.CompletedAtUtc);
+        Assert.Equal(checkIn.AnnualIncome, restored.AnnualIncome);
+        Assert.Equal(checkIn.AnnualExpenses, restored.AnnualExpenses);
+        Assert.Equal(checkIn.Accounts, restored.Accounts);
+        Assert.Equal(checkIn.Debts, restored.Debts);
+    }
+
+    [Fact]
+    public async Task ImportAsync_RejectsInvalidFinancialCheckInData()
+    {
+        var database = new LocalDatabase(databasePath);
+        var archive = (await database.ExportAsync()) with
+        {
+            FinancialCheckIns =
+            [
+                new FinancialCheckIn(
+                    "bad-check-in",
+                    DateTime.UtcNow,
+                    [new AccountBalanceEntry("acct", "Account", RetirementAccountType.Roth, -1)],
+                    [],
+                    0,
+                    0)
+            ]
+        };
+
+        await Assert.ThrowsAsync<InvalidDataException>(() => database.ImportAsync(archive));
+    }
 }

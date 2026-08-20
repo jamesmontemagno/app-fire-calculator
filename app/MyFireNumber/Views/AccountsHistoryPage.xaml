@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.AccountsHistoryPage"
+             x:DataType="viewModels:AccountsHistoryViewModel"
+             Title="History &amp; trends"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+             SafeAreaEdges="Container">
+    <ScrollView>
+        <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
+            <VerticalStackLayout Spacing="2">
+                <Label Text="History &amp; trends"
+                       FontSize="26"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                       SemanticProperties.HeadingLevel="Level1" />
+                <Label Text="Built from your monthly check-ins. All history stays on this device."
+                       FontSize="13"
+                       TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+            </VerticalStackLayout>
+
+            <!-- Time-range selector -->
+            <Border Padding="{StaticResource CardPaddingCompact}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 12">
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="{StaticResource SpaceXs}">
+                    <Button AutomationId="HistoryRangeThreeMonthsButton"
+                            Text="3 mo"
+                            Padding="6,10"
+                            Command="{Binding SetRangeCommand}"
+                            CommandParameter="{x:Static viewModels:HistoryRange.ThreeMonths}"
+                            Background="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding SelectedRange}" Value="ThreeMonths">
+                                <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button AutomationId="HistoryRangeSixMonthsButton"
+                            Grid.Column="1"
+                            Text="6 mo"
+                            Padding="6,10"
+                            Command="{Binding SetRangeCommand}"
+                            CommandParameter="{x:Static viewModels:HistoryRange.SixMonths}"
+                            Background="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding SelectedRange}" Value="SixMonths">
+                                <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button AutomationId="HistoryRangeOneYearButton"
+                            Grid.Column="2"
+                            Text="1 yr"
+                            Padding="6,10"
+                            Command="{Binding SetRangeCommand}"
+                            CommandParameter="{x:Static viewModels:HistoryRange.OneYear}"
+                            Background="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding SelectedRange}" Value="OneYear">
+                                <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                    <Button AutomationId="HistoryRangeAllButton"
+                            Grid.Column="3"
+                            Text="All"
+                            Padding="6,10"
+                            Command="{Binding SetRangeCommand}"
+                            CommandParameter="{x:Static viewModels:HistoryRange.All}"
+                            Background="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding SelectedRange}" Value="All">
+                                <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- No check-ins at all: single empty state, no charts -->
+            <Border Padding="{StaticResource CardPadding}"
+                    IsVisible="{Binding HasNoHistory}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                    StrokeShape="RoundRectangle 12">
+                <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                    <Label Text="No history yet" Style="{StaticResource CalculatorSectionHeading}" />
+                    <Label Text="Complete your first monthly check-in on the Accounts tab to start building trend charts."
+                           Style="{StaticResource CalculatorSupportingText}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <VerticalStackLayout Spacing="{StaticResource SpaceLg}" IsVisible="{Binding HasHistory}">
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                        <Label Text="Net worth trend" Style="{StaticResource CalculatorSectionHeading}" />
+                        <lvc:CartesianChart Series="{Binding NetWorthSeries}"
+                                            XAxes="{Binding NetWorthXAxes}"
+                                            AnimationsSpeed="{Binding ChartAnimationsSpeed}"
+                                            HeightRequest="220"
+                                            IsVisible="{Binding HasTrendData}"
+                                            SemanticProperties.Description="{Binding NetWorthDescription}" />
+                        <Label Text="{Binding NetWorthDescription}" Style="{StaticResource CalculatorSupportingText}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                        <Label Text="Assets vs. debts" Style="{StaticResource CalculatorSectionHeading}" />
+                        <lvc:CartesianChart Series="{Binding AssetsVsDebtsSeries}"
+                                            XAxes="{Binding AssetsVsDebtsXAxes}"
+                                            AnimationsSpeed="{Binding ChartAnimationsSpeed}"
+                                            HeightRequest="220"
+                                            IsVisible="{Binding HasTrendData}"
+                                            SemanticProperties.Description="{Binding AssetsVsDebtsDescription}" />
+                        <Label Text="{Binding AssetsVsDebtsDescription}" Style="{StaticResource CalculatorSupportingText}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                        <Label Text="Account trends" Style="{StaticResource CalculatorSectionHeading}" />
+                        <lvc:CartesianChart Series="{Binding AccountTrendsSeries}"
+                                            XAxes="{Binding AccountTrendsXAxes}"
+                                            AnimationsSpeed="{Binding ChartAnimationsSpeed}"
+                                            HeightRequest="240"
+                                            IsVisible="{Binding HasAccountTrendData}"
+                                            SemanticProperties.Description="{Binding AccountTrendsDescription}" />
+                        <Label Text="{Binding AccountTrendsDescription}" Style="{StaticResource CalculatorSupportingText}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                        <Label Text="Current allocation" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Label Text="Based on today's account balances, not history."
+                               Style="{StaticResource CalculatorSupportingText}" />
+                        <lvc:PieChart Series="{Binding AllocationSeries}"
+                                      AnimationsSpeed="{Binding ChartAnimationsSpeed}"
+                                      HeightRequest="240"
+                                      IsVisible="{Binding HasAllocationData}"
+                                      SemanticProperties.Description="{Binding AllocationDescription}" />
+                        <Label Text="{Binding AllocationDescription}" Style="{StaticResource CalculatorSupportingText}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                        <Label Text="Income vs. expenses" Style="{StaticResource CalculatorSectionHeading}" />
+                        <lvc:CartesianChart Series="{Binding IncomeVsExpensesSeries}"
+                                            XAxes="{Binding IncomeVsExpensesXAxes}"
+                                            AnimationsSpeed="{Binding ChartAnimationsSpeed}"
+                                            HeightRequest="220"
+                                            IsVisible="{Binding HasTrendData}"
+                                            SemanticProperties.Description="{Binding IncomeVsExpensesDescription}" />
+                        <Label Text="{Binding IncomeVsExpensesDescription}" Style="{StaticResource CalculatorSupportingText}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Padding="{StaticResource CardPadding}"
+                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                        <Label Text="Cash flow" Style="{StaticResource CalculatorSectionHeading}" />
+                        <lvc:CartesianChart Series="{Binding CashFlowSeries}"
+                                            XAxes="{Binding CashFlowXAxes}"
+                                            AnimationsSpeed="{Binding ChartAnimationsSpeed}"
+                                            HeightRequest="220"
+                                            IsVisible="{Binding HasTrendData}"
+                                            SemanticProperties.Description="{Binding CashFlowDescription}" />
+                        <Label Text="{Binding CashFlowDescription}" Style="{StaticResource CalculatorSupportingText}" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <controls:EducationalDisclaimerView />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

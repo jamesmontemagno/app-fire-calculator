@@ -33,6 +33,13 @@ public sealed partial class DebtEditorItem : ObservableObject
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
     private bool isExpanded;
 
+    /// <summary>Set by the Accounts overview after loading check-in history; not persisted.</summary>
+    [ObservableProperty]
+    private string freshnessText = "Never confirmed";
+
+    [ObservableProperty]
+    private bool isOverdue;
+
     public bool IsEditable => !IsReadOnly;
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
 

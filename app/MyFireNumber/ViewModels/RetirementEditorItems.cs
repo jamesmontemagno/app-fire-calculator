@@ -50,6 +50,13 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
     [NotifyPropertyChangedFor(nameof(IsEditable))]
     private bool isReadOnly;
 
+    /// <summary>Set by the Accounts overview after loading check-in history; not persisted.</summary>
+    [ObservableProperty]
+    private string freshnessText = "Never confirmed";
+
+    [ObservableProperty]
+    private bool isOverdue;
+
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
     public bool IsEditable => !IsReadOnly;
     public bool UsesPayoutSchedule => Type == RetirementAccountType.Deferred;

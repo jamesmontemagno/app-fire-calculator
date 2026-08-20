@@ -144,7 +144,7 @@
                                 Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
                                 StrokeThickness="0"
                                 StrokeShape="RoundRectangle 12">
-                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="{StaticResource SpaceXs}">
+                            <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="{StaticResource SpaceXs}">
                                 <Button AutomationId="LaunchHomeButton"
                                         Text="Home"
                                         Padding="6,10"
@@ -159,8 +159,23 @@
                                         </DataTrigger>
                                     </Button.Triggers>
                                 </Button>
-                                <Button AutomationId="LaunchCalculatorsButton"
+                                <Button AutomationId="LaunchAccountsButton"
                                         Grid.Column="1"
+                                        Text="Accounts"
+                                        Padding="6,10"
+                                        Command="{Binding SetLaunchDestinationCommand}"
+                                        CommandParameter="{x:Static services:LaunchDestination.Accounts}"
+                                        Background="Transparent"
+                                        TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}">
+                                    <Button.Triggers>
+                                        <DataTrigger TargetType="Button" Binding="{Binding SelectedLaunchDestination}" Value="Accounts">
+                                            <Setter Property="Background" Value="{StaticResource FixedAccent}" />
+                                            <Setter Property="TextColor" Value="{StaticResource FixedWhite}" />
+                                        </DataTrigger>
+                                    </Button.Triggers>
+                                </Button>
+                                <Button AutomationId="LaunchCalculatorsButton"
+                                        Grid.Column="2"
                                         Text="Calculators"
                                         Padding="6,10"
                                         Command="{Binding SetLaunchDestinationCommand}"
@@ -175,7 +190,7 @@
                                     </Button.Triggers>
                                 </Button>
                                 <Button AutomationId="LaunchPlansButton"
-                                        Grid.Column="2"
+                                        Grid.Column="3"
                                         Text="Plans"
                                         Padding="6,10"
                                         Command="{Binding SetLaunchDestinationCommand}"

@@ -44,3 +44,39 @@ public sealed record ProfileResolution<TDraft>(
 {
     public bool IsValid => Errors.Count == 0;
 }
+
+/// <summary>
+/// A single account's balance as captured by a monthly check-in. The name and type are copied at
+/// check-in time (not looked up live) so history keeps reading correctly even after the source
+/// account is renamed, re-typed, or deleted.
+/// </summary>
+public sealed record AccountBalanceEntry(
+    string AccountId,
+    string Name,
+    RetirementAccountType Type,
+    double Balance);
+
+/// <summary>A single debt's balance as captured by a monthly check-in. See <see cref="AccountBalanceEntry"/>.</summary>
+public sealed record DebtBalanceEntry(
+    string DebtId,
+    string Name,
+    double Balance);
+
+/// <summary>
+/// A timestamped, entirely local snapshot produced by the guided monthly check-in. Every field is
+/// copied at the moment the check-in is saved, so the snapshot never changes even as the live
+/// Accounts data it was based on is edited or deleted later.
+/// </summary>
+public sealed record FinancialCheckIn(
+    string Id,
+    DateTime CompletedAtUtc,
+    IReadOnlyList<AccountBalanceEntry> Accounts,
+    IReadOnlyList<DebtBalanceEntry> Debts,
+    double AnnualIncome,
+    double AnnualExpenses)
+{
+    public double TotalAssets => Accounts.Sum(account => account.Balance);
+    public double TotalDebts => Debts.Sum(debt => debt.Balance);
+    public double NetWorth => TotalAssets - TotalDebts;
+    public double AnnualCashFlow => AnnualIncome - AnnualExpenses;
+}

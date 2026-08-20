@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+             xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+             x:Class="MyFireNumber.Views.AccountsCheckInPage"
+             x:DataType="viewModels:AccountsCheckInViewModel"
+             Title="Monthly check-in"
+             Shell.NavBarIsVisible="True"
+             Shell.TabBarIsVisible="False"
+             Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+             SafeAreaEdges="All">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Cancel"
+                     Command="{Binding CancelCommand}"
+                     SemanticProperties.Description="Cancel the monthly check-in without saving changes." />
+    </ContentPage.ToolbarItems>
+    <Grid RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{Binding StepTitle}"
+                           FontSize="26"
+                           FontAttributes="Bold"
+                           LineHeight="1.1"
+                           TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
+                           SemanticProperties.HeadingLevel="Level1" />
+                    <ProgressBar Progress="{Binding ProgressFraction}"
+                                 SemanticProperties.Description="{Binding ProgressText}" />
+                    <Label Text="{Binding ProgressText}"
+                           FontSize="12"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                </VerticalStackLayout>
+
+                <Label Text="{Binding ValidationMessage}" IsVisible="{Binding HasValidationMessage}" TextColor="{StaticResource FixedDanger}" />
+
+                <!-- Step 1: accounts -->
+                <VerticalStackLayout IsVisible="{Binding IsAccountsStep}" Spacing="{StaticResource SpaceMd}">
+                    <Label Text="Update each account's balance to today's value. Everything else about the account stays the same."
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Accounts}" Spacing="{StaticResource SpaceSm}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:RetirementAccountEditorItem">
+                                <Border Padding="{StaticResource CardPadding}"
+                                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                        StrokeShape="RoundRectangle 12">
+                                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                            <Label Grid.Column="1" Text="{Binding Type}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                        </Grid>
+                                        <Label Text="{Binding FreshnessText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                        <controls:NumericInputView Header="Current balance"
+                                                                   Placeholder="0"
+                                                                   Text="{Binding BalanceText, Mode=TwoWay}" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Step 2: debts -->
+                <VerticalStackLayout IsVisible="{Binding IsDebtsStep}" Spacing="{StaticResource SpaceMd}">
+                    <Label Text="Update each debt's remaining balance."
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Debts}" Spacing="{StaticResource SpaceSm}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:DebtEditorItem">
+                                <Border Padding="{StaticResource CardPadding}"
+                                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                        StrokeShape="RoundRectangle 12">
+                                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                        <Label Text="{Binding FreshnessText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                        <controls:NumericInputView Header="Current balance"
+                                                                   Placeholder="0"
+                                                                   Text="{Binding BalanceText, Mode=TwoWay}" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Step 3: income and expenses -->
+                <VerticalStackLayout IsVisible="{Binding IsIncomeAndExpensesStep}" Spacing="{StaticResource SpaceMd}">
+                    <Label Text="Review your income and expenses. Adjust any amount that has changed."
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Label Text="Income" Style="{StaticResource CalculatorSectionHeading}" IsVisible="{Binding HasIncome}" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Income}" Spacing="{StaticResource SpaceSm}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:RetirementIncomeEditorItem">
+                                <Border Padding="{StaticResource CardPadding}"
+                                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                        StrokeShape="RoundRectangle 12">
+                                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                        <controls:NumericInputView Header="Annual amount"
+                                                                   Placeholder="0"
+                                                                   Text="{Binding AnnualAmountText, Mode=TwoWay}" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                    <Label Text="Expenses" Style="{StaticResource CalculatorSectionHeading}" IsVisible="{Binding HasExpenses}" />
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Expenses}" Spacing="{StaticResource SpaceSm}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="viewModels:RetirementExpenseEditorItem">
+                                <Border Padding="{StaticResource CardPadding}"
+                                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                                        StrokeShape="RoundRectangle 12">
+                                    <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                                        <Label Text="{Binding Name}" FontAttributes="Bold" />
+                                        <controls:NumericInputView Header="Annual amount"
+                                                                   Placeholder="0"
+                                                                   Text="{Binding AnnualAmountText, Mode=TwoWay}" />
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- Step 4: confirm -->
+                <VerticalStackLayout IsVisible="{Binding IsConfirmStep}" Spacing="{StaticResource SpaceMd}">
+                    <Label Text="Review your updated totals, then save to complete this month's check-in."
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                    <Border Padding="{StaticResource CardPadding}"
+                            Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                            Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                            StrokeShape="RoundRectangle 12">
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Total assets" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding TotalAssetsText}" FontAttributes="Bold" FontSize="18" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="Total debts" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding TotalDebtsText}" FontAttributes="Bold" FontSize="18" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="1" Grid.ColumnSpan="2" Spacing="2">
+                                <Label Text="Net worth" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding NetWorthText}" FontAttributes="Bold" FontSize="22" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="2" Spacing="2">
+                                <Label Text="Annual income" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualIncomeText}" FontAttributes="Bold" FontSize="15" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Row="2" Grid.Column="1" Spacing="2">
+                                <Label Text="Annual cash flow" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualCashFlowText}" FontAttributes="Bold" FontSize="15" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                    <controls:EducationalDisclaimerView />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+        </ScrollView>
+        <Border Grid.Row="1"
+                Padding="16,10"
+                Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceMd}">
+                <Button AutomationId="CheckInBackButton" Text="Back" Command="{Binding BackCommand}" IsVisible="{Binding CanGoBack}" Background="Transparent" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                <Button Grid.Column="1" AutomationId="CheckInNextButton" Text="{Binding NextButtonText}"
+                        Command="{Binding NextCommand}"
+                        IsVisible="{Binding IsNotConfirmStep}" />
+                <Button Grid.Column="1" AutomationId="CheckInCompleteButton" Text="{Binding NextButtonText}"
+                        Command="{Binding CompleteCommand}"
+                        IsVisible="{Binding IsConfirmStep}"
+                        IsEnabled="{Binding IsNotSaving}">
+                    <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf00c;" Color="{StaticResource FixedWhite}" Size="14" /></Button.ImageSource>
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</ContentPage>
