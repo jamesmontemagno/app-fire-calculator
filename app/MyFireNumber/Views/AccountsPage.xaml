@@ -351,7 +351,7 @@
                                                                            PeriodSuffix="/mo"
                                                                            Text="{Binding MinimumPaymentText, Mode=TwoWay}" />
                                                 <controls:NumericInputView Grid.Column="1"
-                                                                           AutomationId="AccountsDebtExtraPaymentInput"
+                                                                           AutomationId="{Binding Id, StringFormat='DebtExtraPayment{0}Input'}"
                                                                            Header="Usual extra payment"
                                                                            HelpText="Additional amount you currently pay toward this debt each month."
                                                                            Placeholder="0"
