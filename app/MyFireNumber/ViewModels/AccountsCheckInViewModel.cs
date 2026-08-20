@@ -176,7 +176,7 @@ public sealed partial class AccountsCheckInViewModel(
     }
 
     [RelayCommand]
-    private Task CancelAsync() => navigationService.GoToAsync("..");
+    private Task CancelAsync() => IsSaving ? Task.CompletedTask : navigationService.GoToAsync("..");
 
     [RelayCommand(CanExecute = nameof(CanComplete))]
     private async Task CompleteAsync()

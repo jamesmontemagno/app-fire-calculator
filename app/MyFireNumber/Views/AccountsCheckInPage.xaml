@@ -13,6 +13,7 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Cancel"
                      Command="{Binding CancelCommand}"
+                     IsEnabled="{Binding IsNotSaving}"
                      SemanticProperties.Description="Cancel the monthly check-in without saving changes." />
     </ContentPage.ToolbarItems>
     <Grid RowDefinitions="*,Auto">

@@ -40,7 +40,9 @@ public sealed partial class AccountsViewModel(
     public ObservableCollection<RetirementExpenseEditorItem> Expenses { get; } = [];
     public ObservableCollection<DebtEditorItem> Debts { get; } = [];
 
-    [ObservableProperty] private string validationMessage = string.Empty;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasValidationMessage))]
+    private string validationMessage = string.Empty;
     [ObservableProperty] private string statusMessage = string.Empty;
 
     [ObservableProperty] private string accountsSummary = "No accounts yet.";
@@ -396,6 +398,7 @@ public sealed partial class AccountsViewModel(
         foreach (var debt in debts) await profileDebtRepository.SaveAsync(debt);
 
         UpdateInventorySummaries();
+        await UpdateFreshnessAsync();
         ValidationMessage = string.Empty;
         StatusMessage = "Accounts saved on this device.";
     }
