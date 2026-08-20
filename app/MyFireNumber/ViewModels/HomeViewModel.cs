@@ -33,6 +33,10 @@ public partial class HomeViewModel : ObservableObject
     private readonly IProfileService profileService;
     private readonly IProfileScenarioResolver profileScenarioResolver;
     private readonly IScenarioModePromptService scenarioModePromptService;
+    private readonly IProfileAccountRepository profileAccountRepository;
+    private readonly IProfileDebtRepository profileDebtRepository;
+    private readonly IFinancialCheckInRepository checkInRepository;
+    private readonly ICurrencyPreferencesService currencyPreferencesService;
 
     public HomeViewModel(
         ICalculatorCatalog catalog,
@@ -47,7 +51,11 @@ public partial class HomeViewModel : ObservableObject
         IErrorPresentationService errorPresentationService,
         IProfileService profileService,
         IProfileScenarioResolver profileScenarioResolver,
-        IScenarioModePromptService scenarioModePromptService)
+        IScenarioModePromptService scenarioModePromptService,
+        IProfileAccountRepository profileAccountRepository,
+        IProfileDebtRepository profileDebtRepository,
+        IFinancialCheckInRepository checkInRepository,
+        ICurrencyPreferencesService currencyPreferencesService)
     {
         this.catalog = catalog;
         this.recommendedBookCatalog = recommendedBookCatalog;
@@ -62,6 +70,10 @@ public partial class HomeViewModel : ObservableObject
         this.profileService = profileService;
         this.profileScenarioResolver = profileScenarioResolver;
         this.scenarioModePromptService = scenarioModePromptService;
+        this.profileAccountRepository = profileAccountRepository;
+        this.profileDebtRepository = profileDebtRepository;
+        this.checkInRepository = checkInRepository;
+        this.currencyPreferencesService = currencyPreferencesService;
     }
 
     public ObservableCollection<CalculatorDefinition> FeaturedCalculators { get; } = [];
@@ -92,6 +104,21 @@ public partial class HomeViewModel : ObservableObject
 
     [ObservableProperty]
     private bool showRecommendedBooks;
+
+    // Accounts dashboard summary. Always computed from live account/debt data, never from check-in
+    // history, so it matches whatever Accounts shows right now even if a check-in was never done.
+    [ObservableProperty] private bool hasAccountsData;
+    public bool HasNoAccountsData => !HasAccountsData;
+    partial void OnHasAccountsDataChanged(bool value) => OnPropertyChanged(nameof(HasNoAccountsData));
+    [ObservableProperty] private string netWorthText = "$0";
+    [ObservableProperty] private string totalAssetsText = "$0";
+    [ObservableProperty] private string totalDebtsText = "$0";
+    [ObservableProperty] private bool hasCompletedCheckIn;
+    [ObservableProperty] private string checkInFreshnessText = string.Empty;
+    [ObservableProperty] private string nextCheckInText = string.Empty;
+    [ObservableProperty] private bool isCheckInOverdue;
+    [ObservableProperty] private bool hasNetWorthChange;
+    [ObservableProperty] private string netWorthChangeText = string.Empty;
 
     public async Task LoadAsync()
     {
@@ -167,6 +194,58 @@ public partial class HomeViewModel : ObservableObject
         OnPropertyChanged(nameof(ShowGettingStarted));
         OnPropertyChanged(nameof(HasQuizRecommendation));
         OnPropertyChanged(nameof(ShowFeaturedCalculators));
+
+        await LoadAccountsSummaryAsync();
+    }
+
+    /// <summary>
+    /// Current net worth/assets/debts (live, not from history), plus freshness and the change in net
+    /// worth since the last completed monthly check-in. Trend-related UI (the change line) only shows
+    /// once at least one check-in has ever completed, since "change since last update" is meaningless
+    /// before that.
+    /// </summary>
+    private async Task LoadAccountsSummaryAsync()
+    {
+        var accounts = await profileAccountRepository.ListAsync();
+        var debts = await profileDebtRepository.ListAsync();
+        HasAccountsData = accounts.Count > 0 || debts.Count > 0;
+
+        var totalAssets = accounts.Sum(account => account.Balance);
+        var totalDebts = debts.Sum(debt => debt.Balance);
+        TotalAssetsText = currencyPreferencesService.Format(totalAssets);
+        TotalDebtsText = currencyPreferencesService.Format(totalDebts);
+        NetWorthText = currencyPreferencesService.Format(totalAssets - totalDebts);
+
+        var latest = await checkInRepository.GetLatestAsync();
+        HasCompletedCheckIn = latest is not null;
+        if (latest is null)
+        {
+            CheckInFreshnessText = "You haven't completed a monthly update yet.";
+            NextCheckInText = string.Empty;
+            IsCheckInOverdue = false;
+            HasNetWorthChange = false;
+            NetWorthChangeText = string.Empty;
+            return;
+        }
+
+        var now = DateTime.UtcNow;
+        var days = CheckInSchedule.DaysSince(latest.CompletedAtUtc, now);
+        CheckInFreshnessText = days == 0 ? "Last updated today." : $"Last updated {days} day{(days == 1 ? "" : "s")} ago.";
+        var status = CheckInSchedule.Classify(latest.CompletedAtUtc, now);
+        IsCheckInOverdue = status == FreshnessStatus.Overdue;
+        var dueDate = CheckInSchedule.NextDueUtc(latest.CompletedAtUtc);
+        NextCheckInText = status == FreshnessStatus.Overdue
+            ? $"Overdue since {dueDate:MMM d, yyyy}."
+            : $"Next update due {dueDate:MMM d, yyyy}.";
+
+        var change = (totalAssets - totalDebts) - latest.NetWorth;
+        HasNetWorthChange = true;
+        NetWorthChangeText = change switch
+        {
+            > 0 => $"Up {currencyPreferencesService.Format(change)} since your last update.",
+            < 0 => $"Down {currencyPreferencesService.Format(Math.Abs(change))} since your last update.",
+            _ => "No change since your last update."
+        };
     }
 
     [RelayCommand]
@@ -226,4 +305,13 @@ public partial class HomeViewModel : ObservableObject
     {
         return navigationService.GoToAsync("quiz");
     }
+
+    [RelayCommand]
+    private Task GoToAccountsAsync() => navigationService.GoToAsync("//accounts");
+
+    [RelayCommand]
+    private Task StartCheckInAsync() => navigationService.GoToAsync("accounts-check-in");
+
+    [RelayCommand]
+    private Task ViewHistoryAsync() => navigationService.GoToAsync("accounts-history");
 }

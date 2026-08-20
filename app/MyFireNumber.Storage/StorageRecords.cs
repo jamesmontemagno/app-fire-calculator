@@ -78,6 +78,9 @@ public sealed record LocalDataArchive(
     public IReadOnlyList<RetirementExpense> ProfileExpenses { get; init; } = [];
 
     public IReadOnlyList<DebtItem> ProfileDebts { get; init; } = [];
+
+    /// <summary>Historical monthly check-in snapshots, empty for an archive written before check-ins existed.</summary>
+    public IReadOnlyList<FinancialCheckIn> FinancialCheckIns { get; init; } = [];
 }
 
 public interface ILocalDataArchiveRepository
@@ -173,4 +176,16 @@ public interface IProfileDebtRepository
 public interface IProfileFinancialSnapshotRepository
 {
     Task<ProfileFinancialSnapshot> GetAsync(CancellationToken cancellationToken = default);
+}
+
+public interface IFinancialCheckInRepository
+{
+    /// <summary>All completed check-ins, ordered oldest to newest.</summary>
+    Task<IReadOnlyList<FinancialCheckIn>> ListAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>The most recently completed check-in, or null if none has ever been saved.</summary>
+    Task<FinancialCheckIn?> GetLatestAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Persists a completed check-in. A check-in is immutable once saved; there is no update.</summary>
+    Task SaveAsync(FinancialCheckIn checkIn, CancellationToken cancellationToken = default);
 }

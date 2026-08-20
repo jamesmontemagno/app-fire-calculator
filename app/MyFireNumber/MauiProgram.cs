@@ -95,6 +95,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IProfileExpenseRepository, SqliteProfileExpenseRepository>();
 		builder.Services.AddSingleton<IProfileDebtRepository, SqliteProfileDebtRepository>();
 		builder.Services.AddSingleton<IProfileFinancialSnapshotRepository, SqliteProfileFinancialSnapshotRepository>();
+		builder.Services.AddSingleton<IFinancialCheckInRepository, SqliteFinancialCheckInRepository>();
 		builder.Services.AddSingleton<AppShell>();
 		builder.Services.AddSingleton<App>();
 		builder.Services.AddSingleton<HomePage>();
@@ -102,6 +103,10 @@ public static class MauiProgram
 		builder.Services.AddSingleton<PlansPage>();
 		builder.Services.AddSingleton<SettingsPage>();
 		builder.Services.AddSingleton<ProfilePage>();
+		builder.Services.AddSingleton<AccountsPage>();
+		builder.Services.AddTransient<AccountsCheckInPage>();
+		builder.Services.AddTransient<AccountsHistoryPage>();
+		builder.Services.AddTransient<AccountItemDetailPage>();
 		builder.Services.AddTransient<FireNumberPage>();
 		builder.Services.AddTransient<WithdrawalRatePage>();
 		builder.Services.AddTransient<SavingsInvestmentPage>();
@@ -123,6 +128,10 @@ public static class MauiProgram
 		builder.Services.AddSingleton<PlansViewModel>();
 		builder.Services.AddSingleton<SettingsViewModel>();
 		builder.Services.AddSingleton<ProfileViewModel>();
+		builder.Services.AddSingleton<AccountsViewModel>();
+		builder.Services.AddTransient<AccountsCheckInViewModel>();
+		builder.Services.AddTransient<AccountsHistoryViewModel>();
+		builder.Services.AddTransient<AccountItemDetailViewModel>();
 		builder.Services.AddTransient<StandardFireViewModel>();
 		builder.Services.AddTransient<LeanFireViewModel>();
 		builder.Services.AddTransient<FatFireViewModel>();

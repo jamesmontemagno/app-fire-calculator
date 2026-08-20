@@ -1,6 +1,7 @@
 using MyFireNumber.Core.Calculations;
 using MyFireNumber.Core.Profile;
 using SQLite;
+using System.Text.Json;
 
 namespace MyFireNumber.Storage;
 
@@ -57,6 +58,7 @@ public sealed class LocalDatabase
             database.DeleteAll<ProfileIncomeEntity>();
             database.DeleteAll<ProfileExpenseEntity>();
             database.DeleteAll<ProfileDebtEntity>();
+            database.DeleteAll<FinancialCheckInEntity>();
         });
     }
 
@@ -73,6 +75,7 @@ public sealed class LocalDatabase
         var profileIncome = await connection.Table<ProfileIncomeEntity>().ToListAsync();
         var profileExpenses = await connection.Table<ProfileExpenseEntity>().ToListAsync();
         var profileDebts = await connection.Table<ProfileDebtEntity>().ToListAsync();
+        var financialCheckIns = await connection.Table<FinancialCheckInEntity>().ToListAsync();
 
         return new LocalDataArchive(
             DateTime.UtcNow,
@@ -86,7 +89,8 @@ public sealed class LocalDatabase
             ProfileAccounts = profileAccounts.Select(ToRecord).ToArray(),
             ProfileIncome = profileIncome.Select(ToRecord).ToArray(),
             ProfileExpenses = profileExpenses.Select(ToRecord).ToArray(),
-            ProfileDebts = profileDebts.Select(ToRecord).ToArray()
+            ProfileDebts = profileDebts.Select(ToRecord).ToArray(),
+            FinancialCheckIns = financialCheckIns.Select(ToFinancialCheckIn).ToArray()
         };
     }
 
@@ -107,6 +111,7 @@ public sealed class LocalDatabase
             database.DeleteAll<ProfileIncomeEntity>();
             database.DeleteAll<ProfileExpenseEntity>();
             database.DeleteAll<ProfileDebtEntity>();
+            database.DeleteAll<FinancialCheckInEntity>();
 
             database.InsertAll(archive.Drafts.Select(ToEntity));
             database.InsertAll(archive.Plans.Select(ToEntity));
@@ -123,6 +128,7 @@ public sealed class LocalDatabase
             database.InsertAll(archive.ProfileIncome.Select(ToEntity));
             database.InsertAll(archive.ProfileExpenses.Select(ToEntity));
             database.InsertAll(archive.ProfileDebts.Select(ToEntity));
+            database.InsertAll(archive.FinancialCheckIns.Select(ToFinancialCheckInEntity));
         });
     }
 
@@ -136,7 +142,8 @@ public sealed class LocalDatabase
             archive.ProfileAccounts is null ||
             archive.ProfileIncome is null ||
             archive.ProfileExpenses is null ||
-            archive.ProfileDebts is null)
+            archive.ProfileDebts is null ||
+            archive.FinancialCheckIns is null)
         {
             throw new InvalidDataException("The archive is missing required local data.");
         }
@@ -181,6 +188,18 @@ public sealed class LocalDatabase
         if (!ProfileAgeCalculator.TryValidate(archive.Profile, out var profileError))
         {
             throw new InvalidDataException($"The archive contains invalid profile data. {profileError}");
+        }
+
+        if (archive.FinancialCheckIns.Any(checkIn =>
+                string.IsNullOrWhiteSpace(checkIn.Id) ||
+                checkIn.Accounts is null ||
+                checkIn.Debts is null ||
+                checkIn.AnnualIncome < 0 ||
+                checkIn.AnnualExpenses < 0 ||
+                checkIn.Accounts.Any(account => string.IsNullOrWhiteSpace(account.AccountId) || string.IsNullOrWhiteSpace(account.Name) || account.Balance < 0) ||
+                checkIn.Debts.Any(debt => string.IsNullOrWhiteSpace(debt.DebtId) || string.IsNullOrWhiteSpace(debt.Name) || debt.Balance < 0)))
+        {
+            throw new InvalidDataException("The archive contains invalid check-in data.");
         }
     }
 
@@ -305,6 +324,24 @@ public sealed class LocalDatabase
     private static DebtItem ToRecord(ProfileDebtEntity item) =>
         new(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment, item.ExtraMonthlyPayment);
 
+    internal static FinancialCheckIn ToFinancialCheckIn(FinancialCheckInEntity item) => new(
+        item.Id,
+        ParseDate(item.CompletedAtUtc),
+        JsonSerializer.Deserialize<AccountBalanceEntry[]>(item.AccountsJson) ?? [],
+        JsonSerializer.Deserialize<DebtBalanceEntry[]>(item.DebtsJson) ?? [],
+        item.AnnualIncome,
+        item.AnnualExpenses);
+
+    internal static FinancialCheckInEntity ToFinancialCheckInEntity(FinancialCheckIn item) => new()
+    {
+        Id = item.Id,
+        CompletedAtUtc = FormatDate(item.CompletedAtUtc),
+        AccountsJson = JsonSerializer.Serialize(item.Accounts),
+        DebtsJson = JsonSerializer.Serialize(item.Debts),
+        AnnualIncome = item.AnnualIncome,
+        AnnualExpenses = item.AnnualExpenses
+    };
+
     private static ProfileEntity ToEntity(FinancialProfile item) => new()
     {
         Id = 1,
@@ -391,6 +428,7 @@ public sealed class LocalDatabase
         await connection.CreateTableAsync<ProfileIncomeEntity>();
         await connection.CreateTableAsync<ProfileExpenseEntity>();
         await connection.CreateTableAsync<ProfileDebtEntity>();
+        await connection.CreateTableAsync<FinancialCheckInEntity>();
     }
 
 }
@@ -589,4 +627,30 @@ internal sealed class ProfileDebtEntity
     public double Rate { get; set; }
     public double MinimumPayment { get; set; }
     public double ExtraMonthlyPayment { get; set; }
+}
+
+/// <summary>
+/// A completed monthly check-in. <see cref="AccountsJson"/> and <see cref="DebtsJson"/> hold the
+/// serialized <see cref="AccountBalanceEntry"/>/<see cref="DebtBalanceEntry"/> lists captured at
+/// check-in time, so a rename or deletion of the live account/debt afterward never rewrites history.
+/// </summary>
+[Table("financial_check_ins")]
+internal sealed class FinancialCheckInEntity
+{
+    [PrimaryKey]
+    public string Id { get; set; } = string.Empty;
+
+    [NotNull]
+    [Indexed]
+    public string CompletedAtUtc { get; set; } = string.Empty;
+
+    [NotNull]
+    public string AccountsJson { get; set; } = "[]";
+
+    [NotNull]
+    public string DebtsJson { get; set; } = "[]";
+
+    public double AnnualIncome { get; set; }
+
+    public double AnnualExpenses { get; set; }
 }

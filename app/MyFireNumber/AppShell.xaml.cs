@@ -12,6 +12,7 @@ public partial class AppShell : Shell
 
 	public AppShell(
 		HomePage homePage,
+		AccountsPage accountsPage,
 		CalculatorsPage calculatorsPage,
 		PlansPage plansPage,
 		ProfilePage profilePage,
@@ -25,6 +26,7 @@ public partial class AppShell : Shell
 		this.profileService = profileService;
 
 		Items.Add(CreateTab("Home", "home", "tab_home.png", homePage));
+		Items.Add(CreateTab("Accounts", "accounts", "tab_accounts.png", accountsPage));
 		Items.Add(CreateTab("Calculators", "calculators", "tab_calculators.png", calculatorsPage));
 		Items.Add(CreateTab("Plans", "plans", "tab_plans.png", plansPage));
 
@@ -32,6 +34,9 @@ public partial class AppShell : Shell
 		// position rather than being a button drawn inside the scrolling content.
 		Items.Add(CreateTab("Profile", "profile", "tab_profile.png", profilePage, showNavBar: true));
 		Routing.RegisterRoute("settings", typeof(SettingsPage));
+		Routing.RegisterRoute("accounts-check-in", typeof(AccountsCheckInPage));
+		Routing.RegisterRoute("accounts-history", typeof(AccountsHistoryPage));
+		Routing.RegisterRoute("account-item-detail", typeof(AccountItemDetailPage));
 
 		Routing.RegisterRoute("quiz", typeof(QuizPage));
 		Routing.RegisterRoute("welcome", typeof(WelcomePage));
@@ -91,6 +96,7 @@ public partial class AppShell : Shell
 
 		var route = behaviorPreferencesService.Current.LaunchDestination switch
 		{
+			LaunchDestination.Accounts => "//accounts",
 			LaunchDestination.Calculators => "//calculators",
 			LaunchDestination.Plans => "//plans",
 			_ => "//home"

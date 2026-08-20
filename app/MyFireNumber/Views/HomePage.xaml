@@ -47,6 +47,78 @@
                     </VerticalStackLayout>
                 </Grid>
 
+                <Border Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                        Padding="{StaticResource CardPadding}"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                        StrokeShape="RoundRectangle 12">
+                    <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Label Text="&#xf555;"
+                                   FontFamily="FontAwesomeSolid"
+                                   VerticalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
+                                   FontSize="18"
+                                   SemanticProperties.Description="Accounts" />
+                            <Label Grid.Column="1" Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
+                        </Grid>
+
+                        <!-- No accounts yet: a single CTA, no stats to show. -->
+                        <VerticalStackLayout IsVisible="{Binding HasNoAccountsData}" Spacing="{StaticResource SpaceSm}">
+                            <Label Text="Add your first account, income source, or debt to start tracking your net worth."
+                                   FontSize="13"
+                                   TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                        </VerticalStackLayout>
+
+                        <Label Text="Track your accounts, income, expenses, and debts, then run a monthly check-in to see your progress over time."
+                               IsVisible="{Binding HasAccountsData}"
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}" IsVisible="{Binding HasAccountsData}">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Net worth" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label AutomationId="HomeNetWorthLabel" Text="{Binding NetWorthText}" FontAttributes="Bold" FontSize="24" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                                <Label Text="{Binding NetWorthChangeText}" IsVisible="{Binding HasNetWorthChange}" FontSize="12" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="Assets" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding TotalAssetsText}" FontAttributes="Bold" FontSize="16" />
+                                <Label Text="{Binding TotalDebtsText}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <VerticalStackLayout Spacing="2" IsVisible="{Binding HasAccountsData}">
+                            <Label Text="{Binding CheckInFreshnessText}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            <Label Text="{Binding NextCheckInText}"
+                                   IsVisible="{Binding HasCompletedCheckIn}"
+                                   FontSize="12"
+                                   TextColor="{StaticResource FixedWarning}" />
+                        </VerticalStackLayout>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Button Text="Go to Accounts"
+                                    AutomationId="HomeGoToAccountsButton"
+                                    Command="{Binding GoToAccountsCommand}"
+                                    Background="Transparent"
+                                    TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                            <Button Grid.Column="1"
+                                    Text="Start monthly check-in"
+                                    AutomationId="HomeStartCheckInButton"
+                                    Command="{Binding StartCheckInCommand}"
+                                    IsVisible="{Binding HasAccountsData}" />
+                        </Grid>
+
+                        <!-- Trend UI only appears once at least one check-in exists; before that there is
+                             nothing to trend, so the link stays hidden rather than opening an empty chart. -->
+                        <Button Text="View history &amp; trends"
+                                AutomationId="HomeViewHistoryButton"
+                                Command="{Binding ViewHistoryCommand}"
+                                IsVisible="{Binding HasCompletedCheckIn}"
+                                Background="Transparent"
+                                TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                    </VerticalStackLayout>
+                </Border>
+
                 <Border IsVisible="{Binding HasRecentCalculators}"
                        Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                        Padding="{StaticResource CardPadding}"
