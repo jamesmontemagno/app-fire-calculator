@@ -84,7 +84,9 @@ public static class PeriodicFieldCatalog
             // The payoff model steps monthly, so the budget, extra payment, and per-debt minimum are
             // genuinely monthly inputs rather than monthly views of an annual amount. Changing the
             // number would change the schedule.
-            ["debt-payoff"] = []
+            ["debt-payoff"] = [],
+            // Account balance is a point-in-time value and every payment amount is a result.
+            ["sepp-72t"] = []
         };
 
     /// <summary>Every calculator ID this catalog covers.</summary>

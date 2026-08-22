@@ -100,6 +100,13 @@
       "webPage": "DebtPayoff.tsx",
       "note": "Declared with no periodic fields rather than omitted. Its budget and payment inputs are genuinely monthly because the amortization steps monthly, so they are fixed units and not a display choice.",
       "fields": []
+    },
+    {
+      "id": "sepp-72t",
+      "webPage": null,
+      "nativePage": "SeppPage.xaml",
+      "note": "Native-only because it links to the on-device Accounts inventory. Its payments are derived results, so it has no display-period inputs.",
+      "fields": []
     }
   ]
 }

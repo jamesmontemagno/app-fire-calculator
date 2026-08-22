@@ -89,6 +89,7 @@ public static class ProfileDraftResolver
                 IncomeSources = snapshot.Income.ToArray(),
                 AdditionalExpenses = snapshot.Expenses.ToArray()
             },
+            SeppDraft draft => ResolveSepp(draft, snapshot),
             _ => source
         };
 
@@ -110,6 +111,10 @@ public static class ProfileDraftResolver
         {
             errors.Add("Add at least one account to Profile to use linked mode.");
         }
+        else if (draft is SeppDraft && !snapshot.Accounts.Any(IsPotentialSeppAccount))
+        {
+            errors.Add("Add a Traditional 401(k)/IRA or Roth IRA account to Accounts to use linked mode.");
+        }
         else if (draft is StandardFireDraft or LeanFireDraft or FatFireDraft or CoastFireDraft or
                  BaristaFireDraft or ReverseFireDraft or SavingsInvestmentDraft &&
                  snapshot.Accounts.Count == 0)
@@ -127,6 +132,11 @@ public static class ProfileDraftResolver
         if (draft is DeferredCompensationDraft)
         {
             if (snapshot.Profile.BirthDate is null)
+            {
+                errors.Add("Add your birth date to Profile to use linked mode.");
+            }
+
+            if (draft is SeppDraft && snapshot.Profile.BirthDate is null)
             {
                 errors.Add("Add your birth date to Profile to use linked mode.");
             }
@@ -200,8 +210,35 @@ public static class ProfileDraftResolver
     {
         DebtPayoffDraft => ["Profile debts"],
         HealthcareGapDraft => ["Profile timeline"],
+        SeppDraft => ["Profile timeline", "Profile retirement accounts"],
         WithdrawalRateDraft => [],
         DeferredCompensationDraft => ["Profile timeline", "Profile accounts", "Profile income", "Profile expenses"],
         _ => ["Profile timeline", "Profile accounts", "Profile income", "Profile expenses"]
     };
+
+    private static SeppDraft ResolveSepp(SeppDraft draft, ProfileFinancialSnapshot snapshot)
+    {
+        var accounts = snapshot.Accounts
+            .Where(IsPotentialSeppAccount)
+            .Select(account => new SeppAccount(
+                account.Id,
+                account.Name,
+                account.Type,
+                account.Balance,
+                account.AnnualReturn))
+            .ToArray();
+        var selectedId = accounts.Any(account => account.Id == draft.SelectedAccountId)
+            ? draft.SelectedAccountId
+            : accounts.FirstOrDefault()?.Id ?? draft.SelectedAccountId;
+
+        return draft with
+        {
+            Accounts = accounts,
+            SelectedAccountId = selectedId,
+            BirthDate = snapshot.Profile.BirthDate ?? draft.BirthDate
+        };
+    }
+
+    private static bool IsPotentialSeppAccount(RetirementAccount account) =>
+        account.Type is RetirementAccountType.Traditional or RetirementAccountType.Roth;
 }

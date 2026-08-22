@@ -23,6 +23,7 @@ public sealed class CalculatorCatalog : ICalculatorCatalog
         new("savings-rate", "Savings & Investment Rate", "See how recurring contributions and compound growth can build wealth over time.", "\uf4c4"),
         new("debt-payoff", "Debt Payoff", "Compare Snowball and Avalanche strategies for eliminating multiple debts.", "\uf09d"),
         new("healthcare-gap", "Healthcare Gap", "Estimate healthcare costs between early retirement and Medicare eligibility.", "\uf0fa"),
+        new("sepp-72t", "72(t) / SEPP", "Estimate early retirement account payments under the IRS substantially equal payment methods.", "\uf4c0"),
         new("retirement-cash-flow", "Retirement Cash Flow", "Coordinate accounts, income, expenses, and withdrawals across retirement.", "\uf1da")
     ];
 
