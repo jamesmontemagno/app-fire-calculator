@@ -28,6 +28,8 @@ public interface ICalculatorDefaultsService
     WithdrawalRateDraft WithdrawalRate { get; }
     SavingsInvestmentDraft SavingsInvestment { get; }
     HealthcareGapDraft HealthcareGap { get; }
+    SeppDraft Sepp { get; }
+    RothConversionDraft RothConversion { get; }
     DeferredCompensationDraft RetirementCashFlow { get; }
 }
 
@@ -69,6 +71,8 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
     public WithdrawalRateDraft WithdrawalRate => Apply(WithdrawalRateDraft.Default);
     public SavingsInvestmentDraft SavingsInvestment => Apply(SavingsInvestmentDraft.Default);
     public HealthcareGapDraft HealthcareGap => Apply(HealthcareGapDraft.Default);
+    public SeppDraft Sepp => Apply(SeppDraft.Default);
+    public RothConversionDraft RothConversion => Apply(RothConversionDraft.Default);
     public DeferredCompensationDraft RetirementCashFlow => Apply(DeferredCompensationDraft.Default);
 
     public void Save(CalculatorDefaults defaults)
@@ -213,6 +217,27 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
             Accounts = [],
             IncomeSources = [],
             AdditionalExpenses = []
+        };
+    }
+
+    private SeppDraft Apply(SeppDraft draft)
+    {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        return draft with
+        {
+            BirthDate = profileService.Current.BirthDate ?? today.AddYears(-Current.CurrentAge),
+            FirstPaymentDate = today
+        };
+    }
+
+    private RothConversionDraft Apply(RothConversionDraft draft)
+    {
+        var defaults = Current;
+        return draft with
+        {
+            CurrentAge = defaults.CurrentAge,
+            StartYear = DateTime.Today.Year,
+            ExpectedReturn = defaults.ExpectedReturn
         };
     }
 }

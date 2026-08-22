@@ -169,6 +169,62 @@ public sealed class ProfileDraftResolverTests
         Assert.Equal([expense], result.Draft.AdditionalExpenses);
     }
 
+    [Fact]
+    public void Resolve_SeppRequiresBirthDateAndMapsEligibleAccounts()
+    {
+        var traditional = new RetirementAccount(
+            "ira", "Traditional IRA", RetirementAccountType.Traditional, 250_000, 0, 0.06, 59, 0.04, 1);
+        var snapshot = Snapshot(accounts: [traditional]);
+
+        var missingBirthDate = ProfileDraftResolver.Resolve(
+            SeppDraft.Default,
+            snapshot,
+            new DateOnly(2026, 1, 1));
+        var complete = ProfileDraftResolver.Resolve(
+            SeppDraft.Default,
+            snapshot with
+            {
+                Profile = FinancialProfile.Empty with { BirthDate = new DateOnly(1980, 1, 1) }
+            },
+            new DateOnly(2026, 1, 1));
+
+        Assert.False(missingBirthDate.IsValid);
+        Assert.Contains(missingBirthDate.Errors, error => error.Contains("birth date", StringComparison.OrdinalIgnoreCase));
+        Assert.True(complete.IsValid);
+        Assert.Equal("ira", complete.Draft.SelectedAccountId);
+        Assert.Equal(250_000, complete.Draft.SelectedAccount.Balance);
+    }
+
+    [Fact]
+    public void Resolve_RothConversionRequiresBirthDateAndMapsRetirementBalances()
+    {
+        var traditional = new RetirementAccount(
+            "ira", "Traditional IRA", RetirementAccountType.Traditional, 250_000, 0, 0.06, 59, 0.04, 1);
+        var roth = new RetirementAccount(
+            "roth", "Roth IRA", RetirementAccountType.Roth, 75_000, 0, 0.06, 59, 0.04, 1);
+        var snapshot = Snapshot(accounts: [traditional, roth]);
+
+        var missingBirthDate = ProfileDraftResolver.Resolve(
+            RothConversionDraft.Default,
+            snapshot,
+            new DateOnly(2026, 1, 1));
+        var complete = ProfileDraftResolver.Resolve(
+            RothConversionDraft.Default,
+            snapshot with
+            {
+                Profile = FinancialProfile.Empty with { BirthDate = new DateOnly(1980, 1, 1) }
+            },
+            new DateOnly(2026, 1, 1));
+
+        Assert.False(missingBirthDate.IsValid);
+        Assert.Contains(missingBirthDate.Errors, error => error.Contains("birth date", StringComparison.OrdinalIgnoreCase));
+        Assert.True(complete.IsValid);
+        Assert.Equal(46, complete.Draft.CurrentAge);
+        Assert.Equal(2026, complete.Draft.StartYear);
+        Assert.Equal(250_000, complete.Draft.TraditionalBalance);
+        Assert.Equal(75_000, complete.Draft.RothBalance);
+    }
+
     private static ProfileFinancialSnapshot Snapshot(
         IReadOnlyList<RetirementAccount>? accounts = null,
         IReadOnlyList<RetirementIncomeSource>? income = null,

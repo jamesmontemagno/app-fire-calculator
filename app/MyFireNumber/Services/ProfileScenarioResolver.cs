@@ -33,6 +33,15 @@ public sealed class ProfileScenarioResolver(
         {
             "debt-payoff" => snapshot.Debts.Count > 0,
             "healthcare-gap" => snapshot.Profile.BirthDate is not null,
+            "sepp-72t" =>
+                snapshot.Profile.BirthDate is not null &&
+                snapshot.Accounts.Any(account =>
+                    account.Type is MyFireNumber.Core.Calculations.RetirementAccountType.Traditional
+                        or MyFireNumber.Core.Calculations.RetirementAccountType.Roth),
+            "roth-conversion" =>
+                snapshot.Profile.BirthDate is not null &&
+                snapshot.Accounts.Any(account =>
+                    account.Type == MyFireNumber.Core.Calculations.RetirementAccountType.Traditional),
             "withdrawal-rate" => false,
             "retirement-cash-flow" =>
                 snapshot.Profile.BirthDate is not null &&

@@ -26,7 +26,7 @@ interface SharedField {
 
 interface SharedCalculator {
   id: string
-  webPage: string
+  webPage: string | null
   fields: SharedField[]
 }
 
@@ -124,7 +124,7 @@ function labelForField(fileName: string, source: string, key: string): string {
 }
 
 describe('shared periodic field inventory', () => {
-  it.each(CALCULATORS.map(calculator => [calculator.webPage, calculator] as const))(
+  it.each(CALCULATORS.filter(calculator => calculator.webPage).map(calculator => [calculator.webPage!, calculator] as const))(
     '%s declares the shared periodic fields in the shared periods',
     (webPage, calculator) => {
       const expected = calculator.fields.map(field => `${field.key}:${field.storedPeriod}`).sort()
@@ -141,7 +141,7 @@ describe('shared periodic field inventory', () => {
       .map(([path]) => pageFileName(path))
       .sort()
 
-    const named = CALCULATORS.map(calculator => calculator.webPage).sort()
+    const named = CALCULATORS.flatMap(calculator => calculator.webPage ? [calculator.webPage] : []).sort()
 
     expect(named).toEqual(expect.arrayContaining(usesMechanism))
   })
@@ -161,10 +161,9 @@ describe('shared periodic field inventory', () => {
   })
 
   it.each(
-    CALCULATORS.filter(calculator => calculator.fields.some(field => field.key in FIELD_LABELS)).map(calculator => [
-      calculator.webPage,
-      calculator,
-    ] as const),
+    CALCULATORS.filter(
+      calculator => calculator.webPage && calculator.fields.some(field => field.key in FIELD_LABELS),
+    ).map(calculator => [calculator.webPage!, calculator] as const),
   )('%s keeps shared labels on its periodic inputs', (webPage, calculator) => {
     for (const field of calculator.fields.filter(field => field.key in FIELD_LABELS)) {
       expect(labelForField(webPage, sourceFor(webPage), field.key)).toBe(FIELD_LABELS[field.key])

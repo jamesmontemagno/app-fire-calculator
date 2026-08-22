@@ -100,6 +100,20 @@
       "webPage": "DebtPayoff.tsx",
       "note": "Declared with no periodic fields rather than omitted. Its budget and payment inputs are genuinely monthly because the amortization steps monthly, so they are fixed units and not a display choice.",
       "fields": []
+    },
+    {
+      "id": "sepp-72t",
+      "webPage": null,
+      "nativePage": "SeppPage.xaml",
+      "note": "Native-only because it links to the on-device Accounts inventory. Its payments are derived results, so it has no display-period inputs.",
+      "fields": []
+    },
+    {
+      "id": "roth-conversion",
+      "webPage": null,
+      "nativePage": "RothConversionPage.xaml",
+      "note": "Native-only because it can link to the on-device Accounts inventory. The annual conversion is a tax-year strategy input rather than a monthly/annual display preference.",
+      "fields": []
     }
   ]
 }

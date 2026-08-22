@@ -524,7 +524,7 @@ describe('per-field stored periods', () => {
 
   interface SharedCalculator {
     id: string
-    webPage: string
+    webPage: string | null
     fields: SharedField[]
   }
 

@@ -274,8 +274,8 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     protected abstract string CalculatorId { get; }
 
     /// <summary>
-    /// Explicit implementation so <see cref="CalculatorId"/> stays <c>protected</c> for the eleven
-    /// derived view models while the page base can still read it.
+    /// Explicit implementation so <see cref="CalculatorId"/> stays <c>protected</c> for derived view
+    /// models while the page base can still read it.
     /// </summary>
     string ICalculatorViewModel.CalculatorId => CalculatorId;
 

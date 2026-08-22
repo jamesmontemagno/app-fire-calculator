@@ -20,8 +20,8 @@ namespace MyFireNumber.Tests.Presentation;
 /// <c>fat-fire</c> all route to <c>FireNumberPage</c> (asserted in
 /// <see cref="Calculations.CalculatorCatalogTests"/>). Any key derived from the page therefore
 /// collapses those three onto one entry and makes them disclose together, while looking perfectly
-/// correct on the other eight calculators — so casual testing, and eight of eleven manual passes,
-/// report success.</para>
+/// correct on calculators with dedicated page types — so casual testing across most calculators
+/// reports success.</para>
 ///
 /// <para><b>Why it reads source text.</b> Same trade the route-table oracle already makes: text is a
 /// weak instrument, but the alternative is no instrument. It costs no MAUI project reference and no
