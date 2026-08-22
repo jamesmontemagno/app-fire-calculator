@@ -83,11 +83,11 @@
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
                             <Button AutomationId="StartCheckInButton" Text="Start monthly check-in" Command="{Binding StartCheckInCommand}"
                                     SemanticProperties.Description="Start a guided monthly check-in for accounts and debts">
-                                <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf14a;" Color="{StaticResource FixedWhite}" Size="14" /></Button.ImageSource>
+                                <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf14a;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="14" /></Button.ImageSource>
                             </Button>
                             <Button Grid.Column="1" AutomationId="ViewHistoryButton" Text="History &amp; trends" Command="{Binding ViewHistoryCommand}"
                                                     SemanticProperties.Description="View account history and trend charts">
-                                <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf201;" Color="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Size="14" /></Button.ImageSource>
+                                <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf201;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="14" /></Button.ImageSource>
                             </Button>
                         </Grid>
                     </VerticalStackLayout>
@@ -101,7 +101,7 @@
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf0d6;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" AutomationProperties.ExcludedWithChildren="True" />
                             <Label Grid.Column="1" Text="Income" Style="{StaticResource CalculatorSectionHeading}" />
-                            <Button Grid.Column="2" AutomationId="AddAccountsIncomeButton" Text="Add" Command="{Binding AddIncomeCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                            <Button Grid.Column="2" AutomationId="AddAccountsIncomeButton" Text="Add" Command="{Binding AddIncomeCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
                         <Label Text="{Binding IncomeSummary}"
                                FontSize="12"
@@ -159,7 +159,7 @@
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf53d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" AutomationProperties.ExcludedWithChildren="True" />
                             <Label Grid.Column="1" Text="Expenses" Style="{StaticResource CalculatorSectionHeading}" />
-                            <Button Grid.Column="2" AutomationId="AddAccountsExpenseButton" Text="Add" Command="{Binding AddExpenseCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                            <Button Grid.Column="2" AutomationId="AddAccountsExpenseButton" Text="Add" Command="{Binding AddExpenseCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
                         <Label Text="{Binding ExpensesSummary}"
                                FontSize="12"
@@ -211,7 +211,7 @@
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf1c0;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" AutomationProperties.ExcludedWithChildren="True" />
                             <Label Grid.Column="1" Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
-                            <Button Grid.Column="2" AutomationId="AddAccountsAccountButton" Text="Add" Command="{Binding AddAccountCommand}" SemanticProperties.Description="Add a reusable account."><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                            <Button Grid.Column="2" AutomationId="AddAccountsAccountButton" Text="Add" Command="{Binding AddAccountCommand}" SemanticProperties.Description="Add a reusable account."><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
                         <Label Text="{Binding AccountsSummary}"
                                FontSize="12"
@@ -308,7 +308,7 @@
                         <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="&#xf09d;" FontFamily="FontAwesomeSolid" VerticalTextAlignment="Center" AutomationProperties.ExcludedWithChildren="True" />
                             <Label Grid.Column="1" Text="Debts" Style="{StaticResource CalculatorSectionHeading}" />
-                            <Button Grid.Column="2" AutomationId="AddAccountsDebtButton" Text="Add" Command="{Binding AddDebtCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{StaticResource FixedWhite}" Size="12" /></Button.ImageSource></Button>
+                            <Button Grid.Column="2" AutomationId="AddAccountsDebtButton" Text="Add" Command="{Binding AddDebtCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
                         <Label Text="{Binding DebtsSummary}"
                                FontSize="12"
@@ -381,7 +381,7 @@
                     <Label Text="{Binding StatusMessage}" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                 </VerticalStackLayout>
                 <Button Grid.Column="1" AutomationId="SaveAccountsButton" Text="Save" Command="{Binding SaveCommand}">
-                    <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="{StaticResource FixedWhite}" Size="14" /></Button.ImageSource>
+                    <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="14" /></Button.ImageSource>
                 </Button>
             </Grid>
         </Border>
