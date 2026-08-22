@@ -185,6 +185,13 @@ public static class SeppCalculator
             throw new ArgumentException("An annuity factor is required for fixed annuitization.", nameof(inputs));
         }
 
+        if (inputs.FirstPaymentDate >= inputs.BirthDate.AddYears(59).AddMonths(6))
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(inputs),
+                "The first SEPP payment must occur before age 59½.");
+        }
+
         var age = AgeOn(inputs.BirthDate, inputs.FirstPaymentDate);
         if (age is < 18 or > 59)
         {

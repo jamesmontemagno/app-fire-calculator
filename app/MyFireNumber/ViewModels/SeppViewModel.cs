@@ -125,9 +125,9 @@ public sealed partial class SeppViewModel : CalculatorViewModelBase<SeppDraft>
         }
 
         if (!TryParsePercentage(InterestRateText, 0, 20, out var interestRate)
-            || !TryParsePercentage(MaximumInterestRateText, 0, 20, out var maximumInterestRate))
+            || !TryParsePercentage(MaximumInterestRateText, 5, 20, out var maximumInterestRate))
         {
-            ValidationMessage = "Enter the chosen and maximum permitted interest rates from 0% to 20%.";
+            ValidationMessage = "Enter a chosen rate from 0% to 20% and an IRS maximum from 5% to 20%.";
             return false;
         }
 
@@ -162,6 +162,11 @@ public sealed partial class SeppViewModel : CalculatorViewModelBase<SeppDraft>
 
         var birth = DateOnly.FromDateTime(BirthDate);
         var firstPayment = DateOnly.FromDateTime(FirstPaymentDate);
+        if (firstPayment >= birth.AddYears(59).AddMonths(6))
+        {
+            ValidationMessage = "The first payment must occur before age 59½.";
+            return false;
+        }
         var age = AgeOn(birth, firstPayment);
         if (age is < 18 or > 59)
         {

@@ -85,4 +85,14 @@ public sealed class SeppCalculatorTests
                 Method = SeppMethod.FixedAnnuitization
             }));
     }
+
+    [Fact]
+    public void Calculate_RejectsAFirstPaymentAtOrAfterAgeFiftyNineAndAHalf()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            SeppCalculator.Calculate(Inputs with
+            {
+                BirthDate = new DateOnly(1967, 2, 22)
+            }));
+    }
 }
