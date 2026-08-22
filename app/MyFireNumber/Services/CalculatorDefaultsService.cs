@@ -29,6 +29,7 @@ public interface ICalculatorDefaultsService
     SavingsInvestmentDraft SavingsInvestment { get; }
     HealthcareGapDraft HealthcareGap { get; }
     SeppDraft Sepp { get; }
+    RothConversionDraft RothConversion { get; }
     DeferredCompensationDraft RetirementCashFlow { get; }
 }
 
@@ -71,6 +72,7 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
     public SavingsInvestmentDraft SavingsInvestment => Apply(SavingsInvestmentDraft.Default);
     public HealthcareGapDraft HealthcareGap => Apply(HealthcareGapDraft.Default);
     public SeppDraft Sepp => Apply(SeppDraft.Default);
+    public RothConversionDraft RothConversion => Apply(RothConversionDraft.Default);
     public DeferredCompensationDraft RetirementCashFlow => Apply(DeferredCompensationDraft.Default);
 
     public void Save(CalculatorDefaults defaults)
@@ -225,6 +227,17 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
         {
             BirthDate = profileService.Current.BirthDate ?? today.AddYears(-Current.CurrentAge),
             FirstPaymentDate = today
+        };
+    }
+
+    private RothConversionDraft Apply(RothConversionDraft draft)
+    {
+        var defaults = Current;
+        return draft with
+        {
+            CurrentAge = defaults.CurrentAge,
+            StartYear = DateTime.Today.Year,
+            ExpectedReturn = defaults.ExpectedReturn
         };
     }
 }
