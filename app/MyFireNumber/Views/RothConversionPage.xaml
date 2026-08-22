@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:CalculatorPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                          xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+                          xmlns:views="clr-namespace:MyFireNumber.Views"
+                          xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+                          xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+                          x:Class="MyFireNumber.Views.RothConversionPage"
+                          x:DataType="viewModels:RothConversionViewModel"
+                          Title="{Binding Title}"
+                          Shell.NavBarIsVisible="True"
+                          Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+                          SafeAreaEdges="All">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding SavePlanAndCloseCommand}"
+                     SemanticProperties.Description="Save the current Roth conversion values as a plan.">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Size="18" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+    <ScrollView>
+        <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" />
+            <Border IsVisible="{Binding HasValidationMessage}" Padding="14"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceWarningLight}, Dark={StaticResource SurfaceWarningDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderWarningLight}, Dark={StaticResource BorderWarningDark}}"
+                    StrokeShape="RoundRectangle 8">
+                <Label Text="{Binding ValidationMessage}"
+                       TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
+            </Border>
+
+            <controls:CalculatorInfoView Title="What is a Roth conversion strategy?"
+                                         Summary="Model annual pre-tax retirement account conversions and the five-tax-year ladder for converted principal."
+                                         Details="A Roth conversion moves pre-tax retirement money into a Roth account. The converted amount is generally ordinary taxable income for that year. When you are under age 59½, each conversion has its own five-tax-year waiting period before converted principal can generally be withdrawn without the additional 10% tax."
+                                         IconGlyph="&#xf2f1;" />
+
+            <Border Padding="{StaticResource CardPadding}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceWarningLight}, Dark={StaticResource SurfaceWarningDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderWarningLight}, Dark={StaticResource BorderWarningDark}}"
+                    StrokeShape="RoundRectangle 10">
+                <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                    <Label Text="Tax rules can materially change the result" FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
+                    <Label Text="This estimate applies one tax rate only to the conversion amount. It does not calculate tax brackets, deductions, credits, state tax, Medicare premiums, ACA subsidies, required minimum distributions, or Roth distribution ordering. Pay conversion taxes from outside funds when possible and verify the strategy with a qualified tax professional."
+                           FontSize="12" LineHeight="1.3"
+                           TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Padding="{StaticResource CardPadding}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                    StrokeShape="RoundRectangle 10">
+                <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                        <Label Text="Conversion plan" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}"
+                                Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}" RowSpacing="{StaticResource SpaceMd}">
+                        <controls:NumericInputView Header="Current age" HelpText="Your age in the first conversion year."
+                                                   Placeholder="45" Text="{Binding CurrentAgeText}" IsEnabled="{Binding CanEditProfileOwnedFields}" />
+                        <controls:NumericInputView Grid.Column="1" Header="First conversion year" HelpText="Calendar year of the first planned conversion."
+                                                   Placeholder="2026" Text="{Binding StartYearText}" />
+                        <controls:NumericInputView Grid.Row="1" Header="Traditional balance" HelpText="Pre-tax retirement balance available for conversion."
+                                                   Placeholder="750000" Text="{Binding TraditionalBalanceText}" IsEnabled="{Binding CanEditProfileOwnedFields}" />
+                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="Existing Roth balance" HelpText="Current Roth balance before this strategy begins."
+                                                   Placeholder="100000" Text="{Binding RothBalanceText}" IsEnabled="{Binding CanEditProfileOwnedFields}" />
+                        <controls:NumericInputView Grid.Row="2" Header="Annual conversion" HelpText="Target gross amount converted each year. The final conversion is limited to the remaining traditional balance."
+                                                   Placeholder="50000" Text="{Binding AnnualConversionText}" />
+                        <controls:NumericInputView Grid.Row="2" Grid.Column="1" Header="Conversion years" HelpText="Number of annual conversions to model."
+                                                   Placeholder="10" Text="{Binding ConversionYearsText}" />
+                    </Grid>
+                    <controls:AdvancedAssumptionsExpander>
+                        <Grid Margin="0,12,0,0" ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
+                            <controls:PercentageInputView Header="Expected return" HelpText="Annual growth applied before each year's conversion."
+                                                          Placeholder="5" Minimum="-100" Maximum="100" Step="0.1" Text="{Binding ExpectedReturnText}" />
+                            <controls:PercentageInputView Grid.Column="1" Header="Estimated tax rate" HelpText="Estimated combined marginal rate applied to each conversion."
+                                                          Placeholder="22" Minimum="0" Maximum="100" Step="0.1" Text="{Binding EstimatedTaxRateText}" />
+                        </Grid>
+                    </controls:AdvancedAssumptionsExpander>
+                </VerticalStackLayout>
+            </Border>
+
+            <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                <Label Text="Strategy outlook" Style="{StaticResource CalculatorSectionHeading}" />
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
+                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceAccentTintFlatLight}, Dark={StaticResource SurfaceAccentTintFlatDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
+                        <VerticalStackLayout Spacing="2"><Label Text="Total converted" FontSize="12" /><Label AutomationId="RothTotalConvertedLabel" Text="{Binding TotalConvertedText}" FontAttributes="Bold" FontSize="20" /></VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8">
+                        <VerticalStackLayout Spacing="2"><Label Text="Estimated taxes" FontSize="12" /><Label Text="{Binding TotalTaxesText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Row="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8">
+                        <VerticalStackLayout Spacing="2"><Label Text="First principal accessible" FontSize="12" /><Label Text="{Binding FirstAccessibleYearText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Row="1" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8">
+                        <VerticalStackLayout Spacing="2"><Label Text="Ending traditional" FontSize="12" /><Label Text="{Binding EndingTraditionalBalanceText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Row="2" Grid.ColumnSpan="2" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8">
+                        <VerticalStackLayout Spacing="2"><Label Text="Ending Roth" FontSize="12" /><Label Text="{Binding EndingRothBalanceText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout>
+                    </Border>
+                </Grid>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                <Label Text="Account balance projection" Style="{StaticResource CalculatorSectionHeading}" />
+                <lvc:CartesianChart Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}"
+                                    AnimationsSpeed="{Binding ChartAnimationsSpeed}" HeightRequest="300"
+                                    SemanticProperties.Description="{Binding ProjectionChartDescription}" />
+                <Label Text="{Binding ProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
+            </VerticalStackLayout>
+
+            <Border Padding="{StaticResource CardPadding}"
+                    Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
+                    StrokeShape="RoundRectangle 10">
+                <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                    <Label Text="Save or export this estimate" Style="{StaticResource CalculatorSectionHeading}" />
+                    <Entry Text="{Binding PlanNameText}" Placeholder="My Roth Conversion Strategy" Style="{StaticResource FormEntry}" />
+                    <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanAndCloseCommand}" />
+                    <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" />
+                    <Label IsVisible="{Binding HasPlanStatusMessage}" Text="{Binding PlanStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
+                    <Label IsVisible="{Binding HasExportStatusMessage}" Text="{Binding ExportStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
+                    <controls:EducationalDisclaimerView />
+                </VerticalStackLayout>
+            </Border>
+
+            <controls:CalculationExplanationView Explanation="At the start of each plan year, both account balances grow by the expected return. The planned conversion is then moved from the traditional balance to the Roth balance and is limited to the traditional balance available that year.&#10;&#10;Estimated conversion tax = conversion amount x estimated tax rate. Taxes are assumed to be paid from funds outside these accounts.&#10;&#10;Before age 59½, each year's converted principal becomes accessible after five tax years. For example, a 2026 conversion is shown as accessible in 2031. At age 60 in this annual model, converted principal is shown as accessible without that waiting period. Investment earnings are not counted as accessible converted principal." />
+        </VerticalStackLayout>
+    </ScrollView>
+</views:CalculatorPageBase>

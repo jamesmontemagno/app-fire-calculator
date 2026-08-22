@@ -90,6 +90,17 @@ public static class ProfileDraftResolver
                 AdditionalExpenses = snapshot.Expenses.ToArray()
             },
             SeppDraft draft => ResolveSepp(draft, snapshot),
+            RothConversionDraft draft => draft with
+            {
+                CurrentAge = CurrentAge(snapshot, today, draft.CurrentAge),
+                StartYear = today.Year,
+                TraditionalBalance = snapshot.Accounts
+                    .Where(account => account.Type == RetirementAccountType.Traditional)
+                    .Sum(account => account.Balance),
+                RothBalance = snapshot.Accounts
+                    .Where(account => account.Type == RetirementAccountType.Roth)
+                    .Sum(account => account.Balance)
+            },
             _ => source
         };
 
@@ -114,6 +125,11 @@ public static class ProfileDraftResolver
         else if (draft is SeppDraft && !snapshot.Accounts.Any(IsPotentialSeppAccount))
         {
             errors.Add("Add a Traditional 401(k)/IRA or Roth IRA account to Accounts to use linked mode.");
+        }
+        else if (draft is RothConversionDraft &&
+                 !snapshot.Accounts.Any(account => account.Type == RetirementAccountType.Traditional))
+        {
+            errors.Add("Add a Traditional 401(k) or IRA account to Accounts to use linked mode.");
         }
         else if (draft is StandardFireDraft or LeanFireDraft or FatFireDraft or CoastFireDraft or
                  BaristaFireDraft or ReverseFireDraft or SavingsInvestmentDraft &&
@@ -143,6 +159,11 @@ public static class ProfileDraftResolver
         }
 
         if (draft is SeppDraft && snapshot.Profile.BirthDate is null)
+        {
+            errors.Add("Add your birth date to Profile to use linked mode.");
+        }
+
+        if (draft is RothConversionDraft && snapshot.Profile.BirthDate is null)
         {
             errors.Add("Add your birth date to Profile to use linked mode.");
         }
@@ -211,6 +232,7 @@ public static class ProfileDraftResolver
         DebtPayoffDraft => ["Profile debts"],
         HealthcareGapDraft => ["Profile timeline"],
         SeppDraft => ["Profile timeline", "Profile retirement accounts"],
+        RothConversionDraft => ["Profile timeline", "Profile retirement accounts"],
         WithdrawalRateDraft => [],
         DeferredCompensationDraft => ["Profile timeline", "Profile accounts", "Profile income", "Profile expenses"],
         _ => ["Profile timeline", "Profile accounts", "Profile income", "Profile expenses"]

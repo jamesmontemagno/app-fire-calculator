@@ -44,6 +44,16 @@ public sealed class RothConversionCalculatorTests
     }
 
     [Fact]
+    public void Calculate_ReleasesConvertedPrincipalAtAgeSixtyWithoutWaitingFiveYears()
+    {
+        var result = RothConversionCalculator.Calculate(Inputs with { CurrentAge = 58 });
+
+        Assert.Equal(2028, result.FirstAccessibleYear);
+        Assert.Equal(120_000, result.Projections[2].NewlyAccessiblePrincipal);
+        Assert.Equal(120_000, result.Projections[2].CumulativeAccessiblePrincipal);
+    }
+
+    [Fact]
     public void Calculate_GrowsBalancesBeforeEachYearsConversion()
     {
         var result = RothConversionCalculator.Calculate(Inputs with

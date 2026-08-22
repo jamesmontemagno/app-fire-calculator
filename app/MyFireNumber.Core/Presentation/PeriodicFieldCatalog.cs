@@ -86,7 +86,9 @@ public static class PeriodicFieldCatalog
             // number would change the schedule.
             ["debt-payoff"] = [],
             // Account balance is a point-in-time value and every payment amount is a result.
-            ["sepp-72t"] = []
+            ["sepp-72t"] = [],
+            // The annual conversion is a tax-year strategy input, not a display-period preference.
+            ["roth-conversion"] = []
         };
 
     /// <summary>Every calculator ID this catalog covers.</summary>

@@ -51,6 +51,7 @@ public partial class AppShell : Shell
 		Routing.RegisterRoute("savings-rate", typeof(SavingsInvestmentPage));
 		Routing.RegisterRoute("healthcare-gap", typeof(HealthcareGapPage));
 		Routing.RegisterRoute("sepp-72t", typeof(SeppPage));
+		Routing.RegisterRoute("roth-conversion", typeof(RothConversionPage));
 		Routing.RegisterRoute("coast-fire", typeof(CoastFirePage));
 		Routing.RegisterRoute("barista-fire", typeof(BaristaFirePage));
 		Routing.RegisterRoute("reverse-fire", typeof(ReverseFirePage));

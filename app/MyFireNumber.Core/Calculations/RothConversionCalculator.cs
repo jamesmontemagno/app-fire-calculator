@@ -41,6 +41,7 @@ public static class RothConversionCalculator
         var traditionalBalance = inputs.TraditionalBalance;
         var rothBalance = inputs.RothBalance;
         var convertedByYear = new Dictionary<int, double>();
+        var accessibleConversionYears = new HashSet<int>();
         var projections = new List<RothConversionProjectionPoint>(
             inputs.ConversionYears + ConversionWaitingPeriodYears);
         var totalConverted = 0d;
@@ -68,8 +69,18 @@ public static class RothConversionCalculator
                 totalTaxes += conversion * inputs.EstimatedTaxRate;
             }
 
-            var sourceYear = calendarYear - ConversionWaitingPeriodYears;
-            var newlyAccessible = convertedByYear.GetValueOrDefault(sourceYear);
+            var age = inputs.CurrentAge + index;
+            var newlyAccessible = convertedByYear
+                .Where(conversion =>
+                    !accessibleConversionYears.Contains(conversion.Key)
+                    && (calendarYear >= conversion.Key + ConversionWaitingPeriodYears || age >= 60))
+                .Sum(conversion => conversion.Value);
+            foreach (var sourceYear in convertedByYear.Keys.Where(year =>
+                         !accessibleConversionYears.Contains(year)
+                         && (calendarYear >= year + ConversionWaitingPeriodYears || age >= 60)))
+            {
+                accessibleConversionYears.Add(sourceYear);
+            }
             accessiblePrincipal += newlyAccessible;
             if (newlyAccessible > 0 && firstAccessibleYear is null)
             {
@@ -79,7 +90,7 @@ public static class RothConversionCalculator
             projections.Add(new(
                 index + 1,
                 calendarYear,
-                inputs.CurrentAge + index,
+                age,
                 Round(startingTraditionalBalance),
                 Round(conversion),
                 Round(conversion * inputs.EstimatedTaxRate),
