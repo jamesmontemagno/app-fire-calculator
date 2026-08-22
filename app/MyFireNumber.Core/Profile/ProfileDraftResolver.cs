@@ -136,15 +136,15 @@ public static class ProfileDraftResolver
                 errors.Add("Add your birth date to Profile to use linked mode.");
             }
 
-            if (draft is SeppDraft && snapshot.Profile.BirthDate is null)
-            {
-                errors.Add("Add your birth date to Profile to use linked mode.");
-            }
-
             if (snapshot.Profile.PhasedRetirementDate is null)
             {
                 errors.Add("Add your phased retirement date to Profile to use linked mode.");
             }
+        }
+
+        if (draft is SeppDraft && snapshot.Profile.BirthDate is null)
+        {
+            errors.Add("Add your birth date to Profile to use linked mode.");
         }
 
         if (draft is StandardFireDraft or LeanFireDraft or FatFireDraft or CoastFireDraft or
