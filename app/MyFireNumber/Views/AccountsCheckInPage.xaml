@@ -180,7 +180,7 @@
                         Command="{Binding CompleteCommand}"
                         IsVisible="{Binding IsConfirmStep}"
                         IsEnabled="{Binding IsNotSaving}">
-                    <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf00c;" Color="{StaticResource FixedWhite}" Size="14" /></Button.ImageSource>
+                    <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf00c;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="14" /></Button.ImageSource>
                 </Button>
             </Grid>
         </Border>

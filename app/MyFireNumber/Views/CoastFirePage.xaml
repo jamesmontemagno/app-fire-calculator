@@ -15,7 +15,7 @@
         <ToolbarItem Command="{Binding SavePlanAndCloseCommand}"
                      SemanticProperties.Description="Save the current calculator values as a plan.">
             <ToolbarItem.IconImageSource>
-                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Size="18" />
+                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Size="18" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>

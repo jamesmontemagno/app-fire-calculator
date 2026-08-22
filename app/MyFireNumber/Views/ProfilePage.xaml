@@ -195,7 +195,7 @@
                     <Label Text="{Binding StatusMessage}" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                 </VerticalStackLayout>
                 <Button Grid.Column="1" AutomationId="SaveProfileButton" Text="Save profile" Command="{Binding SaveCommand}">
-                    <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="{StaticResource FixedWhite}" Size="14" /></Button.ImageSource>
+                    <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="14" /></Button.ImageSource>
                 </Button>
             </Grid>
         </Border>
