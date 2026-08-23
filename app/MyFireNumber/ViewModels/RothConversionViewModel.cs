@@ -157,7 +157,4 @@ public sealed partial class RothConversionViewModel : CalculatorViewModelBase<Ro
 
     protected override Task ShareAsync(RothConversionDraft draft) =>
         exportService.ShareAsync(draft, RothConversionCalculator.Calculate(draft.ToInputs()));
-
-    private static bool TryParseNonNegative(string value, out double parsed) =>
-        double.TryParse(value, NumberStyles.Number, CultureInfo.CurrentCulture, out parsed) && parsed >= 0;
 }

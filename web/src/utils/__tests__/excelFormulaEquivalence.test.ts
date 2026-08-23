@@ -509,6 +509,19 @@ const BASE_PARAMS: CalculatorParams = {
   healthcareAnnualOutOfPocket: 2_000,
   contributionGrowth: 'inflation',
   currencyPeriod: 'annual',
+  seppBalance: 500_000,
+  seppBirthDate: '1976-08-22',
+  seppFirstPaymentDate: '2026-08-22',
+  seppInterestRate: 0.05,
+  seppMaxInterestRate: 0.05,
+  seppAnnuityFactor: 0,
+  seppMethod: 'amortization',
+  rothStartYear: 2026,
+  rothTraditionalBalance: 750_000,
+  rothBalance: 100_000,
+  rothAnnualConversion: 50_000,
+  rothConversionYears: 10,
+  rothTaxRate: 0.22,
 }
 
 /**

@@ -11,6 +11,8 @@ interface PercentageInputProps {
   max?: number
   step?: number
   showSlider?: boolean
+  /** Decimal places shown in the text field. Rates quoted to the basis point need two. */
+  decimals?: number
   className?: string
 }
 
@@ -24,13 +26,14 @@ export default function PercentageInput({
   max = 1,
   step = 0.005,
   showSlider = true,
+  decimals = 1,
   className = '',
 }: PercentageInputProps) {
   const id = useId()
   const sliderId = useId()
   
   // Convert decimal to percentage for display
-  const displayValue = (value * 100).toFixed(1)
+  const displayValue = (value * 100).toFixed(decimals)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value

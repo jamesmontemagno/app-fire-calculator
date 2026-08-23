@@ -5,6 +5,8 @@ import type { ContributionGrowth, DebtItem } from '../utils/calculations'
 import { DEFAULT_CONTRIBUTION_GROWTH } from '../utils/calculations'
 import type { CurrencyPeriod } from '../utils/currencyPeriod'
 import { DEFAULT_CURRENCY_PERIOD, isCurrencyPeriod } from '../utils/currencyPeriod'
+import type { SeppMethod } from '../utils/sepp'
+import { addYears, formatIsoDate, isSeppMethod, parseIsoDate, todayIsoDate } from '../utils/sepp'
 import { STANDARD_STORAGE_KEY_PREFIX } from '../utils/savedCalculationStorage'
 
 interface SavedCalculatorParams {
@@ -40,7 +42,26 @@ interface CalculatorParams {
   healthcareAnnualOutOfPocket: number
   contributionGrowth: ContributionGrowth
   currencyPeriod: CurrencyPeriod
+  // 72(t) / SEPP parameters
+  seppBalance: number
+  seppBirthDate: string
+  seppFirstPaymentDate: string
+  seppInterestRate: number
+  seppMaxInterestRate: number
+  /** 0 means no actuarial factor has been supplied. */
+  seppAnnuityFactor: number
+  seppMethod: SeppMethod
+  // Roth conversion parameters
+  rothStartYear: number
+  rothTraditionalBalance: number
+  rothBalance: number
+  rothAnnualConversion: number
+  rothConversionYears: number
+  rothTaxRate: number
 }
+
+const TODAY = todayIsoDate()
+const CURRENT_YEAR = Number(TODAY.slice(0, 4))
 
 const DEFAULTS: CalculatorParams = {
   currentAge: 30,
@@ -69,6 +90,19 @@ const DEFAULTS: CalculatorParams = {
   healthcareAnnualOutOfPocket: 2000,
   contributionGrowth: DEFAULT_CONTRIBUTION_GROWTH,
   currencyPeriod: DEFAULT_CURRENCY_PERIOD,
+  seppBalance: 500000,
+  seppBirthDate: formatIsoDate(addYears(parseIsoDate(TODAY)!, -50)),
+  seppFirstPaymentDate: TODAY,
+  seppInterestRate: 0.05,
+  seppMaxInterestRate: 0.05,
+  seppAnnuityFactor: 0,
+  seppMethod: 'amortization',
+  rothStartYear: CURRENT_YEAR,
+  rothTraditionalBalance: 750000,
+  rothBalance: 100000,
+  rothAnnualConversion: 50000,
+  rothConversionYears: 10,
+  rothTaxRate: 0.22,
 }
 
 const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
@@ -98,6 +132,19 @@ const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
   healthcareAnnualOutOfPocket: 'healthcareOop',
   contributionGrowth: 'contribGrowth',
   currencyPeriod: 'period',
+  seppBalance: 'seppBalance',
+  seppBirthDate: 'seppBirth',
+  seppFirstPaymentDate: 'seppStart',
+  seppInterestRate: 'seppRate',
+  seppMaxInterestRate: 'seppMaxRate',
+  seppAnnuityFactor: 'seppFactor',
+  seppMethod: 'seppMethod',
+  rothStartYear: 'rothYear',
+  rothTraditionalBalance: 'rothTraditional',
+  rothBalance: 'rothBalance',
+  rothAnnualConversion: 'rothConvert',
+  rothConversionYears: 'rothYears',
+  rothTaxRate: 'rothTax',
 }
 
 interface NumericBounds {
@@ -127,6 +174,16 @@ const NUMERIC_BOUNDS: Partial<Record<keyof CalculatorParams, NumericBounds>> = {
   healthcareMonthlyPremium: { min: 0, max: 3000 },
   healthcareAnnualDeductible: { min: 0, max: 20000 },
   healthcareAnnualOutOfPocket: { min: 0, max: 20000 },
+  seppBalance: { min: 0 },
+  seppInterestRate: { min: 0, max: 0.2 },
+  seppMaxInterestRate: { min: 0.05, max: 0.2 },
+  seppAnnuityFactor: { min: 0 },
+  rothStartYear: { min: 1900, max: 2200 },
+  rothTraditionalBalance: { min: 0 },
+  rothBalance: { min: 0 },
+  rothAnnualConversion: { min: 0 },
+  rothConversionYears: { min: 1, max: 50 },
+  rothTaxRate: { min: 0, max: 1 },
 }
 
 const ROUTE_NUMERIC_BOUNDS: Record<string, Partial<Record<keyof CalculatorParams, NumericBounds>>> = {
@@ -137,6 +194,9 @@ const ROUTE_NUMERIC_BOUNDS: Record<string, Partial<Record<keyof CalculatorParams
     currentAge: { min: 18, max: 64 },
     retirementAge: { min: 18, max: 64 },
     inflationRate: { min: 0, max: 0.15 },
+  },
+  '/roth-conversion': {
+    currentAge: { min: 18, max: 100 },
   },
 }
 
@@ -282,6 +342,12 @@ export function useCalculatorParams() {
         if (key === 'currencyPeriod') {
           return isCurrencyPeriod(urlValue) ? urlValue : DEFAULTS[key]
         }
+        if (key === 'seppMethod') {
+          return isSeppMethod(urlValue) ? urlValue : DEFAULTS[key]
+        }
+        if (key === 'seppBirthDate' || key === 'seppFirstPaymentDate') {
+          return parseIsoDate(urlValue) ? urlValue : DEFAULTS[key]
+        }
         
         return parseNumericParam(
           urlValue,
@@ -339,6 +405,19 @@ export function useCalculatorParams() {
       healthcareAnnualOutOfPocket: getParam('healthcareAnnualOutOfPocket'),
       contributionGrowth: getParam('contributionGrowth'),
       currencyPeriod: getParam('currencyPeriod'),
+      seppBalance: getParam('seppBalance'),
+      seppBirthDate: getParam('seppBirthDate'),
+      seppFirstPaymentDate: getParam('seppFirstPaymentDate'),
+      seppInterestRate: getParam('seppInterestRate'),
+      seppMaxInterestRate: getParam('seppMaxInterestRate'),
+      seppAnnuityFactor: getParam('seppAnnuityFactor'),
+      seppMethod: getParam('seppMethod'),
+      rothStartYear: getParam('rothStartYear'),
+      rothTraditionalBalance: getParam('rothTraditionalBalance'),
+      rothBalance: getParam('rothBalance'),
+      rothAnnualConversion: getParam('rothAnnualConversion'),
+      rothConversionYears: getParam('rothConversionYears'),
+      rothTaxRate: getParam('rothTaxRate'),
     }
   }, [location.pathname, savedParams, searchParams])
   const params = useMemo(() => ({ ...resolvedParams, ...pendingParams }), [pendingParams, resolvedParams])

@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, Check, EyeOff, Link2, ShieldCheck, Wallet, Wifi } from 'lucide-react'
-import { Card, CardContent, Disclaimer } from '../components/ui'
-import { calculators } from '../config/calculators'
+import { Card, CardContent } from '../components/ui'
+import { groupCalculators } from '../config/calculators'
 import SEO from '../components/SEO'
+
+const CALCULATOR_GROUPS = groupCalculators()
 
 export default function Home() {
   return (
@@ -61,43 +63,61 @@ export default function Home() {
       </section>
 
       {/* Calculator Grid */}
-      <div>
-        <h2 className="mb-6 text-xl font-semibold text-content">
+      <div className="space-y-10">
+        <h2 className="text-xl font-semibold text-content">
           Choose Your Calculator
         </h2>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {calculators.map((calc) => {
-            const Icon = calc.icon
-            return (
-            <Link key={calc.path} to={calc.path} className="group">
-              <Card className="flex h-full flex-col border border-border-subtle transition-colors duration-200 hover:border-border-strong motion-reduce:transition-none">
-                <CardContent className="flex flex-1 flex-col p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="rounded-container bg-surface-sunken p-3">
-                      <Icon className={`h-6 w-6 ${calc.accent}`} aria-hidden="true" strokeWidth={1.5} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-content group-hover:text-accent transition-colors">
-                        {calc.name}
-                      </h3>
-                      <p className="text-sm text-content-muted mt-1">
-                        {calc.description}
-                      </p>
-                      <p className="text-xs text-content-subtle mt-3 font-medium">
-                        {calc.audience}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="mt-auto flex items-center pt-5 text-sm font-medium text-accent transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">
-                    Start calculating
-                    <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-            )
-          })}
-        </div>
+        {CALCULATOR_GROUPS.map(({ category, items }) => {
+          const GroupIcon = category.icon
+          return (
+            <section key={category.id} aria-labelledby={`home-group-${category.id}`}>
+              <div className="mb-5 flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-control bg-surface-sunken">
+                  <GroupIcon className="h-4 w-4 text-content-muted" aria-hidden="true" strokeWidth={1.5} />
+                </div>
+                <div>
+                  <h3 id={`home-group-${category.id}`} className="text-lg font-semibold text-content">
+                    {category.name}
+                  </h3>
+                  <p className="mt-0.5 text-sm text-content-muted">{category.description}</p>
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {items.map((calc) => {
+                  const Icon = calc.icon
+                  return (
+                    <Link key={calc.path} to={calc.path} className="group">
+                      <Card className="flex h-full flex-col border border-border-subtle transition-colors duration-200 hover:border-border-strong motion-reduce:transition-none">
+                        <CardContent className="flex flex-1 flex-col p-6">
+                          <div className="flex items-start gap-4">
+                            <div className="rounded-container bg-surface-sunken p-3">
+                              <Icon className={`h-6 w-6 ${calc.accent}`} aria-hidden="true" strokeWidth={1.5} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-lg font-semibold text-content group-hover:text-accent transition-colors">
+                                {calc.name}
+                              </h4>
+                              <p className="text-sm text-content-muted mt-1">
+                                {calc.description}
+                              </p>
+                              <p className="text-xs text-content-subtle mt-3 font-medium">
+                                {calc.audience}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="mt-auto flex items-center pt-5 text-sm font-medium text-accent transition-transform group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0">
+                            Start calculating
+                            <ArrowRight className="ml-1 h-4 w-4" aria-hidden="true" strokeWidth={1.5} />
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  )
+                })}
+              </div>
+            </section>
+          )
+        })}
       </div>
 
       {/* Recommended Books Section */}
@@ -277,47 +297,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Footer */}
-      <footer className="text-center text-sm text-content-subtle pt-8 border-t border-border-subtle">
-        <div className="mb-6 text-left">
-          <Disclaimer />
-        </div>
-        <p>
-          Built with privacy in mind. No data ever leaves your browser.
-        </p>
-        <p className="mt-2">
-          <Link to="/legal#terms" className="text-accent hover:underline">
-            Terms of use
-          </Link>
-          {' · '}
-          <Link to="/legal#privacy" className="text-accent hover:underline">
-            Privacy policy
-          </Link>
-        </p>
-        <p className="mt-2">
-          Find more tiny tools like this at{' '}
-          <a
-            href="https://www.tinytooltown.com/"
-            className="text-accent hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Tiny Tool Town
-          </a>
-          .
-        </p>
-        <p className="mt-2">
-          <a 
-            href="https://github.com/jamesmontemagno/app-fire-calculator" 
-            className="text-accent hover:underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            View on GitHub
-          </a>
-        </p>
-      </footer>
     </div>
     </>
   )

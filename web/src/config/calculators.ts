@@ -5,6 +5,7 @@
 
 import type { LucideIcon } from 'lucide-react'
 import {
+  ArrowLeftRight,
   BriefcaseMedical,
   CalendarClock,
   Coffee,
@@ -12,11 +13,54 @@ import {
   CreditCard,
   Flame,
   HandCoins,
+  Landmark,
   PiggyBank,
   RotateCw,
   Sprout,
+  Target,
   TreePalm,
+  Wallet,
 } from 'lucide-react'
+
+export type CalculatorCategory = 'fire' | 'saving' | 'retirement'
+
+export interface CalculatorCategoryMetadata {
+  id: CalculatorCategory
+  name: string
+  /** Short label for navigation headings. */
+  label: string
+  description: string
+  icon: LucideIcon
+}
+
+/**
+ * Display order for the sidebar and home page. Mirrors the FIRE / Finance / Cash Flow grouping in
+ * the MAUI CalculatorCatalogViewModel, split one step further so saving-up tools and
+ * drawing-down tools are not mixed.
+ */
+export const calculatorCategories: CalculatorCategoryMetadata[] = [
+  {
+    id: 'fire',
+    name: 'FIRE targets',
+    label: 'FIRE targets',
+    description: 'Find your number and the age you can reach it, for every flavour of FIRE.',
+    icon: Target,
+  },
+  {
+    id: 'saving',
+    name: 'Saving & debt',
+    label: 'Saving & debt',
+    description: 'Build the habits that get you there: savings rate, compound growth, and paying off debt.',
+    icon: Wallet,
+  },
+  {
+    id: 'retirement',
+    name: 'Retirement income & taxes',
+    label: 'Retirement income',
+    description: 'Plan how you draw down, bridge the gap before 59½ and Medicare, and coordinate accounts.',
+    icon: Landmark,
+  },
+]
 
 export interface CalculatorMetadata {
   path: string
@@ -32,6 +76,7 @@ export interface CalculatorMetadata {
   accent: string
   audience: string // Target audience description
   storagePrefix: 'standard' | 'deferred'
+  category: CalculatorCategory
 }
 
 export const calculators: CalculatorMetadata[] = [
@@ -44,6 +89,7 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-standard',
     audience: 'Best for: Anyone starting their FI journey',
     storagePrefix: 'standard',
+    category: 'fire',
   },
   {
     path: '/coast',
@@ -54,6 +100,7 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-coast',
     audience: 'Best for: Young savers wanting flexibility',
     storagePrefix: 'standard',
+    category: 'fire',
   },
   {
     path: '/lean',
@@ -64,6 +111,7 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-lean',
     audience: 'Best for: Minimalists & early retirees',
     storagePrefix: 'standard',
+    category: 'fire',
   },
   {
     path: '/fat',
@@ -74,6 +122,7 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-fat',
     audience: 'Best for: High earners & luxury seekers',
     storagePrefix: 'standard',
+    category: 'fire',
   },
   {
     path: '/barista',
@@ -84,6 +133,7 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-barista',
     audience: 'Best for: Those wanting work-life balance',
     storagePrefix: 'standard',
+    category: 'fire',
   },
   {
     path: '/reverse',
@@ -94,16 +144,7 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-reverse',
     audience: 'Best for: Goal-oriented planners',
     storagePrefix: 'standard',
-  },
-  {
-    path: '/withdrawal',
-    icon: HandCoins,
-    name: 'Withdrawal Rate',
-    label: 'Withdrawal Rate',
-    description: "Test your portfolio's longevity — find your safe withdrawal rate for any scenario.",
-    accent: 'text-calc-withdrawal',
-    audience: 'Best for: Those at or near FIRE',
-    storagePrefix: 'standard',
+    category: 'fire',
   },
   {
     path: '/savings-rate',
@@ -114,6 +155,7 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-savings',
     audience: 'Best for: Understanding your FI timeline',
     storagePrefix: 'standard',
+    category: 'saving',
   },
   {
     path: '/debt-payoff',
@@ -124,6 +166,18 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-debt',
     audience: 'Best for: Tackling multiple debts strategically',
     storagePrefix: 'standard',
+    category: 'saving',
+  },
+  {
+    path: '/withdrawal',
+    icon: HandCoins,
+    name: 'Withdrawal Rate',
+    label: 'Withdrawal Rate',
+    description: "Test your portfolio's longevity — find your safe withdrawal rate for any scenario.",
+    accent: 'text-calc-withdrawal',
+    audience: 'Best for: Those at or near FIRE',
+    storagePrefix: 'standard',
+    category: 'retirement',
   },
   {
     path: '/healthcare',
@@ -134,6 +188,29 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-healthcare',
     audience: 'Best for: US-based early retirees',
     storagePrefix: 'standard',
+    category: 'retirement',
+  },
+  {
+    path: '/sepp',
+    icon: Landmark,
+    name: '72(t) / SEPP',
+    label: '72(t) / SEPP',
+    description: 'Estimate penalty-free early retirement account payments under the IRS substantially equal periodic payment methods.',
+    accent: 'text-calc-sepp',
+    audience: 'Best for: Tapping retirement accounts before 59½',
+    storagePrefix: 'standard',
+    category: 'retirement',
+  },
+  {
+    path: '/roth-conversion',
+    icon: ArrowLeftRight,
+    name: 'Roth Conversion Strategy',
+    label: 'Roth Conversion',
+    description: 'Plan annual Roth conversions, estimate the tax bill, and map the five-tax-year ladder for converted principal.',
+    accent: 'text-calc-roth',
+    audience: 'Best for: Building a Roth ladder for early access',
+    storagePrefix: 'standard',
+    category: 'retirement',
   },
   {
     path: '/retirement-cash-flow',
@@ -144,8 +221,20 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-cashflow',
     audience: 'Best for: Complex, multi-account retirement plans',
     storagePrefix: 'deferred',
+    category: 'retirement',
   },
 ]
+
+/**
+ * Calculators grouped in display order. Every category is returned even when empty so callers
+ * can rely on the order without re-sorting.
+ */
+export function groupCalculators(): Array<{ category: CalculatorCategoryMetadata; items: CalculatorMetadata[] }> {
+  return calculatorCategories.map(category => ({
+    category,
+    items: calculators.filter(calculator => calculator.category === category.id),
+  }))
+}
 
 /**
  * Get calculator metadata by path

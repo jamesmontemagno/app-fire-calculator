@@ -1,6 +1,7 @@
 import { Flame, Menu } from 'lucide-react'
 import { Outlet } from 'react-router-dom'
 import Sidebar from './Sidebar'
+import SiteFooter from './SiteFooter'
 import { useState, useEffect } from 'react'
 import UpdatePrompt from '../UpdatePrompt'
 
@@ -62,6 +63,7 @@ export default function AppLayout() {
         <main className="flex-1 overflow-auto">
           <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
             <Outlet />
+            <SiteFooter />
           </div>
         </main>
       </div>

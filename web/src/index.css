@@ -60,6 +60,8 @@
   --color-calc-savings: var(--app-calc-savings);
   --color-calc-fat: var(--app-calc-fat);
   --color-calc-healthcare: var(--app-calc-healthcare);
+  --color-calc-sepp: var(--app-calc-sepp);
+  --color-calc-roth: var(--app-calc-roth);
 
   /* Three radii, not five: controls, containers, pills. */
   --radius-control: 0.375rem;
@@ -125,6 +127,8 @@
   --app-calc-savings: #7a5eb6;
   --app-calc-fat: #9354a2;
   --app-calc-healthcare: #a94c7d;
+  --app-calc-sepp: #8a5a00;
+  --app-calc-roth: #4f6f1f;
 }
 
 .dark {
@@ -169,6 +173,8 @@
   --app-calc-savings: #b8a0f7;
   --app-calc-fat: #d496e2;
   --app-calc-healthcare: #ec8fbc;
+  --app-calc-sepp: #f5b75b;
+  --app-calc-roth: #a8cf6a;
 }
 
 * {

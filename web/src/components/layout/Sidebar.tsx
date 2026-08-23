@@ -16,7 +16,7 @@ import {
 } from 'lucide-react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { useTheme } from '../../context/ThemeContext'
-import { calculators } from '../../config/calculators'
+import { groupCalculators } from '../../config/calculators'
 
 interface SidebarProps {
   isOpen: boolean
@@ -27,11 +27,12 @@ interface SidebarProps {
 
 const PRIMARY_LINKS: { to: string; label: string; icon: LucideIcon }[] = [
   { to: '/', label: 'Home', icon: House },
+  { to: '/quiz', label: 'Find Your Path', icon: Compass },
   { to: '/books', label: 'Recommended Books', icon: Library },
   { to: '/apps', label: 'Recommended Apps', icon: Smartphone },
-  { to: '/quiz', label: 'Find Your Path', icon: Compass },
-  { to: '/settings', label: 'Settings', icon: Settings },
 ]
+
+const CALCULATOR_GROUPS = groupCalculators()
 
 const THEMES: { value: 'light' | 'dark' | 'system'; label: string; icon: LucideIcon }[] = [
   { value: 'light', label: 'Light', icon: Sun },
@@ -122,33 +123,43 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
           </NavLink>
         ))}
 
-        {!isCollapsed ? (
-          <h2 className="px-3 pt-5 pb-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-content-subtle">
-            Calculators
-          </h2>
-        ) : (
-          <div className="mx-2 my-3 border-t border-border-subtle" />
-        )}
+        {CALCULATOR_GROUPS.map(({ category, items }) => (
+          <div key={category.id} role="group" aria-labelledby={`sidebar-group-${category.id}`}>
+            {!isCollapsed ? (
+              <h2
+                id={`sidebar-group-${category.id}`}
+                className="px-3 pt-5 pb-1 text-[0.6875rem] font-semibold uppercase tracking-[0.08em] text-content-subtle"
+              >
+                {category.label}
+              </h2>
+            ) : (
+              <>
+                <span id={`sidebar-group-${category.id}`} className="sr-only">{category.label}</span>
+                <div className="mx-2 my-3 border-t border-border-subtle" />
+              </>
+            )}
 
-        {calculators.map(calc => {
-          const Icon = calc.icon
-          return (
-            <NavLink
-              key={calc.path}
-              to={`${calc.path}${currentSearch}`}
-              onClick={onClose}
-              className={({ isActive }) => navClass(isActive, isCollapsed)}
-              title={isCollapsed ? calc.label : undefined}
-              aria-label={isCollapsed ? calc.label : undefined}
-            >
-              <Icon className={`h-5 w-5 shrink-0 ${calc.accent}`} aria-hidden="true" strokeWidth={1.5} />
-              {!isCollapsed && <span className="truncate">{calc.label}</span>}
-            </NavLink>
-          )
-        })}
+            {items.map(calc => {
+              const Icon = calc.icon
+              return (
+                <NavLink
+                  key={calc.path}
+                  to={`${calc.path}${currentSearch}`}
+                  onClick={onClose}
+                  className={({ isActive }) => navClass(isActive, isCollapsed)}
+                  title={isCollapsed ? calc.label : undefined}
+                  aria-label={isCollapsed ? calc.label : undefined}
+                >
+                  <Icon className={`h-5 w-5 shrink-0 ${calc.accent}`} aria-hidden="true" strokeWidth={1.5} />
+                  {!isCollapsed && <span className="truncate">{calc.label}</span>}
+                </NavLink>
+              )
+            })}
+          </div>
+        ))}
       </nav>
 
-      <div className="space-y-3 border-t border-border-subtle p-3">
+      <div className="space-y-2 border-t border-border-subtle p-3">
         <div
           role="radiogroup"
           aria-label="Colour theme"
@@ -180,8 +191,19 @@ export default function Sidebar({ isOpen, onClose, isCollapsed, onToggleCollapse
           })}
         </div>
 
+        <NavLink
+          to="/settings"
+          onClick={onClose}
+          className={({ isActive }) => navClass(isActive, isCollapsed)}
+          title={isCollapsed ? 'Settings' : undefined}
+          aria-label={isCollapsed ? 'Settings' : undefined}
+        >
+          <Settings className="h-5 w-5 shrink-0" aria-hidden="true" strokeWidth={1.5} />
+          {!isCollapsed && <span className="truncate">Settings</span>}
+        </NavLink>
+
         <p
-          className={`flex items-center gap-2 rounded-control px-2.5 py-2 text-xs font-medium text-content-muted ${
+          className={`flex items-center gap-2 rounded-control px-2.5 py-1.5 text-xs font-medium text-content-muted ${
             isCollapsed ? 'justify-center' : ''
           }`}
         >

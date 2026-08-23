@@ -103,16 +103,16 @@
     },
     {
       "id": "sepp-72t",
-      "webPage": null,
+      "webPage": "Sepp.tsx",
       "nativePage": "SeppPage.xaml",
-      "note": "Native-only because it links to the on-device Accounts inventory. Its payments are derived results, so it has no display-period inputs.",
+      "note": "Native links to the on-device Accounts inventory; web takes a single balance. Its payments are derived results, so it has no display-period inputs.",
       "fields": []
     },
     {
       "id": "roth-conversion",
-      "webPage": null,
+      "webPage": "RothConversion.tsx",
       "nativePage": "RothConversionPage.xaml",
-      "note": "Native-only because it can link to the on-device Accounts inventory. The annual conversion is a tax-year strategy input rather than a monthly/annual display preference.",
+      "note": "Native can link to the on-device Accounts inventory; web takes balances directly. The annual conversion is a tax-year strategy input rather than a monthly/annual display preference.",
       "fields": []
     }
   ]

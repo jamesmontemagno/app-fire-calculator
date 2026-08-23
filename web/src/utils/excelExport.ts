@@ -389,6 +389,39 @@ const EXPORT_FIELD_FORMATS: Record<string, ExportFormat> = {
   extraPayment: 'currency',
   // A real dollar amount that the old inputs list had no entry for at all (#64).
   totalDebt: 'currency',
+  accountBalance: 'currency',
+  traditionalBalance: 'currency',
+  rothBalance: 'currency',
+  annualConversion: 'currency',
+
+  // --- 72(t) / SEPP and Roth conversion ---------------------------------------------------------
+  // Rates the IRS methods take as inputs; declared alongside the other percentages.
+  interestRate: 'percent',
+  maximumInterestRate: 'percent',
+  estimatedTaxRate: 'percent',
+  // The Single Life factor and an actuarial factor both carry one decimal (36.2), so '0.0' is
+  // right even though neither is a duration.
+  lifeExpectancyFactor: 'years',
+  annuityFactor: 'years',
+  // ISO dates, a method name and a calendar year. Years are 'text' so they never pick up a
+  // thousands separator and render as 2,026.
+  birthDate: 'text',
+  firstPaymentDate: 'text',
+  requiredEndDate: 'text',
+  method: 'text',
+  startYear: 'text',
+  firstAccessibleYear: 'text',
+  startingAge: 'age',
+  requiredYears: 'number',
+  conversionYears: 'number',
+  annualPayment: 'currency',
+  rmdAnnualPayment: 'currency',
+  amortizationAnnualPayment: 'currency',
+  annuitizationAnnualPayment: 'currency',
+  totalConverted: 'currency',
+  totalEstimatedTaxes: 'currency',
+  endingTraditionalBalance: 'currency',
+  endingRothBalance: 'currency',
 
   // --- Dollar results ---------------------------------------------------------------------------
   fireNumber: 'currency',

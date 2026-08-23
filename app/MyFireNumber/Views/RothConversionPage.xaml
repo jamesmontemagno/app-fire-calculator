@@ -15,7 +15,7 @@
         <ToolbarItem Command="{Binding SavePlanAndCloseCommand}"
                      SemanticProperties.Description="Save the current Roth conversion values as a plan.">
             <ToolbarItem.IconImageSource>
-                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Size="18" />
+                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Size="18" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>
@@ -38,7 +38,7 @@
             <Border Padding="{StaticResource CardPadding}"
                     Background="{AppThemeBinding Light={StaticResource SurfaceWarningLight}, Dark={StaticResource SurfaceWarningDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource BorderWarningLight}, Dark={StaticResource BorderWarningDark}}"
-                    StrokeShape="RoundRectangle 10">
+                    StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Tax rules can materially change the result" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
@@ -51,12 +51,13 @@
             <Border Padding="{StaticResource CardPadding}"
                     Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                    StrokeShape="RoundRectangle 10">
+                    StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                         <Label Text="Conversion plan" Style="{StaticResource CalculatorSectionHeading}" />
                         <Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}"
-                                Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" />
+                                Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12"
+                                SemanticProperties.Description="Reset Roth conversion values to their defaults." />
                     </Grid>
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}" RowSpacing="{StaticResource SpaceMd}">
                         <controls:NumericInputView Header="Current age" HelpText="Your age in the first conversion year."
@@ -115,12 +116,12 @@
             <Border Padding="{StaticResource CardPadding}"
                     Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                    StrokeShape="RoundRectangle 10">
+                    StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Save or export this estimate" Style="{StaticResource CalculatorSectionHeading}" />
-                    <Entry Text="{Binding PlanNameText}" Placeholder="My Roth Conversion Strategy" Style="{StaticResource FormEntry}" />
-                    <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanAndCloseCommand}" />
-                    <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" />
+                    <Entry Text="{Binding PlanNameText}" Placeholder="My Roth Conversion Strategy" Style="{StaticResource FormEntry}" SemanticProperties.Description="Name for this saved Roth conversion plan" />
+                    <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanAndCloseCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />
+                    <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Create a Roth conversion workbook on this device and open the native share sheet." />
                     <Label IsVisible="{Binding HasPlanStatusMessage}" Text="{Binding PlanStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
                     <Label IsVisible="{Binding HasExportStatusMessage}" Text="{Binding ExportStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
                     <controls:EducationalDisclaimerView />

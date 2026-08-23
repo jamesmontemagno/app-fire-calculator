@@ -71,6 +71,18 @@ export const calculatorSEO: Record<string, PageSEO> = {
     keywords: 'healthcare gap calculator, early retirement healthcare, pre-Medicare coverage, healthcare costs, ACA marketplace, retirement healthcare planning',
     canonicalPath: '/healthcare',
   },
+  sepp: {
+    title: '72(t) SEPP Calculator - Penalty-Free Early Retirement Withdrawals',
+    description: 'Free 72(t) / SEPP calculator comparing the IRS required minimum distribution, fixed amortization, and fixed annuitization methods. Estimate substantially equal periodic payments and the required commitment period before 59½.',
+    keywords: '72t calculator, SEPP calculator, substantially equal periodic payments, early IRA withdrawal, 10% penalty exception, rule 72(t), early retirement withdrawals',
+    canonicalPath: '/sepp',
+  },
+  'roth-conversion': {
+    title: 'Roth Conversion Calculator - Plan Your Roth Conversion Ladder',
+    description: 'Free Roth conversion strategy calculator. Model annual conversions from a traditional IRA or 401(k), estimate the tax bill, and see when each year of converted principal becomes accessible under the five-tax-year rule.',
+    keywords: 'roth conversion calculator, roth ladder calculator, roth conversion ladder, five year rule, traditional to roth conversion, early retirement roth ladder, conversion tax estimate',
+    canonicalPath: '/roth-conversion',
+  },
   'retirement-cash-flow': {
     title: 'Retirement Cash Flow Calculator - Deferred Compensation Planner',
     description: 'Plan retirement cash flow across deferred compensation, 401(k), IRA, brokerage, and savings accounts. Model payout timing, withdrawal rates, and semi-retirement income.',
