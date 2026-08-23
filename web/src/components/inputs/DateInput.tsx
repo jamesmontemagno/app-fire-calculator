@@ -1,4 +1,4 @@
-import { useId } from 'react'
+import { useEffect, useId, useState } from 'react'
 import Tooltip from '../ui/Tooltip'
 
 interface DateInputProps {
@@ -25,6 +25,11 @@ export default function DateInput({
 }: DateInputProps) {
   const id = useId()
   const helperTextId = useId()
+  // A partially typed date reports an empty value. Holding it locally lets the field go blank
+  // while the user types instead of snapping back to the last complete date on every keystroke.
+  const [draft, setDraft] = useState(value)
+
+  useEffect(() => setDraft(value), [value])
 
   return (
     <div className={className}>
@@ -38,13 +43,15 @@ export default function DateInput({
       <input
         id={id}
         type="date"
-        value={value}
+        value={draft}
         min={min}
         max={max}
         onChange={event => {
-          // A partially typed date reports an empty value; keep the last valid one until it is complete.
-          if (event.target.value) onChange(event.target.value)
+          const next = event.target.value
+          setDraft(next)
+          if (next) onChange(next)
         }}
+        onBlur={() => setDraft(value)}
         aria-describedby={helperText ? helperTextId : undefined}
         className="
           w-full px-3 py-2.5
