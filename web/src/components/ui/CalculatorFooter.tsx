@@ -1,5 +1,4 @@
 import Card, { CardContent } from './Card'
-import Disclaimer from './Disclaimer'
 import ExportButton from './ExportButton'
 import UrlActions from './UrlActions'
 
@@ -30,7 +29,7 @@ export default function CalculatorFooter({
 }: CalculatorFooterProps) {
   return (
     <Card>
-      <CardContent className="space-y-5">
+      <CardContent>
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
           <div>
             <h2 className="font-semibold text-content">Keep this calculation</h2>
@@ -52,7 +51,6 @@ export default function CalculatorFooter({
             />
           </div>
         </div>
-        <Disclaimer embedded />
       </CardContent>
     </Card>
   )

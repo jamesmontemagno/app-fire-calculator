@@ -14,7 +14,7 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Command="{Binding SavePlanAndCloseCommand}" SemanticProperties.Description="Save the current 72(t) values as a plan.">
             <ToolbarItem.IconImageSource>
-                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Size="18" />
+                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Size="18" />
             </ToolbarItem.IconImageSource>
         </ToolbarItem>
     </ContentPage.ToolbarItems>
@@ -31,12 +31,12 @@
             <controls:CalculatorInfoView Title="What is a 72(t) / SEPP plan?"
                                          Summary="Estimate substantially equal periodic payments that may avoid the additional 10% tax on early retirement-plan distributions."
                                          Details="A SEPP series is a strict tax arrangement, not simply a withdrawal strategy. This calculator uses the IRS Single Life table and compares the required minimum distribution and fixed amortization safe-harbor methods. Fixed annuitization requires an actuarial factor supplied by a qualified professional."
-                                         IconGlyph="&#xf4c0;" />
+                                         IconGlyph="&#xf571;" />
 
             <Border Padding="{StaticResource CardPadding}"
                     Background="{AppThemeBinding Light={StaticResource SurfaceWarningLight}, Dark={StaticResource SurfaceWarningDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource BorderWarningLight}, Dark={StaticResource BorderWarningDark}}"
-                    StrokeShape="RoundRectangle 10">
+                    StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Verify eligibility before relying on this estimate" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
@@ -49,12 +49,13 @@
             <Border Padding="{StaticResource CardPadding}"
                     Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                    StrokeShape="RoundRectangle 10">
+                    StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                         <Label Text="SEPP account" Style="{StaticResource CalculatorSectionHeading}" />
                         <Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}"
-                                Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" />
+                                Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12"
+                                SemanticProperties.Description="Reset 72(t) / SEPP values to their defaults." />
                     </Grid>
                     <VerticalStackLayout Spacing="3">
                         <Label Text="Account" Style="{StaticResource FormFieldLabel}" />
@@ -83,7 +84,7 @@
             <Border Padding="{StaticResource CardPadding}"
                     Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                    StrokeShape="RoundRectangle 10">
+                    StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                     <Label Text="Payment setup" Style="{StaticResource CalculatorSectionHeading}" />
                     <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceMd}">
@@ -142,7 +143,7 @@
             <Border Padding="{StaticResource CardPadding}"
                     Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                    StrokeShape="RoundRectangle 10">
+                    StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Method comparison" Style="{StaticResource CalculatorSectionHeading}" />
                     <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto,Auto" RowSpacing="{StaticResource SpaceSm}">
@@ -166,7 +167,7 @@
             <Border Padding="{StaticResource CardPadding}"
                     Background="{AppThemeBinding Light={StaticResource SurfaceWarningLight}, Dark={StaticResource SurfaceWarningDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource BorderWarningLight}, Dark={StaticResource BorderWarningDark}}"
-                    StrokeShape="RoundRectangle 10">
+                    StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="A modification can trigger retroactive tax and interest" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
@@ -179,12 +180,12 @@
             <Border Padding="{StaticResource CardPadding}"
                     Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
-                    StrokeShape="RoundRectangle 10">
+                    StrokeShape="RoundRectangle 8">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Save or export this estimate" Style="{StaticResource CalculatorSectionHeading}" />
-                    <Entry Text="{Binding PlanNameText}" Placeholder="My 72(t) SEPP Plan" Style="{StaticResource FormEntry}" />
-                    <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanAndCloseCommand}" />
-                    <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" />
+                    <Entry Text="{Binding PlanNameText}" Placeholder="My 72(t) SEPP Plan" Style="{StaticResource FormEntry}" SemanticProperties.Description="Name for this saved 72(t) / SEPP plan" />
+                    <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanAndCloseCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />
+                    <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Create a 72(t) / SEPP workbook on this device and open the native share sheet." />
                     <Label IsVisible="{Binding HasPlanStatusMessage}" Text="{Binding PlanStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
                     <Label IsVisible="{Binding HasExportStatusMessage}" Text="{Binding ExportStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
                     <controls:EducationalDisclaimerView />

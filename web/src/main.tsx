@@ -18,6 +18,8 @@ import Apps from './pages/Apps'
 import FIREQuiz from './pages/FIREQuiz'
 import DebtPayoff from './pages/DebtPayoff'
 import DeferredCompensation from './pages/DeferredCompensation'
+import Sepp from './pages/Sepp'
+import RothConversion from './pages/RothConversion'
 import Settings from './pages/Settings'
 import Legal from './pages/Legal'
 import './index.css'
@@ -57,6 +59,8 @@ const router = createBrowserRouter([
       { path: 'deferred-compensation', element: <DeferredCompensationRedirect /> },
       { path: 'reverse', element: <ReverseFIRE /> },
       { path: 'healthcare', element: <HealthcareGap /> },
+      { path: 'sepp', element: <Sepp /> },
+      { path: 'roth-conversion', element: <RothConversion /> },
       { path: 'books', element: <Books /> },
       { path: 'apps', element: <Apps /> },
       { path: 'quiz', element: <FIREQuiz /> },
