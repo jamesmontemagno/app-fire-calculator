@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+             xmlns:shimmer="clr-namespace:Syncfusion.Maui.Shimmer;assembly=Syncfusion.Maui.Core"
              xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
              x:Class="MyFireNumber.Views.AccountsPage"
              x:DataType="viewModels:AccountsViewModel"
@@ -9,6 +10,10 @@
              Shell.NavBarIsVisible="False"
              Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
              SafeAreaEdges="Container">
+    <shimmer:SfShimmer IsActive="{Binding IsLoading}"
+                       Type="Feed"
+                       Fill="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
+                       WaveColor="{AppThemeBinding Light={StaticResource SurfaceAccentTintPaleLight}, Dark={StaticResource SurfaceCardDark}}">
     <Grid RowDefinitions="*,Auto">
         <ScrollView Grid.Row="0">
             <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
@@ -386,4 +391,5 @@
             </Grid>
         </Border>
     </Grid>
+    </shimmer:SfShimmer>
 </ContentPage>

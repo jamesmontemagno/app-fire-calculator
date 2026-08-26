@@ -119,8 +119,22 @@ public partial class HomeViewModel : ObservableObject
     [ObservableProperty] private bool isCheckInOverdue;
     [ObservableProperty] private bool hasNetWorthChange;
     [ObservableProperty] private string netWorthChangeText = string.Empty;
+    [ObservableProperty] private bool isLoading = true;
 
     public async Task LoadAsync()
+    {
+        IsLoading = true;
+        try
+        {
+            await LoadCoreAsync();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadCoreAsync()
     {
         await profileService.LoadAsync();
         var displayName = profileService.Current.DisplayName;
