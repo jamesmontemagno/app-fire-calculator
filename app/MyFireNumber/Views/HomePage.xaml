@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:books="clr-namespace:MyFireNumber.Core.Books;assembly=MyFireNumber.Core"
              xmlns:catalog="clr-namespace:MyFireNumber.Core.Calculators;assembly=MyFireNumber.Core"
-             xmlns:shimmer="clr-namespace:Syncfusion.Maui.Shimmer;assembly=Syncfusion.Maui.Core"
+             xmlns:shimmer="clr-namespace:Syncfusion.Maui.Toolkit.Shimmer;assembly=Syncfusion.Maui.Toolkit"
              xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
              x:Class="MyFireNumber.Views.HomePage"
              x:DataType="viewModels:HomeViewModel"
