@@ -8,6 +8,7 @@ using MyFireNumber.Storage;
 using MyFireNumber.ViewModels;
 using MyFireNumber.Views;
 using SkiaSharp.Views.Maui.Controls.Hosting;
+using Syncfusion.Maui.Toolkit.Hosting;
 #if IOS
 using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Platform;
@@ -38,6 +39,7 @@ public static class MauiProgram
 		var builder = MauiApp.CreateBuilder();
 		builder
 			.UseMauiApp<App>()
+			.ConfigureSyncfusionToolkit()
 			.UseSkiaSharp()
 			.UseLiveCharts()
 			.ConfigureFonts(fonts =>

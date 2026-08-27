@@ -66,6 +66,7 @@ public sealed partial class AccountsViewModel(
     [ObservableProperty] private bool isCheckInOverdue;
     [ObservableProperty] private string netWorthChangeText = string.Empty;
     [ObservableProperty] private bool hasNetWorthChange;
+    [ObservableProperty] private bool isLoading = true;
 
     public bool HasValidationMessage => !string.IsNullOrWhiteSpace(ValidationMessage);
 
@@ -77,6 +78,19 @@ public sealed partial class AccountsViewModel(
     public void Invalidate() => isLoaded = false;
 
     public async Task LoadAsync()
+    {
+        IsLoading = true;
+        try
+        {
+            await LoadCoreAsync();
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task LoadCoreAsync()
     {
         if (isLoaded && loadedDataRevision == profileService.DataRevision)
         {
