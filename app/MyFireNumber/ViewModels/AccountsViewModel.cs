@@ -109,6 +109,11 @@ public sealed partial class AccountsViewModel(
 
     public async Task LoadAsync()
     {
+        if (isLoaded && loadedDataRevision == profileService.DataRevision)
+        {
+            return;
+        }
+
         IsLoading = true;
         try
         {
