@@ -67,6 +67,11 @@
                             <Label Grid.Column="1" Text="Accounts" Style="{StaticResource CalculatorSectionHeading}" />
                         </Grid>
 
+                        <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasAccountsData}">
+                            <Label Text="Hide dollar amounts" VerticalTextAlignment="Center" FontSize="13" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                            <Switch Grid.Column="1" AutomationId="HomePrivacyModeSwitch" IsToggled="{Binding IsPrivacyModeEnabled}" SemanticProperties.Description="Hide net worth, assets, and debts on this screen" />
+                        </Grid>
+
                         <!-- No accounts yet: a single CTA, no stats to show. -->
                         <VerticalStackLayout IsVisible="{Binding HasNoAccountsData}" Spacing="{StaticResource SpaceSm}">
                             <Label Text="Add your first account, income source, or debt to start tracking your net worth."

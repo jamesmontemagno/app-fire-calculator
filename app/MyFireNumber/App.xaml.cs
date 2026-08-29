@@ -11,6 +11,7 @@ public partial class App : Application
 		IServiceProvider services,
 		IThemeService themeService,
 		IAppBehaviorPreferencesService behaviorPreferencesService,
+		IPrivacyModePreferencesService privacyModePreferencesService,
 		ITemporaryExportCleanupService temporaryExportCleanupService,
 		IProfileService profileService)
 	{
@@ -20,6 +21,7 @@ public partial class App : Application
 		themeService.Apply(behaviorPreferencesService.Current.HighContrast
 			? ThemePreference.Dark
 			: themeService.Preference);
+		privacyModePreferencesService.ApplyStartupOverride();
 		_ = profileService.LoadAsync();
 	}
 

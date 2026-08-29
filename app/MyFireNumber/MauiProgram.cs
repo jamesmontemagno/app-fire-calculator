@@ -56,6 +56,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IAppDataTransferService, AppDataTransferService>();
 		builder.Services.AddSingleton<ICalculatorDefaultsService, CalculatorDefaultsService>();
 		builder.Services.AddSingleton<IAppBehaviorPreferencesService, AppBehaviorPreferencesService>();
+		builder.Services.AddSingleton<IPrivacyModePreferencesService, PrivacyModePreferencesService>();
 		builder.Services.AddSingleton<ICurrencyPreferencesService, CurrencyPreferencesService>();
 		builder.Services.AddSingleton<IDisplayPeriodPreferencesService, DisplayPeriodPreferencesService>();
 		// Singleton on purpose: this is the only thing that outlives a transient calculator page, so

@@ -37,6 +37,12 @@ public partial class HomeViewModel : ObservableObject
     private readonly IProfileDebtRepository profileDebtRepository;
     private readonly IFinancialCheckInRepository checkInRepository;
     private readonly ICurrencyPreferencesService currencyPreferencesService;
+    private readonly IPrivacyModePreferencesService privacyModePreferencesService;
+
+    private const string PrivacyMask = "••••••";
+    private double rawTotalAssets;
+    private double rawTotalDebts;
+    private string rawNetWorthChangeText = string.Empty;
 
     public HomeViewModel(
         ICalculatorCatalog catalog,
@@ -55,7 +61,8 @@ public partial class HomeViewModel : ObservableObject
         IProfileAccountRepository profileAccountRepository,
         IProfileDebtRepository profileDebtRepository,
         IFinancialCheckInRepository checkInRepository,
-        ICurrencyPreferencesService currencyPreferencesService)
+        ICurrencyPreferencesService currencyPreferencesService,
+        IPrivacyModePreferencesService privacyModePreferencesService)
     {
         this.catalog = catalog;
         this.recommendedBookCatalog = recommendedBookCatalog;
@@ -74,6 +81,8 @@ public partial class HomeViewModel : ObservableObject
         this.profileDebtRepository = profileDebtRepository;
         this.checkInRepository = checkInRepository;
         this.currencyPreferencesService = currencyPreferencesService;
+        this.privacyModePreferencesService = privacyModePreferencesService;
+        isPrivacyModeEnabled = privacyModePreferencesService.HomePrivacyEnabled;
     }
 
     public ObservableCollection<CalculatorDefinition> FeaturedCalculators { get; } = [];
@@ -120,6 +129,28 @@ public partial class HomeViewModel : ObservableObject
     [ObservableProperty] private bool hasNetWorthChange;
     [ObservableProperty] private string netWorthChangeText = string.Empty;
     [ObservableProperty] private bool isLoading = true;
+
+    /// <summary>
+    /// Masks net worth, assets, and debts on the Home dashboard when on. Off by default; persisted
+    /// per-page in <see cref="IPrivacyModePreferencesService"/> and only forced on at app launch when
+    /// the Settings "privacy mode on startup" override is enabled.
+    /// </summary>
+    [ObservableProperty]
+    private bool isPrivacyModeEnabled;
+
+    partial void OnIsPrivacyModeEnabledChanged(bool value)
+    {
+        privacyModePreferencesService.HomePrivacyEnabled = value;
+        ApplyPrivacyMasking();
+    }
+
+    private void ApplyPrivacyMasking()
+    {
+        TotalAssetsText = IsPrivacyModeEnabled ? PrivacyMask : currencyPreferencesService.Format(rawTotalAssets);
+        TotalDebtsText = IsPrivacyModeEnabled ? PrivacyMask : currencyPreferencesService.Format(rawTotalDebts);
+        NetWorthText = IsPrivacyModeEnabled ? PrivacyMask : currencyPreferencesService.Format(rawTotalAssets - rawTotalDebts);
+        NetWorthChangeText = IsPrivacyModeEnabled ? PrivacyMask : rawNetWorthChangeText;
+    }
 
     public async Task LoadAsync()
     {
@@ -226,9 +257,8 @@ public partial class HomeViewModel : ObservableObject
 
         var totalAssets = accounts.Sum(account => account.Balance);
         var totalDebts = debts.Sum(debt => debt.Balance);
-        TotalAssetsText = currencyPreferencesService.Format(totalAssets);
-        TotalDebtsText = currencyPreferencesService.Format(totalDebts);
-        NetWorthText = currencyPreferencesService.Format(totalAssets - totalDebts);
+        rawTotalAssets = totalAssets;
+        rawTotalDebts = totalDebts;
 
         var latest = await checkInRepository.GetLatestAsync();
         HasCompletedCheckIn = latest is not null;
@@ -238,7 +268,8 @@ public partial class HomeViewModel : ObservableObject
             NextCheckInText = string.Empty;
             IsCheckInOverdue = false;
             HasNetWorthChange = false;
-            NetWorthChangeText = string.Empty;
+            rawNetWorthChangeText = string.Empty;
+            ApplyPrivacyMasking();
             return;
         }
 
@@ -254,12 +285,13 @@ public partial class HomeViewModel : ObservableObject
 
         var change = (totalAssets - totalDebts) - latest.NetWorth;
         HasNetWorthChange = true;
-        NetWorthChangeText = change switch
+        rawNetWorthChangeText = change switch
         {
             > 0 => $"Up {currencyPreferencesService.Format(change)} since your last update.",
             < 0 => $"Down {currencyPreferencesService.Format(Math.Abs(change))} since your last update.",
             _ => "No change since your last update."
         };
+        ApplyPrivacyMasking();
     }
 
     [RelayCommand]

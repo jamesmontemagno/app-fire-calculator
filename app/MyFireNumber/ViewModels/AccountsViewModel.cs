@@ -28,12 +28,26 @@ public sealed partial class AccountsViewModel(
     ILocalDateProvider localDateProvider,
     INavigationService navigationService,
     IConfirmationService confirmationService,
-    IRetirementCashFlowPromptService promptService) : ObservableObject
+    IRetirementCashFlowPromptService promptService,
+    IPrivacyModePreferencesService privacyModePreferencesService) : ObservableObject
 {
+    private const string PrivacyMask = "••••••";
+
     private bool isLoaded;
     private bool isTrackingCollections;
     private long loadedDataRevision = -1;
     private IReadOnlyList<FinancialCheckIn> allCheckIns = [];
+
+    private string rawAccountsSummary = "No accounts yet.";
+    private string rawIncomeSummary = "No income yet.";
+    private string rawExpensesSummary = "No expenses yet.";
+    private string rawDebtsSummary = "No debts yet.";
+    private double rawTotalAssets;
+    private double rawTotalDebts;
+    private double rawAnnualIncome;
+    private double rawAnnualExpenses;
+    private double rawContributions;
+    private string rawNetWorthChangeText = string.Empty;
 
     public ObservableCollection<RetirementAccountEditorItem> Accounts { get; } = [];
     public ObservableCollection<RetirementIncomeEditorItem> Income { get; } = [];
@@ -67,6 +81,22 @@ public sealed partial class AccountsViewModel(
     [ObservableProperty] private string netWorthChangeText = string.Empty;
     [ObservableProperty] private bool hasNetWorthChange;
     [ObservableProperty] private bool isLoading = true;
+
+    /// <summary>
+    /// Masks the Overview totals and per-section summary lines when on, so passively glancing at the
+    /// Accounts list doesn't show dollar figures. Expanding an individual account/income/expense/debt
+    /// row still shows its real numbers — that's a deliberate tap, not a passive glance. Off by
+    /// default; persisted per-page in <see cref="IPrivacyModePreferencesService"/> and only forced on
+    /// at app launch when the Settings "privacy mode on startup" override is enabled.
+    /// </summary>
+    [ObservableProperty]
+    private bool isPrivacyModeEnabled = privacyModePreferencesService.AccountsPrivacyEnabled;
+
+    partial void OnIsPrivacyModeEnabledChanged(bool value)
+    {
+        privacyModePreferencesService.AccountsPrivacyEnabled = value;
+        ApplyPrivacyMasking();
+    }
 
     public bool HasValidationMessage => !string.IsNullOrWhiteSpace(ValidationMessage);
 
@@ -220,34 +250,50 @@ public sealed partial class AccountsViewModel(
     {
         var accountBalance = Accounts.Sum(item => ParseAmount(item.BalanceText));
         var contributions = Accounts.Sum(item => ParseAmount(item.AnnualContributionText));
-        AccountsSummary = Accounts.Count == 0
+        rawAccountsSummary = Accounts.Count == 0
             ? "No accounts yet."
             : $"{CountLabel(Accounts.Count, "account")} | {FormatCurrency(accountBalance)} balance | {FormatCurrency(contributions)}/yr contributions";
 
         var annualIncome = Income.Sum(item => ParseAmount(item.AnnualAmountText));
-        IncomeSummary = Income.Count == 0
+        rawIncomeSummary = Income.Count == 0
             ? "No income yet."
             : $"{CountLabel(Income.Count, "source")} | {FormatCurrency(annualIncome)}/yr total";
 
         var annualExpenses = Expenses.Sum(item => ParseAmount(item.AnnualAmountText));
-        ExpensesSummary = Expenses.Count == 0
+        rawExpensesSummary = Expenses.Count == 0
             ? "No expenses yet."
             : $"{CountLabel(Expenses.Count, "expense")} | {FormatCurrency(annualExpenses)}/yr total";
 
         var debtBalance = Debts.Sum(item => ParseAmount(item.BalanceText));
         var minimumPayments = Debts.Sum(item => ParseAmount(item.MinimumPaymentText));
         var extraPayments = Debts.Sum(item => ParseAmount(item.ExtraMonthlyPaymentText));
-        DebtsSummary = Debts.Count == 0
+        rawDebtsSummary = Debts.Count == 0
             ? "No debts yet."
             : $"{CountLabel(Debts.Count, "debt")} | {FormatCurrency(debtBalance)} balance | {FormatCurrency(minimumPayments + extraPayments)}/mo current payments";
 
-        TotalAssetsText = FormatCurrency(accountBalance);
-        TotalDebtsText = FormatCurrency(debtBalance);
-        NetWorthText = FormatCurrency(accountBalance - debtBalance);
-        AnnualIncomeTotalText = FormatCurrency(annualIncome);
-        AnnualExpensesTotalText = FormatCurrency(annualExpenses);
-        AnnualCashFlowText = FormatCurrency(annualIncome - annualExpenses);
-        AnnualContributionsText = FormatCurrency(contributions);
+        rawTotalAssets = accountBalance;
+        rawTotalDebts = debtBalance;
+        rawAnnualIncome = annualIncome;
+        rawAnnualExpenses = annualExpenses;
+        rawContributions = contributions;
+        ApplyPrivacyMasking();
+    }
+
+    private void ApplyPrivacyMasking()
+    {
+        AccountsSummary = IsPrivacyModeEnabled && Accounts.Count > 0 ? PrivacyMask : rawAccountsSummary;
+        IncomeSummary = IsPrivacyModeEnabled && Income.Count > 0 ? PrivacyMask : rawIncomeSummary;
+        ExpensesSummary = IsPrivacyModeEnabled && Expenses.Count > 0 ? PrivacyMask : rawExpensesSummary;
+        DebtsSummary = IsPrivacyModeEnabled && Debts.Count > 0 ? PrivacyMask : rawDebtsSummary;
+
+        TotalAssetsText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawTotalAssets);
+        TotalDebtsText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawTotalDebts);
+        NetWorthText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawTotalAssets - rawTotalDebts);
+        AnnualIncomeTotalText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawAnnualIncome);
+        AnnualExpensesTotalText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawAnnualExpenses);
+        AnnualCashFlowText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawAnnualIncome - rawAnnualExpenses);
+        AnnualContributionsText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawContributions);
+        NetWorthChangeText = IsPrivacyModeEnabled ? PrivacyMask : rawNetWorthChangeText;
     }
 
     /// <summary>
@@ -269,7 +315,7 @@ public sealed partial class AccountsViewModel(
             NextCheckInText = string.Empty;
             IsCheckInOverdue = false;
             HasNetWorthChange = false;
-            NetWorthChangeText = string.Empty;
+            rawNetWorthChangeText = string.Empty;
         }
         else
         {
@@ -285,13 +331,14 @@ public sealed partial class AccountsViewModel(
             var currentNetWorth = Accounts.Sum(item => ParseAmount(item.BalanceText)) - Debts.Sum(item => ParseAmount(item.BalanceText));
             var change = currentNetWorth - latest.NetWorth;
             HasNetWorthChange = true;
-            NetWorthChangeText = change switch
+            rawNetWorthChangeText = change switch
             {
                 > 0 => $"Up {FormatCurrency(change)} since your last update.",
                 < 0 => $"Down {FormatCurrency(Math.Abs(change))} since your last update.",
                 _ => "No change since your last update."
             };
         }
+        ApplyPrivacyMasking();
 
         // Latest confirming check-in per account/debt id, scanning newest-first so the first match wins.
         var latestAccountConfirmation = new Dictionary<string, DateTime>(StringComparer.Ordinal);
