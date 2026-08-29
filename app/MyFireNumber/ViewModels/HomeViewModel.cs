@@ -40,6 +40,7 @@ public partial class HomeViewModel : ObservableObject
     private readonly IPrivacyModePreferencesService privacyModePreferencesService;
 
     private const string PrivacyMask = "••••••";
+    private bool hasLoaded;
     private double rawTotalAssets;
     private double rawTotalDebts;
     private string rawNetWorthChangeText = string.Empty;
@@ -154,14 +155,23 @@ public partial class HomeViewModel : ObservableObject
 
     public async Task LoadAsync()
     {
-        IsLoading = true;
+        var showLoading = !hasLoaded;
+        if (showLoading)
+        {
+            IsLoading = true;
+        }
+
         try
         {
             await LoadCoreAsync();
+            hasLoaded = true;
         }
         finally
         {
-            IsLoading = false;
+            if (showLoading)
+            {
+                IsLoading = false;
+            }
         }
     }
 
