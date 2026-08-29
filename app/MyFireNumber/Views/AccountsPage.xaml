@@ -41,7 +41,13 @@
                         Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
-                        <Label Text="Overview" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                            <Label Text="Overview" Style="{StaticResource CalculatorSectionHeading}" />
+                            <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceXs}">
+                                <Label Text="Hide amounts" VerticalTextAlignment="Center" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Switch Grid.Column="1" AutomationId="AccountsPrivacyModeSwitch" IsToggled="{Binding IsPrivacyModeEnabled}" SemanticProperties.Description="Hide dollar amounts in the Accounts overview and summaries" />
+                            </Grid>
+                        </Grid>
                         <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
                             <VerticalStackLayout Spacing="2">
                                 <Label Text="Total assets" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />

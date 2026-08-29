@@ -225,6 +225,15 @@
                             <Label Grid.Row="5" Text="Show recommended books on Home" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                             <Switch AutomationId="RecommendedBooksSwitch" Grid.Row="5" Grid.Column="1" IsToggled="{Binding ShowRecommendedBooks}" />
                         </Grid>
+                        <VerticalStackLayout Spacing="4">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="Privacy mode on startup" VerticalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
+                                <Switch AutomationId="PrivacyModeOnStartupSwitch" Grid.Column="1" IsToggled="{Binding PrivacyModeOnStartup}" />
+                            </Grid>
+                            <Label Text="Hides dollar amounts on Home and Accounts every time the app launches, overriding whatever those two screens were last set to."
+                                   FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
                 <Border Padding="{StaticResource CardPadding}"

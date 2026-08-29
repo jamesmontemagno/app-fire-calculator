@@ -16,6 +16,7 @@ public partial class SettingsViewModel : ObservableObject
     private readonly ICalculatorCatalog catalog;
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly IAppBehaviorPreferencesService behaviorPreferencesService;
+    private readonly IPrivacyModePreferencesService privacyModePreferencesService;
     private readonly ICurrencyPreferencesService currencyPreferencesService;
     private readonly IAppResetService appResetService;
     private readonly IAppDataTransferService appDataTransferService;
@@ -31,6 +32,7 @@ public partial class SettingsViewModel : ObservableObject
         ICalculatorCatalog catalog,
         ICalculatorDefaultsService calculatorDefaultsService,
         IAppBehaviorPreferencesService behaviorPreferencesService,
+        IPrivacyModePreferencesService privacyModePreferencesService,
         ICurrencyPreferencesService currencyPreferencesService,
         IAppResetService appResetService,
         IAppDataTransferService appDataTransferService,
@@ -45,6 +47,7 @@ public partial class SettingsViewModel : ObservableObject
         this.catalog = catalog;
         this.calculatorDefaultsService = calculatorDefaultsService;
         this.behaviorPreferencesService = behaviorPreferencesService;
+        this.privacyModePreferencesService = privacyModePreferencesService;
         this.currencyPreferencesService = currencyPreferencesService;
         this.appResetService = appResetService;
         this.appDataTransferService = appDataTransferService;
@@ -63,6 +66,7 @@ public partial class SettingsViewModel : ObservableObject
         highContrast = behavior.HighContrast;
         showRecommendedBooks = behavior.ShowRecommendedBooks;
         selectedCurrencyOption = currencyPreferencesService.SelectedOption;
+        privacyModeOnStartup = privacyModePreferencesService.PrivacyModeOnStartup;
     }
 
     public IReadOnlyList<ThemePreference> ThemeOptions { get; } = Enum.GetValues<ThemePreference>();
@@ -113,6 +117,16 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private bool showRecommendedBooks;
+
+    /// <summary>
+    /// Global override: when on, Home and Accounts privacy toggles are forced back on every time the
+    /// app launches, regardless of what the user last left them as. Applied once per launch in
+    /// <c>App.xaml.cs</c>; toggling it here only takes effect on the next launch, not immediately.
+    /// </summary>
+    [ObservableProperty]
+    private bool privacyModeOnStartup;
+
+    partial void OnPrivacyModeOnStartupChanged(bool value) => privacyModePreferencesService.PrivacyModeOnStartup = value;
 
     public string LaunchDestinationDescription => $"{SelectedLaunchDestination} will open after onboarding.";
 
