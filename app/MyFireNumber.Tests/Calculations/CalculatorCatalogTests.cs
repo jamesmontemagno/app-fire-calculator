@@ -76,6 +76,13 @@ public class CalculatorCatalogTests
         Assert.Throws<KeyNotFoundException>(() => Catalog.GetRequired("not-a-calculator"));
     }
 
+    [Fact]
+    public void Standalone_only_calculators_do_not_support_linked_profiles()
+    {
+        Assert.False(Catalog.GetRequired("interest-calculator").SupportsLinkedProfile);
+        Assert.False(Catalog.GetRequired("withdrawal-rate").SupportsLinkedProfile);
+    }
+
     private static IReadOnlyDictionary<string, string> LoadNativeRoutes()
     {
         var path = Path.Combine(AppContext.BaseDirectory, "NativeRoutes", "AppShell.xaml.cs");

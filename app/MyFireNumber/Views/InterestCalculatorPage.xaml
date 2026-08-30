@@ -39,7 +39,7 @@
                         <controls:NumericInputView Header="Starting balance" HelpText="The amount already in the account, in dollars." Placeholder="10000" Text="{Binding StartingBalanceText}" />
                         <controls:NumericInputView Grid.Column="1" Header="Monthly contribution" HelpText="The amount deposited at the end of each month, in dollars." Placeholder="250" Text="{Binding MonthlyContributionText}" />
                         <controls:PercentageInputView Grid.Row="1" Header="Annual interest rate" HelpText="The stated annual rate, compounded monthly." Placeholder="5" Minimum="0" Maximum="50" Step="0.1" Text="{Binding AnnualInterestRateText}" />
-                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="Time period" HelpText="How many years the balance earns interest." Placeholder="10" Text="{Binding YearsText}" />
+                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="Time period" HelpText="How many years the balance earns interest." Placeholder="10" Text="{Binding YearsText}" VerticalOptions="Start" />
                     </Grid>
                 </VerticalStackLayout>
             </Border>
