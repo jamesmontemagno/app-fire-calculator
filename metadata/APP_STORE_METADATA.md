@@ -26,7 +26,8 @@
 ### Promotional Text
 
 Plan your path to financial independence with private, offline calculators for FIRE,
-investing, debt payoff, healthcare, and retirement cash flow.
+investing, debt payoff, healthcare, taxes, and retirement cash flow — plus account
+tracking and monthly net-worth check-ins.
 
 ### Description
 
@@ -45,21 +46,41 @@ Choose the calculator that fits your goals:
 - Savings & Investment Rate
 - Debt Payoff
 - Healthcare Gap
+- 72(t) / SEPP
+- Roth Conversion Strategy
+- Interest Calculator
 - Retirement Cash Flow
 
-Adjust your assumptions and immediately see estimated targets, timelines, progress, and
-portfolio projections. Save scenarios on your device, compare plans, and export supported
-calculations to Excel when you want a portable copy.
+TRACK WHAT YOU ACTUALLY OWN
 
-Privacy comes first. Your financial inputs and saved plans stay on your device. The app has
-no accounts, advertising, analytics, or tracking, and calculations work offline.
+Build a financial Profile once — accounts, income, expenses, and debts — and link it to
+any calculator so your scenarios always start from real numbers instead of guesses.
+
+SEE YOUR PROGRESS OVER TIME
+
+Run a guided monthly check-in to capture a snapshot of every balance. History & Trends
+turns those check-ins into net-worth, assets-versus-debts, and cash-flow charts you can
+scrub through, so you can watch the plan actually working.
+
+PLAN, COMPARE, AND EXPORT
+
+Adjust your assumptions and immediately see estimated targets, timelines, progress, and
+portfolio projections on interactive charts. Save named scenarios on your device, compare
+plans, and export supported calculations to Excel when you want a portable copy.
+
+PRIVACY COMES FIRST
+
+Your financial inputs, accounts, and saved plans stay on your device. The app has no
+accounts, advertising, analytics, or tracking, and calculations work offline. Privacy Mode
+hides every dollar figure with one tap — and can turn itself on at each launch — so you can
+open the app anywhere.
 
 My Fire # is designed for education and planning. Results are hypothetical estimates and
 are not financial, investment, tax, or legal advice.
 
 ### Keywords
 
-`FIRE,retirement,financial independence,calculator,savings,investing,debt,Coast FIRE`
+`FIRE,retirement,financial independence,net worth,calculator,savings,investing,debt,Coast FIRE`
 
 ### URLs
 
@@ -73,7 +94,8 @@ are not financial, investment, tax, or legal advice.
 ### What's New
 
 Initial release of My Fire # with private, on-device FIRE, savings, debt payoff,
-healthcare-gap, and retirement cash-flow planning tools.
+healthcare-gap, 72(t)/SEPP, Roth conversion, interest, and retirement cash-flow planning
+tools, plus account tracking, monthly check-ins, net-worth history, and Privacy Mode.
 
 ## App Review Information
 
@@ -89,9 +111,14 @@ healthcare-gap, and retirement cash-flow planning tools.
 ### Review Notes
 
 My Fire # does not require an account or internet connection. All financial calculations,
-drafts, and saved plans remain on the device. The Privacy Policy and Terms links in Settings
-open the public website. Excel exports are created locally and are shared only when the user
-explicitly invokes the system share sheet.
+accounts, check-in history, drafts, and saved plans remain on the device. The Privacy Policy
+and Terms links in Settings open the public website. Excel exports are created locally and
+are shared only when the user explicitly invokes the system share sheet.
+
+Reviewers can reach every feature without signing in: the Calculators tab lists all fourteen
+calculators, the Accounts tab holds the optional financial Profile and the guided monthly
+check-in, and Profile/Settings contains theme, accessibility, defaults, currency, Privacy
+Mode, local backup and restore, legal links, and confirmed data deletion.
 
 The app provides educational estimates and displays an informational disclaimer throughout
 the calculator experience.
@@ -146,16 +173,23 @@ Upload screenshots in this order for both display classes:
 
 | Order | Screen | iPhone 6.5-inch | iPad 13-inch |
 | --- | --- | --- | --- |
-| 1 | Home and privacy-first positioning | `iphone-6.5/01-home.png` | `ipad-13/01-home.png` |
-| 2 | Full calculator catalog | `iphone-6.5/02-calculators.png` | `ipad-13/02-calculators.png` |
-| 3 | Standard FIRE scenario and projection | `iphone-6.5/03-standard-fire.png` | `ipad-13/03-standard-fire.png` |
-| 4 | Coast FIRE results and comparison | `iphone-6.5/04-coast-fire.png` | `ipad-13/04-coast-fire.png` |
-| 5 | Retirement cash-flow outlook | `iphone-6.5/05-retirement-cash-flow.png` | `ipad-13/05-retirement-cash-flow.png` |
+| 1 | Home dashboard with net worth and next steps | `iphone-6.5/01-home.png` | `ipad-13/01-home.png` |
+| 2 | Accounts overview: assets, debts, and cash flow | `iphone-6.5/02-accounts.png` | `ipad-13/02-accounts.png` |
+| 3 | History & trends net-worth charts | `iphone-6.5/03-history.png` | `ipad-13/03-history.png` |
+| 4 | Full calculator catalog | `iphone-6.5/04-calculators.png` | `ipad-13/04-calculators.png` |
+| 5 | Coast FIRE projection and export options | `iphone-6.5/05-coast-fire.png` | `ipad-13/05-coast-fire.png` |
 
 Screenshot dimensions:
 
 - iPhone 6.5-inch: 1242 x 2688 pixels
 - iPad 13-inch: 2064 x 2752 pixels
+
+The iPhone slot also accepts 1284 x 2778. Uploading these two master sizes lets App Store
+Connect scale the remaining device classes, so per-device sets are not required.
+
+Screenshots are generated from a seeded demo profile rather than real financial data. See
+`tools/store-screenshots/README.md` for the full runbook: building for the simulator, seeding
+the demo persona, capturing with the status bar pinned to 9:41, and framing the results.
 
 ## Submission Checklist
 
