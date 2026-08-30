@@ -348,13 +348,21 @@ public sealed class LocalDatabase
     internal static FinancialCheckIn ToFinancialCheckIn(FinancialCheckInEntity item) => new(
         item.Id,
         ParseDate(item.CompletedAtUtc),
-        JsonSerializer.Deserialize<AccountBalanceEntry[]>(item.AccountsJson) ?? [],
-        JsonSerializer.Deserialize<DebtBalanceEntry[]>(item.DebtsJson) ?? [],
+        DeserializeOrEmpty<AccountBalanceEntry>(item.AccountsJson),
+        DeserializeOrEmpty<DebtBalanceEntry>(item.DebtsJson),
         item.AnnualIncome,
         item.AnnualExpenses)
     {
-        Assets = JsonSerializer.Deserialize<AssetValueEntry[]>(item.AssetsJson) ?? []
+        Assets = DeserializeOrEmpty<AssetValueEntry>(item.AssetsJson)
     };
+
+    /// <summary>
+    /// Older rows migrated before a JSON column existed can have it stored as NULL rather than
+    /// the entity's "[]" default, since sqlite-net's ALTER TABLE migration does not backfill
+    /// existing rows. Deserializing a null string throws, so treat null/blank as empty.
+    /// </summary>
+    private static T[] DeserializeOrEmpty<T>(string? json) =>
+        string.IsNullOrWhiteSpace(json) ? [] : JsonSerializer.Deserialize<T[]>(json) ?? [];
 
     internal static FinancialCheckInEntity ToFinancialCheckInEntity(FinancialCheckIn item) => new()
     {
@@ -465,6 +473,12 @@ public sealed class LocalDatabase
         await connection.CreateTableAsync<ProfileDebtEntity>();
         await connection.CreateTableAsync<ProfileAssetEntity>();
         await connection.CreateTableAsync<FinancialCheckInEntity>();
+
+        // sqlite-net's auto-migration adds new NOT NULL columns via ALTER TABLE without
+        // backfilling existing rows, leaving AssetsJson as NULL on rows created before the
+        // asset-tracking feature. Backfill those so future reads never see a null column value.
+        await connection.ExecuteAsync(
+            "UPDATE financial_check_ins SET AssetsJson = '[]' WHERE AssetsJson IS NULL");
     }
 
 }
@@ -701,8 +715,12 @@ internal sealed class FinancialCheckInEntity
     [NotNull]
     public string DebtsJson { get; set; } = "[]";
 
-    [NotNull]
-    public string AssetsJson { get; set; } = "[]";
+    // Intentionally not [NotNull]: this column was added after the table already existed on
+    // deployed devices. sqlite-net migrates existing tables with a plain
+    // "ALTER TABLE ... ADD COLUMN ... NOT NULL" (no DEFAULT), which SQLite rejects outright for
+    // a non-empty table and crashes the app on first launch after update. Leaving the column
+    // nullable lets the migration succeed; DeserializeOrEmpty treats a null value as "[]".
+    public string? AssetsJson { get; set; } = "[]";
 
     public double AnnualIncome { get; set; }
 
