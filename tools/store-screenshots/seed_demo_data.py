@@ -77,6 +77,7 @@ assert sum(e[2] for e in EXPENSES) == ANNUAL_EXPENSES, sum(e[2] for e in EXPENSE
 for table in (
     "profile", "profile_accounts", "profile_income", "profile_expenses",
     "profile_debts", "financial_check_ins", "plans", "drafts", "recent_activity",
+    "calculator_preferences", "corrupt_payloads",
 ):
     cur.execute(f"DELETE FROM {table}")
 

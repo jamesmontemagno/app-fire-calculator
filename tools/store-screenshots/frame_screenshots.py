@@ -44,7 +44,10 @@ def font(size, bold=False):
                 return ImageFont.truetype(name, size)
             except OSError:
                 continue
-    return ImageFont.load_default(size)
+    try:
+        return ImageFont.load_default(size=size)
+    except TypeError:
+        return ImageFont.load_default()
 
 
 def gradient(width, height):
@@ -115,7 +118,6 @@ def compose(raw_path, headline, subhead, out_path):
     target = (max(1, int(shot.width * ratio)), max(1, int(shot.height * ratio)))
     shot = shot.resize(target, Image.LANCZOS)
 
-    corner = int(58 * ratio * (shot.width / target[0] or 1))
     corner = max(12, int(62 * ratio))
     screen = rounded(shot, corner)
 
