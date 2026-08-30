@@ -58,6 +58,7 @@ public sealed class LocalDatabase
             database.DeleteAll<ProfileIncomeEntity>();
             database.DeleteAll<ProfileExpenseEntity>();
             database.DeleteAll<ProfileDebtEntity>();
+            database.DeleteAll<ProfileAssetEntity>();
             database.DeleteAll<FinancialCheckInEntity>();
         });
     }
@@ -75,6 +76,7 @@ public sealed class LocalDatabase
         var profileIncome = await connection.Table<ProfileIncomeEntity>().ToListAsync();
         var profileExpenses = await connection.Table<ProfileExpenseEntity>().ToListAsync();
         var profileDebts = await connection.Table<ProfileDebtEntity>().ToListAsync();
+        var profileAssets = await connection.Table<ProfileAssetEntity>().ToListAsync();
         var financialCheckIns = await connection.Table<FinancialCheckInEntity>().ToListAsync();
 
         return new LocalDataArchive(
@@ -90,6 +92,7 @@ public sealed class LocalDatabase
             ProfileIncome = profileIncome.Select(ToRecord).ToArray(),
             ProfileExpenses = profileExpenses.Select(ToRecord).ToArray(),
             ProfileDebts = profileDebts.Select(ToRecord).ToArray(),
+            ProfileAssets = profileAssets.Select(ToRecord).ToArray(),
             FinancialCheckIns = financialCheckIns.Select(ToFinancialCheckIn).ToArray()
         };
     }
@@ -111,6 +114,7 @@ public sealed class LocalDatabase
             database.DeleteAll<ProfileIncomeEntity>();
             database.DeleteAll<ProfileExpenseEntity>();
             database.DeleteAll<ProfileDebtEntity>();
+            database.DeleteAll<ProfileAssetEntity>();
             database.DeleteAll<FinancialCheckInEntity>();
 
             database.InsertAll(archive.Drafts.Select(ToEntity));
@@ -128,6 +132,7 @@ public sealed class LocalDatabase
             database.InsertAll(archive.ProfileIncome.Select(ToEntity));
             database.InsertAll(archive.ProfileExpenses.Select(ToEntity));
             database.InsertAll(archive.ProfileDebts.Select(ToEntity));
+            database.InsertAll(archive.ProfileAssets.Select(ToEntity));
             database.InsertAll(archive.FinancialCheckIns.Select(ToFinancialCheckInEntity));
         });
     }
@@ -143,6 +148,7 @@ public sealed class LocalDatabase
             archive.ProfileIncome is null ||
             archive.ProfileExpenses is null ||
             archive.ProfileDebts is null ||
+            archive.ProfileAssets is null ||
             archive.FinancialCheckIns is null)
         {
             throw new InvalidDataException("The archive is missing required local data.");
@@ -180,7 +186,12 @@ public sealed class LocalDatabase
                 item.Balance < 0 ||
                 item.Rate < 0 ||
                 item.MinimumPayment < 0 ||
-                item.ExtraMonthlyPayment < 0))
+                item.ExtraMonthlyPayment < 0) ||
+            archive.ProfileAssets.Any(item =>
+                string.IsNullOrWhiteSpace(item.Id) ||
+                string.IsNullOrWhiteSpace(item.Name) ||
+                item.CurrentValue < 0 ||
+                item.PurchaseValue < 0))
         {
             throw new InvalidDataException("The archive contains invalid profile data.");
         }
@@ -194,10 +205,12 @@ public sealed class LocalDatabase
                 string.IsNullOrWhiteSpace(checkIn.Id) ||
                 checkIn.Accounts is null ||
                 checkIn.Debts is null ||
+                checkIn.Assets is null ||
                 checkIn.AnnualIncome < 0 ||
                 checkIn.AnnualExpenses < 0 ||
                 checkIn.Accounts.Any(account => string.IsNullOrWhiteSpace(account.AccountId) || string.IsNullOrWhiteSpace(account.Name) || account.Balance < 0) ||
-                checkIn.Debts.Any(debt => string.IsNullOrWhiteSpace(debt.DebtId) || string.IsNullOrWhiteSpace(debt.Name) || debt.Balance < 0)))
+                checkIn.Debts.Any(debt => string.IsNullOrWhiteSpace(debt.DebtId) || string.IsNullOrWhiteSpace(debt.Name) || debt.Balance < 0) ||
+                checkIn.Assets.Any(asset => string.IsNullOrWhiteSpace(asset.AssetId) || string.IsNullOrWhiteSpace(asset.Name) || asset.Value < 0)))
         {
             throw new InvalidDataException("The archive contains invalid check-in data.");
         }
@@ -324,13 +337,24 @@ public sealed class LocalDatabase
     private static DebtItem ToRecord(ProfileDebtEntity item) =>
         new(item.Id, item.Name, item.Balance, item.Rate, item.MinimumPayment, item.ExtraMonthlyPayment);
 
+    private static PropertyAsset ToRecord(ProfileAssetEntity item) => new(
+        item.Id,
+        item.Name,
+        Enum.TryParse<PropertyAssetType>(item.Type, out var type) ? type : PropertyAssetType.Other,
+        item.CurrentValue,
+        item.PurchaseValue,
+        item.IncludeInNetWorth);
+
     internal static FinancialCheckIn ToFinancialCheckIn(FinancialCheckInEntity item) => new(
         item.Id,
         ParseDate(item.CompletedAtUtc),
         JsonSerializer.Deserialize<AccountBalanceEntry[]>(item.AccountsJson) ?? [],
         JsonSerializer.Deserialize<DebtBalanceEntry[]>(item.DebtsJson) ?? [],
         item.AnnualIncome,
-        item.AnnualExpenses);
+        item.AnnualExpenses)
+    {
+        Assets = JsonSerializer.Deserialize<AssetValueEntry[]>(item.AssetsJson) ?? []
+    };
 
     internal static FinancialCheckInEntity ToFinancialCheckInEntity(FinancialCheckIn item) => new()
     {
@@ -338,6 +362,7 @@ public sealed class LocalDatabase
         CompletedAtUtc = FormatDate(item.CompletedAtUtc),
         AccountsJson = JsonSerializer.Serialize(item.Accounts),
         DebtsJson = JsonSerializer.Serialize(item.Debts),
+        AssetsJson = JsonSerializer.Serialize(item.Assets),
         AnnualIncome = item.AnnualIncome,
         AnnualExpenses = item.AnnualExpenses
     };
@@ -400,6 +425,16 @@ public sealed class LocalDatabase
         ExtraMonthlyPayment = item.ExtraMonthlyPayment
     };
 
+    private static ProfileAssetEntity ToEntity(PropertyAsset item) => new()
+    {
+        Id = item.Id,
+        Name = item.Name,
+        Type = item.Type.ToString(),
+        CurrentValue = item.CurrentValue,
+        PurchaseValue = item.PurchaseValue,
+        IncludeInNetWorth = item.IncludeInNetWorth
+    };
+
     private static DateOnly? ParseDateOnly(string? value) => string.IsNullOrWhiteSpace(value)
         ? null
         : DateOnly.Parse(value, System.Globalization.CultureInfo.InvariantCulture);
@@ -428,6 +463,7 @@ public sealed class LocalDatabase
         await connection.CreateTableAsync<ProfileIncomeEntity>();
         await connection.CreateTableAsync<ProfileExpenseEntity>();
         await connection.CreateTableAsync<ProfileDebtEntity>();
+        await connection.CreateTableAsync<ProfileAssetEntity>();
         await connection.CreateTableAsync<FinancialCheckInEntity>();
     }
 
@@ -630,6 +666,21 @@ internal sealed class ProfileDebtEntity
 }
 
 /// <summary>
+/// Owned property tracked for net worth only: a home, land, a vehicle, a collection. Stored at its
+/// current value, with the original purchase value kept alongside purely for context.
+/// </summary>
+[Table("profile_assets")]
+internal sealed class ProfileAssetEntity
+{
+    [PrimaryKey] public string Id { get; set; } = string.Empty;
+    [NotNull] public string Name { get; set; } = string.Empty;
+    [NotNull] public string Type { get; set; } = nameof(PropertyAssetType.Other);
+    public double CurrentValue { get; set; }
+    public double PurchaseValue { get; set; }
+    public bool IncludeInNetWorth { get; set; } = true;
+}
+
+/// <summary>
 /// A completed monthly check-in. <see cref="AccountsJson"/> and <see cref="DebtsJson"/> hold the
 /// serialized <see cref="AccountBalanceEntry"/>/<see cref="DebtBalanceEntry"/> lists captured at
 /// check-in time, so a rename or deletion of the live account/debt afterward never rewrites history.
@@ -649,6 +700,9 @@ internal sealed class FinancialCheckInEntity
 
     [NotNull]
     public string DebtsJson { get; set; } = "[]";
+
+    [NotNull]
+    public string AssetsJson { get; set; } = "[]";
 
     public double AnnualIncome { get; set; }
 

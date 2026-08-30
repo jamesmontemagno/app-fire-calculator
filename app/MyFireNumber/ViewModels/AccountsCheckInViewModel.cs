@@ -13,6 +13,7 @@ namespace MyFireNumber.ViewModels;
 public enum CheckInStep
 {
     Accounts,
+    Assets,
     Debts,
     IncomeAndExpenses,
     Confirm
@@ -29,6 +30,7 @@ public sealed partial class AccountsCheckInViewModel(
     IProfileIncomeRepository profileIncomeRepository,
     IProfileExpenseRepository profileExpenseRepository,
     IProfileDebtRepository profileDebtRepository,
+    IProfileAssetRepository profileAssetRepository,
     IFinancialCheckInRepository checkInRepository,
     ICurrencyPreferencesService currencyPreferencesService,
     INavigationService navigationService,
@@ -39,6 +41,7 @@ public sealed partial class AccountsCheckInViewModel(
     private static readonly CheckInStep[] StepOrder =
     [
         CheckInStep.Accounts,
+        CheckInStep.Assets,
         CheckInStep.Debts,
         CheckInStep.IncomeAndExpenses,
         CheckInStep.Confirm
@@ -46,6 +49,7 @@ public sealed partial class AccountsCheckInViewModel(
 
     public ObservableCollection<RetirementAccountEditorItem> Accounts { get; } = [];
     public ObservableCollection<DebtEditorItem> Debts { get; } = [];
+    public ObservableCollection<AssetEditorItem> Assets { get; } = [];
     public ObservableCollection<RetirementIncomeEditorItem> Income { get; } = [];
     public ObservableCollection<RetirementExpenseEditorItem> Expenses { get; } = [];
 
@@ -57,6 +61,8 @@ public sealed partial class AccountsCheckInViewModel(
     [NotifyPropertyChangedFor(nameof(IsNotSaving))]
     private bool isSaving;
 
+    [ObservableProperty] private string accountBalanceText = "$0";
+    [ObservableProperty] private string assetValueText = "$0";
     [ObservableProperty] private string totalAssetsText = "$0";
     [ObservableProperty] private string totalDebtsText = "$0";
     [ObservableProperty] private string netWorthText = "$0";
@@ -69,6 +75,7 @@ public sealed partial class AccountsCheckInViewModel(
 
     public CheckInStep CurrentStep => StepIndex >= 0 && StepIndex < StepOrder.Length ? StepOrder[StepIndex] : CheckInStep.Confirm;
     public bool IsAccountsStep => CurrentStep == CheckInStep.Accounts;
+    public bool IsAssetsStep => CurrentStep == CheckInStep.Assets;
     public bool IsDebtsStep => CurrentStep == CheckInStep.Debts;
     public bool IsIncomeAndExpensesStep => CurrentStep == CheckInStep.IncomeAndExpenses;
     public bool IsConfirmStep => CurrentStep == CheckInStep.Confirm;
@@ -83,6 +90,7 @@ public sealed partial class AccountsCheckInViewModel(
     public string StepTitle => CurrentStep switch
     {
         CheckInStep.Accounts => "Confirm account balances",
+        CheckInStep.Assets => "Confirm asset values",
         CheckInStep.Debts => "Confirm debt balances",
         CheckInStep.IncomeAndExpenses => "Review income and expenses",
         _ => "Confirm and save"
@@ -93,6 +101,7 @@ public sealed partial class AccountsCheckInViewModel(
     {
         OnPropertyChanged(nameof(CurrentStep));
         OnPropertyChanged(nameof(IsAccountsStep));
+        OnPropertyChanged(nameof(IsAssetsStep));
         OnPropertyChanged(nameof(IsDebtsStep));
         OnPropertyChanged(nameof(IsIncomeAndExpensesStep));
         OnPropertyChanged(nameof(IsConfirmStep));
@@ -113,6 +122,7 @@ public sealed partial class AccountsCheckInViewModel(
     {
         Accounts.Clear();
         Debts.Clear();
+        Assets.Clear();
         Income.Clear();
         Expenses.Clear();
 
@@ -124,6 +134,11 @@ public sealed partial class AccountsCheckInViewModel(
         foreach (var debt in await profileDebtRepository.ListAsync())
         {
             Debts.Add(DebtEditorItem.FromDebt(debt));
+        }
+
+        foreach (var asset in await profileAssetRepository.ListAsync())
+        {
+            Assets.Add(AssetEditorItem.FromAsset(asset));
         }
 
         foreach (var income in await profileIncomeRepository.ListAsync())
@@ -213,6 +228,18 @@ public sealed partial class AccountsCheckInViewModel(
                 debts.Add(debt);
             }
 
+            var assets = new List<PropertyAsset>(Assets.Count);
+            foreach (var editor in Assets)
+            {
+                if (!editor.TryCreateAsset(out var asset, out var assetError))
+                {
+                    ValidationMessage = $"Asset {editor.Name}: {assetError}";
+                    return;
+                }
+
+                assets.Add(asset);
+            }
+
             var income = new List<RetirementIncomeSource>(Income.Count);
             foreach (var editor in Income)
             {
@@ -239,6 +266,7 @@ public sealed partial class AccountsCheckInViewModel(
 
             foreach (var account in accounts) await profileAccountRepository.SaveAsync(account);
             foreach (var debt in debts) await profileDebtRepository.SaveAsync(debt);
+            foreach (var asset in assets) await profileAssetRepository.SaveAsync(asset);
             foreach (var source in income) await profileIncomeRepository.SaveAsync(source);
             foreach (var expense in expenses) await profileExpenseRepository.SaveAsync(expense);
 
@@ -248,7 +276,10 @@ public sealed partial class AccountsCheckInViewModel(
                 [.. accounts.Select(a => new AccountBalanceEntry(a.Id, a.Name, a.Type, a.Balance))],
                 [.. debts.Select(d => new DebtBalanceEntry(d.Id, d.Name, d.Balance))],
                 income.Sum(i => i.AnnualAmount),
-                expenses.Sum(e => e.AnnualAmount));
+                expenses.Sum(e => e.AnnualAmount))
+            {
+                Assets = [.. assets.Select(a => new AssetValueEntry(a.Id, a.Name, a.Type, a.CurrentValue, a.IncludeInNetWorth))]
+            };
 
             await checkInRepository.SaveAsync(checkIn);
 
@@ -268,11 +299,15 @@ public sealed partial class AccountsCheckInViewModel(
 
     private void UpdateConfirmationTotals()
     {
-        var assets = Accounts.Sum(item => ParseAmount(item.BalanceText));
+        var accountBalance = Accounts.Sum(item => ParseAmount(item.BalanceText));
+        var assetValue = Assets.Where(item => item.IncludeInNetWorth).Sum(item => ParseAmount(item.CurrentValueText));
+        var assets = accountBalance + assetValue;
         var debts = Debts.Sum(item => ParseAmount(item.BalanceText));
         var income = Income.Sum(item => ParseAmount(item.AnnualAmountText));
         var expenses = Expenses.Sum(item => ParseAmount(item.AnnualAmountText));
 
+        AccountBalanceText = FormatCurrency(accountBalance);
+        AssetValueText = FormatCurrency(assetValue);
         TotalAssetsText = FormatCurrency(assets);
         TotalDebtsText = FormatCurrency(debts);
         NetWorthText = FormatCurrency(assets - debts);
@@ -292,6 +327,18 @@ public sealed partial class AccountsCheckInViewModel(
                     if (!TryParseNonNegative(account.BalanceText, out _))
                     {
                         ValidationMessage = $"Enter a valid balance for {account.Name}.";
+                        return false;
+                    }
+                }
+
+                return true;
+
+            case CheckInStep.Assets:
+                foreach (var asset in Assets)
+                {
+                    if (!TryParseNonNegative(asset.CurrentValueText, out _))
+                    {
+                        ValidationMessage = $"Enter a valid current value for {asset.Name}.";
                         return false;
                     }
                 }
@@ -356,6 +403,7 @@ public sealed partial class AccountsCheckInViewModel(
     private bool IsStepEmpty(CheckInStep step) => step switch
     {
         CheckInStep.Accounts => Accounts.Count == 0,
+        CheckInStep.Assets => Assets.Count == 0,
         CheckInStep.Debts => Debts.Count == 0,
         CheckInStep.IncomeAndExpenses => Income.Count == 0 && Expenses.Count == 0,
         _ => false

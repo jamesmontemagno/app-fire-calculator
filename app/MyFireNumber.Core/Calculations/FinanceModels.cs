@@ -286,6 +286,52 @@ public sealed record RetirementAccount(
         Math.Clamp(WithdrawalTaxRate ?? RetirementTaxDefaults.WithdrawalTaxRateFor(Type), 0, 1);
 }
 
+/// <summary>The kind of owned property tracked on the net worth side of the ledger.</summary>
+public enum PropertyAssetType
+{
+    Home,
+    RealEstate,
+    Land,
+    Vehicle,
+    Collectible,
+    Other
+}
+
+/// <summary>
+/// A physical or otherwise non-investable asset (home, rental property, land, car, collection) held
+/// only so net worth tells the whole story.
+///
+/// <para><see cref="CurrentValue"/> is what the asset is worth today and is the only figure net worth
+/// uses, matching how a net worth statement is normally prepared: assets at current fair market
+/// value, liabilities at their outstanding balance. <see cref="PurchaseValue"/> is kept purely for
+/// context so the app can show appreciation or depreciation since purchase.</para>
+///
+/// <para>Money owed against an asset (a mortgage, a car loan) is entered as a <see cref="DebtItem"/>
+/// like any other debt, so the asset is never recorded net of its loan and nothing is double
+/// counted.</para>
+///
+/// <para>These assets deliberately stay out of every FIRE projection: a house you live in or a car
+/// you drive cannot fund withdrawals, so calculators keep using investment account balances only.
+/// <see cref="IncludeInNetWorth"/> lets someone leave a personal-use asset out of net worth as well.</para>
+/// </summary>
+public sealed record PropertyAsset(
+    string Id,
+    string Name,
+    PropertyAssetType Type,
+    double CurrentValue,
+    double PurchaseValue,
+    bool IncludeInNetWorth = true)
+{
+    /// <summary>The value this asset contributes to net worth, honoring <see cref="IncludeInNetWorth"/>.</summary>
+    public double NetWorthValue => IncludeInNetWorth ? CurrentValue : 0;
+
+    /// <summary>
+    /// Change in value since purchase, or null when no purchase value was entered (so the UI can stay
+    /// silent instead of claiming a 100% loss).
+    /// </summary>
+    public double? ValueChange => PurchaseValue > 0 ? CurrentValue - PurchaseValue : null;
+}
+
 public sealed record RetirementIncomeSource(
     string Id,
     string Name,

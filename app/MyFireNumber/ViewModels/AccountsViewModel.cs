@@ -22,6 +22,7 @@ public sealed partial class AccountsViewModel(
     IProfileIncomeRepository profileIncomeRepository,
     IProfileExpenseRepository profileExpenseRepository,
     IProfileDebtRepository profileDebtRepository,
+    IProfileAssetRepository profileAssetRepository,
     IFinancialCheckInRepository checkInRepository,
     ICalculatorDefaultsService calculatorDefaultsService,
     ICurrencyPreferencesService currencyPreferencesService,
@@ -42,6 +43,9 @@ public sealed partial class AccountsViewModel(
     private string rawIncomeSummary = "No income yet.";
     private string rawExpensesSummary = "No expenses yet.";
     private string rawDebtsSummary = "No debts yet.";
+    private string rawAssetsSummary = "No assets yet.";
+    private double rawAccountBalance;
+    private double rawAssetValue;
     private double rawTotalAssets;
     private double rawTotalDebts;
     private double rawAnnualIncome;
@@ -53,6 +57,7 @@ public sealed partial class AccountsViewModel(
     public ObservableCollection<RetirementIncomeEditorItem> Income { get; } = [];
     public ObservableCollection<RetirementExpenseEditorItem> Expenses { get; } = [];
     public ObservableCollection<DebtEditorItem> Debts { get; } = [];
+    public ObservableCollection<AssetEditorItem> Assets { get; } = [];
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasValidationMessage))]
@@ -63,9 +68,12 @@ public sealed partial class AccountsViewModel(
     [ObservableProperty] private string incomeSummary = "No income yet.";
     [ObservableProperty] private string expensesSummary = "No expenses yet.";
     [ObservableProperty] private string debtsSummary = "No debts yet.";
+    [ObservableProperty] private string assetsSummary = "No assets yet.";
 
     // Overview totals. Always computed from the live, current inventory — not from check-in history,
     // which exists only to show trends and freshness over time.
+    [ObservableProperty] private string accountBalanceTotalText = "$0";
+    [ObservableProperty] private string assetValueTotalText = "$0";
     [ObservableProperty] private string totalAssetsText = "$0";
     [ObservableProperty] private string totalDebtsText = "$0";
     [ObservableProperty] private string netWorthText = "$0";
@@ -144,11 +152,13 @@ public sealed partial class AccountsViewModel(
         Income.Clear();
         Expenses.Clear();
         Debts.Clear();
+        Assets.Clear();
 
         var accounts = await profileAccountRepository.ListAsync();
         var income = await profileIncomeRepository.ListAsync();
         var expenses = await profileExpenseRepository.ListAsync();
         var debts = await profileDebtRepository.ListAsync();
+        var assets = await profileAssetRepository.ListAsync();
 
         foreach (var account in accounts)
         {
@@ -190,6 +200,7 @@ public sealed partial class AccountsViewModel(
         Income.CollectionChanged += OnIncomeCollectionChanged;
         Expenses.CollectionChanged += OnExpenseCollectionChanged;
         Debts.CollectionChanged += OnDebtsCollectionChanged;
+        Assets.CollectionChanged += OnAssetsCollectionChanged;
     }
 
     private void OnAccountsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
@@ -216,6 +227,12 @@ public sealed partial class AccountsViewModel(
         UpdateInventorySummaries();
     }
 
+    private void OnAssetsCollectionChanged(object? sender, NotifyCollectionChangedEventArgs eventArgs)
+    {
+        UpdateItemHandlers<AssetEditorItem>(eventArgs, OnInventoryItemChanged);
+        UpdateInventorySummaries();
+    }
+
     private static void UpdateItemHandlers<TItem>(
         NotifyCollectionChangedEventArgs eventArgs,
         EventHandler handler)
@@ -229,6 +246,7 @@ public sealed partial class AccountsViewModel(
                 case RetirementIncomeEditorItem income: income.Changed -= handler; break;
                 case RetirementExpenseEditorItem expense: expense.Changed -= handler; break;
                 case DebtEditorItem debt: debt.Changed -= handler; break;
+                case AssetEditorItem asset: asset.Changed -= handler; break;
             }
         }
 
@@ -240,6 +258,7 @@ public sealed partial class AccountsViewModel(
                 case RetirementIncomeEditorItem income: income.Changed += handler; break;
                 case RetirementExpenseEditorItem expense: expense.Changed += handler; break;
                 case DebtEditorItem debt: debt.Changed += handler; break;
+                case AssetEditorItem asset: asset.Changed += handler; break;
             }
         }
     }
@@ -252,6 +271,7 @@ public sealed partial class AccountsViewModel(
         foreach (var item in Income) item.Changed -= OnInventoryItemChanged;
         foreach (var item in Expenses) item.Changed -= OnInventoryItemChanged;
         foreach (var item in Debts) item.Changed -= OnInventoryItemChanged;
+        foreach (var item in Assets) item.Changed -= OnInventoryItemChanged;
     }
 
     private void UpdateInventorySummaries()
@@ -279,7 +299,29 @@ public sealed partial class AccountsViewModel(
             ? "No debts yet."
             : $"{CountLabel(Debts.Count, "debt")} | {FormatCurrency(debtBalance)} balance | {FormatCurrency(minimumPayments + extraPayments)}/mo current payments";
 
-        rawTotalAssets = accountBalance;
+        var assetValue = Assets.Where(item => item.IncludeInNetWorth).Sum(item => ParseAmount(item.CurrentValueText));
+        var excludedAssets = Assets.Count(item => !item.IncludeInNetWorth);
+        rawAssetsSummary = Assets.Count == 0
+            ? "No assets yet."
+            : $"{CountLabel(Assets.Count, "asset")} | {FormatCurrency(assetValue)} counted in net worth{(excludedAssets > 0 ? $" | {excludedAssets} not counted" : string.Empty)}";
+
+        foreach (var asset in Assets)
+        {
+            var purchaseValue = ParseAmount(asset.PurchaseValueText);
+            var change = ParseAmount(asset.CurrentValueText) - purchaseValue;
+            asset.ValueChangeText = purchaseValue <= 0
+                ? string.Empty
+                : change switch
+                {
+                    > 0 => $"Up {FormatCurrency(change)} since purchase",
+                    < 0 => $"Down {FormatCurrency(Math.Abs(change))} since purchase",
+                    _ => "Unchanged since purchase"
+                };
+        }
+
+        rawAccountBalance = accountBalance;
+        rawAssetValue = assetValue;
+        rawTotalAssets = accountBalance + assetValue;
         rawTotalDebts = debtBalance;
         rawAnnualIncome = annualIncome;
         rawAnnualExpenses = annualExpenses;
@@ -293,7 +335,10 @@ public sealed partial class AccountsViewModel(
         IncomeSummary = IsPrivacyModeEnabled && Income.Count > 0 ? PrivacyMask : rawIncomeSummary;
         ExpensesSummary = IsPrivacyModeEnabled && Expenses.Count > 0 ? PrivacyMask : rawExpensesSummary;
         DebtsSummary = IsPrivacyModeEnabled && Debts.Count > 0 ? PrivacyMask : rawDebtsSummary;
+        AssetsSummary = IsPrivacyModeEnabled && Assets.Count > 0 ? PrivacyMask : rawAssetsSummary;
 
+        AccountBalanceTotalText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawAccountBalance);
+        AssetValueTotalText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawAssetValue);
         TotalAssetsText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawTotalAssets);
         TotalDebtsText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawTotalDebts);
         NetWorthText = IsPrivacyModeEnabled ? PrivacyMask : FormatCurrency(rawTotalAssets - rawTotalDebts);
@@ -336,7 +381,7 @@ public sealed partial class AccountsViewModel(
                 ? $"Overdue since {dueDate:MMM d, yyyy}."
                 : $"Next update due {dueDate:MMM d, yyyy}.";
 
-            var currentNetWorth = Accounts.Sum(item => ParseAmount(item.BalanceText)) - Debts.Sum(item => ParseAmount(item.BalanceText));
+            var currentNetWorth = rawTotalAssets - rawTotalDebts;
             var change = currentNetWorth - latest.NetWorth;
             HasNetWorthChange = true;
             rawNetWorthChangeText = change switch
@@ -351,6 +396,7 @@ public sealed partial class AccountsViewModel(
         // Latest confirming check-in per account/debt id, scanning newest-first so the first match wins.
         var latestAccountConfirmation = new Dictionary<string, DateTime>(StringComparer.Ordinal);
         var latestDebtConfirmation = new Dictionary<string, DateTime>(StringComparer.Ordinal);
+        var latestAssetConfirmation = new Dictionary<string, DateTime>(StringComparer.Ordinal);
         for (var index = checkIns.Count - 1; index >= 0; index--)
         {
             var checkIn = checkIns[index];
@@ -362,6 +408,11 @@ public sealed partial class AccountsViewModel(
             foreach (var debt in checkIn.Debts)
             {
                 latestDebtConfirmation.TryAdd(debt.DebtId, checkIn.CompletedAtUtc);
+            }
+
+            foreach (var asset in checkIn.Assets)
+            {
+                latestAssetConfirmation.TryAdd(asset.AssetId, checkIn.CompletedAtUtc);
             }
         }
 
@@ -375,6 +426,12 @@ public sealed partial class AccountsViewModel(
         {
             ApplyFreshness(debt, latestDebtConfirmation.GetValueOrDefault(debt.Id), now,
                 (text, overdue) => { debt.FreshnessText = text; debt.IsOverdue = overdue; });
+        }
+
+        foreach (var asset in Assets)
+        {
+            ApplyFreshness(asset, latestAssetConfirmation.GetValueOrDefault(asset.Id), now,
+                (text, overdue) => { asset.FreshnessText = text; asset.IsOverdue = overdue; });
         }
     }
 
@@ -461,10 +518,24 @@ public sealed partial class AccountsViewModel(
             debts.Add(debt);
         }
 
+        var assets = new List<PropertyAsset>(Assets.Count);
+        foreach (var item in Assets)
+        {
+            if (!item.TryCreateAsset(out var asset, out var assetError))
+            {
+                item.IsExpanded = true;
+                ValidationMessage = $"Asset {item.Name}: {assetError}";
+                return;
+            }
+
+            assets.Add(asset);
+        }
+
         foreach (var account in accounts) await profileAccountRepository.SaveAsync(account);
         foreach (var item in income) await profileIncomeRepository.SaveAsync(item);
         foreach (var item in expenses) await profileExpenseRepository.SaveAsync(item);
         foreach (var debt in debts) await profileDebtRepository.SaveAsync(debt);
+        foreach (var asset in assets) await profileAssetRepository.SaveAsync(asset);
 
         UpdateInventorySummaries();
         await UpdateFreshnessAsync();
@@ -512,6 +583,26 @@ public sealed partial class AccountsViewModel(
     }
 
     [RelayCommand] private void AddDebt() => Debts.Add(new DebtEditorItem { Name = "New debt", IsExpanded = true });
+
+    [RelayCommand]
+    private async Task AddAssetAsync()
+    {
+        var type = await promptService.ChooseAssetTypeAsync();
+        if (type is null)
+        {
+            return;
+        }
+
+        Assets.Add(AssetEditorItem.CreateNew(type.Value));
+    }
+
+    [RelayCommand]
+    private async Task RemoveAssetAsync(AssetEditorItem? item)
+    {
+        if (item is null || !await ConfirmDeleteAsync("asset", item.Name)) return;
+        Assets.Remove(item);
+        await profileAssetRepository.DeleteAsync(item.Id);
+    }
 
     [RelayCommand]
     private async Task RemoveIncomeAsync(RetirementIncomeEditorItem? item)
@@ -598,6 +689,34 @@ public sealed partial class AccountsViewModel(
             ParseAmount(account.BalanceText),
             account.FreshnessText,
             account.IsOverdue,
+            history);
+
+        return navigationService.GoToAsync("account-item-detail", new Dictionary<string, object> { ["details"] = args });
+    }
+
+    [RelayCommand]
+    private Task ViewAssetDetailAsync(AssetEditorItem? asset)
+    {
+        if (asset is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var history = allCheckIns
+            .SelectMany(checkIn => checkIn.Assets
+                .Where(entry => entry.AssetId == asset.Id)
+                .Select(entry => new AccountItemHistoryPoint(checkIn.CompletedAtUtc, entry.Value)))
+            .OrderBy(point => point.CompletedAtUtc)
+            .ToArray();
+
+        var args = new AccountItemDetailArgs(
+            asset.Id,
+            asset.Name,
+            asset.TypeLabel,
+            IsDebt: false,
+            ParseAmount(asset.CurrentValueText),
+            asset.FreshnessText,
+            asset.IsOverdue,
             history);
 
         return navigationService.GoToAsync("account-item-detail", new Dictionary<string, object> { ["details"] = args });

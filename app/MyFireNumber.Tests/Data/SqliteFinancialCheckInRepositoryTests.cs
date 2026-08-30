@@ -32,6 +32,59 @@ public sealed class SqliteFinancialCheckInRepositoryTests : IAsyncLifetime
         Assert.Equal(expected.AnnualExpenses, actual.AnnualExpenses);
         Assert.Equal(expected.Accounts, actual.Accounts);
         Assert.Equal(expected.Debts, actual.Debts);
+        Assert.Equal(expected.Assets, actual.Assets);
+    }
+
+    [Fact]
+    public async Task SaveAsync_RoundTripsAssetValuesAndCountsThemInNetWorth()
+    {
+        var repository = new SqliteFinancialCheckInRepository(new LocalDatabase(databasePath));
+        var checkIn = new FinancialCheckIn(
+            "with-assets",
+            new DateTime(2025, 4, 1, 0, 0, 0, DateTimeKind.Utc),
+            [new AccountBalanceEntry("401k", "401(k)", RetirementAccountType.Traditional, 100_000)],
+            [new DebtBalanceEntry("mortgage", "Mortgage", 300_000)],
+            90_000,
+            60_000)
+        {
+            Assets =
+            [
+                new AssetValueEntry("house", "Our house", PropertyAssetType.Home, 450_000),
+                new AssetValueEntry("car", "Car", PropertyAssetType.Vehicle, 22_000, IncludeInNetWorth: false)
+            ]
+        };
+
+        await repository.SaveAsync(checkIn);
+
+        var saved = Assert.Single(await repository.ListAsync());
+        AssertCheckInsMatch(checkIn, saved);
+        Assert.Equal(100_000, saved.TotalAccountBalance);
+        Assert.Equal(450_000, saved.TotalAssetValue);
+        Assert.Equal(550_000, saved.TotalAssets);
+        Assert.Equal(250_000, saved.NetWorth);
+    }
+
+    [Fact]
+    public async Task SaveAsync_RejectsANegativeAssetValue()
+    {
+        var repository = new SqliteFinancialCheckInRepository(new LocalDatabase(databasePath));
+        var invalid = new FinancialCheckIn("bad-asset", DateTime.UtcNow, [], [], 0, 0)
+        {
+            Assets = [new AssetValueEntry("house", "Our house", PropertyAssetType.Home, -1)]
+        };
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => repository.SaveAsync(invalid));
+    }
+
+    [Fact]
+    public async Task ListAsync_TreatsACheckInSavedWithoutAssetsAsHavingNone()
+    {
+        var repository = new SqliteFinancialCheckInRepository(new LocalDatabase(databasePath));
+        await repository.SaveAsync(CreateCheckIn("legacy", new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
+
+        var saved = Assert.Single(await repository.ListAsync());
+        Assert.Empty(saved.Assets);
+        Assert.Equal(saved.TotalAccountBalance, saved.TotalAssets);
     }
 
     [Fact]

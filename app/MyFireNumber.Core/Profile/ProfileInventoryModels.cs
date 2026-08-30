@@ -16,7 +16,23 @@ public sealed record ProfileFinancialSnapshot(
     IReadOnlyList<DebtItem> Debts,
     long Revision)
 {
+    /// <summary>
+    /// Owned property (home, land, vehicles). Reported for net worth only; calculators intentionally
+    /// never draw on it, so it is not part of <see cref="TotalAccountBalance"/>.
+    /// </summary>
+    public IReadOnlyList<PropertyAsset> Assets { get; init; } = [];
+
+    /// <summary>Investable balances calculators can spend from. Property assets are excluded by design.</summary>
     public double TotalAccountBalance => Accounts.Sum(account => account.Balance);
+
+    /// <summary>Current value of the property assets that count toward net worth.</summary>
+    public double TotalAssetValue => Assets.Sum(asset => asset.NetWorthValue);
+
+    public double TotalDebtBalance => Debts.Sum(debt => debt.Balance);
+
+    /// <summary>Investable balances plus property values, minus everything owed.</summary>
+    public double NetWorth => TotalAccountBalance + TotalAssetValue - TotalDebtBalance;
+
     public double TotalAnnualContributions => Accounts.Sum(account => account.AnnualContribution);
     public double TotalAnnualIncome => Income.Sum(item => item.AnnualAmount);
     public double TotalAnnualExpenses => Expenses.Sum(item => item.AnnualAmount);
@@ -63,6 +79,21 @@ public sealed record DebtBalanceEntry(
     double Balance);
 
 /// <summary>
+/// A single property asset's current value as captured by a monthly check-in. See
+/// <see cref="AccountBalanceEntry"/>. <see cref="IncludeInNetWorth"/> is copied too, so a snapshot
+/// keeps totalling the way it did on the day it was taken.
+/// </summary>
+public sealed record AssetValueEntry(
+    string AssetId,
+    string Name,
+    PropertyAssetType Type,
+    double Value,
+    bool IncludeInNetWorth = true)
+{
+    public double NetWorthValue => IncludeInNetWorth ? Value : 0;
+}
+
+/// <summary>
 /// A timestamped, entirely local snapshot produced by the guided monthly check-in. Every field is
 /// copied at the moment the check-in is saved, so the snapshot never changes even as the live
 /// Accounts data it was based on is edited or deleted later.
@@ -75,7 +106,19 @@ public sealed record FinancialCheckIn(
     double AnnualIncome,
     double AnnualExpenses)
 {
-    public double TotalAssets => Accounts.Sum(account => account.Balance);
+    /// <summary>
+    /// Property asset values recorded by this check-in. Defaulted so a check-in saved before assets
+    /// existed still deserializes, and simply contributes nothing to the property side of net worth.
+    /// </summary>
+    public IReadOnlyList<AssetValueEntry> Assets { get; init; } = [];
+
+    /// <summary>Investable account balances only.</summary>
+    public double TotalAccountBalance => Accounts.Sum(account => account.Balance);
+
+    /// <summary>Current value of property assets counted toward net worth.</summary>
+    public double TotalAssetValue => Assets.Sum(asset => asset.NetWorthValue);
+
+    public double TotalAssets => TotalAccountBalance + TotalAssetValue;
     public double TotalDebts => Debts.Sum(debt => debt.Balance);
     public double NetWorth => TotalAssets - TotalDebts;
     public double AnnualCashFlow => AnnualIncome - AnnualExpenses;

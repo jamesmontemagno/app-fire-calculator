@@ -54,6 +54,8 @@ public sealed class LocalDataArchiveRepositoryTests : IAsyncLifetime
             new RetirementExpense("housing", "Housing", 30_000, 45, 75));
         await new SqliteProfileDebtRepository(database).SaveAsync(
             new DebtItem("card", "Card", 5_000, 0.2, 150, 75));
+        await new SqliteProfileAssetRepository(database).SaveAsync(
+            new PropertyAsset("house", "Our house", PropertyAssetType.Home, 450_000, 380_000));
 
         var archive = await database.ExportAsync();
         await database.ClearAsync();
@@ -64,6 +66,20 @@ public sealed class LocalDataArchiveRepositoryTests : IAsyncLifetime
         Assert.Single(await new SqliteProfileIncomeRepository(database).ListAsync());
         Assert.Single(await new SqliteProfileExpenseRepository(database).ListAsync());
         Assert.Equal(75, Assert.Single(await new SqliteProfileDebtRepository(database).ListAsync()).ExtraMonthlyPayment);
+        var restoredAsset = Assert.Single(await new SqliteProfileAssetRepository(database).ListAsync());
+        Assert.Equal(new PropertyAsset("house", "Our house", PropertyAssetType.Home, 450_000, 380_000), restoredAsset);
+    }
+
+    [Fact]
+    public async Task ImportAsync_RejectsAnAssetWithANegativeValue()
+    {
+        var database = new LocalDatabase(databasePath);
+        var archive = (await database.ExportAsync()) with
+        {
+            ProfileAssets = [new PropertyAsset("house", "Our house", PropertyAssetType.Home, -1, 0)]
+        };
+
+        await Assert.ThrowsAsync<InvalidDataException>(() => database.ImportAsync(archive));
     }
 
     [Fact]
