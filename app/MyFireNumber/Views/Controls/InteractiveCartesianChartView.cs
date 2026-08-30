@@ -167,7 +167,9 @@ public sealed class InteractiveCartesianChartView : ContentView
             ? drawMarginSize.Width
             : Math.Max(1, chart.Width);
 
-        var ratio = Math.Clamp((pointerX - plotLeft) / plotWidth, 0, 1);
+        var density = DeviceDisplay.Current.MainDisplayInfo.Density;
+        var scaledPointerX = pointerX * (density > 0 ? density : 1);
+        var ratio = Math.Clamp((scaledPointerX - plotLeft) / plotWidth, 0, 1);
         return (int)Math.Round(ratio * (pointCount - 1), MidpointRounding.AwayFromZero);
     }
 
