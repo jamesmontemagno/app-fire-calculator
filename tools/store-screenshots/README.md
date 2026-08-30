@@ -218,3 +218,16 @@ Play Store phone screenshots must be between 320 and 3840 px on a side with an
 aspect ratio no taller than 2:1, so the Pixel's native 1080 x 2400 (2.22:1) is
 rejected. 1080 x 1920 is the safe target.
 
+**Purple status bar on pages with a nav bar.** Any page with
+`Shell.NavBarIsVisible="True"` (Coast FIRE, Standard FIRE, History & trends,
+Profile, ...) used to show the default .NET MAUI template purple
+(`#512BD4`) behind the status bar on Android, while pages with a hidden nav
+bar (Home, Accounts, Calculators, Plans) looked correct. Root cause:
+`Platforms/Android/Resources/values/colors.xml` still had the unedited
+template `colorPrimary`/`colorPrimaryDark`, which Android falls back to for
+the status bar whenever the native Toolbar is shown — this is unrelated to
+the Shell/NavigationPage `BarBackgroundColor` XAML setters in
+`Resources/Styles/Styles.xaml`. Fixed by updating `colors.xml` to the app's
+actual light palette and adding a `values-night/colors.xml` override for
+dark mode. If you see this again, check those two files first.
+
