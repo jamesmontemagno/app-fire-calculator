@@ -88,6 +88,30 @@ public sealed class SqliteFinancialCheckInRepositoryTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task ListAsync_DoesNotCrashOnARowMigratedFromASchemaWithoutTheAssetsJsonColumn()
+    {
+        // sqlite-net's auto-migration adds new columns via "ALTER TABLE ... ADD COLUMN" without
+        // backfilling existing rows or applying a NOT NULL constraint retroactively, so a
+        // check-in saved before the asset-tracking feature shipped ends up with AssetsJson
+        // stored as NULL once the app updates. Reproduce that by creating the pre-feature
+        // schema by hand, inserting a legacy row, then running the current schema migration.
+        using (var raw = new SQLite.SQLiteConnection(databasePath))
+        {
+            raw.Execute(
+                "CREATE TABLE financial_check_ins (Id TEXT PRIMARY KEY NOT NULL, CompletedAtUtc TEXT NOT NULL, AccountsJson TEXT NOT NULL, DebtsJson TEXT NOT NULL, AnnualIncome REAL NOT NULL, AnnualExpenses REAL NOT NULL)");
+            raw.Execute(
+                "INSERT INTO financial_check_ins (Id, CompletedAtUtc, AccountsJson, DebtsJson, AnnualIncome, AnnualExpenses) VALUES (?, ?, '[]', '[]', 0, 0)",
+                "pre-asset-feature",
+                new DateTime(2024, 1, 1, 0, 0, 0, DateTimeKind.Utc).ToString("O"));
+        }
+
+        var repository = new SqliteFinancialCheckInRepository(new LocalDatabase(databasePath));
+        var saved = Assert.Single(await repository.ListAsync());
+
+        Assert.Empty(saved.Assets);
+    }
+
+    [Fact]
     public async Task SaveAsync_ThenListAsync_RoundTripsAllFieldsAndOrdersOldestFirst()
     {
         var repository = new SqliteFinancialCheckInRepository(new LocalDatabase(databasePath));
