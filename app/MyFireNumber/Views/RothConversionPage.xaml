@@ -107,8 +107,8 @@
 
             <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                 <Label Text="Account balance projection" Style="{StaticResource CalculatorSectionHeading}" />
-                <lvc:CartesianChart Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}"
-                                    AnimationsSpeed="{Binding ChartAnimationsSpeed}" HeightRequest="300"
+                <controls:InteractiveCartesianChartView Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}"
+                                    AnimationsSpeed="{Binding ChartAnimationsSpeed}" ChartHeight="300"
                                     SemanticProperties.Description="{Binding ProjectionChartDescription}" />
                 <Label Text="{Binding ProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>

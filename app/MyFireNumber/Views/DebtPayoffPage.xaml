@@ -107,9 +107,9 @@
 
             <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                 <Label Text="Debt balance projection" Style="{StaticResource CalculatorSectionHeading}" />
-                <lvc:CartesianChart Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" HeightRequest="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
+                <controls:InteractiveCartesianChartView Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" ChartHeight="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
                 <Label Text="Principal and interest paid" Style="{StaticResource CalculatorSectionHeading}" />
-                <lvc:CartesianChart Series="{Binding DebtBreakdownSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" HeightRequest="300" SemanticProperties.Description="{Binding DebtBreakdownDescription}" />
+                <controls:InteractiveCartesianChartView Series="{Binding DebtBreakdownSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" ChartHeight="300" SemanticProperties.Description="{Binding DebtBreakdownDescription}" />
                 <Label Text="{Binding DebtBreakdownSummary}" Style="{StaticResource CalculatorSupportingText}" />
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}"><VerticalStackLayout Spacing="2"><Label Text="Snowball" FontAttributes="Bold" /><Label Text="{Binding DebtSnowballComparisonText}" Style="{StaticResource CalculatorSupportingText}" /></VerticalStackLayout><VerticalStackLayout Grid.Column="1" Spacing="2"><Label Text="Avalanche" FontAttributes="Bold" /><Label Text="{Binding DebtAvalancheComparisonText}" Style="{StaticResource CalculatorSupportingText}" /></VerticalStackLayout></Grid>
             </VerticalStackLayout>
