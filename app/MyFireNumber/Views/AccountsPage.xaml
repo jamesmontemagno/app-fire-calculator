@@ -86,16 +86,18 @@
                             </VerticalStackLayout>
                         </Border>
 
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                        <!-- Stacked rather than side by side: the labels plus their icons are truncated
+                             by the native button when two of them share a phone-width row. -->
+                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                             <Button AutomationId="StartCheckInButton" Text="Start monthly check-in" Command="{Binding StartCheckInCommand}"
                                     SemanticProperties.Description="Start a guided monthly check-in for accounts and debts">
                                 <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf14a;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="14" /></Button.ImageSource>
                             </Button>
-                            <Button Grid.Column="1" AutomationId="ViewHistoryButton" Text="History &amp; trends" Command="{Binding ViewHistoryCommand}"
-                                                    SemanticProperties.Description="View account history and trend charts">
+                            <Button AutomationId="ViewHistoryButton" Text="History &amp; trends" Command="{Binding ViewHistoryCommand}"
+                                    SemanticProperties.Description="View account history and trend charts">
                                 <Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf201;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="14" /></Button.ImageSource>
                             </Button>
-                        </Grid>
+                        </VerticalStackLayout>
                     </VerticalStackLayout>
                 </Border>
 
