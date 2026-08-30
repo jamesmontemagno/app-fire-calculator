@@ -717,7 +717,8 @@ public sealed partial class AccountsViewModel(
             ParseAmount(asset.CurrentValueText),
             asset.FreshnessText,
             asset.IsOverdue,
-            history);
+            history,
+            BalanceLabel: "Current value");
 
         return navigationService.GoToAsync("account-item-detail", new Dictionary<string, object> { ["details"] = args });
     }

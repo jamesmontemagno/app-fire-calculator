@@ -28,6 +28,7 @@ public sealed partial class AccountItemDetailViewModel(
     [ObservableProperty] private string itemTypeLabel = string.Empty;
     [ObservableProperty] private bool isDebt;
     [ObservableProperty] private string currentBalanceText = string.Empty;
+    [ObservableProperty] private string balanceLabel = "Current balance";
     [ObservableProperty] private string freshnessText = string.Empty;
     [ObservableProperty] private bool isOverdue;
 
@@ -61,6 +62,7 @@ public sealed partial class AccountItemDetailViewModel(
         ItemTypeLabel = args.ItemTypeLabel;
         IsDebt = args.IsDebt;
         CurrentBalanceText = currencyPreferencesService.Format(args.CurrentBalance);
+        BalanceLabel = args.BalanceLabel;
         FreshnessText = args.FreshnessText;
         IsOverdue = args.IsOverdue;
         allHistory = args.History;
