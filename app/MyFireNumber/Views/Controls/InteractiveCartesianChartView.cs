@@ -10,11 +10,12 @@ using LiveChartsCore.SkiaSharpView.Maui;
 namespace MyFireNumber.Views.Controls;
 
 /// <summary>
-/// Wraps a LiveCharts Cartesian chart with a pinned readout that is updated when the chart is pressed.
+/// Wraps a LiveCharts Cartesian chart with a pinned readout that is updated when the chart is pressed
+/// and while the pointer is dragged across the plot.
 /// </summary>
 public sealed class InteractiveCartesianChartView : ContentView
 {
-    private const string EmptySelectionText = "Tap the graph to pin exact values.";
+    private const string EmptySelectionText = "Tap or drag across the graph to pin exact values.";
 
     public static readonly BindableProperty SeriesProperty = BindableProperty.Create(
         nameof(Series),
@@ -68,6 +69,9 @@ public sealed class InteractiveCartesianChartView : ContentView
 
     private readonly CartesianChart chart;
     private readonly Label detailLabel;
+    private (ISeries Series, IReadOnlyList<object?> Values)[]? cachedSeriesValues;
+    private bool isPointerDown;
+    private int selectedIndex = -1;
 
     public InteractiveCartesianChartView()
     {
@@ -77,8 +81,11 @@ public sealed class InteractiveCartesianChartView : ContentView
         };
 
         // LiveCharts handles native touch on its own platform view, so MAUI gesture recognizers on the
-        // chart never fire on mobile. The chart's own pointer command is the reliable input source.
+        // chart never fire on mobile. The chart's own pointer commands are the reliable input source.
+        // Pressed pins the first value, Moved keeps it in sync while the finger drags across the plot.
         chart.PressedCommand = new Command<PointerCommandArgs>(OnChartPressed);
+        chart.MovedCommand = new Command<PointerCommandArgs>(OnChartMoved);
+        chart.ReleasedCommand = new Command<PointerCommandArgs>(OnChartReleased);
 
         detailLabel = new Label
         {
@@ -131,16 +138,38 @@ public sealed class InteractiveCartesianChartView : ContentView
 
     private void OnChartPressed(PointerCommandArgs? args)
     {
+        isPointerDown = true;
+        // Series values can be replaced or mutated between gestures, so snapshot them per gesture.
+        cachedSeriesValues = null;
+        UpdateSelection(args, force: true);
+    }
+
+    private void OnChartMoved(PointerCommandArgs? args)
+    {
+        // Moved also fires for mouse hover on desktop; only scrub while the pointer is held down so the
+        // pinned readout stays where the user placed it.
+        if (!isPointerDown)
+        {
+            return;
+        }
+
+        UpdateSelection(args, force: false);
+    }
+
+    private void OnChartReleased(PointerCommandArgs? args)
+    {
+        isPointerDown = false;
+        cachedSeriesValues = null;
+    }
+
+    private void UpdateSelection(PointerCommandArgs? args, bool force)
+    {
         if (args is null)
         {
             return;
         }
 
-        var seriesValues = Series
-            .Select(series => (Series: series, Values: ToValueList(series.Values)))
-            .Where(series => series.Values.Count > 0)
-            .ToArray();
-
+        var seriesValues = GetSeriesValues();
         if (seriesValues.Length == 0)
         {
             ClearSelection();
@@ -151,20 +180,39 @@ public sealed class InteractiveCartesianChartView : ContentView
         var dataX = TryScalePointerToData(pointerX);
 
         var primaryValues = seriesValues[0].Values;
-        var selectedIndex = GetNearestIndex(primaryValues, dataX, pointerX);
-        var lines = new List<string> { GetXAxisLabel(selectedIndex, primaryValues) };
+        var index = GetNearestIndex(primaryValues, dataX, pointerX);
+        if (!force && index == selectedIndex)
+        {
+            return;
+        }
+
+        selectedIndex = index;
+        var lines = new List<string> { GetXAxisLabel(index, primaryValues) };
 
         foreach (var (series, values) in seriesValues)
         {
-            var index = GetNearestIndex(values, dataX, pointerX);
-            if (TryFormatValue(values[index]) is not { } value)
+            var seriesIndex = GetNearestIndex(values, dataX, pointerX);
+            if (TryFormatValue(values[seriesIndex]) is not { } value)
             {
                 continue;
             }
 
             lines.Add($"{series.Name}: {value}");
         }
+
         detailLabel.Text = string.Join(Environment.NewLine, lines);
+    }
+
+    /// <summary>
+    /// Materializes the series values once per interaction so dragging does not re-enumerate every
+    /// series on each pointer move.
+    /// </summary>
+    private (ISeries Series, IReadOnlyList<object?> Values)[] GetSeriesValues()
+    {
+        return cachedSeriesValues ??= Series
+            .Select(series => (Series: series, Values: ToValueList(series.Values)))
+            .Where(series => series.Values.Count > 0)
+            .ToArray();
     }
 
     /// <summary>
@@ -293,6 +341,8 @@ public sealed class InteractiveCartesianChartView : ContentView
 
     private void ClearSelection()
     {
+        cachedSeriesValues = null;
+        selectedIndex = -1;
         detailLabel.Text = EmptySelectionText;
     }
 }
