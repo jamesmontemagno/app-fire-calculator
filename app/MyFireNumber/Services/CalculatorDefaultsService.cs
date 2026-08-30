@@ -71,7 +71,7 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
     public ReverseFireDraft ReverseFire => Apply(ReverseFireDraft.Default);
     public WithdrawalRateDraft WithdrawalRate => Apply(WithdrawalRateDraft.Default);
     public SavingsInvestmentDraft SavingsInvestment => Apply(SavingsInvestmentDraft.Default);
-    public InterestCalculatorDraft InterestCalculator => InterestCalculatorDraft.Default with { AnnualInterestRate = Current.ExpectedReturn };
+    public InterestCalculatorDraft InterestCalculator => Apply(InterestCalculatorDraft.Default);
     public HealthcareGapDraft HealthcareGap => Apply(HealthcareGapDraft.Default);
     public SeppDraft Sepp => Apply(SeppDraft.Default);
     public RothConversionDraft RothConversion => Apply(RothConversionDraft.Default);
@@ -196,6 +196,9 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
             AnnualIncome = defaults.AnnualIncome
         };
     }
+
+    private InterestCalculatorDraft Apply(InterestCalculatorDraft draft) =>
+        draft with { AnnualInterestRate = Current.ExpectedReturn };
 
     private HealthcareGapDraft Apply(HealthcareGapDraft draft)
     {

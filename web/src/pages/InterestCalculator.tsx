@@ -97,7 +97,7 @@ export default function InterestCalculator() {
           <h2 id="interest-method-heading" className="text-lg font-semibold text-content">How this estimate works</h2>
           <p className="mt-2 text-sm text-content-muted">
             Each month, the prior balance earns one-twelfth of the annual rate, then the monthly contribution is added.
-            At this rate, your deposits contribute {formatCurrency(results.totalContributions)} and estimated interest contributes {formatCurrency(results.interestEarned)}.
+            At this rate, your starting balance and deposits contribute {formatCurrency(results.totalContributions)} and estimated interest contributes {formatCurrency(results.interestEarned)}.
           </p>
         </section>
 
