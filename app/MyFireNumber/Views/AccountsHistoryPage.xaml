@@ -110,10 +110,10 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                         <Label Text="Net worth trend" Style="{StaticResource CalculatorSectionHeading}" />
-                        <lvc:CartesianChart Series="{Binding NetWorthSeries}"
+                        <controls:InteractiveCartesianChartView Series="{Binding NetWorthSeries}"
                                             XAxes="{Binding NetWorthXAxes}"
                                             AnimationsSpeed="{Binding ChartAnimationsSpeed}"
-                                            HeightRequest="220"
+                                            ChartHeight="220"
                                             IsVisible="{Binding HasTrendData}"
                                             SemanticProperties.Description="{Binding NetWorthDescription}" />
                         <Label Text="{Binding NetWorthDescription}" Style="{StaticResource CalculatorSupportingText}" />
@@ -126,10 +126,10 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                         <Label Text="Assets vs. debts" Style="{StaticResource CalculatorSectionHeading}" />
-                        <lvc:CartesianChart Series="{Binding AssetsVsDebtsSeries}"
+                        <controls:InteractiveCartesianChartView Series="{Binding AssetsVsDebtsSeries}"
                                             XAxes="{Binding AssetsVsDebtsXAxes}"
                                             AnimationsSpeed="{Binding ChartAnimationsSpeed}"
-                                            HeightRequest="220"
+                                            ChartHeight="220"
                                             IsVisible="{Binding HasTrendData}"
                                             SemanticProperties.Description="{Binding AssetsVsDebtsDescription}" />
                         <Label Text="{Binding AssetsVsDebtsDescription}" Style="{StaticResource CalculatorSupportingText}" />
@@ -142,10 +142,10 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                         <Label Text="Account trends" Style="{StaticResource CalculatorSectionHeading}" />
-                        <lvc:CartesianChart Series="{Binding AccountTrendsSeries}"
+                        <controls:InteractiveCartesianChartView Series="{Binding AccountTrendsSeries}"
                                             XAxes="{Binding AccountTrendsXAxes}"
                                             AnimationsSpeed="{Binding ChartAnimationsSpeed}"
-                                            HeightRequest="240"
+                                            ChartHeight="240"
                                             IsVisible="{Binding HasAccountTrendData}"
                                             SemanticProperties.Description="{Binding AccountTrendsDescription}" />
                         <Label Text="{Binding AccountTrendsDescription}" Style="{StaticResource CalculatorSupportingText}" />
@@ -175,10 +175,10 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                         <Label Text="Income vs. expenses" Style="{StaticResource CalculatorSectionHeading}" />
-                        <lvc:CartesianChart Series="{Binding IncomeVsExpensesSeries}"
+                        <controls:InteractiveCartesianChartView Series="{Binding IncomeVsExpensesSeries}"
                                             XAxes="{Binding IncomeVsExpensesXAxes}"
                                             AnimationsSpeed="{Binding ChartAnimationsSpeed}"
-                                            HeightRequest="220"
+                                            ChartHeight="220"
                                             IsVisible="{Binding HasTrendData}"
                                             SemanticProperties.Description="{Binding IncomeVsExpensesDescription}" />
                         <Label Text="{Binding IncomeVsExpensesDescription}" Style="{StaticResource CalculatorSupportingText}" />
@@ -191,10 +191,10 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                         <Label Text="Cash flow" Style="{StaticResource CalculatorSectionHeading}" />
-                        <lvc:CartesianChart Series="{Binding CashFlowSeries}"
+                        <controls:InteractiveCartesianChartView Series="{Binding CashFlowSeries}"
                                             XAxes="{Binding CashFlowXAxes}"
                                             AnimationsSpeed="{Binding ChartAnimationsSpeed}"
-                                            HeightRequest="220"
+                                            ChartHeight="220"
                                             IsVisible="{Binding HasTrendData}"
                                             SemanticProperties.Description="{Binding CashFlowDescription}" />
                         <Label Text="{Binding CashFlowDescription}" Style="{StaticResource CalculatorSupportingText}" />

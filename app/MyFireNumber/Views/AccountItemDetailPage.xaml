@@ -133,10 +133,10 @@
                     StrokeShape="RoundRectangle 12">
                 <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                     <Label Text="Balance history" Style="{StaticResource CalculatorSectionHeading}" />
-                    <lvc:CartesianChart Series="{Binding Series}"
+                    <controls:InteractiveCartesianChartView Series="{Binding Series}"
                                         XAxes="{Binding XAxes}"
                                         AnimationsSpeed="{Binding ChartAnimationsSpeed}"
-                                        HeightRequest="240"
+                                        ChartHeight="240"
                                         IsVisible="{Binding HasTrendData}"
                                         SemanticProperties.Description="{Binding SummaryText}" />
                     <Label Text="{Binding SummaryText}" Style="{StaticResource CalculatorSupportingText}" />

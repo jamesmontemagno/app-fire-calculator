@@ -68,7 +68,7 @@
 
             <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                 <Label Text="Coast vs. continue contributing" Style="{StaticResource CalculatorSectionHeading}" />
-                <lvc:CartesianChart Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" HeightRequest="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
+                <controls:InteractiveCartesianChartView Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" ChartHeight="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
                 <Label Text="{Binding CoastProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>
 

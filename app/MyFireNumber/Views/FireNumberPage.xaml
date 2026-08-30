@@ -197,10 +197,10 @@
 
             <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                 <Label Text="{Binding ProjectionTitle}" Style="{StaticResource CalculatorSectionHeading}" />
-                <lvc:CartesianChart Series="{Binding ProjectionSeries}"
+                <controls:InteractiveCartesianChartView Series="{Binding ProjectionSeries}"
                                     XAxes="{Binding ProjectionXAxes}"
                                     AnimationsSpeed="{Binding ChartAnimationsSpeed}"
-                                    HeightRequest="300"
+                                    ChartHeight="300"
                                     SemanticProperties.Description="{Binding ProjectionChartDescription}" />
                 <Label Text="{Binding ProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>

@@ -63,7 +63,7 @@
 
             <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                 <Label Text="Barista FIRE projection" Style="{StaticResource CalculatorSectionHeading}" />
-                <lvc:CartesianChart Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" HeightRequest="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
+                <controls:InteractiveCartesianChartView Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" ChartHeight="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
                 <Label Text="{Binding BaristaProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
             </VerticalStackLayout>
 
