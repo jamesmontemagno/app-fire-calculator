@@ -65,7 +65,8 @@ confirmed data deletion.
 ## Screenshot Set
 
 Capture each state on the current required iPhone, iPad, Android phone, and
-Android tablet dimensions:
+Android tablet dimensions. Committed sets live in `metadata/android-phone/`
+(1080 x 1920), `metadata/iphone-6.5/`, and `metadata/ipad-13/`:
 
 1. Home with net worth, check-in prompt, recent calculators, and recent plans
 2. Accounts with the net worth overview, income, expenses, and debts

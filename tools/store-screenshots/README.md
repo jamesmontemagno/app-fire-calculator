@@ -156,7 +156,65 @@ two conventions below coexist and are easy to mix up:
 
 ## Android
 
-Not yet automated. The APK builds and installs on an emulator, but the app does
-not create its SQLite database in a `run-as`-readable location there, so seeding
-does not currently land. Framing works at any size — `frame_screenshots.py`
-accepts arbitrary dimensions — so only the seeding step is unsolved.
+Same idea, with two Android-specific gotchas.
+
+**Build with assemblies embedded.** A plain `dotnet build` for Android produces a
+Fast Deployment APK whose assemblies are pushed separately by the deploy tooling.
+Installing that APK with `adb install` gives you an app that aborts on launch with
+`No assemblies found in ... /.__override__/arm64-v8a`, and never creates its
+database. Pass `-p:EmbedAssembliesIntoApk=true`:
+
+```bash
+dotnet build app/MyFireNumber/MyFireNumber.csproj \
+  -f net10.0-android -c Debug -p:EmbedAssembliesIntoApk=true
+
+adb install --no-incremental -r \
+  app/MyFireNumber/bin/Debug/net10.0-android/com.refractored.myfirenumber-Signed.apk
+adb shell am start -n com.refractored.myfirenumber/crc649d097029e233987d.MainActivity
+```
+
+A correct APK is around 110 MB. If yours is a few MB, the assemblies are not in it.
+
+**Seed by round-tripping the file.** `run-as` can read and write the app's data
+directory but the seeding script needs a local file, so pull, seed, and push back
+with the app stopped:
+
+```bash
+DBPATH=/data/data/com.refractored.myfirenumber/files/my-fire-number-v4.db3
+
+adb shell "run-as com.refractored.myfirenumber cat $DBPATH" > /tmp/and.db3
+python3 tools/store-screenshots/seed_demo_data.py /tmp/and.db3
+
+adb shell am force-stop com.refractored.myfirenumber
+adb push /tmp/and.db3 /data/local/tmp/and.db3
+adb shell "run-as com.refractored.myfirenumber cp /data/local/tmp/and.db3 $DBPATH"
+adb shell "run-as com.refractored.myfirenumber rm -f $DBPATH-wal $DBPATH-shm"
+adb shell am start -n com.refractored.myfirenumber/crc649d097029e233987d.MainActivity
+```
+
+Removing the `-wal` and `-shm` files matters — a stale write-ahead log will
+otherwise replay over the data you just seeded.
+
+Then tap through onboarding exactly as on iOS.
+
+**Status bar.** Android has its own demo mode:
+
+```bash
+adb shell settings put global sysui_demo_allowed 1
+adb shell am broadcast -a com.android.systemui.demo -e command enter
+adb shell am broadcast -a com.android.systemui.demo -e command clock -e hhmm 0941
+adb shell am broadcast -a com.android.systemui.demo -e command battery -e level 100 -e plugged false
+adb shell am broadcast -a com.android.systemui.demo -e command network -e wifi show -e level 4
+adb shell am broadcast -a com.android.systemui.demo -e command notifications -e visible false
+```
+
+Capture with `adb exec-out screencap -p > raw-android/01-home.png`, then frame:
+
+```bash
+python3 tools/store-screenshots/frame_screenshots.py raw-android metadata/android-phone 1080 1920
+```
+
+Play Store phone screenshots must be between 320 and 3840 px on a side with an
+aspect ratio no taller than 2:1, so the Pixel's native 1080 x 2400 (2.22:1) is
+rejected. 1080 x 1920 is the safe target.
+
