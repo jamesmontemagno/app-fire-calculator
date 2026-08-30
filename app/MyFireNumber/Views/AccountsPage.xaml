@@ -12,6 +12,7 @@
              SafeAreaEdges="Container">
     <shimmer:SfShimmer IsActive="{Binding IsLoading}"
                        Type="Feed"
+                       BackgroundColor="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
                        Fill="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
                        WaveColor="{AppThemeBinding Light={StaticResource SurfaceAccentTintPaleLight}, Dark={StaticResource SurfaceCardDark}}">
     <Grid RowDefinitions="*,Auto">
