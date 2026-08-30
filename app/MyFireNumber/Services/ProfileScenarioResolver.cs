@@ -1,3 +1,4 @@
+using MyFireNumber.Core.Calculators;
 using MyFireNumber.Core.Profile;
 using MyFireNumber.Storage;
 
@@ -15,7 +16,8 @@ public interface IProfileScenarioResolver
 
 public sealed class ProfileScenarioResolver(
     IProfileFinancialSnapshotRepository snapshotRepository,
-    ILocalDateProvider localDateProvider) : IProfileScenarioResolver
+    ILocalDateProvider localDateProvider,
+    ICalculatorCatalog calculatorCatalog) : IProfileScenarioResolver
 {
     public async Task<ProfileResolution<TDraft>> ResolveAsync<TDraft>(
         TDraft draft,
@@ -28,6 +30,11 @@ public sealed class ProfileScenarioResolver(
 
     public async Task<bool> HasCompatibleDataAsync(string calculatorId, CancellationToken cancellationToken = default)
     {
+        if (!calculatorCatalog.GetRequired(calculatorId).SupportsLinkedProfile)
+        {
+            return false;
+        }
+
         var snapshot = await snapshotRepository.GetAsync(cancellationToken);
         return calculatorId switch
         {
@@ -42,7 +49,6 @@ public sealed class ProfileScenarioResolver(
                 snapshot.Profile.BirthDate is not null &&
                 snapshot.Accounts.Any(account =>
                     account.Type == MyFireNumber.Core.Calculations.RetirementAccountType.Traditional),
-            "interest-calculator" or "withdrawal-rate" => false,
             "retirement-cash-flow" =>
                 snapshot.Profile.BirthDate is not null &&
                 snapshot.Profile.PhasedRetirementDate is not null &&

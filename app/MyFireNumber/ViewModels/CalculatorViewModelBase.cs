@@ -292,8 +292,6 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
 
     protected abstract string ExportFailureMessage { get; }
 
-    protected virtual bool SupportsLinkedProfile => true;
-
     /// <summary>Populates the input properties from <paramref name="draft"/>.</summary>
     protected abstract void ApplyDraft(TDraft draft);
 
@@ -318,9 +316,9 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
         loadedPlanId = null;
         loadedPlanCreatedAtUtc = null;
         IsLoadedPlan = false;
+        var definition = catalog.GetRequired(CalculatorId);
         ScenarioDataMode = NormalizeDataMode(requestedMode ?? ScenarioDataMode.Standalone);
 
-        var definition = catalog.GetRequired(CalculatorId);
         Title = definition.Title;
         Summary = definition.Summary;
         PlanNameText = DefaultPlanName;
@@ -406,7 +404,9 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     }
 
     private ScenarioDataMode NormalizeDataMode(ScenarioDataMode dataMode) =>
-        SupportsLinkedProfile ? dataMode : ScenarioDataMode.Standalone;
+        catalog.GetRequired(CalculatorId).SupportsLinkedProfile
+            ? dataMode
+            : ScenarioDataMode.Standalone;
 
     private async Task LoadResolvedInputsAsync(TDraft draft)
     {

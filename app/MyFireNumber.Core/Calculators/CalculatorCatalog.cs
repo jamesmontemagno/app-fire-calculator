@@ -1,6 +1,11 @@
 namespace MyFireNumber.Core.Calculators;
 
-public sealed record CalculatorDefinition(string Id, string Title, string Summary, string IconGlyph);
+public sealed record CalculatorDefinition(
+    string Id,
+    string Title,
+    string Summary,
+    string IconGlyph,
+    bool SupportsLinkedProfile = true);
 
 public interface ICalculatorCatalog
 {
@@ -19,13 +24,13 @@ public sealed class CalculatorCatalog : ICalculatorCatalog
         new("fat-fire", "Fat FIRE", "Plan for financial independence while maintaining a comfortable lifestyle.", "\uf51e"),
         new("barista-fire", "Barista FIRE", "Blend part-time income with portfolio withdrawals to leave full-time work earlier.", "\uf0f4"),
         new("reverse-fire", "Reverse FIRE", "Choose a target retirement age and find the savings needed to reach it.", "\uf2f9"),
-        new("withdrawal-rate", "Withdrawal Rate", "Test how long your portfolio may last while funding retirement spending.", "\uf4c0"),
+        new("withdrawal-rate", "Withdrawal Rate", "Test how long your portfolio may last while funding retirement spending.", "\uf4c0", false),
         new("savings-rate", "Savings & Investment Rate", "See how recurring contributions and compound growth can build wealth over time.", "\uf4c4"),
         new("debt-payoff", "Debt Payoff", "Compare Snowball and Avalanche strategies for eliminating multiple debts.", "\uf09d"),
         new("healthcare-gap", "Healthcare Gap", "Estimate healthcare costs between early retirement and Medicare eligibility.", "\uf0fa"),
         new("sepp-72t", "72(t) / SEPP", "Estimate early retirement account payments under the IRS substantially equal payment methods.", "\uf571"),
         new("roth-conversion", "Roth Conversion Strategy", "Plan annual Roth conversions and the five-tax-year ladder for converted principal.", "\uf2f1"),
-        new("interest-calculator", "Interest Calculator", "Estimate how monthly compounding and regular deposits can grow a balance over time.", "\uf295"),
+        new("interest-calculator", "Interest Calculator", "Estimate how monthly compounding and regular deposits can grow a balance over time.", "\uf295", false),
         new("retirement-cash-flow", "Retirement Cash Flow", "Coordinate accounts, income, expenses, and withdrawals across retirement.", "\uf1da")
     ];
 
