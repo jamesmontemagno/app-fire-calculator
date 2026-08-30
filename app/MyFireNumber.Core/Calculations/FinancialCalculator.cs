@@ -431,6 +431,40 @@ public static class FinancialCalculator
             SavingsCategory(savingsRate));
     }
 
+    public static InterestCalculatorResult CalculateInterest(InterestCalculatorInputs inputs)
+    {
+        var monthlyRate = inputs.AnnualInterestRate / 12;
+        var balance = inputs.StartingBalance;
+        var totalContributions = inputs.StartingBalance;
+        var projections = new List<InterestProjectionPoint>
+        {
+            new(0, Round(balance), Round(totalContributions), 0)
+        };
+
+        for (var month = 1; month <= inputs.Years * 12; month++)
+        {
+            balance = (balance * (1 + monthlyRate)) + inputs.MonthlyContribution;
+            totalContributions += inputs.MonthlyContribution;
+
+            if (month % 12 == 0)
+            {
+                projections.Add(new InterestProjectionPoint(
+                    month / 12,
+                    Round(balance),
+                    Round(totalContributions),
+                    Round(balance - totalContributions)));
+            }
+        }
+
+        var effectiveAnnualYield = Math.Pow(1 + monthlyRate, 12) - 1;
+        return new InterestCalculatorResult(
+            Round(balance),
+            Round(totalContributions),
+            Round(balance - totalContributions),
+            effectiveAnnualYield,
+            projections);
+    }
+
     public static HealthcareGapResult CalculateHealthcareGap(HealthcareGapInputs inputs)
     {
         var gapYears = Math.Max(0, inputs.MedicareAge - inputs.EarlyRetirementAge);

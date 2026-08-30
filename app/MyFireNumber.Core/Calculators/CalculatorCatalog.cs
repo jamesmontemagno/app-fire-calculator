@@ -25,6 +25,7 @@ public sealed class CalculatorCatalog : ICalculatorCatalog
         new("healthcare-gap", "Healthcare Gap", "Estimate healthcare costs between early retirement and Medicare eligibility.", "\uf0fa"),
         new("sepp-72t", "72(t) / SEPP", "Estimate early retirement account payments under the IRS substantially equal payment methods.", "\uf571"),
         new("roth-conversion", "Roth Conversion Strategy", "Plan annual Roth conversions and the five-tax-year ladder for converted principal.", "\uf2f1"),
+        new("interest-calculator", "Interest Calculator", "Estimate how monthly compounding and regular deposits can grow a balance over time.", "\uf295"),
         new("retirement-cash-flow", "Retirement Cash Flow", "Coordinate accounts, income, expenses, and withdrawals across retirement.", "\uf1da")
     ];
 

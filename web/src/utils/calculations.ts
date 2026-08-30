@@ -178,6 +178,63 @@ function flatContributionRealBalance(
  * Solves for n in: FV = PV(1+r)^n + PMT * (((1+r)^n - 1) / r)
  * Uses closed-form solution: n = ln((PMT + target*r) / (PMT + PV*r)) / ln(1+r)
  */
+export interface InterestProjectionPoint {
+  year: number
+  balance: number
+  totalContributions: number
+  interestEarned: number
+}
+
+export interface InterestCalculatorResult {
+  endingBalance: number
+  totalContributions: number
+  interestEarned: number
+  effectiveAnnualYield: number
+  projections: InterestProjectionPoint[]
+}
+
+/**
+ * Calculate monthly-compounded interest with contributions made at the end of each month.
+ */
+export function calculateInterest(
+  startingBalance: number,
+  monthlyContribution: number,
+  annualInterestRate: number,
+  years: number,
+): InterestCalculatorResult {
+  const monthlyRate = annualInterestRate / 12
+  let balance = startingBalance
+  let totalContributions = startingBalance
+  const projections: InterestProjectionPoint[] = [{
+    year: 0,
+    balance,
+    totalContributions,
+    interestEarned: 0,
+  }]
+
+  for (let month = 1; month <= years * 12; month++) {
+    balance = balance * (1 + monthlyRate) + monthlyContribution
+    totalContributions += monthlyContribution
+
+    if (month % 12 === 0) {
+      projections.push({
+        year: month / 12,
+        balance,
+        totalContributions,
+        interestEarned: balance - totalContributions,
+      })
+    }
+  }
+
+  return {
+    endingBalance: balance,
+    totalContributions,
+    interestEarned: balance - totalContributions,
+    effectiveAnnualYield: (1 + monthlyRate) ** 12 - 1,
+    projections,
+  }
+}
+
 export function yearsToTarget(
   presentVal: number,
   annualContribution: number,

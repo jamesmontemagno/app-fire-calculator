@@ -522,6 +522,10 @@ const BASE_PARAMS: CalculatorParams = {
   rothAnnualConversion: 50_000,
   rothConversionYears: 10,
   rothTaxRate: 0.22,
+  interestStartingBalance: 10_000,
+  interestMonthlyContribution: 250,
+  interestAnnualRate: 0.05,
+  interestYears: 10,
 }
 
 /**

@@ -191,6 +191,25 @@ public sealed record InvestmentGrowthResult(
     IReadOnlyList<InvestmentProjectionPoint> Projections,
     string SavingsCategory);
 
+public sealed record InterestCalculatorInputs(
+    double StartingBalance,
+    double MonthlyContribution,
+    double AnnualInterestRate,
+    int Years);
+
+public sealed record InterestProjectionPoint(
+    int Year,
+    double Balance,
+    double TotalContributions,
+    double InterestEarned);
+
+public sealed record InterestCalculatorResult(
+    double EndingBalance,
+    double TotalContributions,
+    double InterestEarned,
+    double EffectiveAnnualYield,
+    IReadOnlyList<InterestProjectionPoint> Projections);
+
 public sealed record HealthcareGapInputs(
     int CurrentAge,
     int EarlyRetirementAge,

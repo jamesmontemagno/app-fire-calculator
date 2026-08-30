@@ -15,6 +15,7 @@ import {
   HandCoins,
   Landmark,
   PiggyBank,
+  Percent,
   RotateCw,
   Sprout,
   Target,
@@ -22,7 +23,7 @@ import {
   Wallet,
 } from 'lucide-react'
 
-export type CalculatorCategory = 'fire' | 'saving' | 'retirement'
+export type CalculatorCategory = 'fire' | 'saving' | 'retirement' | 'cashflow'
 
 export interface CalculatorCategoryMetadata {
   id: CalculatorCategory
@@ -59,6 +60,13 @@ export const calculatorCategories: CalculatorCategoryMetadata[] = [
     label: 'Retirement income',
     description: 'Plan how you draw down, bridge the gap before 59½ and Medicare, and coordinate accounts.',
     icon: Landmark,
+  },
+  {
+    id: 'cashflow',
+    name: 'Cash Flow',
+    label: 'Cash Flow',
+    description: 'Understand how balances, contributions, and interest change your money over time.',
+    icon: Wallet,
   },
 ]
 
@@ -213,6 +221,17 @@ export const calculators: CalculatorMetadata[] = [
     category: 'retirement',
   },
   {
+    path: '/interest',
+    icon: Percent,
+    name: 'Interest Calculator',
+    label: 'Interest',
+    description: 'See how monthly compounding and regular contributions can grow a balance over time.',
+    accent: 'text-calc-cashflow',
+    audience: 'Best for: Estimating savings interest and account growth',
+    storagePrefix: 'standard',
+    category: 'cashflow',
+  },
+  {
     path: '/retirement-cash-flow',
     icon: CalendarClock,
     name: 'Retirement Cash Flow',
@@ -221,7 +240,7 @@ export const calculators: CalculatorMetadata[] = [
     accent: 'text-calc-cashflow',
     audience: 'Best for: Complex, multi-account retirement plans',
     storagePrefix: 'deferred',
-    category: 'retirement',
+    category: 'cashflow',
   },
 ]
 

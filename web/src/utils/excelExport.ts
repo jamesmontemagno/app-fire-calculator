@@ -373,6 +373,8 @@ const EXPORT_FIELD_FORMATS: Record<string, ExportFormat> = {
   withdrawalRate: 'percent',
   savingsRate: 'percent',
   horizonFundedRatio: 'percent',
+  annualInterestRate: 'percent',
+  effectiveAnnualYield: 'percent',
 
   // --- Dollar inputs ----------------------------------------------------------------------------
   currentSavings: 'currency',
@@ -393,6 +395,7 @@ const EXPORT_FIELD_FORMATS: Record<string, ExportFormat> = {
   traditionalBalance: 'currency',
   rothBalance: 'currency',
   annualConversion: 'currency',
+  startingBalance: 'currency',
 
   // --- 72(t) / SEPP and Roth conversion ---------------------------------------------------------
   // Rates the IRS methods take as inputs; declared alongside the other percentages.
@@ -443,6 +446,8 @@ const EXPORT_FIELD_FORMATS: Record<string, ExportFormat> = {
   totalInvested: 'currency',
   totalGrowth: 'currency',
   inflationImpact: 'currency',
+  totalContributions: 'currency',
+  interestEarned: 'currency',
   totalInterest: 'currency',
   totalPrincipal: 'currency',
   monthlyPayment: 'currency',
@@ -485,6 +490,7 @@ const EXPORT_FIELD_FORMATS: Record<string, ExportFormat> = {
   incomeSourceCount: 'number',
   accountCount: 'number',
   additionalExpenseCount: 'number',
+  years: 'number',
 
   // --- Declared non-numeric ---------------------------------------------------------------------
   // Strings and booleans. Declaring them keeps a number format off a text cell without needing a

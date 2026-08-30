@@ -88,7 +88,9 @@ public static class PeriodicFieldCatalog
             // Account balance is a point-in-time value and every payment amount is a result.
             ["sepp-72t"] = [],
             // The annual conversion is a tax-year strategy input, not a display-period preference.
-            ["roth-conversion"] = []
+            ["roth-conversion"] = [],
+            // Monthly contribution is a fixed model input, not a monthly view of an annual amount.
+            ["interest-calculator"] = []
         };
 
     /// <summary>Every calculator ID this catalog covers.</summary>

@@ -27,6 +27,7 @@ public interface ICalculatorDefaultsService
     ReverseFireDraft ReverseFire { get; }
     WithdrawalRateDraft WithdrawalRate { get; }
     SavingsInvestmentDraft SavingsInvestment { get; }
+    InterestCalculatorDraft InterestCalculator { get; }
     HealthcareGapDraft HealthcareGap { get; }
     SeppDraft Sepp { get; }
     RothConversionDraft RothConversion { get; }
@@ -70,6 +71,7 @@ public sealed class CalculatorDefaultsService(IProfileService profileService) : 
     public ReverseFireDraft ReverseFire => Apply(ReverseFireDraft.Default);
     public WithdrawalRateDraft WithdrawalRate => Apply(WithdrawalRateDraft.Default);
     public SavingsInvestmentDraft SavingsInvestment => Apply(SavingsInvestmentDraft.Default);
+    public InterestCalculatorDraft InterestCalculator => InterestCalculatorDraft.Default with { AnnualInterestRate = Current.ExpectedReturn };
     public HealthcareGapDraft HealthcareGap => Apply(HealthcareGapDraft.Default);
     public SeppDraft Sepp => Apply(SeppDraft.Default);
     public RothConversionDraft RothConversion => Apply(RothConversionDraft.Default);
