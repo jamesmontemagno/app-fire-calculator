@@ -79,15 +79,16 @@ public sealed class InteractiveCartesianChartView : ContentView
         tapGesture.Tapped += OnChartTapped;
         chart.GestureRecognizers.Add(tapGesture);
 
-        Content = new VerticalStackLayout
+        var layout = new VerticalStackLayout
         {
-            Spacing = 6,
             Children =
             {
                 chart,
                 detailLabel
             }
         };
+        layout.SetDynamicResource(VerticalStackLayout.SpacingProperty, "SpaceSm");
+        Content = layout;
     }
 
     public IReadOnlyList<ISeries> Series
@@ -172,10 +173,11 @@ public sealed class InteractiveCartesianChartView : ContentView
 
     private string GetXAxisLabel(int selectedIndex, IEnumerable<(ISeries Series, IReadOnlyList<object?> Values)> seriesValues)
     {
-        var labels = XAxes.FirstOrDefault()?.Labels;
+        var firstAxis = XAxes.FirstOrDefault();
+        var labels = firstAxis?.Labels;
         if (labels is not null && selectedIndex < labels.Count)
         {
-            var axisName = XAxes.FirstOrDefault()?.Name;
+            var axisName = firstAxis?.Name;
             return string.IsNullOrWhiteSpace(axisName)
                 ? labels[selectedIndex]
                 : $"{axisName} {labels[selectedIndex]}";
@@ -221,5 +223,6 @@ public sealed class InteractiveCartesianChartView : ContentView
     private void ClearSelection()
     {
         detailLabel.Text = EmptySelectionText;
+        SemanticProperties.SetDescription(this, EmptySelectionText);
     }
 }
