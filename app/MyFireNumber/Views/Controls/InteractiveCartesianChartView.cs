@@ -161,7 +161,6 @@ public sealed class InteractiveCartesianChartView : ContentView
             lines.Add($"{series.Name}: {value}");
         }
         detailLabel.Text = string.Join(Environment.NewLine, lines);
-        detailLabel.Text = string.Join(Environment.NewLine, lines);
     }
 
     private int GetNearestIndex(double pointerX, int pointCount)
