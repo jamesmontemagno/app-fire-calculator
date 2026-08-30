@@ -80,6 +80,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IDeferredCompensationExportService, DeferredCompensationExportService>();
 		builder.Services.AddSingleton<IFatFireExportService, FatFireExportService>();
 		builder.Services.AddSingleton<IHealthcareGapExportService, HealthcareGapExportService>();
+		builder.Services.AddSingleton<IInterestCalculatorExportService, InterestCalculatorExportService>();
 		builder.Services.AddSingleton<ILeanFireExportService, LeanFireExportService>();
 		builder.Services.AddSingleton<IReverseFireExportService, ReverseFireExportService>();
 		builder.Services.AddSingleton<IRothConversionExportService, RothConversionExportService>();
@@ -116,6 +117,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<WithdrawalRatePage>();
 		builder.Services.AddTransient<SavingsInvestmentPage>();
 		builder.Services.AddTransient<HealthcareGapPage>();
+		builder.Services.AddTransient<InterestCalculatorPage>();
 		builder.Services.AddTransient<SeppPage>();
 		builder.Services.AddTransient<RothConversionPage>();
 		builder.Services.AddTransient<CoastFirePage>();
@@ -146,6 +148,7 @@ public static class MauiProgram
 		builder.Services.AddTransient<WithdrawalRateViewModel>();
 		builder.Services.AddTransient<SavingsInvestmentViewModel>();
 		builder.Services.AddTransient<HealthcareGapViewModel>();
+		builder.Services.AddTransient<InterestCalculatorViewModel>();
 		builder.Services.AddTransient<SeppViewModel>();
 		builder.Services.AddTransient<RothConversionViewModel>();
 		builder.Services.AddTransient<CoastFireViewModel>();

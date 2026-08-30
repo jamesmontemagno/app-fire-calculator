@@ -89,6 +89,12 @@ export const calculatorSEO: Record<string, PageSEO> = {
     keywords: 'deferred compensation calculator, retirement cash flow calculator, 401k withdrawal planner, semi-retirement calculator, retirement account buckets',
     canonicalPath: '/retirement-cash-flow',
   },
+  interest: {
+    title: 'Interest Calculator - Monthly Compound Interest',
+    description: 'Calculate monthly compound interest, regular contribution growth, total contributions, and interest earned. Private and available offline.',
+    keywords: 'interest calculator, compound interest calculator, monthly interest, savings interest, investment growth',
+    canonicalPath: '/interest',
+  },
   books: {
     title: 'Best FIRE Books - Recommended Financial Independence Reading',
     description: 'Curated list of the best FIRE books to accelerate your financial independence journey. Essential reading on investing, personal finance, early retirement, and wealth building.',

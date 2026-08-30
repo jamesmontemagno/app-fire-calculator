@@ -31,6 +31,7 @@ public partial class CalculatorCatalogViewModel : ObservableObject
             ["healthcare-gap"] = "Finance",
             ["sepp-72t"] = "Finance",
             ["roth-conversion"] = "Finance",
+            ["interest-calculator"] = "Cash Flow",
             ["retirement-cash-flow"] = "Cash Flow"
         };
     private static readonly (string Name, string IconGlyph)[] CategoryOrder =

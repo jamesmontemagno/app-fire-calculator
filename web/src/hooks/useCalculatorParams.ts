@@ -58,6 +58,11 @@ interface CalculatorParams {
   rothAnnualConversion: number
   rothConversionYears: number
   rothTaxRate: number
+  // Interest calculator parameters
+  interestStartingBalance: number
+  interestMonthlyContribution: number
+  interestAnnualRate: number
+  interestYears: number
 }
 
 const TODAY = todayIsoDate()
@@ -103,6 +108,10 @@ const DEFAULTS: CalculatorParams = {
   rothAnnualConversion: 50000,
   rothConversionYears: 10,
   rothTaxRate: 0.22,
+  interestStartingBalance: 10000,
+  interestMonthlyContribution: 250,
+  interestAnnualRate: 0.05,
+  interestYears: 10,
 }
 
 const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
@@ -145,6 +154,10 @@ const PARAM_KEYS: Record<keyof CalculatorParams, string> = {
   rothAnnualConversion: 'rothConvert',
   rothConversionYears: 'rothYears',
   rothTaxRate: 'rothTax',
+  interestStartingBalance: 'interestBalance',
+  interestMonthlyContribution: 'interestContribution',
+  interestAnnualRate: 'interestRate',
+  interestYears: 'interestYears',
 }
 
 interface NumericBounds {
@@ -184,6 +197,10 @@ const NUMERIC_BOUNDS: Partial<Record<keyof CalculatorParams, NumericBounds>> = {
   rothAnnualConversion: { min: 0 },
   rothConversionYears: { min: 1, max: 50 },
   rothTaxRate: { min: 0, max: 1 },
+  interestStartingBalance: { min: 0 },
+  interestMonthlyContribution: { min: 0 },
+  interestAnnualRate: { min: 0, max: 0.5 },
+  interestYears: { min: 1, max: 60 },
 }
 
 const ROUTE_NUMERIC_BOUNDS: Record<string, Partial<Record<keyof CalculatorParams, NumericBounds>>> = {
@@ -418,6 +435,10 @@ export function useCalculatorParams() {
       rothAnnualConversion: getParam('rothAnnualConversion'),
       rothConversionYears: getParam('rothConversionYears'),
       rothTaxRate: getParam('rothTaxRate'),
+      interestStartingBalance: getParam('interestStartingBalance'),
+      interestMonthlyContribution: getParam('interestMonthlyContribution'),
+      interestAnnualRate: getParam('interestAnnualRate'),
+      interestYears: getParam('interestYears'),
     }
   }, [location.pathname, savedParams, searchParams])
   const params = useMemo(() => ({ ...resolvedParams, ...pendingParams }), [pendingParams, resolvedParams])

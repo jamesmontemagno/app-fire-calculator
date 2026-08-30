@@ -22,6 +22,7 @@ import Sepp from './pages/Sepp'
 import RothConversion from './pages/RothConversion'
 import Settings from './pages/Settings'
 import Legal from './pages/Legal'
+import InterestCalculator from './pages/InterestCalculator'
 import './index.css'
 
 const basename = import.meta.env.BASE_URL
@@ -56,6 +57,7 @@ const router = createBrowserRouter([
       { path: 'savings-rate', element: <SavingsRate /> },
       { path: 'debt-payoff', element: <DebtPayoff /> },
       { path: 'retirement-cash-flow', element: <DeferredCompensation /> },
+      { path: 'interest', element: <InterestCalculator /> },
       { path: 'deferred-compensation', element: <DeferredCompensationRedirect /> },
       { path: 'reverse', element: <ReverseFIRE /> },
       { path: 'healthcare', element: <HealthcareGap /> },

@@ -114,6 +114,13 @@
       "nativePage": "RothConversionPage.xaml",
       "note": "Native can link to the on-device Accounts inventory; web takes balances directly. The annual conversion is a tax-year strategy input rather than a monthly/annual display preference.",
       "fields": []
+    },
+    {
+      "id": "interest-calculator",
+      "webPage": "InterestCalculator.tsx",
+      "nativePage": "InterestCalculatorPage.xaml",
+      "note": "Declared with no periodic fields. The contribution is genuinely monthly because interest accrues monthly, so changing its period would change the calculation.",
+      "fields": []
     }
   ]
 }

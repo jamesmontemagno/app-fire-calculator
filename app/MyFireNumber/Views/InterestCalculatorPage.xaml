@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<views:CalculatorPageBase xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                          xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                          xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
+                          xmlns:views="clr-namespace:MyFireNumber.Views"
+                          xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
+                          x:Class="MyFireNumber.Views.InterestCalculatorPage"
+                          x:DataType="viewModels:InterestCalculatorViewModel"
+                          Title="{Binding Title}"
+                          Shell.NavBarIsVisible="True"
+                          Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
+                          SafeAreaEdges="All">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Command="{Binding SavePlanAndCloseCommand}" SemanticProperties.Description="Save the current calculator values as a plan.">
+            <ToolbarItem.IconImageSource>
+                <FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf0c7;" Color="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" Size="18" />
+            </ToolbarItem.IconImageSource>
+        </ToolbarItem>
+    </ContentPage.ToolbarItems>
+    <ScrollView>
+        <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
+            <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" SemanticProperties.Description="Restoring your local calculator draft." />
+            <Border IsVisible="{Binding HasValidationMessage}" Padding="14" Background="{AppThemeBinding Light={StaticResource SurfaceWarningLight}, Dark={StaticResource SurfaceWarningDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderWarningLight}, Dark={StaticResource BorderWarningDark}}" StrokeShape="RoundRectangle 8">
+                <Label Text="{Binding ValidationMessage}" TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
+            </Border>
+
+            <controls:CalculatorInfoView Title="What is compound interest?"
+                                         Summary="Estimate how monthly compounding and regular deposits could grow your money."
+                                         Details="Interest is calculated from the current balance each month. Deposits are then added at the end of the month and begin earning interest the following month."
+                                         IconGlyph="&#xf295;" />
+
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
+                        <Label Text="Your savings plan" Style="{StaticResource CalculatorSectionHeading}" />
+                        <Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12" SemanticProperties.Description="Reset Interest Calculator values to their defaults." />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceMd}" RowSpacing="{StaticResource SpaceMd}">
+                        <controls:NumericInputView Header="Starting balance" HelpText="The amount already in the account, in dollars." Placeholder="10000" Text="{Binding StartingBalanceText}" />
+                        <controls:NumericInputView Grid.Column="1" Header="Monthly contribution" HelpText="The amount deposited at the end of each month, in dollars." Placeholder="250" Text="{Binding MonthlyContributionText}" />
+                        <controls:PercentageInputView Grid.Row="1" Header="Annual interest rate" HelpText="The stated annual rate, compounded monthly." Placeholder="5" Minimum="0" Maximum="50" Step="0.1" Text="{Binding AnnualInterestRateText}" />
+                        <controls:NumericInputView Grid.Row="1" Grid.Column="1" Header="Time period" HelpText="How many years the balance earns interest." Placeholder="10" Text="{Binding YearsText}" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                <Label Text="Your interest outlook" Style="{StaticResource CalculatorSectionHeading}" />
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
+                    <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInfoSkyLight}, Dark={StaticResource SurfaceInfoSkyDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Ending balance" FontSize="12" /><Label AutomationId="InterestEndingBalanceLabel" Text="{Binding EndingBalanceText}" FontAttributes="Bold" FontSize="22" /></VerticalStackLayout></Border>
+                    <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Interest earned" FontSize="12" /><Label Text="{Binding InterestEarnedText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Total contributions" FontSize="12" /><Label Text="{Binding TotalContributionsText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                    <Border Grid.Row="1" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8"><VerticalStackLayout Spacing="2"><Label Text="Effective annual yield" FontSize="12" /><Label Text="{Binding EffectiveAnnualYieldText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout></Border>
+                </Grid>
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                <Label Text="Balance growth" Style="{StaticResource CalculatorSectionHeading}" />
+                <controls:InteractiveCartesianChartView Series="{Binding ProjectionSeries}" XAxes="{Binding ProjectionXAxes}" AnimationsSpeed="{Binding ChartAnimationsSpeed}" ChartHeight="300" SemanticProperties.Description="{Binding ProjectionChartDescription}" />
+                <Label Text="{Binding ProjectionSummary}" Style="{StaticResource CalculatorSupportingText}" />
+            </VerticalStackLayout>
+
+            <Border Padding="{StaticResource CardPadding}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}" StrokeShape="RoundRectangle 8">
+                <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                    <Label Text="Save or export this plan" Style="{StaticResource CalculatorSectionHeading}" />
+                    <Entry Text="{Binding PlanNameText}" Placeholder="My Interest Plan" Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}" SemanticProperties.Description="Name for this saved Interest Calculator plan" />
+                    <Button Text="{Binding SavePlanActionText}" Command="{Binding SavePlanAndCloseCommand}" SemanticProperties.Description="{Binding SavePlanActionDescription}" />
+                    <Button Text="Export to Excel" Command="{Binding ExportCommand}" Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" SemanticProperties.Description="Create an Interest Calculator workbook on this device and open the native share sheet." />
+                    <Label IsVisible="{Binding HasPlanStatusMessage}" Text="{Binding PlanStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
+                    <Label IsVisible="{Binding HasExportStatusMessage}" Text="{Binding ExportStatusMessage}" Style="{StaticResource CalculatorSupportingText}" />
+                    <controls:EducationalDisclaimerView />
+                </VerticalStackLayout>
+            </Border>
+            <controls:CalculationExplanationView Explanation="Monthly rate = annual interest rate / 12.&#10;&#10;Each month, balance = prior balance x (1 + monthly rate) + monthly contribution. Contributions are assumed to be made at the end of each month.&#10;&#10;Interest earned = ending balance - starting balance - total monthly contributions.&#10;&#10;This is a deterministic estimate; actual account rates, fees, taxes, and deposit timing may differ." />
+        </VerticalStackLayout>
+    </ScrollView>
+</views:CalculatorPageBase>
