@@ -82,6 +82,9 @@ public sealed partial class AccountsViewModel(
     [ObservableProperty] private bool hasNetWorthChange;
     [ObservableProperty] private bool isLoading = true;
 
+    public bool IsNotLoading => !IsLoading;
+    partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(IsNotLoading));
+
     /// <summary>
     /// Masks the Overview totals and per-section summary lines when on, so passively glancing at the
     /// Accounts list doesn't show dollar figures. Expanding an individual account/income/expense/debt

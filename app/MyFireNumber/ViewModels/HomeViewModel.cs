@@ -131,6 +131,9 @@ public partial class HomeViewModel : ObservableObject
     [ObservableProperty] private string netWorthChangeText = string.Empty;
     [ObservableProperty] private bool isLoading = true;
 
+    public bool IsNotLoading => !IsLoading;
+    partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(IsNotLoading));
+
     /// <summary>
     /// Masks net worth, assets, and debts on the Home dashboard when on. Off by default; persisted
     /// per-page in <see cref="IPrivacyModePreferencesService"/> and only forced on at app launch when

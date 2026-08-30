@@ -2,7 +2,6 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:MyFireNumber.Views.Controls"
-             xmlns:shimmer="clr-namespace:Syncfusion.Maui.Toolkit.Shimmer;assembly=Syncfusion.Maui.Toolkit"
              xmlns:viewModels="clr-namespace:MyFireNumber.ViewModels"
              x:Class="MyFireNumber.Views.AccountsPage"
              x:DataType="viewModels:AccountsViewModel"
@@ -10,13 +9,8 @@
              Shell.NavBarIsVisible="False"
              Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
              SafeAreaEdges="Container">
-    <shimmer:SfShimmer IsActive="{Binding IsLoading}"
-                       Type="Feed"
-                       BackgroundColor="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}"
-                       Fill="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}"
-                       WaveColor="{AppThemeBinding Light={StaticResource SurfaceAccentTintPaleLight}, Dark={StaticResource SurfaceCardDark}}">
     <Grid RowDefinitions="*,Auto">
-        <ScrollView Grid.Row="0">
+        <ScrollView Grid.Row="0" IsVisible="{Binding IsNotLoading}">
             <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceMd}">
                     <Label Text="&#xf555;"
@@ -384,6 +378,7 @@
             </VerticalStackLayout>
         </ScrollView>
         <Border Grid.Row="1"
+                IsVisible="{Binding IsNotLoading}"
                 Padding="16,10"
                 Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
                 Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}">
@@ -397,6 +392,10 @@
                 </Button>
             </Grid>
         </Border>
+        <ActivityIndicator IsRunning="{Binding IsLoading}"
+                           IsVisible="{Binding IsLoading}"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center"
+                           SemanticProperties.Description="Loading your accounts." />
     </Grid>
-    </shimmer:SfShimmer>
 </ContentPage>
