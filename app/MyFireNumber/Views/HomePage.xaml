@@ -100,18 +100,19 @@
                                    TextColor="{StaticResource FixedWarning}" />
                         </VerticalStackLayout>
 
-                        <Grid ColumnDefinitions="*,*" ColumnSpacing="{StaticResource SpaceSm}">
+                        <!-- Stacked rather than side by side: the longer labels are truncated by the
+                             native button when two of them share a phone-width row. -->
+                        <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
+                            <Button Text="Start monthly check-in"
+                                    AutomationId="HomeStartCheckInButton"
+                                    Command="{Binding StartCheckInCommand}"
+                                    IsVisible="{Binding HasAccountsData}" />
                             <Button Text="Go to Accounts"
                                     AutomationId="HomeGoToAccountsButton"
                                     Command="{Binding GoToAccountsCommand}"
                                     Background="Transparent"
                                     TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
-                            <Button Grid.Column="1"
-                                    Text="Start monthly check-in"
-                                    AutomationId="HomeStartCheckInButton"
-                                    Command="{Binding StartCheckInCommand}"
-                                    IsVisible="{Binding HasAccountsData}" />
-                        </Grid>
+                        </VerticalStackLayout>
 
                         <!-- Trend UI only appears once at least one check-in exists; before that there is
                              nothing to trend, so the link stays hidden rather than opening an empty chart. -->

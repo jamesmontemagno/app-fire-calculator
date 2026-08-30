@@ -32,6 +32,16 @@
     backgrounds (Gray200 on the light field surface is 1.55:1), so placeholders
     use these instead. Light 5.0:1, dark 10.2:1 against the field backgrounds.
     -->
+    <!--
+    Switch "on" track/thumb pair. Light mode pairs a pale green track with the
+    deep green thumb; dark mode mirrors that with a mid green track and the pale
+    green thumb so the accent reads as green in both themes.
+    -->
+    <Color x:Key="SwitchTrackOnLight">#E4F0E9</Color>
+    <Color x:Key="SwitchTrackOnDark">#3A6B57</Color>
+    <Color x:Key="SwitchThumbOnLight">#2F6B57</Color>
+    <Color x:Key="SwitchThumbOnDark">#CFE4D6</Color>
+
     <Color x:Key="PlaceholderLight">#587068</Color>
     <Color x:Key="PlaceholderDark">#B9D1C2</Color>
 
