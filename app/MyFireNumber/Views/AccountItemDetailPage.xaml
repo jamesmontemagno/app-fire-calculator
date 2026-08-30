@@ -30,7 +30,7 @@
                     Stroke="{AppThemeBinding Light={StaticResource BorderSubtleLight}, Dark={StaticResource BorderSubtleDark}}"
                     StrokeShape="RoundRectangle 12">
                 <VerticalStackLayout Spacing="{StaticResource SpaceXs}">
-                    <Label Text="Current balance" Style="{StaticResource CalculatorSectionHeading}" />
+                    <Label Text="{Binding BalanceLabel}" Style="{StaticResource CalculatorSectionHeading}" />
                     <Label Text="{Binding CurrentBalanceText}"
                            FontSize="28"
                            FontAttributes="Bold"

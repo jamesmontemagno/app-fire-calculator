@@ -79,6 +79,9 @@ public sealed record LocalDataArchive(
 
     public IReadOnlyList<DebtItem> ProfileDebts { get; init; } = [];
 
+    /// <summary>Owned property assets, empty for an archive written before assets existed.</summary>
+    public IReadOnlyList<PropertyAsset> ProfileAssets { get; init; } = [];
+
     /// <summary>Historical monthly check-in snapshots, empty for an archive written before check-ins existed.</summary>
     public IReadOnlyList<FinancialCheckIn> FinancialCheckIns { get; init; } = [];
 }
@@ -170,6 +173,13 @@ public interface IProfileDebtRepository
 {
     Task<IReadOnlyList<DebtItem>> ListAsync(CancellationToken cancellationToken = default);
     Task SaveAsync(DebtItem debt, CancellationToken cancellationToken = default);
+    Task DeleteAsync(string id, CancellationToken cancellationToken = default);
+}
+
+public interface IProfileAssetRepository
+{
+    Task<IReadOnlyList<PropertyAsset>> ListAsync(CancellationToken cancellationToken = default);
+    Task SaveAsync(PropertyAsset asset, CancellationToken cancellationToken = default);
     Task DeleteAsync(string id, CancellationToken cancellationToken = default);
 }
 

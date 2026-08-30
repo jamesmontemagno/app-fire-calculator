@@ -1,10 +1,13 @@
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 
 namespace MyFireNumber.Services;
 
 public interface IRetirementCashFlowPromptService
 {
     Task<RetirementAccountType?> ChooseAccountTypeAsync();
+
+    Task<PropertyAssetType?> ChooseAssetTypeAsync();
 
     Task<bool?> ChooseIncomeTaxTreatmentAsync();
 }
@@ -17,6 +20,18 @@ public sealed class RetirementCashFlowPromptService : IRetirementCashFlowPromptS
             .ToDictionary(FormatAccountType, type => type, StringComparer.Ordinal);
         var choice = await Shell.Current.DisplayActionSheetAsync(
             "New account",
+            "Cancel",
+            null,
+            [.. choices.Keys]);
+        return choice is not null && choices.TryGetValue(choice, out var type) ? type : null;
+    }
+
+    public async Task<PropertyAssetType?> ChooseAssetTypeAsync()
+    {
+        var choices = Enum.GetValues<PropertyAssetType>()
+            .ToDictionary(PropertyAssetLabels.Format, type => type, StringComparer.Ordinal);
+        var choice = await Shell.Current.DisplayActionSheetAsync(
+            "New asset",
             "Cancel",
             null,
             [.. choices.Keys]);

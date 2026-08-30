@@ -35,6 +35,7 @@ public partial class HomeViewModel : ObservableObject
     private readonly IScenarioModePromptService scenarioModePromptService;
     private readonly IProfileAccountRepository profileAccountRepository;
     private readonly IProfileDebtRepository profileDebtRepository;
+    private readonly IProfileAssetRepository profileAssetRepository;
     private readonly IFinancialCheckInRepository checkInRepository;
     private readonly ICurrencyPreferencesService currencyPreferencesService;
     private readonly IPrivacyModePreferencesService privacyModePreferencesService;
@@ -61,6 +62,7 @@ public partial class HomeViewModel : ObservableObject
         IScenarioModePromptService scenarioModePromptService,
         IProfileAccountRepository profileAccountRepository,
         IProfileDebtRepository profileDebtRepository,
+        IProfileAssetRepository profileAssetRepository,
         IFinancialCheckInRepository checkInRepository,
         ICurrencyPreferencesService currencyPreferencesService,
         IPrivacyModePreferencesService privacyModePreferencesService)
@@ -80,6 +82,7 @@ public partial class HomeViewModel : ObservableObject
         this.scenarioModePromptService = scenarioModePromptService;
         this.profileAccountRepository = profileAccountRepository;
         this.profileDebtRepository = profileDebtRepository;
+        this.profileAssetRepository = profileAssetRepository;
         this.checkInRepository = checkInRepository;
         this.currencyPreferencesService = currencyPreferencesService;
         this.privacyModePreferencesService = privacyModePreferencesService;
@@ -266,9 +269,11 @@ public partial class HomeViewModel : ObservableObject
     {
         var accounts = await profileAccountRepository.ListAsync();
         var debts = await profileDebtRepository.ListAsync();
-        HasAccountsData = accounts.Count > 0 || debts.Count > 0;
+        var assets = await profileAssetRepository.ListAsync();
+        HasAccountsData = accounts.Count > 0 || debts.Count > 0 || assets.Count > 0;
 
-        var totalAssets = accounts.Sum(account => account.Balance);
+        // Net worth counts investment balances plus what owned property is worth today.
+        var totalAssets = accounts.Sum(account => account.Balance) + assets.Sum(asset => asset.NetWorthValue);
         var totalDebts = debts.Sum(debt => debt.Balance);
         rawTotalAssets = totalAssets;
         rawTotalDebts = totalDebts;

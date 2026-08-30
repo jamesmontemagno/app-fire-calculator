@@ -100,6 +100,7 @@ public static class MauiProgram
 		builder.Services.AddSingleton<IProfileIncomeRepository, SqliteProfileIncomeRepository>();
 		builder.Services.AddSingleton<IProfileExpenseRepository, SqliteProfileExpenseRepository>();
 		builder.Services.AddSingleton<IProfileDebtRepository, SqliteProfileDebtRepository>();
+		builder.Services.AddSingleton<IProfileAssetRepository, SqliteProfileAssetRepository>();
 		builder.Services.AddSingleton<IProfileFinancialSnapshotRepository, SqliteProfileFinancialSnapshotRepository>();
 		builder.Services.AddSingleton<IFinancialCheckInRepository, SqliteFinancialCheckInRepository>();
 		builder.Services.AddSingleton<AppShell>();

@@ -5,6 +5,7 @@ using LiveChartsCore.Defaults;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using MyFireNumber.Core.Calculations;
+using MyFireNumber.Core.Presentation;
 using MyFireNumber.Core.Profile;
 using MyFireNumber.Services;
 using MyFireNumber.Storage;
@@ -31,6 +32,7 @@ public enum HistoryRange
 public sealed partial class AccountsHistoryViewModel(
     IFinancialCheckInRepository checkInRepository,
     IProfileAccountRepository profileAccountRepository,
+    IProfileAssetRepository profileAssetRepository,
     ICurrencyPreferencesService currencyPreferencesService,
     IAppBehaviorPreferencesService behaviorPreferencesService) : ObservableObject
 {
@@ -57,6 +59,7 @@ public sealed partial class AccountsHistoryViewModel(
 
     private IReadOnlyList<FinancialCheckIn> allCheckIns = [];
     private IReadOnlyList<RetirementAccount> currentAccounts = [];
+    private IReadOnlyList<PropertyAsset> currentAssets = [];
     private bool isLoaded;
 
     [ObservableProperty] private HistoryRange selectedRange = HistoryRange.OneYear;
@@ -107,6 +110,7 @@ public sealed partial class AccountsHistoryViewModel(
 
         allCheckIns = await checkInRepository.ListAsync();
         currentAccounts = await profileAccountRepository.ListAsync();
+        currentAssets = await profileAssetRepository.ListAsync();
         HasHistory = allCheckIns.Count > 0;
         UpdateCharts();
         isLoaded = true;
@@ -234,11 +238,20 @@ public sealed partial class AccountsHistoryViewModel(
 
     private void UpdateAllocationChart()
     {
-        // Allocation is a point-in-time concept, so it always reflects the accounts as they stand
-        // today rather than a historical check-in, even while the other charts respect the range picker.
-        var groups = currentAccounts
+        // Allocation is a point-in-time concept, so it always reflects the accounts and assets as they
+        // stand today rather than a historical check-in, even while the other charts respect the range
+        // picker. Property assets appear as their own slices so the pie covers everything net worth counts.
+        var accountGroups = currentAccounts
             .GroupBy(account => account.Type)
-            .Select(group => (Type: group.Key, Balance: group.Sum(account => account.Balance)))
+            .Select(group => (Label: group.Key.ToString(), Balance: group.Sum(account => account.Balance)));
+
+        var assetGroups = currentAssets
+            .Where(asset => asset.IncludeInNetWorth)
+            .GroupBy(asset => asset.Type)
+            .Select(group => (Label: PropertyAssetLabels.Format(group.Key), Balance: group.Sum(asset => asset.CurrentValue)));
+
+        var groups = accountGroups
+            .Concat(assetGroups)
             .Where(group => group.Balance > 0)
             .OrderByDescending(group => group.Balance)
             .ToArray();
@@ -247,23 +260,23 @@ public sealed partial class AccountsHistoryViewModel(
         if (groups.Length == 0)
         {
             AllocationSeries = [];
-            AllocationDescription = "Add an account balance to see how your assets are allocated.";
+            AllocationDescription = "Add an account balance or asset value to see how your assets are allocated.";
             return;
         }
 
         AllocationSeries = groups
             .Select((group, index) => (ISeries)new PieSeries<double>
             {
-                Name = group.Type.ToString(),
+                Name = group.Label,
                 Values = [group.Balance],
                 Fill = new SolidColorPaint(AccountColors[index % AccountColors.Length]),
-                ToolTipLabelFormatter = point => $"{group.Type}: {FormatCurrency(point.Coordinate.PrimaryValue)}"
+                ToolTipLabelFormatter = point => $"{group.Label}: {FormatCurrency(point.Coordinate.PrimaryValue)}"
             })
             .ToArray();
 
         var total = groups.Sum(group => group.Balance);
         AllocationDescription = string.Join(", ", groups.Select(group =>
-            $"{group.Type} {FormatCurrency(group.Balance)} ({group.Balance / total:P0})"));
+            $"{group.Label} {FormatCurrency(group.Balance)} ({group.Balance / total:P0})"));
     }
 
     private void UpdateIncomeVsExpensesChart(IReadOnlyList<FinancialCheckIn> checkIns)

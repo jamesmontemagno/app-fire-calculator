@@ -352,12 +352,51 @@ public sealed class SqliteProfileDebtRepository(LocalDatabase database) : IProfi
     public async Task DeleteAsync(string id, CancellationToken cancellationToken = default) { await database.InitializeAsync(cancellationToken); await database.Connection.DeleteAsync<ProfileDebtEntity>(id); }
 }
 
+public sealed class SqliteProfileAssetRepository(LocalDatabase database) : IProfileAssetRepository
+{
+    public async Task<IReadOnlyList<PropertyAsset>> ListAsync(CancellationToken cancellationToken = default)
+    {
+        await database.InitializeAsync(cancellationToken);
+        var items = await database.Connection.Table<ProfileAssetEntity>().OrderBy(item => item.Name).ToListAsync();
+        return items
+            .Select(item => new PropertyAsset(
+                item.Id,
+                item.Name,
+                Enum.TryParse<PropertyAssetType>(item.Type, out var type) ? type : PropertyAssetType.Other,
+                item.CurrentValue,
+                item.PurchaseValue,
+                item.IncludeInNetWorth))
+            .ToArray();
+    }
+
+    public async Task SaveAsync(PropertyAsset item, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(item.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(item.Name);
+        ArgumentOutOfRangeException.ThrowIfNegative(item.CurrentValue);
+        ArgumentOutOfRangeException.ThrowIfNegative(item.PurchaseValue);
+        await database.InitializeAsync(cancellationToken);
+        await database.Connection.InsertOrReplaceAsync(new ProfileAssetEntity
+        {
+            Id = item.Id,
+            Name = item.Name.Trim(),
+            Type = item.Type.ToString(),
+            CurrentValue = item.CurrentValue,
+            PurchaseValue = item.PurchaseValue,
+            IncludeInNetWorth = item.IncludeInNetWorth
+        });
+    }
+
+    public async Task DeleteAsync(string id, CancellationToken cancellationToken = default) { await database.InitializeAsync(cancellationToken); await database.Connection.DeleteAsync<ProfileAssetEntity>(id); }
+}
+
 public sealed class SqliteProfileFinancialSnapshotRepository(
     IProfileRepository profileRepository,
     IProfileAccountRepository accountRepository,
     IProfileIncomeRepository incomeRepository,
     IProfileExpenseRepository expenseRepository,
-    IProfileDebtRepository debtRepository) : IProfileFinancialSnapshotRepository
+    IProfileDebtRepository debtRepository,
+    IProfileAssetRepository assetRepository) : IProfileFinancialSnapshotRepository
 {
     public async Task<ProfileFinancialSnapshot> GetAsync(CancellationToken cancellationToken = default) => new(
         await profileRepository.GetAsync(cancellationToken),
@@ -365,7 +404,10 @@ public sealed class SqliteProfileFinancialSnapshotRepository(
         await incomeRepository.ListAsync(cancellationToken),
         await expenseRepository.ListAsync(cancellationToken),
         await debtRepository.ListAsync(cancellationToken),
-        DateTime.UtcNow.Ticks);
+        DateTime.UtcNow.Ticks)
+    {
+        Assets = await assetRepository.ListAsync(cancellationToken)
+    };
 }
 
 public sealed class SqliteFinancialCheckInRepository(LocalDatabase database) : IFinancialCheckInRepository
@@ -405,6 +447,13 @@ public sealed class SqliteFinancialCheckInRepository(LocalDatabase database) : I
             ArgumentException.ThrowIfNullOrWhiteSpace(debt.DebtId);
             ArgumentException.ThrowIfNullOrWhiteSpace(debt.Name);
             ArgumentOutOfRangeException.ThrowIfNegative(debt.Balance);
+        }
+
+        foreach (var asset in checkIn.Assets)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(asset.AssetId);
+            ArgumentException.ThrowIfNullOrWhiteSpace(asset.Name);
+            ArgumentOutOfRangeException.ThrowIfNegative(asset.Value);
         }
 
         await database.InitializeAsync(cancellationToken);
