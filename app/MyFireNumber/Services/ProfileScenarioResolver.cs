@@ -42,7 +42,7 @@ public sealed class ProfileScenarioResolver(
                 snapshot.Profile.BirthDate is not null &&
                 snapshot.Accounts.Any(account =>
                     account.Type == MyFireNumber.Core.Calculations.RetirementAccountType.Traditional),
-            "withdrawal-rate" => false,
+            "interest-calculator" or "withdrawal-rate" => false,
             "retirement-cash-flow" =>
                 snapshot.Profile.BirthDate is not null &&
                 snapshot.Profile.PhasedRetirementDate is not null &&

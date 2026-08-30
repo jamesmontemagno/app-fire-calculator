@@ -32,6 +32,7 @@ public sealed partial class InterestCalculatorViewModel : CalculatorViewModelBas
     protected override string DefaultPlanName => "My Interest Plan";
     protected override string ExportSuccessMessage => "Your Interest Calculator workbook is ready to share.";
     protected override string ExportFailureMessage => "The Interest Calculator workbook could not be created locally.";
+    protected override bool SupportsLinkedProfile => false;
 
     partial void OnStartingBalanceTextChanged(string value) => OnDraftInputChanged();
     partial void OnMonthlyContributionTextChanged(string value) => OnDraftInputChanged();

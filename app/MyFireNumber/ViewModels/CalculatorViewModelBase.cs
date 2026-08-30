@@ -292,6 +292,8 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
 
     protected abstract string ExportFailureMessage { get; }
 
+    protected virtual bool SupportsLinkedProfile => true;
+
     /// <summary>Populates the input properties from <paramref name="draft"/>.</summary>
     protected abstract void ApplyDraft(TDraft draft);
 
@@ -316,7 +318,7 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
         loadedPlanId = null;
         loadedPlanCreatedAtUtc = null;
         IsLoadedPlan = false;
-        ScenarioDataMode = requestedMode ?? ScenarioDataMode.Standalone;
+        ScenarioDataMode = NormalizeDataMode(requestedMode ?? ScenarioDataMode.Standalone);
 
         var definition = catalog.GetRequired(CalculatorId);
         Title = definition.Title;
@@ -373,7 +375,7 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
         }
 
         PlanNameText = savedPlan.Name;
-        ScenarioDataMode = savedPlan.DataMode;
+        ScenarioDataMode = NormalizeDataMode(savedPlan.DataMode);
         await LoadResolvedInputsAsync(JsonSerializer.Deserialize<TDraft>(savedPlan.PayloadJson) ?? DefaultDraft);
         loadedPlanId = savedPlan.Id;
         loadedPlanCreatedAtUtc = savedPlan.CreatedAtUtc;
@@ -399,9 +401,12 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
             return;
         }
 
-        ScenarioDataMode = requestedMode ?? savedDraft.DataMode;
+        ScenarioDataMode = NormalizeDataMode(requestedMode ?? savedDraft.DataMode);
         await LoadResolvedInputsAsync(JsonSerializer.Deserialize<TDraft>(savedDraft.PayloadJson) ?? DefaultDraft);
     }
+
+    private ScenarioDataMode NormalizeDataMode(ScenarioDataMode dataMode) =>
+        SupportsLinkedProfile ? dataMode : ScenarioDataMode.Standalone;
 
     private async Task LoadResolvedInputsAsync(TDraft draft)
     {
