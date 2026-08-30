@@ -12,6 +12,8 @@ namespace MyFireNumber.Views.Controls;
 /// </summary>
 public sealed class InteractiveCartesianChartView : ContentView
 {
+    private const string EmptySelectionText = "Tap the graph to pin exact values.";
+
     public static readonly BindableProperty SeriesProperty = BindableProperty.Create(
         nameof(Series),
         typeof(IReadOnlyList<ISeries>),
@@ -56,9 +58,6 @@ public sealed class InteractiveCartesianChartView : ContentView
             ((InteractiveCartesianChartView)bindable).chart.HeightRequest = (double)newValue;
         });
 
-    private const double PlotLeftInset = 36;
-    private const double PlotRightInset = 12;
-
     private readonly CartesianChart chart;
     private readonly Label detailLabel;
 
@@ -71,11 +70,10 @@ public sealed class InteractiveCartesianChartView : ContentView
 
         detailLabel = new Label
         {
-            FontSize = 12,
             LineBreakMode = LineBreakMode.WordWrap,
-            Text = "Tap the graph to pin exact values."
+            Text = EmptySelectionText
         };
-        detailLabel.SetAppThemeColor(Label.TextColorProperty, Color.FromArgb("#587068"), Color.FromArgb("#B7C9C0"));
+        detailLabel.SetDynamicResource(StyleProperty, "CalculatorSupportingText");
 
         var tapGesture = new TapGestureRecognizer();
         tapGesture.Tapped += OnChartTapped;
@@ -136,7 +134,7 @@ public sealed class InteractiveCartesianChartView : ContentView
         }
 
         var pointCount = seriesValues.Max(series => series.Values.Count);
-        var selectedIndex = GetNearestIndex(position.Value.X, chart.Width, pointCount);
+        var selectedIndex = GetNearestIndex(position.Value.X, pointCount);
         var label = GetXAxisLabel(selectedIndex, seriesValues);
         var lines = new List<string> { label };
 
@@ -154,15 +152,21 @@ public sealed class InteractiveCartesianChartView : ContentView
         SemanticProperties.SetDescription(this, detailLabel.Text);
     }
 
-    private static int GetNearestIndex(double pointerX, double width, int pointCount)
+    private int GetNearestIndex(double pointerX, int pointCount)
     {
-        if (pointCount <= 1 || width <= 0)
+        if (pointCount <= 1 || chart.Width <= 0)
         {
             return 0;
         }
 
-        var plotWidth = Math.Max(1, width - PlotLeftInset - PlotRightInset);
-        var ratio = Math.Clamp((pointerX - PlotLeftInset) / plotWidth, 0, 1);
+        var drawMarginLocation = chart.CoreChart.DrawMarginLocation;
+        var drawMarginSize = chart.CoreChart.DrawMarginSize;
+        var plotLeft = drawMarginLocation.X;
+        var plotWidth = drawMarginSize.Width > 0
+            ? drawMarginSize.Width
+            : Math.Max(1, chart.Width);
+
+        var ratio = Math.Clamp((pointerX - plotLeft) / plotWidth, 0, 1);
         return (int)Math.Round(ratio * (pointCount - 1), MidpointRounding.AwayFromZero);
     }
 
@@ -216,6 +220,6 @@ public sealed class InteractiveCartesianChartView : ContentView
 
     private void ClearSelection()
     {
-        detailLabel.Text = "Tap the graph to pin exact values.";
+        detailLabel.Text = EmptySelectionText;
     }
 }
