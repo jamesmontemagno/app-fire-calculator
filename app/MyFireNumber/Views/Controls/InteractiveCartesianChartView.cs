@@ -58,6 +58,12 @@ public sealed class InteractiveCartesianChartView : ContentView
             ((InteractiveCartesianChartView)bindable).chart.HeightRequest = (double)newValue;
         });
 
+    public static readonly BindableProperty ValueFormatProperty = BindableProperty.Create(
+        nameof(ValueFormat),
+        typeof(string),
+        typeof(InteractiveCartesianChartView),
+        "C0");
+
     private readonly CartesianChart chart;
     private readonly Label detailLabel;
 
@@ -115,6 +121,12 @@ public sealed class InteractiveCartesianChartView : ContentView
         set => SetValue(ChartHeightProperty, value);
     }
 
+    public string ValueFormat
+    {
+        get => (string)GetValue(ValueFormatProperty);
+        set => SetValue(ValueFormatProperty, value);
+    }
+
     private void OnChartTapped(object? sender, TappedEventArgs args)
     {
         var position = args.GetPosition(chart);
@@ -148,9 +160,8 @@ public sealed class InteractiveCartesianChartView : ContentView
 
             lines.Add($"{series.Name}: {value}");
         }
-
         detailLabel.Text = string.Join(Environment.NewLine, lines);
-        SemanticProperties.SetDescription(this, detailLabel.Text);
+        detailLabel.Text = string.Join(Environment.NewLine, lines);
     }
 
     private int GetNearestIndex(double pointerX, int pointCount)
@@ -205,7 +216,7 @@ public sealed class InteractiveCartesianChartView : ContentView
         return values.Cast<object?>().ToArray();
     }
 
-    private static string? TryFormatValue(object? value)
+    private string? TryFormatValue(object? value)
     {
         var number = value switch
         {
@@ -219,12 +230,18 @@ public sealed class InteractiveCartesianChartView : ContentView
             _ => (double?)null
         };
 
-        return number?.ToString("C0", CultureInfo.CurrentCulture);
+        try
+        {
+            return number?.ToString(ValueFormat, CultureInfo.CurrentCulture);
+        }
+        catch (FormatException)
+        {
+            return number?.ToString("0.##", CultureInfo.CurrentCulture);
+        }
     }
 
     private void ClearSelection()
     {
         detailLabel.Text = EmptySelectionText;
-        SemanticProperties.SetDescription(this, EmptySelectionText);
     }
 }
