@@ -2,13 +2,15 @@ using System.Collections;
 using System.Globalization;
 using LiveChartsCore;
 using LiveChartsCore.Defaults;
+using LiveChartsCore.Drawing;
+using LiveChartsCore.Kernel.Events;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Maui;
 
 namespace MyFireNumber.Views.Controls;
 
 /// <summary>
-/// Wraps a LiveCharts Cartesian chart with a pinned readout that is updated after a tap completes.
+/// Wraps a LiveCharts Cartesian chart with a pinned readout that is updated when the chart is pressed.
 /// </summary>
 public sealed class InteractiveCartesianChartView : ContentView
 {
@@ -74,16 +76,16 @@ public sealed class InteractiveCartesianChartView : ContentView
             HeightRequest = ChartHeight
         };
 
+        // LiveCharts handles native touch on its own platform view, so MAUI gesture recognizers on the
+        // chart never fire on mobile. The chart's own pointer command is the reliable input source.
+        chart.PressedCommand = new Command<PointerCommandArgs>(OnChartPressed);
+
         detailLabel = new Label
         {
             LineBreakMode = LineBreakMode.WordWrap,
             Text = EmptySelectionText
         };
         detailLabel.SetDynamicResource(StyleProperty, "CalculatorSupportingText");
-
-        var tapGesture = new TapGestureRecognizer();
-        tapGesture.Tapped += OnChartTapped;
-        chart.GestureRecognizers.Add(tapGesture);
 
         var layout = new VerticalStackLayout
         {
@@ -127,10 +129,9 @@ public sealed class InteractiveCartesianChartView : ContentView
         set => SetValue(ValueFormatProperty, value);
     }
 
-    private void OnChartTapped(object? sender, TappedEventArgs args)
+    private void OnChartPressed(PointerCommandArgs? args)
     {
-        var position = args.GetPosition(chart);
-        if (position is null)
+        if (args is null)
         {
             return;
         }
@@ -146,14 +147,17 @@ public sealed class InteractiveCartesianChartView : ContentView
             return;
         }
 
-        var pointCount = seriesValues.Max(series => series.Values.Count);
-        var selectedIndex = GetNearestIndex(position.Value.X, pointCount);
-        var label = GetXAxisLabel(selectedIndex, seriesValues);
-        var lines = new List<string> { label };
+        var pointerX = args.PointerPosition.X;
+        var dataX = TryScalePointerToData(pointerX);
+
+        var primaryValues = seriesValues[0].Values;
+        var selectedIndex = GetNearestIndex(primaryValues, dataX, pointerX);
+        var lines = new List<string> { GetXAxisLabel(selectedIndex, primaryValues) };
 
         foreach (var (series, values) in seriesValues)
         {
-            if (selectedIndex >= values.Count || TryFormatValue(values[selectedIndex]) is not { } value)
+            var index = GetNearestIndex(values, dataX, pointerX);
+            if (TryFormatValue(values[index]) is not { } value)
             {
                 continue;
             }
@@ -163,7 +167,62 @@ public sealed class InteractiveCartesianChartView : ContentView
         detailLabel.Text = string.Join(Environment.NewLine, lines);
     }
 
-    private int GetNearestIndex(double pointerX, int pointCount)
+    /// <summary>
+    /// Converts the pointer position (in device independent units, the same units LiveCharts uses for
+    /// the draw margin) into a value on the x axis, or <c>null</c> when the chart has not been measured.
+    /// </summary>
+    private double? TryScalePointerToData(double pointerX)
+    {
+        if (chart.Width <= 0 || chart.CoreChart.DrawMarginSize.Width <= 0)
+        {
+            return null;
+        }
+
+        try
+        {
+            return chart.ScalePixelsToData(new LvcPointD(pointerX, 0)).X;
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+    }
+
+    private int GetNearestIndex(IReadOnlyList<object?> values, double? dataX, double pointerX)
+    {
+        if (values.Count <= 1)
+        {
+            return 0;
+        }
+
+        if (dataX is not { } targetX)
+        {
+            return GetNearestIndexFromPointer(pointerX, values.Count);
+        }
+
+        var nearestIndex = 0;
+        var nearestDistance = double.MaxValue;
+        for (var index = 0; index < values.Count; index++)
+        {
+            var distance = Math.Abs(GetPointX(values[index], index) - targetX);
+            if (distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestIndex = index;
+            }
+        }
+
+        return nearestIndex;
+    }
+
+    private static double GetPointX(object? value, int index) => value switch
+    {
+        DateTimePoint datePoint => datePoint.DateTime.Ticks,
+        ObservablePoint { X: { } x } => x,
+        _ => index
+    };
+
+    private int GetNearestIndexFromPointer(double pointerX, int pointCount)
     {
         if (pointCount <= 1 || chart.Width <= 0)
         {
@@ -177,13 +236,11 @@ public sealed class InteractiveCartesianChartView : ContentView
             ? drawMarginSize.Width
             : Math.Max(1, chart.Width);
 
-        var density = DeviceDisplay.Current.MainDisplayInfo.Density;
-        var scaledPointerX = pointerX * (density > 0 ? density : 1);
-        var ratio = Math.Clamp((scaledPointerX - plotLeft) / plotWidth, 0, 1);
+        var ratio = Math.Clamp((pointerX - plotLeft) / plotWidth, 0, 1);
         return (int)Math.Round(ratio * (pointCount - 1), MidpointRounding.AwayFromZero);
     }
 
-    private string GetXAxisLabel(int selectedIndex, IEnumerable<(ISeries Series, IReadOnlyList<object?> Values)> seriesValues)
+    private string GetXAxisLabel(int selectedIndex, IReadOnlyList<object?> values)
     {
         var firstAxis = XAxes.FirstOrDefault();
         var labels = firstAxis?.Labels;
@@ -195,12 +252,7 @@ public sealed class InteractiveCartesianChartView : ContentView
                 : $"{axisName} {labels[selectedIndex]}";
         }
 
-        var datePoint = seriesValues
-            .Select(series => selectedIndex < series.Values.Count ? series.Values[selectedIndex] : null)
-            .OfType<DateTimePoint>()
-            .FirstOrDefault();
-
-        return datePoint is not null
+        return selectedIndex < values.Count && values[selectedIndex] is DateTimePoint datePoint
             ? datePoint.DateTime.ToString("MMM d, yyyy", CultureInfo.CurrentCulture)
             : $"Point {selectedIndex + 1}";
     }
