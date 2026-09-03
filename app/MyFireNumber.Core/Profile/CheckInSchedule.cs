@@ -58,3 +58,51 @@ public static class CheckInSchedule
     public static int DaysSince(DateTime lastCompletedAtUtc, DateTime nowUtc) =>
         Math.Max(0, (int)(nowUtc.Date - lastCompletedAtUtc.Date).TotalDays);
 }
+
+public enum NetWorthComparisonPeriod
+{
+    LastUpdate,
+    PreviousUpdate
+}
+
+public readonly record struct NetWorthComparison(
+    double Change,
+    NetWorthComparisonPeriod Period);
+
+public static class CheckInTrend
+{
+    /// <summary>
+    /// Compares unsaved live changes with the latest check-in. Immediately after a check-in, when
+    /// live net worth matches that snapshot, compares the latest check-in with the preceding one.
+    /// </summary>
+    public static NetWorthComparison? CompareNetWorth(
+        double currentNetWorth,
+        IReadOnlyList<FinancialCheckIn> checkIns)
+    {
+        if (checkIns.Count == 0)
+        {
+            return null;
+        }
+
+        var latest = checkIns[^1];
+        if (!MatchesDisplayedCurrency(currentNetWorth, latest.NetWorth))
+        {
+            return new NetWorthComparison(
+                currentNetWorth - latest.NetWorth,
+                NetWorthComparisonPeriod.LastUpdate);
+        }
+
+        if (checkIns.Count == 1)
+        {
+            return null;
+        }
+
+        return new NetWorthComparison(
+            latest.NetWorth - checkIns[^2].NetWorth,
+            NetWorthComparisonPeriod.PreviousUpdate);
+    }
+
+    private static bool MatchesDisplayedCurrency(double left, double right) =>
+        Math.Round(left, MidpointRounding.ToEven)
+        == Math.Round(right, MidpointRounding.ToEven);
+}

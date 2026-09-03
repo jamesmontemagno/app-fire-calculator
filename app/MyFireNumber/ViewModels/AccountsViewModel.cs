@@ -38,6 +38,7 @@ public sealed partial class AccountsViewModel(
     private bool isTrackingCollections;
     private long loadedDataRevision = -1;
     private IReadOnlyList<FinancialCheckIn> allCheckIns = [];
+    private readonly HashSet<string> persistedAccountIds = new(StringComparer.Ordinal);
 
     private string rawAccountsSummary = "No accounts yet.";
     private string rawIncomeSummary = "No income yet.";
@@ -160,8 +161,10 @@ public sealed partial class AccountsViewModel(
         var debts = await profileDebtRepository.ListAsync();
         var assets = await profileAssetRepository.ListAsync();
 
+        persistedAccountIds.Clear();
         foreach (var account in accounts)
         {
+            persistedAccountIds.Add(account.Id);
             Accounts.Add(RetirementAccountEditorItem.FromAccount(account));
         }
 
@@ -178,6 +181,11 @@ public sealed partial class AccountsViewModel(
         foreach (var item in debts)
         {
             Debts.Add(DebtEditorItem.FromDebt(item));
+        }
+
+        foreach (var asset in assets)
+        {
+            Assets.Add(AssetEditorItem.FromAsset(asset));
         }
 
         UpdateInventorySummaries();
@@ -381,15 +389,9 @@ public sealed partial class AccountsViewModel(
                 ? $"Overdue since {dueDate:MMM d, yyyy}."
                 : $"Next update due {dueDate:MMM d, yyyy}.";
 
-            var currentNetWorth = rawTotalAssets - rawTotalDebts;
-            var change = currentNetWorth - latest.NetWorth;
-            HasNetWorthChange = true;
-            rawNetWorthChangeText = change switch
-            {
-                > 0 => $"Up {FormatCurrency(change)} since your last update.",
-                < 0 => $"Down {FormatCurrency(Math.Abs(change))} since your last update.",
-                _ => "No change since your last update."
-            };
+            var comparison = CheckInTrend.CompareNetWorth(rawTotalAssets - rawTotalDebts, checkIns);
+            HasNetWorthChange = comparison is not null;
+            rawNetWorthChangeText = comparison is null ? string.Empty : FormatNetWorthChange(comparison.Value);
         }
         ApplyPrivacyMasking();
 
@@ -433,6 +435,19 @@ public sealed partial class AccountsViewModel(
             ApplyFreshness(asset, latestAssetConfirmation.GetValueOrDefault(asset.Id), now,
                 (text, overdue) => { asset.FreshnessText = text; asset.IsOverdue = overdue; });
         }
+    }
+
+    private string FormatNetWorthChange(NetWorthComparison comparison)
+    {
+        var period = comparison.Period == NetWorthComparisonPeriod.PreviousUpdate
+            ? "previous update"
+            : "last update";
+        return comparison.Change switch
+        {
+            > 0 => $"Up {FormatCurrency(comparison.Change)} since your {period}.",
+            < 0 => $"Down {FormatCurrency(Math.Abs(comparison.Change))} since your {period}.",
+            _ => $"No change since your {period}."
+        };
     }
 
     private static void ApplyFreshness<TItem>(
@@ -531,16 +546,28 @@ public sealed partial class AccountsViewModel(
             assets.Add(asset);
         }
 
+        var hasNewAccount = accounts.Any(account => !persistedAccountIds.Contains(account.Id));
+
         foreach (var account in accounts) await profileAccountRepository.SaveAsync(account);
         foreach (var item in income) await profileIncomeRepository.SaveAsync(item);
         foreach (var item in expenses) await profileExpenseRepository.SaveAsync(item);
         foreach (var debt in debts) await profileDebtRepository.SaveAsync(debt);
         foreach (var asset in assets) await profileAssetRepository.SaveAsync(asset);
+        foreach (var account in accounts) persistedAccountIds.Add(account.Id);
 
         UpdateInventorySummaries();
         await UpdateFreshnessAsync();
         ValidationMessage = string.Empty;
         StatusMessage = "Accounts saved on this device.";
+
+        if (hasNewAccount && await confirmationService.ConfirmAsync(
+                "Start a monthly check-in?",
+                "Your new account is saved. Complete a monthly check-in now to record a starting point for your progress.",
+                "Start check-in",
+                "Not now"))
+        {
+            await navigationService.GoToAsync("accounts-check-in");
+        }
     }
 
     [RelayCommand]

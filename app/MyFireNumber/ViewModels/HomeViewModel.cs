@@ -278,9 +278,9 @@ public partial class HomeViewModel : ObservableObject
         rawTotalAssets = totalAssets;
         rawTotalDebts = totalDebts;
 
-        var latest = await checkInRepository.GetLatestAsync();
-        HasCompletedCheckIn = latest is not null;
-        if (latest is null)
+        var checkIns = await checkInRepository.ListAsync();
+        HasCompletedCheckIn = checkIns.Count > 0;
+        if (checkIns.Count == 0)
         {
             CheckInFreshnessText = "You haven't completed a monthly update yet.";
             NextCheckInText = string.Empty;
@@ -291,6 +291,7 @@ public partial class HomeViewModel : ObservableObject
             return;
         }
 
+        var latest = checkIns[^1];
         var now = DateTime.UtcNow;
         var days = CheckInSchedule.DaysSince(latest.CompletedAtUtc, now);
         CheckInFreshnessText = days == 0 ? "Last updated today." : $"Last updated {days} day{(days == 1 ? "" : "s")} ago.";
@@ -301,15 +302,23 @@ public partial class HomeViewModel : ObservableObject
             ? $"Overdue since {dueDate:MMM d, yyyy}."
             : $"Next update due {dueDate:MMM d, yyyy}.";
 
-        var change = (totalAssets - totalDebts) - latest.NetWorth;
-        HasNetWorthChange = true;
-        rawNetWorthChangeText = change switch
-        {
-            > 0 => $"Up {currencyPreferencesService.Format(change)} since your last update.",
-            < 0 => $"Down {currencyPreferencesService.Format(Math.Abs(change))} since your last update.",
-            _ => "No change since your last update."
-        };
+        var comparison = CheckInTrend.CompareNetWorth(totalAssets - totalDebts, checkIns);
+        HasNetWorthChange = comparison is not null;
+        rawNetWorthChangeText = comparison is null ? string.Empty : FormatNetWorthChange(comparison.Value);
         ApplyPrivacyMasking();
+    }
+
+    private string FormatNetWorthChange(NetWorthComparison comparison)
+    {
+        var period = comparison.Period == NetWorthComparisonPeriod.PreviousUpdate
+            ? "previous update"
+            : "last update";
+        return comparison.Change switch
+        {
+            > 0 => $"Up {currencyPreferencesService.Format(comparison.Change)} since your {period}.",
+            < 0 => $"Down {currencyPreferencesService.Format(Math.Abs(comparison.Change))} since your {period}.",
+            _ => $"No change since your {period}."
+        };
     }
 
     [RelayCommand]
