@@ -38,6 +38,7 @@ public sealed partial class AccountsViewModel(
     private bool isTrackingCollections;
     private long loadedDataRevision = -1;
     private IReadOnlyList<FinancialCheckIn> allCheckIns = [];
+    private readonly HashSet<string> persistedAccountIds = new(StringComparer.Ordinal);
 
     private string rawAccountsSummary = "No accounts yet.";
     private string rawIncomeSummary = "No income yet.";
@@ -160,8 +161,10 @@ public sealed partial class AccountsViewModel(
         var debts = await profileDebtRepository.ListAsync();
         var assets = await profileAssetRepository.ListAsync();
 
+        persistedAccountIds.Clear();
         foreach (var account in accounts)
         {
+            persistedAccountIds.Add(account.Id);
             Accounts.Add(RetirementAccountEditorItem.FromAccount(account));
         }
 
@@ -543,16 +546,28 @@ public sealed partial class AccountsViewModel(
             assets.Add(asset);
         }
 
+        var hasNewAccount = accounts.Any(account => !persistedAccountIds.Contains(account.Id));
+
         foreach (var account in accounts) await profileAccountRepository.SaveAsync(account);
         foreach (var item in income) await profileIncomeRepository.SaveAsync(item);
         foreach (var item in expenses) await profileExpenseRepository.SaveAsync(item);
         foreach (var debt in debts) await profileDebtRepository.SaveAsync(debt);
         foreach (var asset in assets) await profileAssetRepository.SaveAsync(asset);
+        foreach (var account in accounts) persistedAccountIds.Add(account.Id);
 
         UpdateInventorySummaries();
         await UpdateFreshnessAsync();
         ValidationMessage = string.Empty;
         StatusMessage = "Accounts saved on this device.";
+
+        if (hasNewAccount && await confirmationService.ConfirmAsync(
+                "Start a monthly check-in?",
+                "Your new account is saved. Complete a monthly check-in now to record a starting point for your progress.",
+                "Start check-in",
+                "Not now"))
+        {
+            await navigationService.GoToAsync("accounts-check-in");
+        }
     }
 
     [RelayCommand]

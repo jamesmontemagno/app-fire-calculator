@@ -280,14 +280,23 @@ public partial class SettingsViewModel : ObservableObject
             if (await appDataTransferService.PickAndImportAsync())
             {
                 await LoadAsync();
+                await errorPresentationService.ShowAsync(
+                    "Import complete",
+                    "Your My Fire # backup was imported successfully.");
                 await navigationService.GoToAsync("//home");
             }
         }
-        catch (Exception exception) when (exception is InvalidDataException or JsonException or IOException or UnauthorizedAccessException)
+        catch (Exception exception) when (exception is
+            InvalidDataException or
+            JsonException or
+            IOException or
+            UnauthorizedAccessException or
+            ArgumentException or
+            SQLite.SQLiteException)
         {
             await errorPresentationService.ShowAsync(
                 "Couldn’t import backup",
-                "The selected file is not a valid My Fire # backup. Your existing data was not changed.");
+                "The selected backup could not be imported. Check that it is a valid My Fire # backup and try again.");
         }
     }
 
