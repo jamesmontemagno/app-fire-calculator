@@ -97,4 +97,14 @@ public sealed class CheckInScheduleTests
 
         Assert.Equal(new NetWorthComparison(25_000, NetWorthComparisonPeriod.PreviousUpdate), result);
     }
+
+    [Fact]
+    public void CompareNetWorth_UsesDisplayedWholeCurrencyToIdentifyCompletedUpdate()
+    {
+        var result = CheckInTrend.CompareNetWorth(
+            125_000.49,
+            [CheckIn("first", 100_000), CheckIn("latest", 125_000)]);
+
+        Assert.Equal(new NetWorthComparison(25_000, NetWorthComparisonPeriod.PreviousUpdate), result);
+    }
 }

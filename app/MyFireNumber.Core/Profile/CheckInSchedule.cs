@@ -103,6 +103,6 @@ public static class CheckInTrend
     }
 
     private static bool MatchesDisplayedCurrency(double left, double right) =>
-        Math.Round(left, 2, MidpointRounding.AwayFromZero)
-        == Math.Round(right, 2, MidpointRounding.AwayFromZero);
+        Math.Round(left, MidpointRounding.ToEven)
+        == Math.Round(right, MidpointRounding.ToEven);
 }
