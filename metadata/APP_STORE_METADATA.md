@@ -20,8 +20,8 @@ Upload these files to the Google Play Console:
 
 | Asset | File | Dimensions |
 | --- | --- | --- |
-| App icon | `google-play/app-icon-512.png` | 512 x 512 pixels |
-| Feature graphic | `google-play/feature-graphic-1024x500.jpg` | 1024 x 500 pixels |
+| App icon | `metadata/google-play/app-icon-512.png` | 512 x 512 pixels |
+| Feature graphic | `metadata/google-play/feature-graphic-1024x500.jpg` | 1024 x 500 pixels |
 
 ## Version Information
 
