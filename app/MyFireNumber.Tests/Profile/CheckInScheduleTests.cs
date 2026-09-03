@@ -1,9 +1,23 @@
+using MyFireNumber.Core.Calculations;
 using MyFireNumber.Core.Profile;
 
 namespace MyFireNumber.Tests.Profile;
 
 public sealed class CheckInScheduleTests
 {
+    private static FinancialCheckIn CheckIn(string id, double netWorth)
+    {
+        var accountBalance = Math.Max(netWorth, 0);
+        var debtBalance = Math.Max(-netWorth, 0);
+        return new FinancialCheckIn(
+            id,
+            DateTime.UtcNow,
+            [new AccountBalanceEntry("account", "Account", RetirementAccountType.Traditional, accountBalance)],
+            [new DebtBalanceEntry("debt", "Debt", debtBalance)],
+            0,
+            0);
+    }
+
     [Fact]
     public void Classify_ReturnsNever_WhenNoCheckInHasEverCompleted()
     {
@@ -54,5 +68,33 @@ public sealed class CheckInScheduleTests
         var futureCheckIn = now.AddDays(5);
 
         Assert.Equal(0, CheckInSchedule.DaysSince(futureCheckIn, now));
+    }
+
+    [Fact]
+    public void CompareNetWorth_ReturnsNoTrend_WhenTheFirstCheckInMatchesLiveData()
+    {
+        var result = CheckInTrend.CompareNetWorth(100_000, [CheckIn("first", 100_000)]);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void CompareNetWorth_UsesLatestCheckInForUnsavedLiveChanges()
+    {
+        var result = CheckInTrend.CompareNetWorth(
+            125_000,
+            [CheckIn("first", 90_000), CheckIn("latest", 100_000)]);
+
+        Assert.Equal(new NetWorthComparison(25_000, NetWorthComparisonPeriod.LastUpdate), result);
+    }
+
+    [Fact]
+    public void CompareNetWorth_UsesPreviousCheckInAfterCompletingAnUpdate()
+    {
+        var result = CheckInTrend.CompareNetWorth(
+            125_000,
+            [CheckIn("first", 100_000), CheckIn("latest", 125_000)]);
+
+        Assert.Equal(new NetWorthComparison(25_000, NetWorthComparisonPeriod.PreviousUpdate), result);
     }
 }

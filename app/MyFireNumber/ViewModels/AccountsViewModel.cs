@@ -180,6 +180,11 @@ public sealed partial class AccountsViewModel(
             Debts.Add(DebtEditorItem.FromDebt(item));
         }
 
+        foreach (var asset in assets)
+        {
+            Assets.Add(AssetEditorItem.FromAsset(asset));
+        }
+
         UpdateInventorySummaries();
         await UpdateFreshnessAsync();
         ValidationMessage = string.Empty;
@@ -381,15 +386,9 @@ public sealed partial class AccountsViewModel(
                 ? $"Overdue since {dueDate:MMM d, yyyy}."
                 : $"Next update due {dueDate:MMM d, yyyy}.";
 
-            var currentNetWorth = rawTotalAssets - rawTotalDebts;
-            var change = currentNetWorth - latest.NetWorth;
-            HasNetWorthChange = true;
-            rawNetWorthChangeText = change switch
-            {
-                > 0 => $"Up {FormatCurrency(change)} since your last update.",
-                < 0 => $"Down {FormatCurrency(Math.Abs(change))} since your last update.",
-                _ => "No change since your last update."
-            };
+            var comparison = CheckInTrend.CompareNetWorth(rawTotalAssets - rawTotalDebts, checkIns);
+            HasNetWorthChange = comparison is not null;
+            rawNetWorthChangeText = comparison is null ? string.Empty : FormatNetWorthChange(comparison.Value);
         }
         ApplyPrivacyMasking();
 
@@ -433,6 +432,19 @@ public sealed partial class AccountsViewModel(
             ApplyFreshness(asset, latestAssetConfirmation.GetValueOrDefault(asset.Id), now,
                 (text, overdue) => { asset.FreshnessText = text; asset.IsOverdue = overdue; });
         }
+    }
+
+    private string FormatNetWorthChange(NetWorthComparison comparison)
+    {
+        var period = comparison.Period == NetWorthComparisonPeriod.PreviousUpdate
+            ? "previous update"
+            : "last update";
+        return comparison.Change switch
+        {
+            > 0 => $"Up {FormatCurrency(comparison.Change)} since your {period}.",
+            < 0 => $"Down {FormatCurrency(Math.Abs(comparison.Change))} since your {period}.",
+            _ => $"No change since your {period}."
+        };
     }
 
     private static void ApplyFreshness<TItem>(
