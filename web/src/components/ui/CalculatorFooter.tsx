@@ -1,5 +1,6 @@
 import Card, { CardContent } from './Card'
 import ExportButton from './ExportButton'
+import MobileAppPromo from './MobileAppPromo'
 import UrlActions from './UrlActions'
 
 interface CalculatorFooterProps {
@@ -28,30 +29,33 @@ export default function CalculatorFooter({
   savedAt,
 }: CalculatorFooterProps) {
   return (
-    <Card>
-      <CardContent>
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <h2 className="font-semibold text-content">Keep this calculation</h2>
-            <p className="mt-1 text-sm text-content-muted">
-              Save locally in this browser, share a link with the current values, or export a workbook.
-            </p>
+    <div className="space-y-6">
+      <Card>
+        <CardContent>
+          <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+            <div>
+              <h2 className="font-semibold text-content">Keep this calculation</h2>
+              <p className="mt-1 text-sm text-content-muted">
+                Save locally in this browser, share a link with the current values, or export a workbook.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <ExportButton onExport={onExport} disabled={exportDisabled} />
+              <UrlActions
+                onReset={onReset}
+                onSave={onSave}
+                onLoad={onLoad}
+                onCopy={onCopy}
+                hasCustomParams={hasCustomParams}
+                hasUnsavedChanges={hasUnsavedChanges}
+                hasSavedParams={hasSavedParams}
+                savedAt={savedAt}
+              />
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <ExportButton onExport={onExport} disabled={exportDisabled} />
-            <UrlActions
-              onReset={onReset}
-              onSave={onSave}
-              onLoad={onLoad}
-              onCopy={onCopy}
-              hasCustomParams={hasCustomParams}
-              hasUnsavedChanges={hasUnsavedChanges}
-              hasSavedParams={hasSavedParams}
-              savedAt={savedAt}
-            />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      <MobileAppPromo />
+    </div>
   )
 }
