@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
-import { ArrowRight, Check, EyeOff, Link2, ShieldCheck, Wallet, Wifi } from 'lucide-react'
-import { Card, CardContent } from '../components/ui'
+import { ArrowRight, Check, EyeOff, Link2, ShieldCheck, Wifi } from 'lucide-react'
+import { Card, CardContent, MobileAppPromo } from '../components/ui'
 import { groupCalculators } from '../config/calculators'
 import SEO from '../components/SEO'
 
@@ -38,6 +38,8 @@ export default function Home() {
             ))}
           </ul>
         </header>
+
+      <MobileAppPromo />
 
       {/* Quiz CTA */}
       <section className="rounded-container border border-border-subtle bg-surface-raised p-6 sm:flex sm:items-center sm:justify-between sm:gap-8">
@@ -271,32 +273,6 @@ export default function Home() {
         </p>
       </section>
 
-      {/* TallyAI Ad Section */}
-      <section className="rounded-container border border-border-subtle bg-surface-raised p-6">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-container border border-border-subtle bg-surface-sunken">
-            <Wallet className="h-6 w-6 text-content-muted" aria-hidden="true" strokeWidth={1.5} />
-          </div>
-          <div className="flex-1">
-            <h3 className="mb-2 text-lg font-semibold text-content">
-              Track Your Progress with Tally AI
-            </h3>
-            <p className="text-content-muted text-sm mb-4">
-              Smart financial companion that helps you track spending, manage budgets, and achieve your FIRE goals 
-              with AI-powered insights. Perfect complement to these calculators.
-            </p>
-            <a
-              href="https://tallyai.money/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex h-9 items-center gap-2 rounded-control border border-border-strong px-4 text-sm font-medium text-content transition-colors hover:bg-surface-sunken motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              Learn More About Tally AI
-              <ArrowRight className="w-4 h-4" strokeWidth={1.5} />
-            </a>
-          </div>
-        </div>
-      </section>
     </div>
     </>
   )

@@ -1,5 +1,5 @@
 import { ArrowRight, Lightbulb } from 'lucide-react'
-import { Card, CardHeader, CardContent } from '../components/ui'
+import { Card, CardHeader, CardContent, MobileAppPromo } from '../components/ui'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 
@@ -95,6 +95,11 @@ export default function Apps() {
           </a>
         ))}
       </div>
+
+      <MobileAppPromo
+        title="The official My Fire Number app"
+        description="Keep your FIRE planning close at hand with the official companion app, now available for iPhone, iPad, and Android."
+      />
 
       {/* Disclaimer */}
       <Card className="bg-surface-sunken border-border-subtle">
