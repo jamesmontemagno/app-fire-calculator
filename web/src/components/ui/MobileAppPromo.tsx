@@ -34,7 +34,7 @@ export default function MobileAppPromo({
               rel="noopener noreferrer"
               className="inline-flex h-14 w-44 items-center gap-3 rounded-container border border-border-subtle bg-surface-sunken px-4 text-left transition-colors hover:border-border-strong hover:bg-accent-subtle motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             >
-              <Apple className="h-6 w-6 shrink-0 fill-current text-content" aria-hidden="true" strokeWidth={0} />
+              <Apple className="h-6 w-6 shrink-0 fill-current text-content" aria-hidden="true" />
               <span className="leading-tight">
                 <span className="block text-xs text-content-muted">Download on the</span>
                 <strong className="block text-sm font-semibold text-content">App Store</strong>
@@ -46,7 +46,7 @@ export default function MobileAppPromo({
               rel="noopener noreferrer"
               className="inline-flex h-14 w-44 items-center gap-3 rounded-container border border-border-subtle bg-surface-sunken px-4 text-left transition-colors hover:border-border-strong hover:bg-accent-subtle motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
             >
-              <Play className="h-6 w-6 shrink-0 fill-current text-content" aria-hidden="true" strokeWidth={0} />
+              <Play className="h-6 w-6 shrink-0 fill-current text-content" aria-hidden="true" />
               <span className="leading-tight">
                 <span className="block text-xs text-content-muted">Get it on</span>
                 <strong className="block text-sm font-semibold text-content">Google Play</strong>
