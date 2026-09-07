@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">FIRE Calculators</title>
+  <desc id="description">Private, offline-first tools for planning financial independence and early retirement.</desc>
+  <defs>
+    <linearGradient id="background" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#17352C" />
+      <stop offset="100%" stop-color="#0D241D" />
+    </linearGradient>
+    <linearGradient id="ember" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#F97316" />
+      <stop offset="0.55" stop-color="#FBBF24" />
+      <stop offset="1" stop-color="#FDE68A" />
+    </linearGradient>
+    <radialGradient id="emberGlow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#FDBA74" stop-opacity="0.72" />
+      <stop offset="0.18" stop-color="#FB923C" stop-opacity="0.52" />
+      <stop offset="0.38" stop-color="#F97316" stop-opacity="0.3" />
+      <stop offset="0.62" stop-color="#F97316" stop-opacity="0.15" />
+      <stop offset="0.82" stop-color="#EA580C" stop-opacity="0.05" />
+      <stop offset="1" stop-color="#EA580C" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#background)" />
+  <circle cx="1010" cy="110" r="370" fill="#FFF3D6" opacity="0.035" />
+  <circle cx="1000" cy="310" r="300" fill="url(#emberGlow)" opacity="0.48" />
+  <path d="M0 550c188-63 360-60 516 7 154 65 338 72 552 20 56-14 100-18 132-12v65H0Z" fill="#FBBF24" opacity="0.08" />
+
+  <g transform="translate(96 104) scale(0.4166667)">
+    <rect width="456" height="456" rx="116" fill="#17352C" stroke="#355D4C" stroke-width="8" />
+    <circle cx="236" cy="232" r="220" fill="url(#emberGlow)" />
+    <rect x="233.6" y="206" width="52" height="52" transform="skewX(-5.81)" fill="url(#ember)" />
+    <g fill="none" stroke="#FFF3D6" stroke-width="40" stroke-linecap="round">
+      <path d="M118 186H338" />
+      <path d="M118 278H338" />
+      <path d="M201 124L179 340" />
+      <path d="M293 124L271 340" />
+    </g>
+  </g>
+
+  <text x="96" y="365" fill="#FFF3D6" font-family="Inter, Arial, sans-serif" font-size="64" font-weight="700" letter-spacing="-2">FIRE Calculators</text>
+  <text x="100" y="424" fill="#D7E2D5" font-family="Inter, Arial, sans-serif" font-size="29" font-weight="500">Private, offline-first tools for planning early retirement.</text>
+
+  <g transform="translate(100 500)" font-family="Inter, Arial, sans-serif" font-size="20" font-weight="600">
+    <rect width="210" height="48" rx="24" fill="#FFF3D6" />
+    <text x="24" y="31" fill="#17352C">10+ calculators</text>
+    <rect x="228" width="214" height="48" rx="24" fill="#FFF3D6" />
+    <text x="252" y="31" fill="#17352C">100% client-side</text>
+    <rect x="460" width="166" height="48" rx="24" fill="#FFF3D6" />
+    <text x="484" y="31" fill="#17352C">No tracking</text>
+  </g>
+
+  <g transform="translate(860 180)" fill="none" stroke="#FFF3D6" stroke-linecap="round" opacity="0.19">
+    <path d="M0 80 50 35l50 36 57-92 54 44 61-88" stroke-width="7" />
+    <path d="m0 160 55-35 44 22 55-65 53 28 64-75" stroke-width="3" />
+  </g>
+</svg>

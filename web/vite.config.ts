@@ -9,13 +9,13 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'fire-icon.svg'],
+      includeAssets: ['favicon.ico', 'favicon-16x16.png', 'favicon-32x32.png', 'apple-touch-icon.png', 'fire-icon.svg', 'og-image.png'],
       manifest: {
         name: 'FIRE Calculators',
         short_name: 'FIRE Calc',
         description: 'Calculate your path to Financial Independence, Retire Early. 100% private, works offline.',
-        theme_color: '#f97316',
-        background_color: '#ffffff',
+        theme_color: '#b54100',
+        background_color: '#fbfaf9',
         display: 'standalone',
         icons: [
           {
