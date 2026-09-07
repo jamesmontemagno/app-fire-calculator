@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Flat, high-contrast variant of fire-icon.svg for the smallest favicon frames (16x16).
+     The soft radial ember glow reads well at app-icon sizes but turns into a muddy haze
+     at 16px, so it is omitted here; the gradient ember center and cream glyph stay crisp. -->
 <svg width="456" height="456" viewBox="0 0 456 456" version="1.1" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="ember" x1="0" y1="1" x2="0" y2="0">
@@ -6,17 +9,8 @@
       <stop offset="0.55" stop-color="#FBBF24" />
       <stop offset="1" stop-color="#FDE68A" />
     </linearGradient>
-    <radialGradient id="emberGlow" cx="0.5" cy="0.5" r="0.5">
-      <stop offset="0" stop-color="#FDBA74" stop-opacity="0.72" />
-      <stop offset="0.18" stop-color="#FB923C" stop-opacity="0.52" />
-      <stop offset="0.38" stop-color="#F97316" stop-opacity="0.3" />
-      <stop offset="0.62" stop-color="#F97316" stop-opacity="0.15" />
-      <stop offset="0.82" stop-color="#EA580C" stop-opacity="0.05" />
-      <stop offset="1" stop-color="#EA580C" stop-opacity="0" />
-    </radialGradient>
   </defs>
   <rect width="456" height="456" fill="#17352C" />
-  <circle cx="236" cy="232" r="220" fill="url(#emberGlow)" />
   <rect x="233.6" y="206" width="52" height="52" transform="skewX(-5.81)" fill="url(#ember)" />
   <g fill="none" stroke="#FFF3D6" stroke-width="40" stroke-linecap="round">
     <path d="M118 186H338" />

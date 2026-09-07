@@ -19,7 +19,7 @@ export default function SEO({
   description = 'Free FIRE calculators to plan your path to Financial Independence, Retire Early. 100% private, works offline, no tracking.',
   keywords = 'FIRE calculator, financial independence calculator, retire early calculator',
   canonicalPath = '',
-  ogImage = 'https://myfirenumber.com/pwa-512x512.png',
+  ogImage = 'https://myfirenumber.com/og-image.png',
   ogType = 'website',
 }: SEOProps) {
   const location = useLocation()
