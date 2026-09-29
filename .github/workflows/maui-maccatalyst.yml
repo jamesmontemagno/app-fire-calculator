@@ -71,7 +71,7 @@ jobs:
         if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.maccatalyst == 'true' }}
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: '10.0.302'
 
       - name: Restore .NET workloads
         if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.maccatalyst == 'true' }}
@@ -103,7 +103,7 @@ jobs:
         env:
           BASE_VERSION: ${{ inputs.base_version }}
         run: |
-          if [[ ! "$BASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+          if [[ ! "$BASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "base_version must be a valid version such as 1.0.0" >&2
             exit 1
           fi
@@ -224,6 +224,7 @@ jobs:
         with:
           app-type: macos
           app-path: ${{ steps.maccatalyst-artifact.outputs.path }}
+          backend: altool
           issuer-id: ${{ secrets.APPLE_REFRACTORED_ISSUER_ID }}
           api-key-id: ${{ secrets.APPLE_REFRACTORED_KEY_ID }}
           api-private-key: ${{ secrets.APPLE_REFRACTORED_P8_KEY }}

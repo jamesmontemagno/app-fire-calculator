@@ -64,16 +64,44 @@ security find-identity -v -p codesigning
 
 Use the full Apple Distribution identity shown by that command for `APPSTORE_CODESIGN_KEY`.
 
+## Mac Catalyst and Mac App Store
+
+The Mac Catalyst workflow publishes an Apple Silicon (`maccatalyst-arm64`) package. It uses the
+same App Store Connect API key as iOS, plus Mac-specific signing credentials:
+
+| Secret | Value |
+| --- | --- |
+| `APPLE_MACCATALYST_APPSTORE_CERTIFICATE_P12` | Base64-encoded `.p12` containing the Apple Distribution and Mac Installer Distribution certificates and private keys |
+| `APPLE_MACCATALYST_APPSTORE_CERTIFICATE_PASSWORD` | Password selected when exporting the `.p12` |
+| `APPLE_MACCATALYST_APPSTORE_PROFILE` | Base64-encoded Mac App Store `.provisionprofile` for `com.refractored.myfirenumber` |
+
+Both signing identities must be present in the P12 because the workflow signs the app with the
+Apple Distribution identity and the installer package with the Mac Installer Distribution
+identity. Export the identities and their private keys together from Keychain Access, then upload
+the certificate and profile:
+
+```bash
+openssl base64 -A -in /path/to/maccatalyst-distribution.p12 |
+  gh secret set APPLE_MACCATALYST_APPSTORE_CERTIFICATE_P12
+openssl base64 -A -in /path/to/MyFireNumber_Mac_AppStore.provisionprofile |
+  gh secret set APPLE_MACCATALYST_APPSTORE_PROFILE
+gh secret set APPLE_MACCATALYST_APPSTORE_CERTIFICATE_PASSWORD
+```
+
+The profile must be a Mac App Store distribution profile for the production bundle identifier.
+Do not use a development, Developer ID, or iOS provisioning profile.
+
 ## Running a Signed Build
 
 1. Open **Actions** in GitHub.
-2. Select **Build and Package Android** or **Build and Package iOS**.
+2. Select **Build and Package Android**, **Build and Package iOS**, or
+   **Build and Package Mac Catalyst**.
 3. Choose **Run workflow**.
 4. Enable **Build release** and enter the display version.
-5. For iOS, optionally enable **Upload to TestFlight**.
+5. For iOS or Mac Catalyst, optionally enable **Upload to TestFlight**.
 
-The Android workflow uploads a signed AAB artifact. The iOS workflow uploads a signed IPA
-artifact and, when requested, sends that IPA to TestFlight using the App Store Connect API key.
+The Android workflow uploads a signed AAB artifact. The Apple workflows upload a signed IPA or
+PKG artifact and, when requested, send it to TestFlight using the App Store Connect API key.
 
 Never commit keystores, certificates, `.p8` files, passwords, or decoded secret values.
 
