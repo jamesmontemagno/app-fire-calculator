@@ -21,17 +21,17 @@
                                FontFamily="FontAwesomeSolid"
                                VerticalTextAlignment="Center"
                                TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
-                               FontSize="24"
+                               FontSize="{StaticResource FontSize24}"
                                SemanticProperties.Description="Calculators" />
                         <VerticalStackLayout Grid.Column="1" Spacing="2">
                             <Label Text="All calculators"
                                    TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                    FontAttributes="Bold"
-                                   FontSize="24"
+                                   FontSize="{StaticResource FontSize24}"
                                    SemanticProperties.HeadingLevel="Level1" />
                             <Label Text="Explore FIRE, finance, and cash flow tools."
                                    TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
-                                   FontSize="13" />
+                                   FontSize="{StaticResource FontSize13}" />
                         </VerticalStackLayout>
                     </Grid>
                     <SearchBar AutomationId="CalculatorSearch"
@@ -50,13 +50,13 @@
                           Padding="4,12,4,10">
                         <Label Text="{Binding IconGlyph}"
                                FontFamily="FontAwesomeSolid"
-                               FontSize="17"
+                               FontSize="{StaticResource FontSize17}"
                                VerticalTextAlignment="Center"
                                TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                SemanticProperties.Description="{Binding Name, StringFormat='{0} calculators'}" />
                         <Label Grid.Column="1"
                                Text="{Binding Name}"
-                               FontSize="20"
+                               FontSize="{StaticResource FontSize20}"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                SemanticProperties.HeadingLevel="Level2" />
@@ -84,7 +84,7 @@
                                     StrokeShape="RoundRectangle 12">
                                 <Label Text="{Binding IconGlyph}"
                                        FontFamily="FontAwesomeSolid"
-                                       FontSize="19"
+                                       FontSize="{StaticResource FontSize19}"
                                        HorizontalTextAlignment="Center"
                                        VerticalTextAlignment="Center"
                                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
@@ -94,15 +94,15 @@
                                 <Label Text="{Binding Title}"
                                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                        FontAttributes="Bold"
-                                       FontSize="18" />
+                                       FontSize="{StaticResource FontSize18}" />
                                 <Label Text="{Binding Summary}"
                                        TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
-                                       FontSize="13" />
+                                       FontSize="{StaticResource FontSize13}" />
                             </VerticalStackLayout>
                             <Label Grid.Column="2"
                                    Text="&#xf054;"
                                    FontFamily="FontAwesomeSolid"
-                                   FontSize="14"
+                                   FontSize="{StaticResource FontSize14}"
                                    VerticalTextAlignment="Center"
                                    TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                    SemanticProperties.Description="Open" />
@@ -116,7 +116,7 @@
                               FontFamily="FontAwesomeSolid"
                               VerticalTextAlignment="Center"
                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
-                          FontSize="28"
+                          FontSize="{StaticResource FontSize28}"
                            SemanticProperties.Description="Search" />
                       <Label Text="No calculators match that search."
                           HorizontalTextAlignment="Center"

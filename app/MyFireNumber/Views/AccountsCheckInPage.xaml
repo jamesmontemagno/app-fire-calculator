@@ -21,7 +21,7 @@
             <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="{Binding StepTitle}"
-                           FontSize="26"
+                           FontSize="{StaticResource FontSize26}"
                            FontAttributes="Bold"
                            LineHeight="1.1"
                            TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
@@ -29,7 +29,7 @@
                     <ProgressBar Progress="{Binding ProgressFraction}"
                                  SemanticProperties.Description="{Binding ProgressText}" />
                     <Label Text="{Binding ProgressText}"
-                           FontSize="12"
+                           FontSize="{StaticResource FontSize12}"
                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                 </VerticalStackLayout>
 
@@ -38,7 +38,7 @@
                 <!-- Step 1: accounts -->
                 <VerticalStackLayout IsVisible="{Binding IsAccountsStep}" Spacing="{StaticResource SpaceMd}">
                     <Label Text="Update each account's balance to today's value. Everything else about the account stays the same."
-                           FontSize="13"
+                           FontSize="{StaticResource FontSize13}"
                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Accounts}" Spacing="{StaticResource SpaceSm}">
                         <BindableLayout.ItemTemplate>
@@ -50,9 +50,9 @@
                                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                                         <Grid ColumnDefinitions="*,Auto">
                                             <Label Text="{Binding Name}" FontAttributes="Bold" />
-                                            <Label Grid.Column="1" Text="{Binding Type}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                            <Label Grid.Column="1" Text="{Binding Type}" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                         </Grid>
-                                        <Label Text="{Binding FreshnessText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                        <Label Text="{Binding FreshnessText}" FontSize="{StaticResource FontSize11}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                         <controls:NumericInputView Header="Current balance"
                                                                    Placeholder="0"
                                                                    Text="{Binding BalanceText, Mode=TwoWay}" />
@@ -66,7 +66,7 @@
                 <!-- Step 2: assets -->
                 <VerticalStackLayout IsVisible="{Binding IsAssetsStep}" Spacing="{StaticResource SpaceMd}">
                     <Label Text="Update what each asset is worth today. Use current market value, not what you paid."
-                           FontSize="13"
+                           FontSize="{StaticResource FontSize13}"
                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Assets}" Spacing="{StaticResource SpaceSm}">
                         <BindableLayout.ItemTemplate>
@@ -78,9 +78,9 @@
                                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                                         <Grid ColumnDefinitions="*,Auto">
                                             <Label Text="{Binding Name}" FontAttributes="Bold" />
-                                            <Label Grid.Column="1" Text="{Binding TypeLabel}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                            <Label Grid.Column="1" Text="{Binding TypeLabel}" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                         </Grid>
-                                        <Label Text="{Binding FreshnessText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                        <Label Text="{Binding FreshnessText}" FontSize="{StaticResource FontSize11}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                         <controls:NumericInputView Header="Current value"
                                                                    Placeholder="0"
                                                                    Text="{Binding CurrentValueText, Mode=TwoWay}" />
@@ -94,7 +94,7 @@
                 <!-- Step 3: debts -->
                 <VerticalStackLayout IsVisible="{Binding IsDebtsStep}" Spacing="{StaticResource SpaceMd}">
                     <Label Text="Update each debt's remaining balance."
-                           FontSize="13"
+                           FontSize="{StaticResource FontSize13}"
                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Debts}" Spacing="{StaticResource SpaceSm}">
                         <BindableLayout.ItemTemplate>
@@ -105,7 +105,7 @@
                                         StrokeShape="RoundRectangle 12">
                                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                                         <Label Text="{Binding Name}" FontAttributes="Bold" />
-                                        <Label Text="{Binding FreshnessText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                        <Label Text="{Binding FreshnessText}" FontSize="{StaticResource FontSize11}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                         <controls:NumericInputView Header="Current balance"
                                                                    Placeholder="0"
                                                                    Text="{Binding BalanceText, Mode=TwoWay}" />
@@ -119,7 +119,7 @@
                 <!-- Step 4: income and expenses -->
                 <VerticalStackLayout IsVisible="{Binding IsIncomeAndExpensesStep}" Spacing="{StaticResource SpaceMd}">
                     <Label Text="Review your income and expenses. Adjust any amount that has changed."
-                           FontSize="13"
+                           FontSize="{StaticResource FontSize13}"
                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     <Label Text="Income" Style="{StaticResource CalculatorSectionHeading}" IsVisible="{Binding HasIncome}" />
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Income}" Spacing="{StaticResource SpaceSm}">
@@ -162,7 +162,7 @@
                 <!-- Step 5: confirm -->
                 <VerticalStackLayout IsVisible="{Binding IsConfirmStep}" Spacing="{StaticResource SpaceMd}">
                     <Label Text="Review your updated totals, then save to complete this month's check-in."
-                           FontSize="13"
+                           FontSize="{StaticResource FontSize13}"
                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     <Border Padding="{StaticResource CardPadding}"
                             Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}"
@@ -170,32 +170,32 @@
                             StrokeShape="RoundRectangle 12">
                         <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
                             <VerticalStackLayout Spacing="2">
-                                <Label Text="Investment accounts" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding AccountBalanceText}" FontAttributes="Bold" FontSize="18" />
+                                <Label Text="Investment accounts" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AccountBalanceText}" FontAttributes="Bold" FontSize="{StaticResource FontSize18}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                <Label Text="Assets" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding AssetValueText}" FontAttributes="Bold" FontSize="18" />
+                                <Label Text="Assets" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AssetValueText}" FontAttributes="Bold" FontSize="{StaticResource FontSize18}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="1" Spacing="2">
-                                <Label Text="Total assets" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding TotalAssetsText}" FontAttributes="Bold" FontSize="18" />
+                                <Label Text="Total assets" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding TotalAssetsText}" FontAttributes="Bold" FontSize="{StaticResource FontSize18}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="2">
-                                <Label Text="Total debts" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding TotalDebtsText}" FontAttributes="Bold" FontSize="18" />
+                                <Label Text="Total debts" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding TotalDebtsText}" FontAttributes="Bold" FontSize="{StaticResource FontSize18}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="2" Spacing="2">
-                                <Label Text="Net worth" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding NetWorthText}" FontAttributes="Bold" FontSize="22" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                                <Label Text="Net worth" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding NetWorthText}" FontAttributes="Bold" FontSize="{StaticResource FontSize22}" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="3" Spacing="2">
-                                <Label Text="Annual income" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding AnnualIncomeText}" FontAttributes="Bold" FontSize="15" />
+                                <Label Text="Annual income" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualIncomeText}" FontAttributes="Bold" FontSize="{StaticResource FontSize15}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="3" Grid.Column="1" Spacing="2">
-                                <Label Text="Annual cash flow" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding AnnualCashFlowText}" FontAttributes="Bold" FontSize="15" />
+                                <Label Text="Annual cash flow" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualCashFlowText}" FontAttributes="Bold" FontSize="{StaticResource FontSize15}" />
                             </VerticalStackLayout>
                         </Grid>
                     </Border>

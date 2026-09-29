@@ -14,7 +14,7 @@
             <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Choose your starting point"
-                           FontSize="28"
+                           FontSize="{StaticResource FontSize28}"
                            FontAttributes="Bold"
                            LineHeight="1.1"
                            TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
@@ -30,7 +30,7 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Label Text="Take the FIRE Quiz"
-                               FontSize="20"
+                               FontSize="{StaticResource FontSize20}"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                         <Label Text="Answer a few questions to find a starting path and compare alternatives."

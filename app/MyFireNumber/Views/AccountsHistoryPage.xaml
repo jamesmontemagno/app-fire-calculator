@@ -13,12 +13,12 @@
         <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
             <VerticalStackLayout Spacing="2">
                 <Label Text="History &amp; trends"
-                       FontSize="26"
+                       FontSize="{StaticResource FontSize26}"
                        FontAttributes="Bold"
                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                        SemanticProperties.HeadingLevel="Level1" />
                 <Label Text="Built from your monthly check-ins. All history stays on this device."
-                       FontSize="13"
+                       FontSize="{StaticResource FontSize13}"
                        TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
             </VerticalStackLayout>
 

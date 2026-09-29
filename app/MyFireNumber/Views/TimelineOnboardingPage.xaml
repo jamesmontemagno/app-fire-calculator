@@ -21,7 +21,7 @@
             <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="When do you want to retire?"
-                           FontSize="28"
+                           FontSize="{StaticResource FontSize28}"
                            FontAttributes="Bold"
                            LineHeight="1.1"
                            TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
@@ -61,7 +61,7 @@
                                 <Button Grid.Column="1"
                                         AutomationId="OnboardingAddPhasedRetirementButton"
                                         Text="Add"
-                                        FontSize="12"
+                                        FontSize="{StaticResource FontSize12}"
                                         Padding="12,4"
                                         IsVisible="{Binding HasNoPhasedRetirement}"
                                         Command="{Binding AddPhasedRetirementCommand}"
@@ -70,7 +70,7 @@
                                         SemanticProperties.Description="Add a phased retirement age." />
                             </Grid>
                             <Label Text="Many people cut back to part-time work before stopping completely. This is optional."
-                                   FontSize="12"
+                                   FontSize="{StaticResource FontSize12}"
                                    LineHeight="1.3"
                                    TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                             <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HasPhasedRetirement}">
@@ -90,7 +90,7 @@
                                                    SemanticProperties.Description="The age you plan to move to part-time work" />
                             <Button AutomationId="OnboardingRemovePhasedRetirementButton"
                                     Text="Remove phased retirement"
-                                    FontSize="12"
+                                    FontSize="{StaticResource FontSize12}"
                                     IsVisible="{Binding HasPhasedRetirement}"
                                     Command="{Binding RemovePhasedRetirementCommand}"
                                     Background="Transparent"
@@ -106,7 +106,7 @@
                         StrokeShape="RoundRectangle 12">
                     <Label AutomationId="OnboardingTimelineSummary"
                            Text="{Binding TimelineSummary}"
-                           FontSize="13"
+                           FontSize="{StaticResource FontSize13}"
                            LineHeight="1.35"
                            TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                 </Border>

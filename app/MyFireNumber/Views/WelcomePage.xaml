@@ -22,7 +22,7 @@
                     StrokeShape="RoundRectangle 48">
                 <Label Text="&#xf0d6;"
                        FontFamily="FontAwesomeSolid"
-                       FontSize="48"
+                       FontSize="{StaticResource FontSize48}"
                        TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                        SemanticProperties.Description="A sprouting plant representing growth" />
             </Border>
@@ -30,13 +30,13 @@
             <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                 <Label Text="Welcome to My Fire Number"
                        FontAttributes="Bold"
-                       FontSize="34"
+                       FontSize="{StaticResource FontSize34}"
                        HorizontalTextAlignment="Center"
                        LineHeight="1.08"
                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                        SemanticProperties.HeadingLevel="Level1" />
                 <Label Text="Explore the choices that shape your path to financial independence."
-                       FontSize="18"
+                       FontSize="{StaticResource FontSize18}"
                        HorizontalTextAlignment="Center"
                        LineHeight="1.35"
                        TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
@@ -49,7 +49,7 @@
                 <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                     <Label Text="Make your plan your own"
                            FontAttributes="Bold"
-                           FontSize="18"
+                           FontSize="{StaticResource FontSize18}"
                            TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                     <Label Text="Set a few starting assumptions, discover the calculator that fits your goal, then revisit and adjust your plan whenever life changes."
                            LineHeight="1.4"
@@ -58,12 +58,12 @@
                           ColumnSpacing="{StaticResource SpaceSm}">
                         <Label Text="&#xf023;"
                                FontFamily="FontAwesomeSolid"
-                               FontSize="16"
+                               FontSize="{StaticResource FontSize16}"
                                TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                SemanticProperties.Description="Private" />
                         <Label Grid.Column="1"
                                Text="Your financial information stays on this device."
-                               FontSize="13"
+                               FontSize="{StaticResource FontSize13}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     </Grid>
                 </VerticalStackLayout>

@@ -1,4 +1,4 @@
-# Mobile Release Secrets
+# App Release Secrets
 
 Pull request validation does not require repository secrets. The Android and iOS workflows only
 read signing credentials when a manual workflow run enables **Build release**. GitHub Pages uses
@@ -76,3 +76,49 @@ The Android workflow uploads a signed AAB artifact. The iOS workflow uploads a s
 artifact and, when requested, sends that IPA to TestFlight using the App Store Connect API key.
 
 Never commit keystores, certificates, `.p8` files, passwords, or decoded secret values.
+
+## Windows and Microsoft Store
+
+The Windows workflow creates one unsigned Store upload bundle containing x64 and ARM64
+packages. Microsoft signs the package after Store certification.
+
+Create a protected GitHub environment named `microsoft-store`, then add these environment
+secrets:
+
+| Secret | Value |
+| --- | --- |
+| `PARTNER_CENTER_TENANT_ID` | Microsoft Entra tenant ID associated with Partner Center |
+| `PARTNER_CENTER_SELLER_ID` | Numeric Partner Center seller ID |
+| `PARTNER_CENTER_CLIENT_ID` | Client ID of the Partner Center Microsoft Entra application |
+| `PARTNER_CENTER_CLIENT_SECRET` | Active client secret for that application |
+
+Grant the Microsoft Entra application the **Manager** role under Partner Center's Microsoft
+Entra application management. Creating an app registration in the Entra portal alone is not
+enough.
+
+Add these repository variables using the values shown under the app's **Product identity**
+page in Partner Center:
+
+| Variable | Value |
+| --- | --- |
+| `MICROSOFT_STORE_PRODUCT_ID` | Store product ID used by the submission API |
+| `MICROSOFT_STORE_IDENTITY_NAME` | Package identity name assigned by Partner Center |
+| `MICROSOFT_STORE_PUBLISHER` | Package publisher value, including the `CN=` prefix |
+| `MICROSOFT_STORE_PUBLISHER_DISPLAY_NAME` | Public publisher display name |
+
+```bash
+gh variable set MICROSOFT_STORE_PRODUCT_ID
+gh variable set MICROSOFT_STORE_IDENTITY_NAME
+gh variable set MICROSOFT_STORE_PUBLISHER
+gh variable set MICROSOFT_STORE_PUBLISHER_DISPLAY_NAME
+
+gh secret set PARTNER_CENTER_TENANT_ID --env microsoft-store
+gh secret set PARTNER_CENTER_SELLER_ID --env microsoft-store
+gh secret set PARTNER_CENTER_CLIENT_ID --env microsoft-store
+gh secret set PARTNER_CENTER_CLIENT_SECRET --env microsoft-store
+```
+
+Run **Windows Store Publish** manually with **Diagnose only** enabled before the first
+submission. To package without publishing, supply a tag such as `v1.0.0-windows` and leave
+**Publish** disabled. Enabling **Publish**, or pushing a matching release tag, submits the
+generated `.msixupload` package after the `microsoft-store` environment approval.

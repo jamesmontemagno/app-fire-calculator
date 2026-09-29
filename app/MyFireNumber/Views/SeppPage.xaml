@@ -41,7 +41,7 @@
                     <Label Text="Verify eligibility before relying on this estimate" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
                     <Label Text="Employer plans may not permit early distributions. Inherited IRAs generally do not need this exception; governmental 457(b) plans generally are not subject to the additional 10% tax; and a SIMPLE IRA within its first two years has different penalty rules. Roth distributions also require separate ordering analysis."
-                           FontSize="12" LineHeight="1.3"
+                           FontSize="{StaticResource FontSize12}" LineHeight="1.3"
                            TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
                 </VerticalStackLayout>
             </Border>
@@ -54,7 +54,7 @@
                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                         <Label Text="SEPP account" Style="{StaticResource CalculatorSectionHeading}" />
                         <Button Grid.Column="1" Text="Reset" Command="{Binding ResetDefaultsCommand}"
-                                Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="12"
+                                Background="{StaticResource Secondary}" TextColor="{StaticResource PrimaryDarkText}" FontSize="{StaticResource FontSize12}"
                                 SemanticProperties.Description="Reset 72(t) / SEPP values to their defaults." />
                     </Grid>
                     <VerticalStackLayout Spacing="3">
@@ -126,16 +126,16 @@
                 <Label Text="Estimated payment" Style="{StaticResource CalculatorSectionHeading}" />
                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceAccentTintFlatLight}, Dark={StaticResource SurfaceAccentTintFlatDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
-                        <VerticalStackLayout Spacing="2"><Label Text="Annual payment" FontSize="12" /><Label AutomationId="SeppAnnualPaymentLabel" Text="{Binding SelectedAnnualPaymentText}" FontAttributes="Bold" FontSize="20" /></VerticalStackLayout>
+                        <VerticalStackLayout Spacing="2"><Label Text="Annual payment" FontSize="{StaticResource FontSize12}" /><Label AutomationId="SeppAnnualPaymentLabel" Text="{Binding SelectedAnnualPaymentText}" FontAttributes="Bold" FontSize="{StaticResource FontSize20}" /></VerticalStackLayout>
                     </Border>
                     <Border Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8">
-                        <VerticalStackLayout Spacing="2"><Label Text="Monthly equivalent" FontSize="12" /><Label Text="{Binding SelectedMonthlyPaymentText}" FontAttributes="Bold" FontSize="18" /></VerticalStackLayout>
+                        <VerticalStackLayout Spacing="2"><Label Text="Monthly equivalent" FontSize="{StaticResource FontSize12}" /><Label Text="{Binding SelectedMonthlyPaymentText}" FontAttributes="Bold" FontSize="{StaticResource FontSize18}" /></VerticalStackLayout>
                     </Border>
                     <Border Grid.Row="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8">
-                        <VerticalStackLayout Spacing="2"><Label Text="Continue through" FontSize="12" /><Label Text="{Binding RequiredEndDateText}" FontAttributes="Bold" FontSize="18" /><Label Text="{Binding RequiredTermText}" FontSize="11" /></VerticalStackLayout>
+                        <VerticalStackLayout Spacing="2"><Label Text="Continue through" FontSize="{StaticResource FontSize12}" /><Label Text="{Binding RequiredEndDateText}" FontAttributes="Bold" FontSize="{StaticResource FontSize18}" /><Label Text="{Binding RequiredTermText}" FontSize="{StaticResource FontSize11}" /></VerticalStackLayout>
                     </Border>
                     <Border Grid.Row="1" Grid.Column="1" Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceCardLight}, Dark={StaticResource SurfaceCardDark}}" StrokeShape="RoundRectangle 8">
-                        <VerticalStackLayout Spacing="2"><Label Text="Starting age / IRS factor" FontSize="12" /><Label Text="{Binding StartingAgeText, StringFormat='Age {0}'}" FontAttributes="Bold" FontSize="18" /><Label Text="{Binding LifeExpectancyFactorText, StringFormat='Single Life factor {0}'}" FontSize="11" /></VerticalStackLayout>
+                        <VerticalStackLayout Spacing="2"><Label Text="Starting age / IRS factor" FontSize="{StaticResource FontSize12}" /><Label Text="{Binding StartingAgeText, StringFormat='Age {0}'}" FontAttributes="Bold" FontSize="{StaticResource FontSize18}" /><Label Text="{Binding LifeExpectancyFactorText, StringFormat='Single Life factor {0}'}" FontSize="{StaticResource FontSize11}" /></VerticalStackLayout>
                     </Border>
                 </Grid>
             </VerticalStackLayout>
@@ -172,7 +172,7 @@
                     <Label Text="A modification can trigger retroactive tax and interest" FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
                     <Label Text="Payments generally must continue until the later of five years after the first payment or age 59½. Adding money, transferring funds, changing payments outside permitted rules, or otherwise modifying the account can break the series. Keep professional calculations and account records."
-                           FontSize="12" LineHeight="1.3"
+                           FontSize="{StaticResource FontSize12}" LineHeight="1.3"
                            TextColor="{AppThemeBinding Light={StaticResource TextWarningLight}, Dark={StaticResource TextWarningDark}}" />
                 </VerticalStackLayout>
             </Border>

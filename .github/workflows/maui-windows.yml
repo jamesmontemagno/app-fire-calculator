@@ -1,0 +1,242 @@
+name: Windows Store Publish
+
+on:
+  push:
+    tags:
+      - 'v*-windows'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Windows release tag, for example v1.0.0-windows'
+        required: false
+        type: string
+      publish:
+        description: 'Publish after the protected-environment approval'
+        required: true
+        default: false
+        type: boolean
+      diagnose_only:
+        description: 'Only validate Partner Center credentials'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: maui-windows-store-publish
+  cancel-in-progress: false
+
+env:
+  APP_PROJECT: app/MyFireNumber/MyFireNumber.csproj
+  TEST_PROJECT: app/MyFireNumber.Tests/MyFireNumber.Tests.csproj
+  TARGET_FRAMEWORK: net10.0-windows10.0.19041.0
+  STORE_MANIFEST: app/MyFireNumber/Platforms/Windows/Package.Store.appxmanifest
+  PACKAGE_MANIFEST: app/MyFireNumber/Platforms/Windows/Package.appxmanifest
+
+jobs:
+  diagnose:
+    name: Diagnose Partner Center credentials
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnose_only }}
+    runs-on: windows-latest
+    environment: microsoft-store
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Diagnose Partner Center credentials
+        uses: ./.github/actions/diagnose-partner-center
+        with:
+          tenant-id: ${{ secrets.PARTNER_CENTER_TENANT_ID }}
+          seller-id: ${{ secrets.PARTNER_CENTER_SELLER_ID }}
+          client-id: ${{ secrets.PARTNER_CENTER_CLIENT_ID }}
+          client-secret: ${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}
+
+  package:
+    name: Package Microsoft Store upload
+    if: ${{ github.event_name == 'push' || !inputs.diagnose_only }}
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore .NET workloads
+        shell: pwsh
+        run: dotnet workload restore $env:APP_PROJECT -p:TargetFramework=$env:TARGET_FRAMEWORK
+
+      - name: Restore
+        shell: pwsh
+        run: dotnet restore $env:APP_PROJECT -p:TargetFramework=$env:TARGET_FRAMEWORK
+
+      - name: Test calculation, storage, and export layers
+        shell: pwsh
+        run: dotnet test $env:TEST_PROJECT -c Release
+
+      - name: Set release version
+        shell: pwsh
+        run: |
+          $tag = if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            "${{ inputs.tag }}"
+          } else {
+            "${{ github.ref_name }}"
+          }
+
+          if ($tag -notmatch '^v(?<base>\d+\.\d+\.\d+)(?:\.(?<revision>\d+))?-windows$') {
+            throw "Windows release tags must look like v1.0.0-windows or v1.0.0.1-windows. Got '$tag'."
+          }
+
+          $revision = if ($Matches.revision) { $Matches.revision } else { "0" }
+          "PACKAGE_VERSION=$($Matches.base).$revision" >> $env:GITHUB_ENV
+
+      - name: Configure Microsoft Store manifest
+        shell: pwsh
+        env:
+          STORE_IDENTITY_NAME: ${{ vars.MICROSOFT_STORE_IDENTITY_NAME }}
+          STORE_PUBLISHER: ${{ vars.MICROSOFT_STORE_PUBLISHER }}
+          STORE_PUBLISHER_DISPLAY_NAME: ${{ vars.MICROSOFT_STORE_PUBLISHER_DISPLAY_NAME }}
+        run: |
+          $requiredValues = @{
+            "MICROSOFT_STORE_IDENTITY_NAME repository variable" = $env:STORE_IDENTITY_NAME
+            "MICROSOFT_STORE_PUBLISHER repository variable" = $env:STORE_PUBLISHER
+            "MICROSOFT_STORE_PUBLISHER_DISPLAY_NAME repository variable" = $env:STORE_PUBLISHER_DISPLAY_NAME
+          }
+          $missing = $requiredValues.GetEnumerator() |
+            Where-Object { [string]::IsNullOrWhiteSpace($_.Value) } |
+            ForEach-Object Key
+
+          if ($missing) {
+            throw "Configure the following before packaging: $($missing -join ', ')."
+          }
+
+          [xml]$manifest = Get-Content $env:STORE_MANIFEST -Raw
+          $manifest.Package.Identity.Name = $env:STORE_IDENTITY_NAME
+          $manifest.Package.Identity.Publisher = $env:STORE_PUBLISHER
+          $manifest.Package.Identity.Version = $env:PACKAGE_VERSION
+          $manifest.Package.Properties.PublisherDisplayName = $env:STORE_PUBLISHER_DISPLAY_NAME
+          $manifest.Save((Resolve-Path $env:PACKAGE_MANIFEST))
+
+      - name: Build Store upload package
+        shell: pwsh
+        run: |
+          $packageDir = Join-Path (Resolve-Path ".") "artifacts/store/"
+          New-Item -ItemType Directory -Force -Path $packageDir | Out-Null
+
+          dotnet build $env:APP_PROJECT `
+            -f $env:TARGET_FRAMEWORK `
+            -c Release `
+            -p:Platform=x64 `
+            -p:WindowsPackageType=MSIX `
+            -p:SelfContained=false `
+            -p:WindowsAppSDKSelfContained=false `
+            -p:EnableMsixTooling=true `
+            -p:GenerateAppxPackageOnBuild=true `
+            -p:AppxPackageDir=$packageDir `
+            -p:AppxBundle=Always `
+            -p:AppxBundlePlatforms="x64|ARM64" `
+            -p:UapAppxPackageBuildMode=StoreUpload `
+            -p:AppxPackageSigningEnabled=false `
+            -p:AppxSymbolPackageEnabled=false `
+            -v:minimal
+          if ($LASTEXITCODE -ne 0) {
+            throw "Microsoft Store package build failed."
+          }
+
+          $upload = Get-ChildItem $packageDir -Recurse -Filter *.msixupload | Select-Object -First 1
+          if (-not $upload) {
+            throw "The Store build did not produce an .msixupload package."
+          }
+
+          Copy-Item $upload.FullName "artifacts/store/MyFireNumber-$env:PACKAGE_VERSION.msixupload" -Force
+
+      - name: Upload Store package
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-store-package
+          path: artifacts/store/MyFireNumber-*.msixupload
+          if-no-files-found: error
+
+  publish:
+    name: Submit to Microsoft Store
+    needs: package
+    if: ${{ github.event_name == 'push' || inputs.publish }}
+    runs-on: windows-latest
+    environment: microsoft-store
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Download Store package
+        uses: actions/download-artifact@v8
+        with:
+          name: windows-store-package
+          path: artifacts/store
+
+      - name: Validate publishing configuration
+        shell: pwsh
+        env:
+          STORE_PRODUCT_ID: ${{ vars.MICROSOFT_STORE_PRODUCT_ID }}
+          PARTNER_CENTER_TENANT_ID: ${{ secrets.PARTNER_CENTER_TENANT_ID }}
+          PARTNER_CENTER_SELLER_ID: ${{ secrets.PARTNER_CENTER_SELLER_ID }}
+          PARTNER_CENTER_CLIENT_ID: ${{ secrets.PARTNER_CENTER_CLIENT_ID }}
+          PARTNER_CENTER_CLIENT_SECRET: ${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}
+        run: |
+          $requiredValues = @{
+            "MICROSOFT_STORE_PRODUCT_ID repository variable" = $env:STORE_PRODUCT_ID
+            "PARTNER_CENTER_TENANT_ID environment secret" = $env:PARTNER_CENTER_TENANT_ID
+            "PARTNER_CENTER_SELLER_ID environment secret" = $env:PARTNER_CENTER_SELLER_ID
+            "PARTNER_CENTER_CLIENT_ID environment secret" = $env:PARTNER_CENTER_CLIENT_ID
+            "PARTNER_CENTER_CLIENT_SECRET environment secret" = $env:PARTNER_CENTER_CLIENT_SECRET
+          }
+          $missing = $requiredValues.GetEnumerator() |
+            Where-Object { [string]::IsNullOrWhiteSpace($_.Value) } |
+            ForEach-Object Key
+
+          if ($missing) {
+            throw "Configure the following before publishing: $($missing -join ', ')."
+          }
+
+      - name: Diagnose Partner Center credentials
+        uses: ./.github/actions/diagnose-partner-center
+        with:
+          tenant-id: ${{ secrets.PARTNER_CENTER_TENANT_ID }}
+          seller-id: ${{ secrets.PARTNER_CENTER_SELLER_ID }}
+          client-id: ${{ secrets.PARTNER_CENTER_CLIENT_ID }}
+          client-secret: ${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}
+
+      - name: Setup Microsoft Store Developer CLI
+        uses: microsoft/microsoft-store-apppublisher@v1.4
+
+      - name: Configure Microsoft Store Developer CLI
+        shell: pwsh
+        run: |
+          msstore reconfigure `
+            --tenantId "${{ secrets.PARTNER_CENTER_TENANT_ID }}" `
+            --sellerId "${{ secrets.PARTNER_CENTER_SELLER_ID }}" `
+            --clientId "${{ secrets.PARTNER_CENTER_CLIENT_ID }}" `
+            --clientSecret "${{ secrets.PARTNER_CENTER_CLIENT_SECRET }}"
+
+      - name: Publish Store package
+        shell: pwsh
+        env:
+          STORE_PRODUCT_ID: ${{ vars.MICROSOFT_STORE_PRODUCT_ID }}
+        run: |
+          $upload = Get-ChildItem artifacts/store -Filter *.msixupload | Select-Object -First 1
+          if (-not $upload) {
+            throw "The downloaded Store package is missing."
+          }
+
+          msstore publish $upload.FullName --appId $env:STORE_PRODUCT_ID --uploadTimeout 900
+          if ($LASTEXITCODE -ne 0) {
+            throw "msstore publish failed."
+          }

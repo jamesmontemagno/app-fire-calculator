@@ -196,6 +196,15 @@ Screenshot dimensions:
 The iPhone slot also accepts 1284 x 2778. Uploading these two master sizes lets App Store
 Connect scale the remaining device classes, so per-device sets are not required.
 
+Mac App Store screenshots are in `metadata/macos/` at 2880 x 1800 pixels:
+
+| Order | Screen | File |
+| --- | --- | --- |
+| 1 | Home dashboard and net worth | `macos/01-home.png` |
+| 2 | Accounts and cash-flow overview | `macos/02-accounts.png` |
+| 3 | Net-worth history and trends | `macos/03-history.png` |
+| 4 | Linked Coast FIRE planning | `macos/04-coast-fire.png` |
+
 Screenshots are generated from a seeded demo profile rather than real financial data. See
 `tools/store-screenshots/README.md` for the full runbook: building for the simulator, seeding
 the demo persona, capturing with the status bar pinned to 9:41, and framing the results.

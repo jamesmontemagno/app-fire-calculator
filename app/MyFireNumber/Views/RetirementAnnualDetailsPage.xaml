@@ -13,11 +13,11 @@
         <VerticalStackLayout Spacing="4">
             <Label Text="Annual cash-flow details"
                    FontAttributes="Bold"
-                   FontSize="28"
+                   FontSize="{StaticResource FontSize28}"
                    TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                    SemanticProperties.HeadingLevel="Level1" />
             <Label Text="Tap a year to review income, expenses, withdrawals, and account balances."
-                   FontSize="14"
+                   FontSize="{StaticResource FontSize14}"
                    LineHeight="1.3"
                    TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
         </VerticalStackLayout>
@@ -42,16 +42,16 @@
                                 <VerticalStackLayout Spacing="3">
                                     <Label Text="{Binding Title}"
                                            FontAttributes="Bold"
-                                           FontSize="18"
+                                           FontSize="{StaticResource FontSize18}"
                                            TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                                     <Label Text="{Binding BalanceText, StringFormat='Ending balance {0}'}"
-                                           FontSize="13"
+                                           FontSize="{StaticResource FontSize13}"
                                            TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                                 </VerticalStackLayout>
                                 <Label Grid.Column="1"
                                        Text="{Binding ExpansionGlyph}"
                                        FontFamily="FontAwesomeSolid"
-                                       FontSize="14"
+                                       FontSize="{StaticResource FontSize14}"
                                        VerticalTextAlignment="Center"
                                        TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
                             </Grid>
@@ -61,26 +61,26 @@
                                                  Spacing="{StaticResource SpaceMd}">
                                 <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
                                     <Border Padding="10" StrokeThickness="0" Background="{AppThemeBinding Light={StaticResource SurfaceAccentTintLight}, Dark={StaticResource SurfaceAccentTintDark}}" StrokeShape="RoundRectangle 8">
-                                        <VerticalStackLayout Spacing="2"><Label Text="Income" FontSize="12" /><Label Text="{Binding IncomeText}" FontAttributes="Bold" /></VerticalStackLayout>
+                                        <VerticalStackLayout Spacing="2"><Label Text="Income" FontSize="{StaticResource FontSize12}" /><Label Text="{Binding IncomeText}" FontAttributes="Bold" /></VerticalStackLayout>
                                     </Border>
                                     <Border Grid.Column="1" Padding="10" StrokeThickness="0" Background="{AppThemeBinding Light={StaticResource SurfaceWarningAltLight}, Dark={StaticResource SurfaceWarningAltDark}}" StrokeShape="RoundRectangle 8">
-                                        <VerticalStackLayout Spacing="2"><Label Text="Expenses" FontSize="12" /><Label Text="{Binding ExpensesText}" FontAttributes="Bold" /></VerticalStackLayout>
+                                        <VerticalStackLayout Spacing="2"><Label Text="Expenses" FontSize="{StaticResource FontSize12}" /><Label Text="{Binding ExpensesText}" FontAttributes="Bold" /></VerticalStackLayout>
                                     </Border>
                                     <Border Grid.Row="1" Grid.ColumnSpan="2" Padding="10" StrokeThickness="0" Background="{AppThemeBinding Light={StaticResource SurfacePageLight}, Dark={StaticResource SurfacePageDark}}" StrokeShape="RoundRectangle 8">
-                                        <VerticalStackLayout Spacing="2"><Label Text="Annual surplus or shortfall" FontSize="12" /><Label Text="{Binding SurplusText}" FontAttributes="Bold" /></VerticalStackLayout>
+                                        <VerticalStackLayout Spacing="2"><Label Text="Annual surplus or shortfall" FontSize="{StaticResource FontSize12}" /><Label Text="{Binding SurplusText}" FontAttributes="Bold" /></VerticalStackLayout>
                                     </Border>
                                 </Grid>
                                 <VerticalStackLayout Spacing="4">
                                     <Label Text="Income and withdrawals" FontAttributes="Bold" />
-                                    <Label Text="{Binding IncomeBreakdown}" FontSize="13" LineHeight="1.3" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                    <Label Text="{Binding IncomeBreakdown}" FontSize="{StaticResource FontSize13}" LineHeight="1.3" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                 </VerticalStackLayout>
                                 <VerticalStackLayout Spacing="4">
                                     <Label Text="Expenses" FontAttributes="Bold" />
-                                    <Label Text="{Binding ExpenseBreakdown}" FontSize="13" LineHeight="1.3" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                    <Label Text="{Binding ExpenseBreakdown}" FontSize="{StaticResource FontSize13}" LineHeight="1.3" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                 </VerticalStackLayout>
                                 <VerticalStackLayout Spacing="4">
                                     <Label Text="Account balances" FontAttributes="Bold" />
-                                    <Label Text="{Binding AccountBalanceBreakdown}" FontSize="13" LineHeight="1.3" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                    <Label Text="{Binding AccountBalanceBreakdown}" FontSize="{StaticResource FontSize13}" LineHeight="1.3" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                 </VerticalStackLayout>
                             </VerticalStackLayout>
                         </Grid>

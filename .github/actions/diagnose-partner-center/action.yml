@@ -1,0 +1,96 @@
+name: Diagnose Partner Center credentials
+description: Diagnose Microsoft Entra and Partner Center Store submission credentials.
+
+inputs:
+  tenant-id:
+    description: Microsoft Entra tenant ID for the Partner Center account.
+    required: true
+  seller-id:
+    description: Partner Center seller ID.
+    required: true
+  client-id:
+    description: Application client ID of the Microsoft Entra application.
+    required: true
+  client-secret:
+    description: Client secret for the Microsoft Entra application.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Check Partner Center credentials
+      shell: pwsh
+      env:
+        PARTNER_CENTER_TENANT_ID: ${{ inputs.tenant-id }}
+        PARTNER_CENTER_SELLER_ID: ${{ inputs.seller-id }}
+        PARTNER_CENTER_CLIENT_ID: ${{ inputs.client-id }}
+        PARTNER_CENTER_CLIENT_SECRET: ${{ inputs.client-secret }}
+      run: |
+        $tenantId = "$env:PARTNER_CENTER_TENANT_ID".Trim()
+        $clientId = "$env:PARTNER_CENTER_CLIENT_ID".Trim()
+        $sellerId = "$env:PARTNER_CENTER_SELLER_ID".Trim()
+        $clientSecret = "$env:PARTNER_CENTER_CLIENT_SECRET".Trim()
+
+        Write-Host "--- Credential shape ---"
+        foreach ($entry in @(
+          @{ Name = "tenantId"; Value = "$env:PARTNER_CENTER_TENANT_ID" }
+          @{ Name = "clientId"; Value = "$env:PARTNER_CENTER_CLIENT_ID" }
+          @{ Name = "sellerId"; Value = "$env:PARTNER_CENTER_SELLER_ID" }
+          @{ Name = "clientSecret"; Value = "$env:PARTNER_CENTER_CLIENT_SECRET" }
+        )) {
+          $raw = $entry.Value
+          Write-Host "$($entry.Name): length=$($raw.Length) hasSurroundingWhitespace=$($raw -ne $raw.Trim())"
+        }
+
+        $guidPattern = '^[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$'
+        if ($tenantId -notmatch $guidPattern) {
+          Write-Host "::warning::The tenant ID is not a GUID."
+        }
+        if ($clientId -notmatch $guidPattern) {
+          Write-Host "::warning::The client ID is not a GUID."
+        }
+        if ($sellerId -notmatch '^\d+$') {
+          Write-Host "::warning::Partner Center seller IDs are numeric."
+        }
+
+        Write-Host "`n--- Request Store submission API token ---"
+        try {
+          $tokenResponse = Invoke-RestMethod -Method Post `
+            -Uri "https://login.microsoftonline.com/$tenantId/oauth2/token" `
+            -ContentType "application/x-www-form-urlencoded" `
+            -Body @{
+              grant_type = "client_credentials"
+              client_id = $clientId
+              client_secret = $clientSecret
+              resource = "https://manage.devcenter.microsoft.com"
+            }
+          $accessToken = $tokenResponse.access_token
+          Write-Host "Token acquired."
+        }
+        catch {
+          $detail = if ($_.ErrorDetails.Message) { $_.ErrorDetails.Message } else { $_.Exception.Message }
+          $code = if ($detail -match '(AADSTS\d+)') { $Matches[1] } else { "unknown" }
+          Write-Host "::error::Microsoft Entra token request failed ($code)."
+          if ($clientSecret) {
+            $detail = $detail -replace [regex]::Escape($clientSecret), "***"
+          }
+          Write-Host $detail
+          throw "Partner Center diagnosis failed at the token step."
+        }
+
+        Write-Host "`n--- Call Store submission API ---"
+        try {
+          Invoke-RestMethod -Method Get `
+            -Uri "https://manage.devcenter.microsoft.com/v1.0/my/applications?top=1" `
+            -Headers @{ Authorization = "Bearer $accessToken" } | Out-Null
+          Write-Host "Partner Center credentials and account association are valid."
+        }
+        catch {
+          $status = $_.Exception.Response.StatusCode.value__
+          Write-Host "::error::The Store submission API returned HTTP $status."
+          Write-Host "::error::Associate this Entra application with Partner Center and grant it the Manager role."
+          if ($_.ErrorDetails.Message) {
+            Write-Host $_.ErrorDetails.Message
+          }
+          throw "Partner Center diagnosis failed at the Store API step."
+        }

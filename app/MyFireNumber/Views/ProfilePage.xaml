@@ -30,18 +30,18 @@
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceMd}">
                     <Label Text="&#xf2bd;"
                            FontFamily="FontAwesomeSolid"
-                           FontSize="28"
+                           FontSize="{StaticResource FontSize28}"
                            VerticalTextAlignment="Center"
                            TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                            SemanticProperties.Description="Profile" />
                     <VerticalStackLayout Grid.Column="1" Spacing="2">
                         <Label Text="{Binding HeaderTitle}"
-                               FontSize="30"
+                               FontSize="{StaticResource FontSize30}"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                SemanticProperties.HeadingLevel="Level1" />
                         <Label Text="Personalize new plans without sharing your data."
-                               FontSize="13"
+                               FontSize="{StaticResource FontSize13}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     </VerticalStackLayout>
                 </Grid>
@@ -53,7 +53,7 @@
                     <VerticalStackLayout Spacing="{StaticResource SpaceSm}">
                         <Label Text="Make your plans personal"
                                FontAttributes="Bold"
-                               FontSize="18"
+                               FontSize="{StaticResource FontSize18}"
                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                         <Label Text="{Binding CompletionText}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
@@ -101,7 +101,7 @@
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Label Text="Your timeline" Style="{StaticResource CalculatorSectionHeading}" />
                         <Label Text="Dates are used only to set starting ages for new plans. You can always override a scenario."
-                               FontSize="12"
+                               FontSize="{StaticResource FontSize12}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <VerticalStackLayout Spacing="4">
                             <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}">
@@ -153,7 +153,7 @@
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Label Text="Planning assumptions" Style="{StaticResource CalculatorSectionHeading}" />
                         <Label Text="Starting assumptions for new calculators. Existing drafts and saved plans never change."
-                               FontSize="12"
+                               FontSize="{StaticResource FontSize12}"
                                LineHeight="1.3"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <controls:PercentageInputView AutomationId="ProfileExpectedReturnInput"
