@@ -21,7 +21,7 @@
             <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
                 <VerticalStackLayout Spacing="6">
                     <Label Text="Choose your withdrawal rate"
-                           FontSize="28"
+                           FontSize="{StaticResource FontSize28}"
                            FontAttributes="Bold"
                            LineHeight="1.1"
                            TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
@@ -37,7 +37,7 @@
                         StrokeShape="RoundRectangle 12">
                     <VerticalStackLayout Spacing="{StaticResource SpaceMd}">
                         <Label Text="Your comfort level"
-                               FontSize="18"
+                               FontSize="{StaticResource FontSize18}"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                         <Label Text="A lower rate generally means a larger savings target and less risk of depleting your portfolio. A higher rate creates a smaller target and more retirement income, but leaves less room for long retirements or difficult markets."
@@ -49,7 +49,7 @@
                                    TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" />
                             <Label Grid.Column="1"
                                    Text="{Binding WithdrawalRateText}"
-                                   FontSize="18"
+                                   FontSize="{StaticResource FontSize18}"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                         </Grid>
@@ -83,7 +83,7 @@
                 </Border>
 
                 <Label Text="No rate guarantees success. Taxes, fees, investment mix, market returns, retirement length, and flexible spending all affect how long a portfolio may last. Revisit this assumption as your plan changes."
-                       FontSize="13"
+                       FontSize="{StaticResource FontSize13}"
                        LineHeight="1.35"
                        TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}" />
 

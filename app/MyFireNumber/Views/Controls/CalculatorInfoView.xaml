@@ -18,7 +18,7 @@
                        Text="{Binding Title, Source={x:Reference Root}}"
                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                        FontAttributes="Bold"
-                       FontSize="20"
+                       FontSize="{StaticResource FontSize20}"
                        SemanticProperties.HeadingLevel="Level2" />
             </Grid>
             <Label Text="{Binding Summary, Source={x:Reference Root}}"
@@ -37,7 +37,7 @@
                    IsVisible="False"
                    Text="{Binding Details, Source={x:Reference Root}}"
                    TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
-                   FontSize="13"
+                   FontSize="{StaticResource FontSize13}"
                    LineHeight="1.35" />
         </VerticalStackLayout>
     </Border>

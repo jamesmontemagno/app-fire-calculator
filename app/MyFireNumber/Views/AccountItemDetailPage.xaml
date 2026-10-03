@@ -15,12 +15,12 @@
         <VerticalStackLayout Padding="{StaticResource PagePadding}" Spacing="{StaticResource SpaceLg}">
             <VerticalStackLayout Spacing="2">
                 <Label Text="{Binding ItemName}"
-                       FontSize="26"
+                       FontSize="{StaticResource FontSize26}"
                        FontAttributes="Bold"
                        TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                        SemanticProperties.HeadingLevel="Level1" />
                 <Label Text="{Binding ItemTypeLabel}"
-                       FontSize="13"
+                       FontSize="{StaticResource FontSize13}"
                        TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
             </VerticalStackLayout>
 
@@ -32,15 +32,15 @@
                 <VerticalStackLayout Spacing="{StaticResource SpaceXs}">
                     <Label Text="{Binding BalanceLabel}" Style="{StaticResource CalculatorSectionHeading}" />
                     <Label Text="{Binding CurrentBalanceText}"
-                           FontSize="28"
+                           FontSize="{StaticResource FontSize28}"
                            FontAttributes="Bold"
                            TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
                     <Label Text="{Binding FreshnessText}"
-                           FontSize="12"
+                           FontSize="{StaticResource FontSize12}"
                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     <Label Text="Overdue for a monthly update"
                            IsVisible="{Binding IsOverdue}"
-                           FontSize="12"
+                           FontSize="{StaticResource FontSize12}"
                            TextColor="{StaticResource FixedWarning}" />
                 </VerticalStackLayout>
             </Border>

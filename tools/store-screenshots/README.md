@@ -121,6 +121,39 @@ App Store Connect accepts 1242 x 2688 or 1284 x 2778 for the iPhone slot and
 2064 x 2752 for the 13-inch iPad slot. Uploading these two master sizes lets it
 scale the remaining device classes.
 
+## Mac Catalyst
+
+Build the Mac Catalyst app with an isolated bundle identifier so demo data never
+touches a locally installed copy:
+
+```bash
+dotnet build app/MyFireNumber/MyFireNumber.csproj \
+  -f net10.0-maccatalyst \
+  -c Debug \
+  -p:RuntimeIdentifier=maccatalyst-arm64 \
+  -p:ApplicationId=com.refractored.myfirenumber.screenshots
+```
+
+Launch the app once, seed the isolated container's database with
+`seed_demo_data.py`, and capture these four screens at native scale:
+
+| File | Screen |
+| --- | --- |
+| `01-home.png` | Home dashboard |
+| `02-accounts.png` | Accounts overview |
+| `03-history.png` | History & trends |
+| `04-coast-fire.png` | Linked Coast FIRE plan |
+
+Frame the raw captures at the largest accepted Mac App Store size:
+
+```bash
+python3 tools/store-screenshots/frame_macos_screenshots.py \
+  raw-macos metadata/macos
+```
+
+The outputs are 2880 x 1800 pixels with a desktop-specific side-by-side layout,
+Mac window chrome, branded gradients, headlines, and supporting copy.
+
 ## Demo persona
 
 Kept internally consistent so no screen contradicts another. Change it in one
@@ -230,4 +263,3 @@ the Shell/NavigationPage `BarBackgroundColor` XAML setters in
 `Resources/Styles/Styles.xaml`. Fixed by updating `colors.xml` to the app's
 actual light palette and adding a `values-night/colors.xml` override for
 dark mode. If you see this again, check those two files first.
-

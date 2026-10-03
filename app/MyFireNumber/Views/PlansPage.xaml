@@ -18,17 +18,17 @@
                                HorizontalTextAlignment="Center"
                                VerticalTextAlignment="Center"
                                TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
-                               FontSize="24"
+                               FontSize="{StaticResource FontSize24}"
                                SemanticProperties.Description="Saved plans" />
                         <VerticalStackLayout Grid.Column="1" Spacing="2">
                             <Label Text="Saved plans"
                                    TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                    FontAttributes="Bold"
-                                   FontSize="24"
+                                   FontSize="{StaticResource FontSize24}"
                                    SemanticProperties.HeadingLevel="Level1" />
                             <Label Text="Your scenarios stay on this device."
                                    TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
-                                   FontSize="13" />
+                                   FontSize="{StaticResource FontSize13}" />
                         </VerticalStackLayout>
                     </Grid>
             <SearchBar AutomationId="PlanSearch"
@@ -43,7 +43,7 @@
                        VerticalTextAlignment="Center"
                        TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"
                        FontAttributes="Bold"
-                       FontSize="13" />
+                       FontSize="{StaticResource FontSize13}" />
                 <Picker AutomationId="PlanSort"
                         Grid.Column="1"
                         ItemsSource="{Binding SortOptions}"
@@ -76,12 +76,12 @@
                                                             VerticalOptions="Center">
                                            <Label Text="&#xf044;"
                                                   FontFamily="FontAwesomeSolid"
-                                                  FontSize="17"
+                                                  FontSize="{StaticResource FontSize17}"
                                                   HorizontalTextAlignment="Center"
                                                   TextColor="{StaticResource FixedWhite}" />
                                            <Label Text="Rename"
                                                   FontAttributes="Bold"
-                                                  FontSize="12"
+                                                  FontSize="{StaticResource FontSize12}"
                                                   HorizontalTextAlignment="Center"
                                                   TextColor="{StaticResource FixedWhite}" />
                                        </VerticalStackLayout>
@@ -100,12 +100,12 @@
                                                             VerticalOptions="Center">
                                            <Label Text="&#xf0c5;"
                                                   FontFamily="FontAwesomeSolid"
-                                                  FontSize="17"
+                                                  FontSize="{StaticResource FontSize17}"
                                                   HorizontalTextAlignment="Center"
                                                   TextColor="{StaticResource FixedWhite}" />
                                            <Label Text="Copy"
                                                   FontAttributes="Bold"
-                                                  FontSize="12"
+                                                  FontSize="{StaticResource FontSize12}"
                                                   HorizontalTextAlignment="Center"
                                                   TextColor="{StaticResource FixedWhite}" />
                                        </VerticalStackLayout>
@@ -124,12 +124,12 @@
                                                             VerticalOptions="Center">
                                            <Label Text="&#xf2ed;"
                                                   FontFamily="FontAwesomeSolid"
-                                                  FontSize="17"
+                                                  FontSize="{StaticResource FontSize17}"
                                                   HorizontalTextAlignment="Center"
                                                   TextColor="{StaticResource FixedWhite}" />
                                            <Label Text="Delete"
                                                   FontAttributes="Bold"
-                                                  FontSize="12"
+                                                  FontSize="{StaticResource FontSize12}"
                                                   HorizontalTextAlignment="Center"
                                                   TextColor="{StaticResource FixedWhite}" />
                                        </VerticalStackLayout>
@@ -151,22 +151,22 @@
                                    <Label Text="{Binding Name}"
                                           TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                           FontAttributes="Bold"
-                                          FontSize="18" />
+                                          FontSize="{StaticResource FontSize18}" />
                                    <Label Text="{Binding CalculatorTitle}"
                                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
-                                          FontSize="13" />
+                                          FontSize="{StaticResource FontSize13}" />
                                    <Label Text="{Binding DataModeDescription}"
                                           TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                                           FontAttributes="Bold"
-                                          FontSize="11" />
+                                          FontSize="{StaticResource FontSize11}" />
                                    <Label Text="{Binding UpdatedDescription}"
                                           TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
-                                          FontSize="12" />
+                                          FontSize="{StaticResource FontSize12}" />
                                </VerticalStackLayout>
                                <Label Grid.Column="1"
                                       Text="&#xf054;"
                                       FontFamily="FontAwesomeSolid"
-                                      FontSize="14"
+                                      FontSize="{StaticResource FontSize14}"
                                       VerticalTextAlignment="Center"
                                       TextColor="{AppThemeBinding Light={StaticResource PlaceholderLight}, Dark={StaticResource PlaceholderDark}}"
                                       SemanticProperties.Description="Open" />
@@ -181,12 +181,12 @@
                            FontFamily="FontAwesomeSolid"
                            HorizontalTextAlignment="Center"
                            TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
-                           FontSize="34"
+                           FontSize="{StaticResource FontSize34}"
                            SemanticProperties.Description="No saved plans" />
                     <Label Text="No saved plans yet."
                            HorizontalTextAlignment="Center"
                            FontAttributes="Bold"
-                           FontSize="18" />
+                           FontSize="{StaticResource FontSize18}" />
                     <Label Text="Save a calculator scenario to compare it here."
                            HorizontalTextAlignment="Center"
                            TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}"

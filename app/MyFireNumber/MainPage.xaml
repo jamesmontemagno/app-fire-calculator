@@ -14,17 +14,17 @@
                     <Label Text="PROJECTION CHECK"
                            TextColor="#326B57"
                            FontAttributes="Bold"
-                           FontSize="12"
+                           FontSize="{StaticResource FontSize12}"
                            CharacterSpacing="1.4" />
                     <Label Text="Your path to financial independence"
                            TextColor="#17352C"
                            FontAttributes="Bold"
-                           FontSize="30"
+                           FontSize="{StaticResource FontSize30}"
                            LineHeight="1.05"
                            SemanticProperties.HeadingLevel="Level1" />
                     <Label Text="A temporary rendering proof using the same annual balance shape planned for calculator results."
                            TextColor="#425D54"
-                           FontSize="15"
+                           FontSize="{StaticResource FontSize15}"
                            LineHeight="1.25" />
                 </VerticalStackLayout>
 
@@ -40,10 +40,10 @@
                         <Label Text="Portfolio balance"
                                TextColor="#17352C"
                                FontAttributes="Bold"
-                               FontSize="18" />
+                               FontSize="{StaticResource FontSize18}" />
                         <Label Text="Age 35–60"
                                TextColor="#587068"
-                               FontSize="13" />
+                               FontSize="{StaticResource FontSize13}" />
                     </VerticalStackLayout>
                     <Border Grid.Column="1"
                             Padding="10,5"
@@ -53,7 +53,7 @@
                         <Label Text="7% return"
                                TextColor="#245744"
                                FontAttributes="Bold"
-                               FontSize="12" />
+                               FontSize="{StaticResource FontSize12}" />
                     </Border>
                 </Grid>
 
@@ -65,12 +65,12 @@
                 <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
                     <Label Text="Starting balance"
                            TextColor="#587068"
-                           FontSize="13" />
+                           FontSize="{StaticResource FontSize13}" />
                     <Label Grid.Column="1"
                            Text="$120,000"
                            TextColor="#17352C"
                            FontAttributes="Bold"
-                           FontSize="13" />
+                           FontSize="{StaticResource FontSize13}" />
                 </Grid>
 
               <Button Grid.Row="3"
@@ -80,19 +80,19 @@
                      TextColor="#FFFFFF"
                      CornerRadius="6"
                      FontAttributes="Bold"
-                     FontSize="13"
+                     FontSize="{StaticResource FontSize13}"
                      SemanticProperties.Description="Create a local spreadsheet proof and open the native share sheet." />
 
                 <Label Grid.Row="4"
                        Text="{Binding ExportProofStatus}"
                        TextColor="#425D54"
-                       FontSize="12"
+                       FontSize="{StaticResource FontSize12}"
                        LineBreakMode="WordWrap" />
 
                 <Label Grid.Row="5"
                        Text="{Binding StorageProofStatus}"
                        TextColor="#425D54"
-                       FontSize="12"
+                       FontSize="{StaticResource FontSize12}"
                        LineBreakMode="WordWrap" />
                                    </Grid>
                             </Border>

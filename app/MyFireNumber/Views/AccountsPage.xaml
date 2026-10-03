@@ -15,18 +15,18 @@
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="{StaticResource SpaceMd}">
                     <Label Text="&#xf555;"
                            FontFamily="FontAwesomeSolid"
-                           FontSize="28"
+                           FontSize="{StaticResource FontSize28}"
                            VerticalTextAlignment="Center"
                            TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}"
                            SemanticProperties.Description="Accounts" />
                     <VerticalStackLayout Grid.Column="1" Spacing="2">
                         <Label Text="Accounts"
-                               FontSize="30"
+                               FontSize="{StaticResource FontSize30}"
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}"
                                SemanticProperties.HeadingLevel="Level1" />
                         <Label Text="Your accounts, income, expenses, and debts. Stays on this device."
-                               FontSize="13"
+                               FontSize="{StaticResource FontSize13}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                     </VerticalStackLayout>
                 </Grid>
@@ -39,47 +39,47 @@
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="{StaticResource SpaceSm}">
                             <Label Text="Overview" Style="{StaticResource CalculatorSectionHeading}" />
                             <Grid Grid.Column="1" ColumnDefinitions="Auto,Auto" ColumnSpacing="{StaticResource SpaceXs}">
-                                <Label Text="Hide amounts" VerticalTextAlignment="Center" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="Hide amounts" VerticalTextAlignment="Center" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                 <Switch Grid.Column="1" AutomationId="AccountsPrivacyModeSwitch" IsToggled="{Binding IsPrivacyModeEnabled}" SemanticProperties.Description="Hide dollar amounts in the Accounts overview and summaries" />
                             </Grid>
                         </Grid>
                         <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="{StaticResource SpaceSm}" RowSpacing="{StaticResource SpaceSm}">
                             <VerticalStackLayout Spacing="2">
-                                <Label Text="Investment accounts" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label AutomationId="AccountsAccountBalanceLabel" Text="{Binding AccountBalanceTotalText}" FontAttributes="Bold" FontSize="20" />
+                                <Label Text="Investment accounts" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label AutomationId="AccountsAccountBalanceLabel" Text="{Binding AccountBalanceTotalText}" FontAttributes="Bold" FontSize="{StaticResource FontSize20}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                <Label Text="Assets" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label AutomationId="AccountsAssetValueLabel" Text="{Binding AssetValueTotalText}" FontAttributes="Bold" FontSize="20" />
+                                <Label Text="Assets" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label AutomationId="AccountsAssetValueLabel" Text="{Binding AssetValueTotalText}" FontAttributes="Bold" FontSize="{StaticResource FontSize20}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="1" Spacing="2">
-                                <Label Text="Total assets" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label AutomationId="AccountsTotalAssetsLabel" Text="{Binding TotalAssetsText}" FontAttributes="Bold" FontSize="20" />
+                                <Label Text="Total assets" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label AutomationId="AccountsTotalAssetsLabel" Text="{Binding TotalAssetsText}" FontAttributes="Bold" FontSize="{StaticResource FontSize20}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="1" Grid.Column="1" Spacing="2">
-                                <Label Text="Total debts" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label AutomationId="AccountsTotalDebtsLabel" Text="{Binding TotalDebtsText}" FontAttributes="Bold" FontSize="20" />
+                                <Label Text="Total debts" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label AutomationId="AccountsTotalDebtsLabel" Text="{Binding TotalDebtsText}" FontAttributes="Bold" FontSize="{StaticResource FontSize20}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="2" Grid.ColumnSpan="2" Spacing="2">
-                                <Label Text="Net worth" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label AutomationId="AccountsNetWorthLabel" Text="{Binding NetWorthText}" FontAttributes="Bold" FontSize="24" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
-                                <Label Text="{Binding NetWorthChangeText}" IsVisible="{Binding HasNetWorthChange}" FontSize="12" />
+                                <Label Text="Net worth" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label AutomationId="AccountsNetWorthLabel" Text="{Binding NetWorthText}" FontAttributes="Bold" FontSize="{StaticResource FontSize24}" TextColor="{AppThemeBinding Light={StaticResource TextAccentLight}, Dark={StaticResource TextAccentDark}}" />
+                                <Label Text="{Binding NetWorthChangeText}" IsVisible="{Binding HasNetWorthChange}" FontSize="{StaticResource FontSize12}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="3" Spacing="2">
-                                <Label Text="Annual income" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding AnnualIncomeTotalText}" FontAttributes="Bold" FontSize="16" />
+                                <Label Text="Annual income" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualIncomeTotalText}" FontAttributes="Bold" FontSize="{StaticResource FontSize16}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="3" Grid.Column="1" Spacing="2">
-                                <Label Text="Annual expenses" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding AnnualExpensesTotalText}" FontAttributes="Bold" FontSize="16" />
+                                <Label Text="Annual expenses" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualExpensesTotalText}" FontAttributes="Bold" FontSize="{StaticResource FontSize16}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="4" Spacing="2">
-                                <Label Text="Annual cash flow" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding AnnualCashFlowText}" FontAttributes="Bold" FontSize="16" />
+                                <Label Text="Annual cash flow" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualCashFlowText}" FontAttributes="Bold" FontSize="{StaticResource FontSize16}" />
                             </VerticalStackLayout>
                             <VerticalStackLayout Grid.Row="4" Grid.Column="1" Spacing="2">
-                                <Label Text="Annual contributions" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                <Label Text="{Binding AnnualContributionsText}" FontAttributes="Bold" FontSize="16" />
+                                <Label Text="Annual contributions" FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="{Binding AnnualContributionsText}" FontAttributes="Bold" FontSize="{StaticResource FontSize16}" />
                             </VerticalStackLayout>
                         </Grid>
 
@@ -88,8 +88,8 @@
                                 StrokeThickness="0"
                                 StrokeShape="RoundRectangle 8">
                             <VerticalStackLayout Spacing="4">
-                                <Label AutomationId="AccountsLastCheckInLabel" Text="{Binding LastCheckInText}" FontSize="13" FontAttributes="Bold" />
-                                <Label Text="{Binding NextCheckInText}" IsVisible="{Binding HasCompletedCheckIn}" FontSize="12"
+                                <Label AutomationId="AccountsLastCheckInLabel" Text="{Binding LastCheckInText}" FontSize="{StaticResource FontSize13}" FontAttributes="Bold" />
+                                <Label Text="{Binding NextCheckInText}" IsVisible="{Binding HasCompletedCheckIn}" FontSize="{StaticResource FontSize12}"
                                        TextColor="{StaticResource FixedWarning}" />
                             </VerticalStackLayout>
                         </Border>
@@ -120,10 +120,10 @@
                             <Button Grid.Column="2" AutomationId="AddAccountsIncomeButton" Text="Add" Command="{Binding AddIncomeCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
                         <Label Text="{Binding IncomeSummary}"
-                               FontSize="12"
+                               FontSize="{StaticResource FontSize12}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Income}" Spacing="{StaticResource SpaceSm}">
-                            <BindableLayout.EmptyView><Label Text="Add income such as salary, pension, Social Security, or rental income." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
+                            <BindableLayout.EmptyView><Label Text="Add income such as salary, pension, Social Security, or rental income." FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:RetirementIncomeEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
@@ -178,10 +178,10 @@
                             <Button Grid.Column="2" AutomationId="AddAccountsExpenseButton" Text="Add" Command="{Binding AddExpenseCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
                         <Label Text="{Binding ExpensesSummary}"
-                               FontSize="12"
+                               FontSize="{StaticResource FontSize12}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Expenses}" Spacing="{StaticResource SpaceSm}">
-                            <BindableLayout.EmptyView><Label Text="Add the expenses your plans should include." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
+                            <BindableLayout.EmptyView><Label Text="Add the expenses your plans should include." FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:RetirementExpenseEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
@@ -230,14 +230,14 @@
                             <Button Grid.Column="2" AutomationId="AddAccountsAccountButton" Text="Add" Command="{Binding AddAccountCommand}" SemanticProperties.Description="Add a reusable account."><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
                         <Label Text="{Binding AccountsSummary}"
-                               FontSize="12"
+                               FontSize="{StaticResource FontSize12}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <Label Text="Accounts stay on this device. Linked retirement plans use these exact account details and update when Accounts changes."
-                               FontSize="11"
+                               FontSize="{StaticResource FontSize11}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Accounts}" Spacing="{StaticResource SpaceSm}">
                             <BindableLayout.EmptyView>
-                                <Label Text="No reusable accounts yet." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                <Label Text="No reusable accounts yet." FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                             </BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:RetirementAccountEditorItem">
@@ -252,8 +252,8 @@
                                                 <Button Grid.Column="2" AutomationId="{Binding Id, StringFormat='AccountHistory{0}Button'}" Text="&#xf201;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedAccentSurface}" TextColor="{StaticResource FixedAccentStrong}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ViewAccountDetailCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='View history for {0} account.'}" />
                                                 <Button Grid.Column="3" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveAccountCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} account.'}" />
                                             </Grid>
-                                            <Label Text="{Binding FreshnessText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                            <Label Text="Overdue for a monthly update" IsVisible="{Binding IsOverdue}" FontSize="11" TextColor="{StaticResource FixedWarning}" />
+                                            <Label Text="{Binding FreshnessText}" FontSize="{StaticResource FontSize11}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                            <Label Text="Overdue for a monthly update" IsVisible="{Binding IsOverdue}" FontSize="{StaticResource FontSize11}" TextColor="{StaticResource FixedWarning}" />
                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
                                                 <VerticalStackLayout Spacing="3">
                                                     <Label Text="Account name" Style="{StaticResource FormFieldLabel}" />
@@ -304,7 +304,7 @@
                                                                                Placeholder="0"
                                                                                PeriodSuffix="%"
                                                                                Text="{Binding WithdrawalTaxRateText, Mode=TwoWay}" />
-                                                    <Label Text="{Binding WithdrawalTaxHelpText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                                    <Label Text="{Binding WithdrawalTaxHelpText}" FontSize="{StaticResource FontSize11}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                                 </VerticalStackLayout>
                                             </VerticalStackLayout>
                                         </VerticalStackLayout>
@@ -327,10 +327,10 @@
                             <Button Grid.Column="2" AutomationId="AddAccountsDebtButton" Text="Add" Command="{Binding AddDebtCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
                         <Label Text="{Binding DebtsSummary}"
-                               FontSize="12"
+                               FontSize="{StaticResource FontSize12}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Debts}" Spacing="{StaticResource SpaceSm}">
-                            <BindableLayout.EmptyView><Label Text="No debts saved." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
+                            <BindableLayout.EmptyView><Label Text="No debts saved." FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:DebtEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
@@ -341,8 +341,8 @@
                                                 <Button Grid.Column="2" AutomationId="{Binding Id, StringFormat='DebtHistory{0}Button'}" Text="&#xf201;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedAccentSurface}" TextColor="{StaticResource FixedAccentStrong}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ViewDebtDetailCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='View history for {0} debt.'}" />
                                                 <Button Grid.Column="3" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveDebtCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} debt.'}" />
                                             </Grid>
-                                            <Label Text="{Binding FreshnessText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                            <Label Text="Overdue for a monthly update" IsVisible="{Binding IsOverdue}" FontSize="11" TextColor="{StaticResource FixedWarning}" />
+                                            <Label Text="{Binding FreshnessText}" FontSize="{StaticResource FontSize11}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                            <Label Text="Overdue for a monthly update" IsVisible="{Binding IsOverdue}" FontSize="{StaticResource FontSize11}" TextColor="{StaticResource FixedWarning}" />
                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
                                             <VerticalStackLayout Spacing="3">
                                                 <Label Text="Debt name" Style="{StaticResource FormFieldLabel}" />
@@ -394,13 +394,13 @@
                             <Button Grid.Column="2" AutomationId="AddAccountsAssetButton" Text="Add" Command="{Binding AddAssetCommand}"><Button.ImageSource><FontImageSource FontFamily="FontAwesomeSolid" Glyph="&#xf067;" Color="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource PrimaryDarkText}}" Size="12" /></Button.ImageSource></Button>
                         </Grid>
                         <Label Text="{Binding AssetsSummary}"
-                               FontSize="12"
+                               FontSize="{StaticResource FontSize12}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <Label Text="Property you own, such as a home, land, or a car. Assets count toward net worth at today's value; any loan against them belongs in Debts. FIRE projections still use your investment accounts only."
-                               FontSize="12"
+                               FontSize="{StaticResource FontSize12}"
                                TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                         <VerticalStackLayout BindableLayout.ItemsSource="{Binding Assets}" Spacing="{StaticResource SpaceSm}">
-                            <BindableLayout.EmptyView><Label Text="No assets saved." FontSize="12" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
+                            <BindableLayout.EmptyView><Label Text="No assets saved." FontSize="{StaticResource FontSize12}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" /></BindableLayout.EmptyView>
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="viewModels:AssetEditorItem">
                                     <Border Padding="{StaticResource CardPaddingCompact}" Background="{AppThemeBinding Light={StaticResource SurfaceInsetLight}, Dark={StaticResource SurfaceInsetDark}}" StrokeThickness="0" StrokeShape="RoundRectangle 8">
@@ -408,15 +408,15 @@
                                             <Grid ColumnDefinitions="*,Auto,Auto,44" ColumnSpacing="{StaticResource SpaceSm}">
                                                 <VerticalStackLayout Spacing="2">
                                                     <Label Text="{Binding Name}" FontAttributes="Bold" VerticalTextAlignment="Center" />
-                                                    <Label Text="{Binding TypeLabel}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                                    <Label Text="{Binding TypeLabel}" FontSize="{StaticResource FontSize11}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
                                                 </VerticalStackLayout>
                                                 <Button Grid.Column="1" AutomationId="{Binding Id, StringFormat='ExpandAsset{0}Button'}" Text="{Binding ExpansionGlyph}" FontFamily="FontAwesomeSolid" Command="{Binding ToggleExpandedCommand}" Background="Transparent" TextColor="{AppThemeBinding Light={StaticResource TextPrimaryLight}, Dark={StaticResource TextPrimaryDark}}" SemanticProperties.Description="{Binding Name, StringFormat='Expand or collapse {0} asset.'}" />
                                                 <Button Grid.Column="2" AutomationId="{Binding Id, StringFormat='AssetHistory{0}Button'}" Text="&#xf201;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedAccentSurface}" TextColor="{StaticResource FixedAccentStrong}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.ViewAssetDetailCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='View history for {0} asset.'}" />
                                                 <Button Grid.Column="3" Text="&#xf2ed;" FontFamily="FontAwesomeSolid" Padding="0" Background="{StaticResource FixedDangerSurface}" TextColor="{StaticResource FixedDanger}" Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveAssetCommand}" CommandParameter="{Binding .}" SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} asset.'}" />
                                             </Grid>
-                                            <Label Text="{Binding FreshnessText}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                            <Label Text="{Binding ValueChangeText}" IsVisible="{Binding HasValueChange}" FontSize="11" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
-                                            <Label Text="Overdue for a monthly update" IsVisible="{Binding IsOverdue}" FontSize="11" TextColor="{StaticResource FixedWarning}" />
+                                            <Label Text="{Binding FreshnessText}" FontSize="{StaticResource FontSize11}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                            <Label Text="{Binding ValueChangeText}" IsVisible="{Binding HasValueChange}" FontSize="{StaticResource FontSize11}" TextColor="{AppThemeBinding Light={StaticResource TextSecondaryLight}, Dark={StaticResource TextSecondaryDark}}" />
+                                            <Label Text="Overdue for a monthly update" IsVisible="{Binding IsOverdue}" FontSize="{StaticResource FontSize11}" TextColor="{StaticResource FixedWarning}" />
                                             <VerticalStackLayout IsVisible="{Binding IsExpanded}" Spacing="{StaticResource SpaceSm}">
                                                 <VerticalStackLayout Spacing="3">
                                                     <Label Text="Asset name" Style="{StaticResource FormFieldLabel}" />
