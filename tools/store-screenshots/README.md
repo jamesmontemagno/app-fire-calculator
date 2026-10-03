@@ -154,6 +154,72 @@ python3 tools/store-screenshots/frame_macos_screenshots.py \
 The outputs are 2880 x 1800 pixels with a desktop-specific side-by-side layout,
 Mac window chrome, branded gradients, headlines, and supporting copy.
 
+## Windows
+
+You need the .NET MAUI Windows workload, Python 3 with Pillow, and the
+[`winapp` CLI](https://github.com/microsoft/winappcli) for UI Automation.
+
+**Build and launch.** Restore the app for the Windows target only, restore the two
+libraries on their own (the app's `TargetFramework` override would otherwise leak
+into them), then build without restoring again:
+
+```powershell
+$tf = 'net10.0-windows10.0.19041.0'
+dotnet restore app\MyFireNumber\MyFireNumber.csproj -p:TargetFramework=$tf
+dotnet restore app\MyFireNumber.Core\MyFireNumber.Core.csproj
+dotnet restore app\MyFireNumber.Storage\MyFireNumber.Storage.csproj
+dotnet build app\MyFireNumber\MyFireNumber.csproj -f $tf -c Debug -r win-x64 --no-restore
+
+$app = Start-Process "app\MyFireNumber\bin\Debug\$tf\win-x64\MyFireNumber.exe" -PassThru
+```
+
+**Seed.** The unpackaged build keeps its data under
+`%LOCALAPPDATA%\User Name\com.refractored.myfirenumber`. That folder is shared by
+every unpackaged run on the machine (the Store install is packaged and lives
+elsewhere), and passing `-p:ApplicationId` does not move it on an incremental build,
+so move an existing folder aside first and delete the seeded one when you are done.
+Launch once so the schema exists, close the app, then:
+
+```powershell
+$data = "$env:LOCALAPPDATA\User Name\com.refractored.myfirenumber"
+python tools\store-screenshots\seed_demo_data.py "$data\Data\my-fire-number-v4.db3"
+```
+
+Preferences are a plain JSON file here, so onboarding can be skipped and the theme
+pinned without tapping through anything. Write this to
+`$data\Settings\preferences.dat` while the app is closed:
+
+```json
+{"":{"theme-preference":"Dark","onboarding-v2-welcome-seen":"True","onboarding-v2-completed":"True"}}
+```
+
+**Capture.** Relaunch, then let the script drive the app. It takes over the mouse and
+the foreground window for about a minute, so leave the machine alone while it runs:
+
+```powershell
+tools\store-screenshots\capture_windows.ps1 -AppPid $app.Id -OutDir raw-windows
+```
+
+It sizes the window to 1180 x 980 device-independent pixels and saves the same five
+screens as the phone sets, choosing **Linked Profile** for Coast FIRE. Capture on a
+display scaled to 150% or more: the window is saved at native resolution, and a
+100% display produces a capture too small to frame without upscaling.
+
+**Frame.**
+
+```powershell
+python tools\store-screenshots\frame_windows_screenshots.py raw-windows metadata\windows
+```
+
+The outputs are 2560 x 1440 pixels. Partner Center accepts desktop screenshots from
+1366 x 768 up to 3840 x 2160, as PNG files of 50 MB or less. Pass a width and height
+to render another 16:9 size.
+
+Partner Center's own guidance prefers screenshots without added marketing copy and
+may overlay text on the bottom third. The headline block sits in the upper two-thirds
+for that reason. The raw captures are valid Store screenshots as they are if an
+unframed set is ever needed.
+
 ## Demo persona
 
 Kept internally consistent so no screen contradicts another. Change it in one
@@ -163,13 +229,22 @@ Alex Rivera, 37, "The Rivera Household", household of 3. Full retirement at 55,
 phased at 52. Income $182,000, expenses $96,000.
 
 - 5 accounts totaling **$838,000**, contributing $54,700/yr
+- 2 property assets totaling **$489,500**: the family home and an SUV, each backing a debt
 - 3 debts totaling **$290,830**
-- **Net worth $547,170**
-- 12 monthly check-ins curving from $388,314 up to $537,158
+- **Net worth $1,036,670**
+- 12 monthly check-ins curving from $863,720 up to $1,025,484
 - 4 saved plans, all linked to the profile
 
 The newest check-in sits one notch behind the live balances on purpose, so Home
-reads "Up $10,012 since your last update" instead of "No change".
+reads "Up $11,186 since your last update" instead of "No change".
+
+Check-ins are dated relative to the day the script runs, with the newest two days
+old. A fixed date would drift past the 30-day cadence and put an orange "Overdue"
+line on the Home dashboard.
+
+The iOS, Android, and Mac sets in `metadata/` predate the property assets and still
+show a $547,170 net worth. They pick up these figures the next time they are
+recaptured.
 
 ## Serialization notes
 
@@ -181,6 +256,8 @@ two conventions below coexist and are easy to mix up:
 - **JSON payloads** store enum **numbers** — `AccountsJson` uses `"Type": 1`
 - `RetirementAccountType`: Deferred=0, Traditional=1, Roth=2, Taxable=3,
   Savings=4, Hsa=5, Other=6
+- `PropertyAssetType`: Home=0, RealEstate=1, Land=2, Vehicle=3, Collectible=4,
+  Other=5 — `profile_assets.Type` is the name, `AssetsJson` uses the number
 - Plan `PayloadJson` uses default `System.Text.Json` options: PascalCase names,
   numeric enums
 - `recent_activity.Key` is `"{Kind}:{ItemId}"` with a colon

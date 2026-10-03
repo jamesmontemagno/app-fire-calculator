@@ -12,7 +12,9 @@ from datetime import datetime, timedelta, timezone
 
 DB = sys.argv[1]
 
-NOW = datetime(2026, 8, 30, 15, 0, 0, tzinfo=timezone.utc)
+# Anchored to the day the script runs. A fixed date ages past the 30-day check-in cadence,
+# which puts an orange "Overdue since ..." line on the Home dashboard.
+NOW = datetime.now(timezone.utc).replace(hour=15, minute=0, second=0, microsecond=0)
 
 
 def iso(dt):
@@ -67,6 +69,18 @@ DEBTS = [
     ("debt-card", "Credit Card", 4180.0, 0.1999, 145.0, 300.0),
 ]
 
+# PropertyAssetType: Home=0, RealEstate=1, Land=2, Vehicle=3, Collectible=4, Other=5.
+# Same split as accounts: the table stores the name, check-in JSON stores the number.
+ASSET_ORDINALS = {"Home": 0, "RealEstate": 1, "Land": 2, "Vehicle": 3,
+                  "Collectible": 4, "Other": 5}
+
+ASSETS = [
+    # id, name, type, current value, purchase value, monthly drift (+ appreciates, - depreciates)
+    # Each one backs a debt above, so the mortgage and auto loan have something to be secured by.
+    ("asset-home", "Family Home", "Home", 465000.0, 389000.0, 0.0030),
+    ("asset-car", "Family SUV", "Vehicle", 24500.0, 38900.0, -0.0090),
+]
+
 conn = sqlite3.connect(DB)
 cur = conn.cursor()
 
@@ -76,7 +90,7 @@ assert sum(i[2] for i in INCOME) == ANNUAL_INCOME, sum(i[2] for i in INCOME)
 assert sum(e[2] for e in EXPENSES) == ANNUAL_EXPENSES, sum(e[2] for e in EXPENSES)
 for table in (
     "profile", "profile_accounts", "profile_income", "profile_expenses",
-    "profile_debts", "financial_check_ins", "plans", "drafts", "recent_activity",
+    "profile_debts", "profile_assets", "financial_check_ins", "plans", "drafts", "recent_activity",
     "calculator_preferences", "corrupt_payloads",
 ):
     cur.execute(f"DELETE FROM {table}")
@@ -107,11 +121,16 @@ cur.executemany(
     "INSERT INTO profile_debts (Id, Name, Balance, Rate, MinimumPayment, ExtraMonthlyPayment)"
     " VALUES (?,?,?,?,?,?)", DEBTS)
 
+cur.executemany(
+    "INSERT INTO profile_assets (Id, Name, Type, CurrentValue, PurchaseValue, IncludeInNetWorth)"
+    " VALUES (?,?,?,?,?,1)", [a[:5] for a in ASSETS])
+
 # --- Check-in history: 12 monthly snapshots trending up ----------------------
 # Balances grow and debts shrink month over month so History & Trends renders a
 # convincing net-worth curve. The newest snapshot matches the live balances above.
 MONTHS = 12
 checkins = []
+net_worth_history = []
 for step in range(MONTHS):
     # step 0 = oldest, step MONTHS-1 = newest.
     # The newest snapshot is deliberately one notch behind the live balances so the Home
@@ -129,18 +148,27 @@ for step in range(MONTHS):
         {"DebtId": d[0], "Name": d[1], "Balance": round(d[2] + (d[4] + d[5]) * back * 0.62, 2)}
         for d in DEBTS
     ]
+    assets = [
+        {"AssetId": a[0], "Name": a[1], "Type": ASSET_ORDINALS[a[2]],
+         "Value": round(a[3] * (1.0 - a[5] * back), 2), "IncludeInNetWorth": True}
+        for a in ASSETS
+    ]
+    net_worth_history.append(
+        sum(a["Balance"] for a in accounts) + sum(a["Value"] for a in assets)
+        - sum(d["Balance"] for d in debts))
     checkins.append((
         str(uuid.uuid4()),
         iso(completed),
         json.dumps(accounts),
         json.dumps(debts),
+        json.dumps(assets),
         ANNUAL_INCOME - (back * 900),
         ANNUAL_EXPENSES - (back * 260),
     ))
 
 cur.executemany(
-    "INSERT INTO financial_check_ins (Id, CompletedAtUtc, AccountsJson, DebtsJson,"
-    " AnnualIncome, AnnualExpenses) VALUES (?,?,?,?,?,?)", checkins)
+    "INSERT INTO financial_check_ins (Id, CompletedAtUtc, AccountsJson, DebtsJson, AssetsJson,"
+    " AnnualIncome, AnnualExpenses) VALUES (?,?,?,?,?,?,?)", checkins)
 
 # --- Saved plans -------------------------------------------------------------
 # Payloads use the default System.Text.Json shape the app writes: PascalCase names
@@ -199,8 +227,10 @@ cur.executemany(
 
 conn.commit()
 
-net = sum(a[3] for a in ACCOUNTS) - sum(d[2] for d in DEBTS)
-print(f"Seeded {len(ACCOUNTS)} accounts, {len(INCOME)} income, {len(EXPENSES)} expenses, "
-      f"{len(DEBTS)} debts, {len(checkins)} check-ins.")
+net = sum(a[3] for a in ACCOUNTS) + sum(a[3] for a in ASSETS) - sum(d[2] for d in DEBTS)
+print(f"Seeded {len(ACCOUNTS)} accounts, {len(ASSETS)} assets, {len(INCOME)} income, "
+      f"{len(EXPENSES)} expenses, {len(DEBTS)} debts, {len(checkins)} check-ins.")
 print(f"Net worth: ${net:,.0f}")
+print(f"Check-ins: ${net_worth_history[0]:,.0f} -> ${net_worth_history[-1]:,.0f} "
+      f"(live is up ${net - net_worth_history[-1]:,.0f} since the last one)")
 conn.close()
