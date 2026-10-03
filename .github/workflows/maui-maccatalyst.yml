@@ -192,6 +192,10 @@ jobs:
           CODESIGN_KEY: ${{ steps.signing.outputs.codesign-key }}
           PACKAGE_SIGNING_KEY: ${{ steps.signing.outputs.package-signing-key }}
         run: |
+          # Store-signed builds carry restricted entitlements, so macOS treats the process as
+          # restricted. Unless the app is also signed with the hardened runtime, dyld then refuses
+          # to expand @rpath and the app aborts at launch before it can load the SkiaSharp,
+          # HarfBuzzSharp, and SQLite native libraries.
           dotnet publish "${{ env.PROJECT_PATH }}" \
             -c Release \
             -f "${{ env.TARGET_FRAMEWORK }}" \
@@ -200,6 +204,7 @@ jobs:
             -p:CreatePackage=true \
             -p:EnableCodeSigning=true \
             -p:EnablePackageSigning=true \
+            -p:UseHardenedRuntime=true \
             -p:ApplicationDisplayVersion="${{ steps.version.outputs.display-version }}" \
             -p:ApplicationVersion="${{ steps.version.outputs.app-version }}" \
             -p:CodesignKey="$CODESIGN_KEY" \
