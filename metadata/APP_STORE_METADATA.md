@@ -205,6 +205,16 @@ Mac App Store screenshots are in `metadata/macos/` at 2880 x 1800 pixels:
 | 3 | Net-worth history and trends | `macos/03-history.png` |
 | 4 | Linked Coast FIRE planning | `macos/04-coast-fire.png` |
 
+Microsoft Store screenshots are in `metadata/windows/` at 2560 x 1440 pixels:
+
+| Order | Screen | File |
+| --- | --- | --- |
+| 1 | Home dashboard and net worth | `windows/01-home.png` |
+| 2 | Accounts and cash-flow overview | `windows/02-accounts.png` |
+| 3 | Net-worth history and trends | `windows/03-history.png` |
+| 4 | Full calculator catalog | `windows/04-calculators.png` |
+| 5 | Linked Coast FIRE results and projection chart | `windows/05-coast-fire.png` |
+
 Screenshots are generated from a seeded demo profile rather than real financial data. See
 `tools/store-screenshots/README.md` for the full runbook: building for the simulator, seeding
 the demo persona, capturing with the status bar pinned to 9:41, and framing the results.
