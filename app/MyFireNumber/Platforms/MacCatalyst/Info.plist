@@ -6,7 +6,8 @@
     <!-- Please consult https://developer.apple.com/documentation/bundleresources/information_property_list/itsappusesnonexemptencryption -->
     <!-- <key>ITSAppUsesNonExemptEncryption</key> -->
     <!-- Please indicate <true/> or <false/> here. -->
-
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
     <!-- Specify the category for your app here. -->
     <!-- Please consult https://developer.apple.com/documentation/bundleresources/information_property_list/lsapplicationcategorytype -->
     <!-- <key>LSApplicationCategoryType</key> -->

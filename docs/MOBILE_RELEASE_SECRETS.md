@@ -91,6 +91,20 @@ gh secret set APPLE_MACCATALYST_APPSTORE_CERTIFICATE_PASSWORD
 The profile must be a Mac App Store distribution profile for the production bundle identifier.
 Do not use a development, Developer ID, or iOS provisioning profile.
 
+The workflow signs the app with the hardened runtime (`-p:UseHardenedRuntime=true`). Store-signed
+builds carry restricted entitlements, so macOS treats the process as restricted, and a restricted
+process may resolve `@rpath` only while library validation is enforced, which the hardened runtime
+does. Without the hardened runtime the app cannot load its bundled native libraries and aborts at
+launch from TestFlight. Keep the property on the release publish command rather than in the
+project file: ad-hoc signed local builds have no team identity, so their libraries fail library
+validation.
+
+Do not add the `com.apple.security.cs.disable-library-validation` entitlement. It turns library
+validation off, which lets the app load code that is not signed by Apple or by the same team and
+makes macOS refuse the `@rpath` references again, so a store-signed build aborts at launch. The
+entitlement is also unnecessary: the publish signs the bundled libraries with the same identity as
+the app, so they pass library validation.
+
 ## Running a Signed Build
 
 1. Open **Actions** in GitHub.
