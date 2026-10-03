@@ -3,7 +3,7 @@ import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateCoastFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { AgeInput, CurrencyInput, CurrencyPeriodProvider, PercentageInput, PeriodToggle, ToggleInput } from '../components/inputs'
-import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard } from '../components/ui'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard, SaveLoadBar } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -41,6 +41,8 @@ export default function CoastFIRE() {
           <h1 className="text-2xl font-bold text-content sm:text-3xl">Coast FIRE Calculator</h1>
           <p className="mt-1 text-content-muted">Find the balance that can grow to your retirement target without more contributions.</p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <section aria-labelledby="coast-plan-heading">
           <Card>
@@ -98,7 +100,7 @@ export default function CoastFIRE() {
         </section>
 
         <p className="max-w-3xl text-sm text-content-muted">Coast FIRE does not mean you can cover current living costs without work. It means your retirement savings could grow to the future target if the assumed return and inflation rates hold.</p>
-        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </CurrencyPeriodProvider>
   )

@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useId, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import Button from './Button'
 
 interface ConfirmationDialogProps {
@@ -57,7 +58,8 @@ export default function ConfirmationDialog({
     }
   }, [onCancel])
 
-  return (
+  // Portalled to the body so the overlay is not trapped in the stacking context of a sticky ancestor.
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={onCancel}
@@ -79,6 +81,7 @@ export default function ConfirmationDialog({
           <Button onClick={onConfirm}>{confirmLabel}</Button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

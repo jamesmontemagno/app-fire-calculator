@@ -7,26 +7,16 @@ interface CalculatorFooterProps {
   onExport: () => void | Promise<void>
   exportDisabled?: boolean
   onReset: () => void
-  onSave: () => void
-  onLoad: () => void
   onCopy: () => Promise<boolean>
   hasCustomParams: boolean
-  hasUnsavedChanges: boolean
-  hasSavedParams: boolean
-  savedAt: string | null
 }
 
 export default function CalculatorFooter({
   onExport,
   exportDisabled = false,
   onReset,
-  onSave,
-  onLoad,
   onCopy,
   hasCustomParams,
-  hasUnsavedChanges,
-  hasSavedParams,
-  savedAt,
 }: CalculatorFooterProps) {
   return (
     <div className="space-y-6">
@@ -34,22 +24,17 @@ export default function CalculatorFooter({
         <CardContent>
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
             <div>
-              <h2 className="font-semibold text-content">Keep this calculation</h2>
+              <h2 className="font-semibold text-content">Share or export this calculation</h2>
               <p className="mt-1 text-sm text-content-muted">
-                Save locally in this browser, share a link with the current values, or export a workbook.
+                Copy a link with the current values or export a workbook. Save and load stay in the bar at the top of the page.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <ExportButton onExport={onExport} disabled={exportDisabled} />
               <UrlActions
                 onReset={onReset}
-                onSave={onSave}
-                onLoad={onLoad}
                 onCopy={onCopy}
                 hasCustomParams={hasCustomParams}
-                hasUnsavedChanges={hasUnsavedChanges}
-                hasSavedParams={hasSavedParams}
-                savedAt={savedAt}
               />
             </div>
           </div>

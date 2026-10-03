@@ -3,7 +3,7 @@ import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { MEDICARE_AGE, calculateHealthcareGap, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { AgeInput, CurrencyInput, CurrencyPeriodProvider, PercentageInput, PeriodToggle } from '../components/inputs'
-import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard, SaveLoadBar } from '../components/ui'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 
@@ -42,6 +42,8 @@ export default function HealthcareGap() {
           <h1 className="text-2xl font-bold text-content sm:text-3xl">Healthcare Gap Calculator</h1>
           <p className="mt-1 text-content-muted">Estimate healthcare costs between early retirement and Medicare eligibility at age {MEDICARE_AGE}.</p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <section aria-labelledby="healthcare-plan-heading">
           <Card>
@@ -113,7 +115,7 @@ export default function HealthcareGap() {
         </section>
 
         <p className="max-w-3xl text-sm text-content-muted">Actual insurance options, subsidies, medical needs, and eligibility rules vary by location and household. Use this as a planning estimate, not a coverage quote.</p>
-        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </CurrencyPeriodProvider>
   )
