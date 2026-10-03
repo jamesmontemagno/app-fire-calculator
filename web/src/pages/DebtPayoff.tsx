@@ -4,7 +4,7 @@ import { calculateAvalanchePayoff, calculateSnowballPayoff, formatCurrency, type
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, InputGroup } from '../components/inputs'
 import DebtListInput from '../components/inputs/DebtListInput'
-import { CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
+import { CalculatorFooter, Card, CardContent, CardHeader, ResultCard, SaveLoadBar } from '../components/ui'
 import DebtBalanceChart from '../components/charts/DebtBalanceChart'
 import DebtBreakdownChart from '../components/charts/DebtBreakdownChart'
 import SEO from '../components/SEO'
@@ -93,6 +93,8 @@ export default function DebtPayoff() {
           <h1 className="text-2xl font-bold text-content sm:text-3xl">Debt Payoff Calculator</h1>
           <p className="mt-1 text-content-muted">Compare a Snowball or Avalanche payoff plan using the money you can send each month.</p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <section aria-labelledby="debt-plan-heading">
           <Card>
@@ -215,7 +217,7 @@ export default function DebtPayoff() {
           </>
         )}
 
-        <CalculatorFooter onExport={handleExport} exportDisabled={!canCalculate} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} exportDisabled={!canCalculate} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </>
   )

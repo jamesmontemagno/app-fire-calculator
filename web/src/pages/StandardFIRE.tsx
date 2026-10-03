@@ -11,6 +11,7 @@ import {
   CardHeader,
   ProgressToFIRE,
   ResultCard,
+  SaveLoadBar,
 } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
@@ -81,6 +82,8 @@ export default function StandardFIRE() {
           <p className="mt-1 text-content-muted">Estimate a practical path to financial independence using your spending and savings plan.</p>
         </header>
 
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+
         <section aria-labelledby="standard-plan-heading">
           <Card>
             <CardHeader>
@@ -144,7 +147,7 @@ export default function StandardFIRE() {
           Your target portfolio equals annual retirement spending divided by your withdrawal rate. The target-age result compares the estimated FIRE age with your retirement-age goal; it does not change the FIRE calculation.
         </p>
 
-        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </CurrencyPeriodProvider>
   )

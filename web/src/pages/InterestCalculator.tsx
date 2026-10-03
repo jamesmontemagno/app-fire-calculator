@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { BalanceProjectionChart } from '../components/charts'
 import { CurrencyInput, InputGroup, PercentageInput } from '../components/inputs'
-import { CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
+import { CalculatorFooter, Card, CardContent, CardHeader, ResultCard, SaveLoadBar } from '../components/ui'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
 import { useCalculatorParams } from '../hooks/useCalculatorParams'
@@ -46,6 +46,8 @@ export default function InterestCalculator() {
           <h1 className="text-2xl font-bold text-content sm:text-3xl">Interest Calculator</h1>
           <p className="mt-1 text-content-muted">Estimate how monthly compounding and regular deposits grow your money.</p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <section aria-labelledby="interest-inputs-heading">
           <Card>
@@ -101,7 +103,7 @@ export default function InterestCalculator() {
           </p>
         </section>
 
-        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </>
   )

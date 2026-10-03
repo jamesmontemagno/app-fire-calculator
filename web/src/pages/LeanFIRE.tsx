@@ -3,7 +3,7 @@ import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateLeanFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { AgeInput, CurrencyInput, CurrencyPeriodProvider, PercentageInput, PeriodToggle, ToggleInput } from '../components/inputs'
-import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard } from '../components/ui'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard, SaveLoadBar } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -51,6 +51,8 @@ export default function LeanFIRE() {
           <h1 className="text-2xl font-bold text-content sm:text-3xl">Lean FIRE Calculator</h1>
           <p className="mt-1 text-content-muted">Plan for financial independence with a deliberately low-cost retirement.</p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <section aria-labelledby="lean-plan-heading">
           <Card>
@@ -105,7 +107,7 @@ export default function LeanFIRE() {
         </section>
 
         <p className="max-w-3xl text-sm text-content-muted">Lean FIRE asks your portfolio to support a lower spending level. Review housing, healthcare, and other flexible costs before relying on this estimate.</p>
-        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </CurrencyPeriodProvider>
   )

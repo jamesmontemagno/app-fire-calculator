@@ -3,7 +3,7 @@ import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateInvestmentGrowth, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { AgeInput, CurrencyInput, CurrencyPeriodProvider, InputGroup, PercentageInput, PeriodToggle, ToggleInput } from '../components/inputs'
-import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard, SaveLoadBar } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -50,6 +50,8 @@ export default function SavingsRate() {
           <h1 className="text-2xl font-bold text-content sm:text-3xl">Savings &amp; Investment Rate Calculator</h1>
           <p className="mt-1 text-content-muted">See how a repeatable contribution plan can grow over time.</p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <section aria-labelledby="savings-plan-heading">
           <Card>
@@ -129,7 +131,7 @@ export default function SavingsRate() {
           </dl>
         </section>
 
-        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </CurrencyPeriodProvider>
   )

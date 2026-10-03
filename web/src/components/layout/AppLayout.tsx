@@ -59,8 +59,8 @@ export default function AppLayout() {
           </div>
         </header>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-auto">
+        {/* Page content. Keep overflow visible: a scroll container here would capture the sticky save/load bar. */}
+        <main className="flex-1">
           <div className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
             <Outlet />
             <SiteFooter />

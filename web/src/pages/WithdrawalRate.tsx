@@ -3,7 +3,7 @@ import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateWithdrawal, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, InputGroup, PercentageInput } from '../components/inputs'
-import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard, SaveLoadBar } from '../components/ui'
 import { WithdrawalChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -41,6 +41,8 @@ export default function WithdrawalRate() {
           <h1 className="text-2xl font-bold text-content sm:text-3xl">Withdrawal Rate Calculator</h1>
           <p className="mt-1 text-content-muted">Test how a starting withdrawal may affect portfolio longevity.</p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <section aria-labelledby="withdrawal-plan-heading">
           <Card>
@@ -115,7 +117,7 @@ export default function WithdrawalRate() {
           </Card>
         </section>
 
-        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </>
   )

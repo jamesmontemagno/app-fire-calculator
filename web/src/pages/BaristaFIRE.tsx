@@ -3,7 +3,7 @@ import { useCalculatorParams } from '../hooks/useCalculatorParams'
 import { calculateBaristaFIRE, formatCurrency } from '../utils/calculations'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { AgeInput, CurrencyInput, CurrencyPeriodProvider, PercentageInput, PeriodToggle, ToggleInput } from '../components/inputs'
-import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard } from '../components/ui'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ProgressToFIRE, ResultCard, SaveLoadBar } from '../components/ui'
 import { ProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -44,6 +44,8 @@ export default function BaristaFIRE() {
           <h1 className="text-2xl font-bold text-content sm:text-3xl">Barista FIRE Calculator</h1>
           <p className="mt-1 text-content-muted">See how part-time income can reduce the portfolio needed for retirement.</p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <section aria-labelledby="barista-plan-heading">
           <Card>
@@ -96,7 +98,7 @@ export default function BaristaFIRE() {
         </section>
 
         <p className="max-w-3xl text-sm text-content-muted">This estimate assumes part-time income continues to cover the stated share of spending. Health coverage, taxes, and the reliability of that income deserve separate planning.</p>
-        <CalculatorFooter onExport={handleExport} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </CurrencyPeriodProvider>
   )

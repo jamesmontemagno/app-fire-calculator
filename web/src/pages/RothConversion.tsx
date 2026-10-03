@@ -11,7 +11,7 @@ import {
 } from '../utils/rothConversion'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { AgeInput, CurrencyInput, InputGroup, PercentageInput } from '../components/inputs'
-import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard } from '../components/ui'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard, SaveLoadBar } from '../components/ui'
 import { BalanceProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -62,6 +62,8 @@ export default function RothConversion() {
           <h1 className="text-2xl font-bold text-content sm:text-3xl">Roth Conversion Strategy Calculator</h1>
           <p className="mt-1 text-content-muted">Model annual pre-tax retirement account conversions and the five-tax-year ladder for converted principal.</p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <section aria-labelledby="roth-tax-heading" className="rounded-container border border-warning/40 bg-warning-subtle p-4 text-sm">
           <h2 id="roth-tax-heading" className="flex items-center gap-2 font-semibold text-content">
@@ -167,7 +169,7 @@ export default function RothConversion() {
           </div>
         </details>
 
-        <CalculatorFooter onExport={handleExport} exportDisabled={!results} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} exportDisabled={!results} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </>
   )

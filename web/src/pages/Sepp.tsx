@@ -13,7 +13,7 @@ import {
 } from '../utils/sepp'
 import { exportToExcel, prepareInputsForExport, prepareResultsForExport } from '../utils/excelExport'
 import { CurrencyInput, DateInput, InputGroup, PercentageInput } from '../components/inputs'
-import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard, Tooltip } from '../components/ui'
+import { AdvancedDetails, CalculatorFooter, Card, CardContent, CardHeader, ResultCard, SaveLoadBar, Tooltip } from '../components/ui'
 import { BalanceProjectionChart } from '../components/charts'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -75,6 +75,8 @@ export default function Sepp() {
           <h1 className="text-2xl font-bold text-content sm:text-3xl">72(t) / SEPP Calculator</h1>
           <p className="mt-1 text-content-muted">Estimate substantially equal periodic payments that may avoid the additional 10% tax on early retirement-plan distributions.</p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <section aria-labelledby="sepp-eligibility-heading" className="rounded-container border border-warning/40 bg-warning-subtle p-4 text-sm">
           <h2 id="sepp-eligibility-heading" className="flex items-center gap-2 font-semibold text-content">
@@ -227,7 +229,7 @@ export default function Sepp() {
           </div>
         </details>
 
-        <CalculatorFooter onExport={handleExport} exportDisabled={!results} onReset={resetParams} onSave={saveParams} onLoad={loadParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
+        <CalculatorFooter onExport={handleExport} exportDisabled={!results} onReset={resetParams} onCopy={copyUrl} hasCustomParams={hasCustomParams} />
       </div>
     </>
   )

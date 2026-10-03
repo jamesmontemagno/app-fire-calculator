@@ -19,6 +19,7 @@ import {
   AdvancedDetails,
   CalculatorFooter,
   ResultCard,
+  SaveLoadBar,
 } from '../components/ui'
 import SEO from '../components/SEO'
 import { calculatorSEO } from '../config/seo'
@@ -143,6 +144,8 @@ export default function DeferredCompensation() {
             future dollars for the age listed on each card.
           </p>
         </header>
+
+        <SaveLoadBar onSave={saveParams} onLoad={loadParams} hasUnsavedChanges={hasUnsavedChanges} hasSavedParams={hasSavedParams} savedAt={savedAt} />
 
         <Card>
           <CardHeader>
@@ -463,13 +466,8 @@ export default function DeferredCompensation() {
         <CalculatorFooter
           onExport={handleExport}
           onReset={resetParams}
-          onSave={saveParams}
-          onLoad={loadParams}
           onCopy={copyUrl}
           hasCustomParams={hasCustomParams}
-          hasUnsavedChanges={hasUnsavedChanges}
-          hasSavedParams={hasSavedParams}
-          savedAt={savedAt}
         />
       </div>
     </CurrencyPeriodProvider>
