@@ -77,6 +77,11 @@ body {
   visibility: visible;
 }
 
+/* Builders set inline `visibility: visible` on children, which would otherwise show through a hidden scene. */
+.scene:not(.active) * {
+  visibility: hidden !important;
+}
+
 .anim {
   display: inline-block;
   will-change: transform, opacity;
