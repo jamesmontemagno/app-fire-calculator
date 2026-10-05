@@ -1,0 +1,22 @@
+{
+  "name": "my-fire-number-hype-video",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Recreatable hype video for the My Fire # website and apps: storyboard, procedural music, and a frame-accurate renderer.",
+  "license": "MIT",
+  "scripts": {
+    "setup": "playwright install chromium",
+    "capture": "node scripts/capture-web.mjs",
+    "music": "node scripts/generate-music.mjs",
+    "preview": "node scripts/preview.mjs",
+    "render": "node scripts/render.mjs",
+    "shrink": "ffmpeg -y -loglevel error -i ../../metadata/video/my-fire-number-hype.mp4 -vf scale=1280:-2 -c:v libx264 -preset slow -crf 24 -maxrate 1000k -bufsize 2000k -pix_fmt yuv420p -c:a aac -b:a 128k -movflags +faststart build/my-fire-number-hype-small.mp4",
+    "build": "npm run capture && npm run music && npm run render",
+    "check": "node scripts/check-storyboard.mjs"
+  },
+  "devDependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "playwright": "^1.63.0"
+  }
+}
