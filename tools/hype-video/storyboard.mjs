@@ -40,14 +40,28 @@ export const config = {
 /**
  * Pages captured from a local production build of `web/` by scripts/capture-web.mjs.
  * `viewport: 'desktop'` is 1440x900, `viewport: 'phone'` is 390x844; both at 2x scale.
+ * Optional `scrollTo` (CSS selector) scrolls that element near the top; `scrollY` scrolls by pixels.
  */
 export const webCaptures = [
   { name: 'home-dark', path: '/', theme: 'dark', viewport: 'desktop' },
   { name: 'standard-dark', path: '/standard', theme: 'dark', viewport: 'desktop' },
   { name: 'coast-light', path: '/coast', theme: 'light', viewport: 'desktop' },
-  { name: 'roth-dark', path: '/roth-conversion', theme: 'dark', viewport: 'desktop' },
-  { name: 'cash-flow-light', path: '/retirement-cash-flow', theme: 'light', viewport: 'desktop' },
-  { name: 'debt-dark', path: '/debt-payoff', theme: 'dark', viewport: 'desktop' },
+  { name: 'roth-dark', path: '/roth-conversion', theme: 'dark', viewport: 'desktop', scrollTo: '#roth-outlook-heading' },
+  { name: 'cash-flow-light', path: '/retirement-cash-flow', theme: 'light', viewport: 'desktop', scrollTo: '#cash-flow-outlook-heading' },
+  {
+    name: 'debt-dark',
+    // Sample debts via URL parameters (the same format the app uses for sharing links).
+    path: `/debt-payoff?budget=1500&strategy=avalanche&debts=${encodeURIComponent(
+      JSON.stringify([
+        { id: '1', name: 'Credit card', balance: 8500, rate: 0.229, minPayment: 255 },
+        { id: '2', name: 'Car loan', balance: 14200, rate: 0.069, minPayment: 340 },
+        { id: '3', name: 'Student loan', balance: 22000, rate: 0.051, minPayment: 260 },
+      ]),
+    )}`,
+    theme: 'dark',
+    viewport: 'desktop',
+    scrollTo: '#debt-outlook-heading',
+  },
   { name: 'quiz-light', path: '/quiz', theme: 'light', viewport: 'desktop' },
   { name: 'phone-home-dark', path: '/', theme: 'dark', viewport: 'phone' },
   { name: 'phone-coast-light', path: '/coast', theme: 'light', viewport: 'phone' },

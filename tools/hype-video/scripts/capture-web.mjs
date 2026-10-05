@@ -69,7 +69,13 @@ try {
     const page = await context.newPage()
     await page.goto(site.url + capture.path, { waitUntil: 'networkidle' })
     await page.evaluate(() => document.fonts.ready)
-    if (capture.scrollY) await page.evaluate((y) => window.scrollTo(0, y), capture.scrollY)
+    if (capture.scrollTo) {
+      await page.locator(capture.scrollTo).first().evaluate((el) => {
+        window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 96)
+      })
+    } else if (capture.scrollY) {
+      await page.evaluate((y) => window.scrollTo(0, y), capture.scrollY)
+    }
     // Let charts finish their (reduced-motion) layout before capturing.
     await page.waitForTimeout(1200)
     const file = join(outDir, `${capture.name}.png`)

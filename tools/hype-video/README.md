@@ -37,7 +37,7 @@ Useful render flags (pass after `--`, e.g. `npm run render -- --stills 3,20`):
 
 - `--stills 3,20,55` writes PNG stills to `build/stills/` (fast layout checks)
 - `--from 16 --to 30 --out build/section.mp4` renders a section
-- `--fps 60`, `--crf 18`, `--no-audio`
+- `--fps 60`, `--crf 18` (default 24; lower is higher quality and larger), `--no-audio`
 - `npm run capture -- --build` forces a fresh web build; `--only home-dark,coast-light` recaptures a subset
 
 `assets/` and `build/` are git-ignored. Only the final MP4 is committed.

@@ -25,7 +25,7 @@ function option(name, fallback) {
 const flag = (name) => process.argv.includes(`--${name}`)
 
 const fps = Number(option('fps', config.fps))
-const crf = String(option('crf', 20))
+const crf = String(option('crf', 24))
 const duration = totalSeconds()
 const from = Math.max(0, Number(option('from', 0)))
 const to = Math.min(duration, Number(option('to', duration)))

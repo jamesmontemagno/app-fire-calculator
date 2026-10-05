@@ -127,7 +127,7 @@ function createRotator(container, shots, box, ctx, center, duration) {
       item.el.style.visibility = visible ? 'visible' : 'hidden'
       if (!visible) return
       const drift = (local - start) * 6 // slow push-in
-      const x = center.x + 160 * (1 - enter) - 220 * leave
+      const x = center.x + 120 * (1 - enter) - 220 * leave
       const scale = (0.9 + 0.1 * enter) * (1 - 0.06 * leave) * (1 + drift * 0.003)
       item.el.style.left = `${x}px`
       item.el.style.top = `${center.y}px`
@@ -152,7 +152,7 @@ function createRow(container, shots, area, ctx, center) {
   }
   return (local, g) => {
     items.forEach((item, i) => {
-      const p = tween(local, 0.15 + i * ctx.beat, 0.8, easeOutBack)
+      const p = tween(local, i * ctx.beat * 0.5, 0.7, easeOutBack)
       const float = Math.sin(g.t * 1.4 + i * 1.7) * 10
       item.el.style.left = `${item.cx}px`
       item.el.style.top = `${center.y}px`
@@ -246,7 +246,7 @@ function pillars(root, scene, ctx) {
       const slam = tween(d, 0, 0.18)
       const shake = Math.exp(-d * 14) * Math.sin(d * 90) * 14
       const text = word.querySelector('.text')
-      text.style.opacity = clamp(d / 0.06)
+      text.style.opacity = 1
       text.style.transform = `translate(${shake}px, 0) scale(${1.6 - 0.6 * slam + 0.04 * (d / wordTime)})`
       const pop = word.querySelector('.pop')
       reveal(pop, tween(d, 0.05, 0.4, easeOutBack), { y: 0, scale: 0, blur: 0, rotate: -25 })
@@ -254,7 +254,7 @@ function pillars(root, scene, ctx) {
     })
     grid.style.visibility = local >= gridStart ? 'visible' : 'hidden'
     reveal(summary, tween(local, gridStart, 0.4), { y: -30, blur: 0 })
-    chips.forEach((chip, i) => reveal(chip, tween(local, gridStart + 0.1 + i * 0.12, 0.5, easeOutBack), { y: 60, scale: 0.6, blur: 0 }))
+    chips.forEach((chip, i) => reveal(chip, tween(local, gridStart + 0.05 + i * 0.08, 0.4, easeOutBack), { y: 60, scale: 0.6, blur: 0 }))
   }
 }
 
@@ -264,7 +264,7 @@ function showcase(root, scene, ctx, duration) {
   el.prepend(copy.el)
   root.append(el)
   const container = el.querySelector('.shots')
-  const center = { x: 520, y: 540 }
+  const center = { x: 500, y: 540 }
   const allTall =
     scene.shots.length <= 3 &&
     scene.shots.every((shot) => {
@@ -273,7 +273,7 @@ function showcase(root, scene, ctx, duration) {
     })
   const animateShots = allTall
     ? createRow(container, scene.shots, { w: 980, h: 820 }, ctx, center)
-    : createRotator(container, scene.shots, { w: 1000, h: 760 }, ctx, center, duration)
+    : createRotator(container, scene.shots, { w: 920, h: 720 }, ctx, center, duration)
   return (local, g) => {
     copy.update(local)
     animateShots(local, g)
@@ -292,13 +292,13 @@ function ticker(root, scene, ctx) {
   const names = [...ctx.calculators, ...ctx.calculators]
   tickerRow.innerHTML = names.map((n) => `<span class="chip">${icon('check')}${escapeHtml(n)}</span>`).join('')
   root.append(el)
-  const shot = createShot(scene.shot, { w: 1000, h: 700 }, ctx)
+  const shot = createShot(scene.shot, { w: 920, h: 660 }, ctx)
   el.querySelector('.shots').append(shot.el)
 
   return (local) => {
     copy.update(local)
     const p = tween(local, 0.1, 0.9)
-    shot.el.style.left = `${520 + 220 * (1 - p)}px`
+    shot.el.style.left = `${500 + 220 * (1 - p)}px`
     shot.el.style.top = '480px'
     shot.el.style.opacity = clamp(p * 1.5)
     shot.el.style.transform = `perspective(2200px) rotateY(${-14 + 5 * p}deg) rotateX(${4 * (1 - p)}deg) scale(${0.85 + 0.15 * p + local * 0.006})`
@@ -315,8 +315,10 @@ function devices(root, scene, ctx) {
   root.append(el)
   const container = el.querySelector('.shots')
   const n = scene.shots.length
-  const spread = Math.min(320, 640 / Math.max(1, (n - 1) / 2))
-  const items = scene.shots.map((shot) => createShot(shot, { w: 520, h: 760 }, ctx))
+  // Keep the outermost phones inside the 1040px shots column (copy column ends at x=0 here).
+  const items = scene.shots.map((shot) => createShot(shot, { w: 420, h: 680 }, ctx))
+  const widest = Math.max(...items.map((item) => item.width))
+  const spread = n > 1 ? Math.min(170, (1000 - widest) / (n - 1)) : 0
   items.forEach((item) => container.append(item.el))
 
   return (local, g) => {
@@ -328,10 +330,10 @@ function devices(root, scene, ctx) {
       const fanX = offset * (spread * 0.55 + spread * 0.45 * settle)
       const float = Math.sin(g.t * 1.3 + i * 1.3) * 10
       item.el.style.left = `${520 + fanX}px`
-      item.el.style.top = `${560 + Math.abs(offset) * 34}px`
+      item.el.style.top = `${540 + Math.abs(offset) * 26}px`
       item.el.style.zIndex = String(100 - Math.round(Math.abs(offset) * 10))
       item.el.style.opacity = clamp(p * 2)
-      item.el.style.transform = `translateY(${(1 - p) * 800 + float}px) rotate(${offset * 6}deg) scale(${1 - Math.abs(offset) * 0.06})`
+      item.el.style.transform = `translateY(${(1 - p) * 800 + float}px) rotate(${offset * 5}deg) scale(${1 - Math.abs(offset) * 0.05})`
     })
   }
 }
