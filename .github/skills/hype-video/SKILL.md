@@ -42,7 +42,8 @@ local build of `web/` served on 127.0.0.1, and the music is synthesized in JavaS
    them and fix overlaps, clipping, or empty frames.
 6. `npm run render` writes `metadata/video/my-fire-number-hype.mp4`. Confirm with
    `ffprobe` that the duration matches the storyboard total and there is an audio stream.
-7. Commit the storyboard/composition changes and the updated MP4. Never commit `assets/`,
+   Then `npm run shrink` to refresh the 720p copy, `my-fire-number-hype-small.mp4`.
+7. Commit the storyboard/composition changes and both updated MP4s. Never commit `assets/`,
    `build/`, or `node_modules/`.
 
 ## New scene types

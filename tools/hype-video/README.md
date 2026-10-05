@@ -6,7 +6,8 @@ analytics, or network services are involved — the web app is served from `web/
 `127.0.0.1` only.
 
 Output: [`metadata/video/my-fire-number-hype.mp4`](../../metadata/video/my-fire-number-hype.mp4)
-(1920x1080, 30 fps, 60 s, AAC audio).
+(1920x1080, 30 fps, 60 s, AAC audio), plus a 720p copy under 10 MB at
+[`metadata/video/my-fire-number-hype-small.mp4`](../../metadata/video/my-fire-number-hype-small.mp4).
 
 ## Requirements
 
@@ -20,7 +21,7 @@ Output: [`metadata/video/my-fire-number-hype.mp4`](../../metadata/video/my-fire-
 cd tools/hype-video
 npm install
 npm run setup     # once: downloads Playwright's Chromium
-npm run build     # capture + music + render
+npm run build     # capture + music + render + shrink
 ```
 
 Or step by step:
@@ -32,7 +33,7 @@ Or step by step:
 | `npm run music` | Synthesizes the soundtrack to match the scene bars | `build/music.wav` |
 | `npm run preview` | Local preview with music, scrubber, and Space to play/pause | browser |
 | `npm run render` | Renders every frame with Chromium and encodes with ffmpeg | `metadata/video/…mp4` |
-| `npm run shrink` | Re-encodes the committed MP4 to 720p, capped to stay under 10 MB | `build/my-fire-number-hype-small.mp4` |
+| `npm run shrink` | Re-encodes the rendered MP4 to 720p, capped to stay under 10 MB | `metadata/video/…-small.mp4` |
 
 GitHub only plays a video inline in a README when it is uploaded as an attachment (10 MB limit
 on free plans), not when it is linked from the repository. To embed it, drag the `shrink` output
@@ -45,7 +46,7 @@ Useful render flags (pass after `--`, e.g. `npm run render -- --stills 3,20`):
 - `--fps 60`, `--crf 18` (default 24; lower is higher quality and larger), `--no-audio`
 - `npm run capture -- --build` forces a fresh web build; `--only home-dark,coast-light` recaptures a subset
 
-`assets/` and `build/` are git-ignored. Only the final MP4 is committed.
+`assets/` and `build/` are git-ignored. Only the two final MP4s are committed.
 
 ## How it fits together
 

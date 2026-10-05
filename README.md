@@ -86,7 +86,9 @@ For Debug-time native UI inspection and automation, see [MAUI DevFlow](docs/MAUI
 ### 🎬 Hype Video
 
 A 60-second promo for the website and apps lives at
-[`metadata/video/my-fire-number-hype.mp4`](metadata/video/my-fire-number-hype.mp4). It is fully
+[`metadata/video/my-fire-number-hype.mp4`](metadata/video/my-fire-number-hype.mp4), with a smaller
+720p copy at
+[`metadata/video/my-fire-number-hype-small.mp4`](metadata/video/my-fire-number-hype-small.mp4). It is fully
 code-generated (live web captures, procedural music, frame-accurate render) from
 [`tools/hype-video`](tools/hype-video/README.md), so it can be rebuilt locally whenever features
 ship.
