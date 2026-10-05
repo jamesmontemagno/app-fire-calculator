@@ -32,6 +32,11 @@ Or step by step:
 | `npm run music` | Synthesizes the soundtrack to match the scene bars | `build/music.wav` |
 | `npm run preview` | Local preview with music, scrubber, and Space to play/pause | browser |
 | `npm run render` | Renders every frame with Chromium and encodes with ffmpeg | `metadata/video/…mp4` |
+| `npm run shrink` | Re-encodes the committed MP4 to 720p, capped to stay under 10 MB | `build/my-fire-number-hype-small.mp4` |
+
+GitHub only plays a video inline in a README when it is uploaded as an attachment (10 MB limit
+on free plans), not when it is linked from the repository. To embed it, drag the `shrink` output
+into the README editor on github.com.
 
 Useful render flags (pass after `--`, e.g. `npm run render -- --stills 3,20`):
 
