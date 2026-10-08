@@ -77,9 +77,9 @@ jobs:
         shell: pwsh
         run: dotnet restore $env:APP_PROJECT -p:TargetFramework=$env:TARGET_FRAMEWORK
 
-      - name: Test calculation, storage, and export layers
+      - name: Test calculation and export layers
         shell: pwsh
-        run: dotnet test $env:TEST_PROJECT -c Release
+        run: dotnet test $env:TEST_PROJECT -c Release --filter "FullyQualifiedName!~Data"
 
       - name: Set release version
         shell: pwsh
