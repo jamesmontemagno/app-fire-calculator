@@ -71,11 +71,11 @@ jobs:
 
       - name: Restore .NET workloads
         shell: pwsh
-        run: dotnet workload restore $env:APP_PROJECT -p:TargetFramework=$env:TARGET_FRAMEWORK
+        run: dotnet workload restore $env:APP_PROJECT -p:TargetFramework=$env:TARGET_FRAMEWORK -p:UseMonoRuntime=false
 
       - name: Restore
         shell: pwsh
-        run: dotnet restore $env:APP_PROJECT -p:TargetFramework=$env:TARGET_FRAMEWORK
+        run: dotnet restore $env:APP_PROJECT -p:TargetFramework=$env:TARGET_FRAMEWORK -p:UseMonoRuntime=false
 
       - name: Test calculation and export layers
         shell: pwsh
