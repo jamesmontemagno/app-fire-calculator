@@ -164,3 +164,5 @@ Run **Windows Store Publish** manually with **Diagnose only** enabled before the
 submission. To package without publishing, supply a tag such as `v1.0.0-windows` and leave
 **Publish** disabled. Enabling **Publish**, or pushing a matching release tag, submits the
 generated `.msixupload` package after the `microsoft-store` environment approval.
+The tag version is used for the MSIX identity version; its fourth component is set to `0`, as
+required for Microsoft Store submissions.

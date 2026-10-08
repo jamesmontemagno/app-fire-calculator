@@ -90,11 +90,13 @@ jobs:
             "${{ github.ref_name }}"
           }
 
-          if ($tag -notmatch '^v(?<base>\d+\.\d+\.\d+)(?:\.(?<revision>\d+))?-windows$') {
-            throw "Windows release tags must look like v1.0.0-windows or v1.0.0.1-windows. Got '$tag'."
+          if ($tag -notmatch '^v(?<base>\d+\.\d+\.\d+)(?:\.0)?-windows$') {
+            throw "Windows Store release tags must look like v1.0.0-windows or v1.0.0.0-windows. Got '$tag'. The fourth MSIX version component must be 0."
           }
 
-          $revision = if ($Matches.revision) { $Matches.revision } else { "0" }
+          $revision = "0"
+          "APPLICATION_DISPLAY_VERSION=$($Matches.base)" >> $env:GITHUB_ENV
+          "APPLICATION_VERSION=$revision" >> $env:GITHUB_ENV
           "PACKAGE_VERSION=$($Matches.base).$revision" >> $env:GITHUB_ENV
 
       - name: Configure Microsoft Store manifest
@@ -135,6 +137,9 @@ jobs:
             -c Release `
             -p:Platform=x64 `
             -p:WindowsPackageType=MSIX `
+            -p:UseMonoRuntime=false `
+            -p:ApplicationDisplayVersion=$env:APPLICATION_DISPLAY_VERSION `
+            -p:ApplicationVersion=$env:APPLICATION_VERSION `
             -p:SelfContained=false `
             -p:WindowsAppSDKSelfContained=false `
             -p:EnableMsixTooling=true `
