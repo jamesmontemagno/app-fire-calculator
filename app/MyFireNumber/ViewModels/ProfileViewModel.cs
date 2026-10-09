@@ -20,26 +20,53 @@ public sealed partial class ProfileViewModel(
     private bool isLoaded;
     private long loadedDataRevision = -1;
 
-    [ObservableProperty] private string displayName = string.Empty;
-    [ObservableProperty] private string householdName = string.Empty;
-    [ObservableProperty] private string householdSizeText = string.Empty;
-    [ObservableProperty] private DateTime birthDate = DateTime.Today.AddYears(-30);
-    [ObservableProperty] private DateTime phasedRetirementDate = DateTime.Today.AddYears(25);
-    [ObservableProperty] private DateTime targetRetirementDate = DateTime.Today.AddYears(30);
-    [ObservableProperty] private bool hasBirthDate;
-    [ObservableProperty] private bool hasPhasedRetirementDate;
-    [ObservableProperty] private bool hasTargetRetirementDate;
-    [ObservableProperty] private string validationMessage = string.Empty;
-    [ObservableProperty] private string statusMessage = string.Empty;
+    [ObservableProperty]
+    public partial string DisplayName { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string HouseholdName { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string HouseholdSizeText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial DateTime BirthDate { get; set; } = DateTime.Today.AddYears(-30);
+
+    [ObservableProperty]
+    public partial DateTime PhasedRetirementDate { get; set; } = DateTime.Today.AddYears(25);
+
+    [ObservableProperty]
+    public partial DateTime TargetRetirementDate { get; set; } = DateTime.Today.AddYears(30);
+
+    [ObservableProperty]
+    public partial bool HasBirthDate { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasPhasedRetirementDate { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasTargetRetirementDate { get; set; }
+
+    [ObservableProperty]
+    public partial string ValidationMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string StatusMessage { get; set; } = string.Empty;
 
     // Planning assumptions. These live with the profile rather than in Settings because they are
     // personal planning inputs, not app preferences, and every new calculator starts from them.
-    [ObservableProperty] private string expectedReturnText = string.Empty;
-    [ObservableProperty] private string inflationRateText = string.Empty;
-    [ObservableProperty] private string withdrawalRateText = string.Empty;
+    [ObservableProperty]
+    public partial string ExpectedReturnText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string InflationRateText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string WithdrawalRateText { get; set; } = string.Empty;
 
     /// <summary>The page heading, personalized once the profile has a name.</summary>
-    [ObservableProperty] private string headerTitle = "Profile";
+    [ObservableProperty]
+    public partial string HeaderTitle { get; set; } = "Profile";
 
     public bool HasValidationMessage => !string.IsNullOrWhiteSpace(ValidationMessage);
     public bool HasNoBirthDate => !HasBirthDate;

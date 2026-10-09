@@ -10,52 +10,52 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
     public IReadOnlyList<RetirementAccountType> AccountTypes { get; } = Enum.GetValues<RetirementAccountType>();
 
     [ObservableProperty]
-    private string id = Guid.NewGuid().ToString("N");
+    public partial string Id { get; set; } = Guid.NewGuid().ToString("N");
 
     [ObservableProperty]
-    private string name = "New account";
+    public partial string Name { get; set; } = "New account";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(UsesPayoutSchedule))]
     [NotifyPropertyChangedFor(nameof(UsesWithdrawalRate))]
     [NotifyPropertyChangedFor(nameof(WithdrawalTaxHelpText))]
-    private RetirementAccountType type = RetirementAccountType.Traditional;
+    public partial RetirementAccountType Type { get; set; } = RetirementAccountType.Traditional;
 
     [ObservableProperty]
-    private string balanceText = "0";
+    public partial string BalanceText { get; set; } = "0";
 
     [ObservableProperty]
-    private string annualContributionText = "0";
+    public partial string AnnualContributionText { get; set; } = "0";
 
     [ObservableProperty]
-    private string annualReturnText = "5";
+    public partial string AnnualReturnText { get; set; } = "5";
 
     [ObservableProperty]
-    private string availableAgeText = "59";
+    public partial string AvailableAgeText { get; set; } = "59";
 
     [ObservableProperty]
-    private string withdrawalRateText = "4";
+    public partial string WithdrawalRateText { get; set; } = "4";
 
     [ObservableProperty]
-    private string withdrawalTaxRateText = "0";
+    public partial string WithdrawalTaxRateText { get; set; } = "0";
 
     [ObservableProperty]
-    private string payoutYearsText = "5";
+    public partial string PayoutYearsText { get; set; } = "5";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
-    private bool isExpanded;
+    public partial bool IsExpanded { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditable))]
-    private bool isReadOnly;
+    public partial bool IsReadOnly { get; set; }
 
     /// <summary>Set by the Accounts overview after loading check-in history; not persisted.</summary>
     [ObservableProperty]
-    private string freshnessText = "Never confirmed";
+    public partial string FreshnessText { get; set; } = "Never confirmed";
 
     [ObservableProperty]
-    private bool isOverdue;
+    public partial bool IsOverdue { get; set; }
 
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
     public bool IsEditable => !IsReadOnly;
@@ -260,37 +260,37 @@ public sealed partial class RetirementAccountEditorItem : ObservableObject
 public sealed partial class RetirementIncomeEditorItem : ObservableObject
 {
     [ObservableProperty]
-    private string id = Guid.NewGuid().ToString("N");
+    public partial string Id { get; set; } = Guid.NewGuid().ToString("N");
 
     [ObservableProperty]
-    private string name = "New income";
+    public partial string Name { get; set; } = "New income";
 
     [ObservableProperty]
-    private string annualAmountText = "0";
+    public partial string AnnualAmountText { get; set; } = "0";
 
     [ObservableProperty]
-    private string startAgeText = "55";
+    public partial string StartAgeText { get; set; } = "55";
 
     [ObservableProperty]
-    private string endAgeText = "65";
+    public partial string EndAgeText { get; set; } = "65";
 
     [ObservableProperty]
-    private string annualGrowthText = "0";
+    public partial string AnnualGrowthText { get; set; } = "0";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RequiresTaxRate))]
-    private bool isAfterTax = true;
+    public partial bool IsAfterTax { get; set; } = true;
 
     [ObservableProperty]
-    private string taxRateText = "25";
+    public partial string TaxRateText { get; set; } = "25";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
-    private bool isExpanded;
+    public partial bool IsExpanded { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditable))]
-    private bool isReadOnly;
+    public partial bool IsReadOnly { get; set; }
 
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
     public bool RequiresTaxRate => !IsAfterTax;
@@ -391,27 +391,27 @@ public sealed partial class RetirementIncomeEditorItem : ObservableObject
 public sealed partial class RetirementExpenseEditorItem : ObservableObject
 {
     [ObservableProperty]
-    private string id = Guid.NewGuid().ToString("N");
+    public partial string Id { get; set; } = Guid.NewGuid().ToString("N");
 
     [ObservableProperty]
-    private string name = "New expense";
+    public partial string Name { get; set; } = "New expense";
 
     [ObservableProperty]
-    private string annualAmountText = "0";
+    public partial string AnnualAmountText { get; set; } = "0";
 
     [ObservableProperty]
-    private string startAgeText = "55";
+    public partial string StartAgeText { get; set; } = "55";
 
     [ObservableProperty]
-    private string endAgeText = "90";
+    public partial string EndAgeText { get; set; } = "90";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
-    private bool isExpanded;
+    public partial bool IsExpanded { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditable))]
-    private bool isReadOnly;
+    public partial bool IsReadOnly { get; set; }
 
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";
     public bool IsEditable => !IsReadOnly;

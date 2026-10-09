@@ -30,40 +30,40 @@ public sealed partial class ReverseFireViewModel : CalculatorViewModelBase<Rever
     }
 
     [ObservableProperty]
-    private string currentAgeText = string.Empty;
+    public partial string CurrentAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string retirementAgeText = string.Empty;
+    public partial string RetirementAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string currentSavingsText = string.Empty;
+    public partial string CurrentSavingsText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string expectedReturnText = string.Empty;
+    public partial string ExpectedReturnText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string inflationRateText = string.Empty;
+    public partial string InflationRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalRateText = string.Empty;
+    public partial string WithdrawalRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string reverseRequiredAnnualSavingsText = string.Empty;
+    public partial string ReverseRequiredAnnualSavingsText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string reverseRequiredMonthlySavingsText = string.Empty;
+    public partial string ReverseRequiredMonthlySavingsText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string reverseYearsText = string.Empty;
+    public partial string ReverseYearsText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string reverseCurrentGrowthText = string.Empty;
+    public partial string ReverseCurrentGrowthText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string reverseStatusText = string.Empty;
+    public partial string ReverseStatusText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string reverseProjectionSummary = string.Empty;
+    public partial string ReverseProjectionSummary { get; set; } = string.Empty;
 
     protected override string CalculatorId => "reverse-fire";
 

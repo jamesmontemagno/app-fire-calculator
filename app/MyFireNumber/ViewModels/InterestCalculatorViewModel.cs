@@ -16,15 +16,32 @@ public sealed partial class InterestCalculatorViewModel : CalculatorViewModelBas
         this.exportService = exportService;
     }
 
-    [ObservableProperty] private string startingBalanceText = string.Empty;
-    [ObservableProperty] private string monthlyContributionText = string.Empty;
-    [ObservableProperty] private string annualInterestRateText = string.Empty;
-    [ObservableProperty] private string yearsText = string.Empty;
-    [ObservableProperty] private string endingBalanceText = string.Empty;
-    [ObservableProperty] private string totalContributionsText = string.Empty;
-    [ObservableProperty] private string interestEarnedText = string.Empty;
-    [ObservableProperty] private string effectiveAnnualYieldText = string.Empty;
-    [ObservableProperty] private string projectionSummary = string.Empty;
+    [ObservableProperty]
+    public partial string StartingBalanceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string MonthlyContributionText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AnnualInterestRateText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string YearsText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string EndingBalanceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string TotalContributionsText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string InterestEarnedText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string EffectiveAnnualYieldText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ProjectionSummary { get; set; } = string.Empty;
 
     protected override string CalculatorId => "interest-calculator";
     protected override int DraftPayloadVersion => InterestCalculatorDraft.PayloadVersion;

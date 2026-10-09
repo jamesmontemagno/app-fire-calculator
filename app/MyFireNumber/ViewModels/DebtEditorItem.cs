@@ -8,37 +8,37 @@ namespace MyFireNumber.ViewModels;
 public sealed partial class DebtEditorItem : ObservableObject
 {
     [ObservableProperty]
-    private string id = Guid.NewGuid().ToString("N");
+    public partial string Id { get; set; } = Guid.NewGuid().ToString("N");
 
     [ObservableProperty]
-    private string name = "Debt";
+    public partial string Name { get; set; } = "Debt";
 
     [ObservableProperty]
-    private string balanceText = string.Empty;
+    public partial string BalanceText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string rateText = string.Empty;
+    public partial string RateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string minimumPaymentText = string.Empty;
+    public partial string MinimumPaymentText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string extraMonthlyPaymentText = "0";
+    public partial string ExtraMonthlyPaymentText { get; set; } = "0";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsEditable))]
-    private bool isReadOnly;
+    public partial bool IsReadOnly { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
-    private bool isExpanded;
+    public partial bool IsExpanded { get; set; }
 
     /// <summary>Set by the Accounts overview after loading check-in history; not persisted.</summary>
     [ObservableProperty]
-    private string freshnessText = "Never confirmed";
+    public partial string FreshnessText { get; set; } = "Never confirmed";
 
     [ObservableProperty]
-    private bool isOverdue;
+    public partial bool IsOverdue { get; set; }
 
     public bool IsEditable => !IsReadOnly;
     public string ExpansionGlyph => IsExpanded ? "\uf078" : "\uf054";

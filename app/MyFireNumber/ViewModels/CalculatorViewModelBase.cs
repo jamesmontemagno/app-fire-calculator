@@ -61,39 +61,39 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     protected IConfirmationService ConfirmationService => confirmationService;
 
     [ObservableProperty]
-    private string title = string.Empty;
+    public partial string Title { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string summary = string.Empty;
+    public partial string Summary { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private bool isLoading;
+    public partial bool IsLoading { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(SavePlanActionText))]
     [NotifyPropertyChangedFor(nameof(SavePlanActionDescription))]
-    private bool isLoadedPlan;
+    public partial bool IsLoadedPlan { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasValidationMessage))]
-    private string validationMessage = string.Empty;
+    public partial string ValidationMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string planNameText = string.Empty;
+    public partial string PlanNameText { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasPlanStatusMessage))]
-    private string planStatusMessage = string.Empty;
+    public partial string PlanStatusMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasExportStatusMessage))]
-    private string exportStatusMessage = string.Empty;
+    public partial string ExportStatusMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsLinkedProfile))]
     [NotifyPropertyChangedFor(nameof(CanEditProfileOwnedFields))]
     [NotifyPropertyChangedFor(nameof(ScenarioDataModeText))]
-    private ScenarioDataMode scenarioDataMode;
+    public partial ScenarioDataMode ScenarioDataMode { get; set; }
 
     public bool IsLinkedProfile => ScenarioDataMode == ScenarioDataMode.LinkedProfile;
     public bool CanEditProfileOwnedFields => !IsLinkedProfile;
@@ -106,13 +106,13 @@ public abstract partial class CalculatorViewModelBase<TDraft> : ObservableObject
     private bool linkedResolutionValid = true;
 
     [ObservableProperty]
-    private IReadOnlyList<ISeries> projectionSeries = [];
+    public partial IReadOnlyList<ISeries> ProjectionSeries { get; set; } = [];
 
     [ObservableProperty]
-    private Axis[] projectionXAxes = [];
+    public partial Axis[] ProjectionXAxes { get; set; } = [];
 
     [ObservableProperty]
-    private string projectionChartDescription = string.Empty;
+    public partial string ProjectionChartDescription { get; set; } = string.Empty;
 
     /// <summary>Suppresses recalculation while inputs are being populated from a draft.</summary>
     protected bool IsApplyingDraft { get; private set; }

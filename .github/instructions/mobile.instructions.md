@@ -133,6 +133,11 @@ build alone is not sufficient UI validation.
 ## MVVM and Binding
 
 - Prefer MVVM with observable properties and commands as the app grows; avoid business logic in page code-behind.
+- Declare CommunityToolkit.Mvvm generated observable members as public partial properties, for example
+  `[ObservableProperty] public partial string Name { get; set; }`, rather than annotated backing fields.
+  Field-based `[ObservableProperty]` declarations produce `MVVMTK0045` on the Windows target because
+  CsWinRT cannot generate the required AOT-compatible marshalling. Fix this warning with the toolkit's
+  partial-property code fix; do not suppress it or disable analyzer warnings.
 - Use one-time binding for immutable values, default one-way binding for display values, and two-way binding only for editable controls.
 - Expose explicit busy, empty, error, and validation states.
 - Prevent duplicate async command execution and restore busy state in `finally`.
@@ -144,7 +149,16 @@ build alone is not sufficient UI validation.
 - Avoid blocking the UI thread; use async APIs for I/O.
 - Unsubscribe event handlers when their owner leaves the visual tree or is disposed.
 - Keep list item templates lightweight and avoid deeply nested layouts.
-- Preserve Release AOT and trimming compatibility; do not add reflection-heavy patterns without verifying them.
+- Preserve platform-required Release AOT and trimming compatibility; do not add reflection-heavy patterns without verifying them.
+- Distinguish Native AOT from platform AOT and runtime selection before changing project or workflow settings:
+  - `UseMonoRuntime=false` selects CoreCLR for the Windows MAUI target; it does not enable Native AOT.
+  - Do not add `PublishAot=true` or otherwise enable Native AOT unless an explicit product requirement calls for it.
+  - Keep Android Release AOT disabled with `RunAOTCompilation=false` until the repository deliberately
+    revisits the current .NET 10 Android compiler failures.
+  - iOS requires platform AOT and must remain AOT compatible even though this project does not opt into Native AOT.
+- When investigating CI output, verify the job conclusion and separate warnings from errors before changing
+  runtime or AOT settings. Treat `MVVMTK0045` as a source-generation compatibility warning to fix in the
+  view model, not as evidence that Native AOT is enabled.
 
 ## Cross-Platform Requirements
 

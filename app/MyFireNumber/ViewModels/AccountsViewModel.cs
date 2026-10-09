@@ -62,34 +62,75 @@ public sealed partial class AccountsViewModel(
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasValidationMessage))]
-    private string validationMessage = string.Empty;
-    [ObservableProperty] private string statusMessage = string.Empty;
+    public partial string ValidationMessage { get; set; } = string.Empty;
 
-    [ObservableProperty] private string accountsSummary = "No accounts yet.";
-    [ObservableProperty] private string incomeSummary = "No income yet.";
-    [ObservableProperty] private string expensesSummary = "No expenses yet.";
-    [ObservableProperty] private string debtsSummary = "No debts yet.";
-    [ObservableProperty] private string assetsSummary = "No assets yet.";
+    [ObservableProperty]
+    public partial string StatusMessage { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AccountsSummary { get; set; } = "No accounts yet.";
+
+    [ObservableProperty]
+    public partial string IncomeSummary { get; set; } = "No income yet.";
+
+    [ObservableProperty]
+    public partial string ExpensesSummary { get; set; } = "No expenses yet.";
+
+    [ObservableProperty]
+    public partial string DebtsSummary { get; set; } = "No debts yet.";
+
+    [ObservableProperty]
+    public partial string AssetsSummary { get; set; } = "No assets yet.";
 
     // Overview totals. Always computed from the live, current inventory — not from check-in history,
     // which exists only to show trends and freshness over time.
-    [ObservableProperty] private string accountBalanceTotalText = "$0";
-    [ObservableProperty] private string assetValueTotalText = "$0";
-    [ObservableProperty] private string totalAssetsText = "$0";
-    [ObservableProperty] private string totalDebtsText = "$0";
-    [ObservableProperty] private string netWorthText = "$0";
-    [ObservableProperty] private string annualIncomeTotalText = "$0";
-    [ObservableProperty] private string annualExpensesTotalText = "$0";
-    [ObservableProperty] private string annualCashFlowText = "$0";
-    [ObservableProperty] private string annualContributionsText = "$0";
+    [ObservableProperty]
+    public partial string AccountBalanceTotalText { get; set; } = "$0";
 
-    [ObservableProperty] private bool hasCompletedCheckIn;
-    [ObservableProperty] private string lastCheckInText = "You haven't completed a monthly update yet.";
-    [ObservableProperty] private string nextCheckInText = string.Empty;
-    [ObservableProperty] private bool isCheckInOverdue;
-    [ObservableProperty] private string netWorthChangeText = string.Empty;
-    [ObservableProperty] private bool hasNetWorthChange;
-    [ObservableProperty] private bool isLoading = true;
+    [ObservableProperty]
+    public partial string AssetValueTotalText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string TotalAssetsText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string TotalDebtsText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string NetWorthText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string AnnualIncomeTotalText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string AnnualExpensesTotalText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string AnnualCashFlowText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string AnnualContributionsText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial bool HasCompletedCheckIn { get; set; }
+
+    [ObservableProperty]
+    public partial string LastCheckInText { get; set; } = "You haven't completed a monthly update yet.";
+
+    [ObservableProperty]
+    public partial string NextCheckInText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsCheckInOverdue { get; set; }
+
+    [ObservableProperty]
+    public partial string NetWorthChangeText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool HasNetWorthChange { get; set; }
+
+    [ObservableProperty]
+    public partial bool IsLoading { get; set; } = true;
 
     public bool IsNotLoading => !IsLoading;
     partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(IsNotLoading));
@@ -102,7 +143,7 @@ public sealed partial class AccountsViewModel(
     /// at app launch when the Settings "privacy mode on startup" override is enabled.
     /// </summary>
     [ObservableProperty]
-    private bool isPrivacyModeEnabled = privacyModePreferencesService.AccountsPrivacyEnabled;
+    public partial bool IsPrivacyModeEnabled { get; set; } = privacyModePreferencesService.AccountsPrivacyEnabled;
 
     partial void OnIsPrivacyModeEnabledChanged(bool value)
     {

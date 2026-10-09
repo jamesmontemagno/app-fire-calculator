@@ -18,7 +18,7 @@ public partial class QuizChoice(string value, string label, string description) 
     public string AutomationId => $"QuizChoice{Value}";
 
     [ObservableProperty]
-    private bool isSelected;
+    public partial bool IsSelected { get; set; }
 }
 
 public sealed record QuizRecommendationOption(
@@ -76,29 +76,29 @@ public partial class QuizViewModel : ObservableObject
         nameof(QuestionProgressText),
         nameof(CanGoBack),
         nameof(CanSkipQuestion))]
-    private int questionIndex;
+    public partial int QuestionIndex { get; set; }
 
     [ObservableProperty]
-    private string questionTitle = string.Empty;
+    public partial string QuestionTitle { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string questionSubtitle = string.Empty;
+    public partial string QuestionSubtitle { get; set; } = string.Empty;
 
     public bool IsChoiceQuestion => true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsQuestionVisible))]
-    private bool isRecommendationVisible;
+    public partial bool IsRecommendationVisible { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasValidationMessage))]
-    private string validationMessage = string.Empty;
+    public partial string ValidationMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private QuizRecommendationOption? primaryRecommendation;
+    public partial QuizRecommendationOption? PrimaryRecommendation { get; set; }
 
     [ObservableProperty]
-    private string recommendationConfidenceText = string.Empty;
+    public partial string RecommendationConfidenceText { get; set; } = string.Empty;
 
     public double QuestionProgress => (QuestionIndex + 1d) / QuestionCount;
     public string QuestionProgressText => $"Question {QuestionIndex + 1} of {QuestionCount}";

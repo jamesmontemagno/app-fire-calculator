@@ -53,22 +53,40 @@ public sealed partial class AccountsCheckInViewModel(
     public ObservableCollection<RetirementIncomeEditorItem> Income { get; } = [];
     public ObservableCollection<RetirementExpenseEditorItem> Expenses { get; } = [];
 
-    [ObservableProperty] private int stepIndex;
-    [ObservableProperty] private string validationMessage = string.Empty;
+    [ObservableProperty]
+    public partial int StepIndex { get; set; }
+
+    [ObservableProperty]
+    public partial string ValidationMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(CompleteCommand))]
     [NotifyPropertyChangedFor(nameof(IsNotSaving))]
-    private bool isSaving;
+    public partial bool IsSaving { get; set; }
 
-    [ObservableProperty] private string accountBalanceText = "$0";
-    [ObservableProperty] private string assetValueText = "$0";
-    [ObservableProperty] private string totalAssetsText = "$0";
-    [ObservableProperty] private string totalDebtsText = "$0";
-    [ObservableProperty] private string netWorthText = "$0";
-    [ObservableProperty] private string annualIncomeText = "$0";
-    [ObservableProperty] private string annualExpensesText = "$0";
-    [ObservableProperty] private string annualCashFlowText = "$0";
+    [ObservableProperty]
+    public partial string AccountBalanceText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string AssetValueText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string TotalAssetsText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string TotalDebtsText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string NetWorthText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string AnnualIncomeText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string AnnualExpensesText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string AnnualCashFlowText { get; set; } = "$0";
 
     public bool HasValidationMessage => !string.IsNullOrWhiteSpace(ValidationMessage);
     public bool IsNotSaving => !IsSaving;

@@ -18,6 +18,7 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
     private readonly IProfileExpenseRepository profileExpenseRepository;
     private readonly IProfileIncomeRepository profileIncomeRepository;
     private readonly IProfileService profileService;
+    private bool isHydrating = true;
 
     public DefaultsOnboardingViewModel(
         ICalculatorDefaultsService calculatorDefaultsService,
@@ -38,41 +39,39 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
 
         var defaults = calculatorDefaultsService.Current;
         var profile = profileService.Current;
-        annualIncome = defaults.AnnualIncome;
-        annualExpenses = defaults.AnnualExpenses;
-        displayName = profile.DisplayName ?? string.Empty;
-        householdSize = profile.HouseholdSize ?? 1;
-
-        // A saved birth date wins. Otherwise the picker opens on the saved default age so the wheel
-        // starts somewhere plausible instead of today.
-        hasBirthDate = profile.BirthDate is not null;
-        birthDate = (profile.BirthDate ?? localDateProvider.Today.AddYears(-defaults.CurrentAge))
+        AnnualIncome = defaults.AnnualIncome;
+        AnnualExpenses = defaults.AnnualExpenses;
+        DisplayName = profile.DisplayName ?? string.Empty;
+        HouseholdSize = profile.HouseholdSize ?? 1;
+        HasBirthDate = profile.BirthDate is not null;
+        BirthDate = (profile.BirthDate ?? localDateProvider.Today.AddYears(-defaults.CurrentAge))
             .ToDateTime(TimeOnly.MinValue);
+        isHydrating = false;
     }
 
     [ObservableProperty]
-    private string displayName = string.Empty;
+    public partial string DisplayName { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HouseholdSizeText))]
-    private double householdSize;
+    public partial double HouseholdSize { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DerivedAgeText))]
-    private DateTime birthDate;
+    public partial DateTime BirthDate { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(DerivedAgeText))]
     [NotifyPropertyChangedFor(nameof(HasNoBirthDate))]
-    private bool hasBirthDate;
+    public partial bool HasBirthDate { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(AnnualIncomeText))]
-    private double annualIncome;
+    public partial double AnnualIncome { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(AnnualExpensesText))]
-    private double annualExpenses;
+    public partial double AnnualExpenses { get; set; }
 
     public bool HasNoBirthDate => !HasBirthDate;
     public string HouseholdSizeText => HouseholdSize <= 1 ? "Just me" : $"{HouseholdSize:0} people";
@@ -100,14 +99,29 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
         }
     }
 
-    partial void OnHouseholdSizeChanged(double value) =>
-        RoundSliderValue(value, rounded => HouseholdSize = rounded, 1);
+    partial void OnHouseholdSizeChanged(double value)
+    {
+        if (!isHydrating)
+        {
+            RoundSliderValue(value, rounded => HouseholdSize = rounded, 1);
+        }
+    }
 
-    partial void OnAnnualIncomeChanged(double value) =>
-        RoundSliderValue(value, rounded => AnnualIncome = rounded, 1_000);
+    partial void OnAnnualIncomeChanged(double value)
+    {
+        if (!isHydrating)
+        {
+            RoundSliderValue(value, rounded => AnnualIncome = rounded, 1_000);
+        }
+    }
 
-    partial void OnAnnualExpensesChanged(double value) =>
-        RoundSliderValue(value, rounded => AnnualExpenses = rounded, 1_000);
+    partial void OnAnnualExpensesChanged(double value)
+    {
+        if (!isHydrating)
+        {
+            RoundSliderValue(value, rounded => AnnualExpenses = rounded, 1_000);
+        }
+    }
 
     [RelayCommand]
     private void UseBirthDate() => HasBirthDate = true;

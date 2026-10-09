@@ -31,49 +31,49 @@ public sealed partial class SavingsInvestmentViewModel : CalculatorViewModelBase
     }
 
     [ObservableProperty]
-    private string currentAgeText = string.Empty;
+    public partial string CurrentAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string yearsInvestingText = string.Empty;
+    public partial string YearsInvestingText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string startingAmountText = string.Empty;
+    public partial string StartingAmountText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string investmentContributionText = string.Empty;
+    public partial string InvestmentContributionText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string expectedReturnText = string.Empty;
+    public partial string ExpectedReturnText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string inflationRateText = string.Empty;
+    public partial string InflationRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsMonthlyContribution))]
     [NotifyPropertyChangedFor(nameof(IsYearlyContribution))]
     [NotifyPropertyChangedFor(nameof(ContributionAmountHeader))]
-    private ContributionFrequency contributionFrequency = ContributionFrequency.Monthly;
+    public partial ContributionFrequency ContributionFrequency { get; set; } = ContributionFrequency.Monthly;
 
     [ObservableProperty]
-    private string investmentSavingsRateText = string.Empty;
+    public partial string InvestmentSavingsRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string investmentAnnualContributionText = string.Empty;
+    public partial string InvestmentAnnualContributionText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string investmentFinalBalanceText = string.Empty;
+    public partial string InvestmentFinalBalanceText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string investmentInflationAdjustedText = string.Empty;
+    public partial string InvestmentInflationAdjustedText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string investmentGrowthText = string.Empty;
+    public partial string InvestmentGrowthText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string investmentCategoryText = string.Empty;
+    public partial string InvestmentCategoryText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string investmentProjectionSummary = string.Empty;
+    public partial string InvestmentProjectionSummary { get; set; } = string.Empty;
 
     public bool IsMonthlyContribution => ContributionFrequency == ContributionFrequency.Monthly;
 

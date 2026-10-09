@@ -10,10 +10,10 @@ public partial class CalculatorPreferenceItem(string calculatorId, string title,
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(VisibilityIcon), nameof(VisibilityDescription))]
-    private bool isVisible = isVisible;
+    public partial bool IsVisible { get; set; } = isVisible;
 
     [ObservableProperty]
-    private int sortOrder = sortOrder;
+    public partial int SortOrder { get; set; } = sortOrder;
 
     public string VisibilityIcon => IsVisible ? "\uf070" : "\uf06e";
 

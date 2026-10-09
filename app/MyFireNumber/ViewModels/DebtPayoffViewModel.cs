@@ -26,54 +26,54 @@ public sealed partial class DebtPayoffViewModel : CalculatorViewModelBase<DebtPa
     public ObservableCollection<DebtEditorItem> DebtItems { get; } = [];
 
     [ObservableProperty]
-    private string debtMonthlyBudgetText = string.Empty;
+    public partial string DebtMonthlyBudgetText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string debtExtraPaymentText = string.Empty;
+    public partial string DebtExtraPaymentText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string debtTargetMonthsText = string.Empty;
+    public partial string DebtTargetMonthsText { get; set; } = string.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsFixedDebtPayoff), nameof(IsTargetDebtPayoff))]
-    private DebtPayoffMode debtPayoffMode = DebtPayoffMode.FixedBudget;
+    public partial DebtPayoffMode DebtPayoffMode { get; set; } = DebtPayoffMode.FixedBudget;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(IsSnowballStrategy), nameof(IsAvalancheStrategy))]
-    private DebtPayoffStrategy debtPayoffStrategy = DebtPayoffStrategy.Snowball;
+    public partial DebtPayoffStrategy DebtPayoffStrategy { get; set; } = DebtPayoffStrategy.Snowball;
 
     [ObservableProperty]
-    private string debtTotalText = string.Empty;
+    public partial string DebtTotalText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string debtMinimumPaymentsText = string.Empty;
+    public partial string DebtMinimumPaymentsText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string debtPayoffTimeText = string.Empty;
+    public partial string DebtPayoffTimeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string debtInterestText = string.Empty;
+    public partial string DebtInterestText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string debtPaymentText = string.Empty;
+    public partial string DebtPaymentText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string debtStrategySummary = string.Empty;
+    public partial string DebtStrategySummary { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string debtSnowballComparisonText = string.Empty;
+    public partial string DebtSnowballComparisonText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string debtAvalancheComparisonText = string.Empty;
+    public partial string DebtAvalancheComparisonText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private IReadOnlyList<ISeries> debtBreakdownSeries = [];
+    public partial IReadOnlyList<ISeries> DebtBreakdownSeries { get; set; } = [];
 
     [ObservableProperty]
-    private string debtBreakdownDescription = string.Empty;
+    public partial string DebtBreakdownDescription { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string debtBreakdownSummary = string.Empty;
+    public partial string DebtBreakdownSummary { get; set; } = string.Empty;
 
     public bool IsFixedDebtPayoff => DebtPayoffMode == DebtPayoffMode.FixedBudget;
 

@@ -21,13 +21,13 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
     }
 
     [ObservableProperty]
-    private string currentAgeText = string.Empty;
+    public partial string CurrentAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string retirementAgeText = string.Empty;
+    public partial string RetirementAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string currentSavingsText = string.Empty;
+    public partial string CurrentSavingsText { get; set; } = string.Empty;
 
     // Recurring amounts. These delegate to Core periodic fields instead of holding their own text, so
     // the canonical amount is the single source of truth and the monthly/annual toggle only changes
@@ -51,55 +51,55 @@ public abstract partial class FireNumberViewModelBase<TDraft> : CalculatorViewMo
     }
 
     [ObservableProperty]
-    private string expectedReturnText = string.Empty;
+    public partial string ExpectedReturnText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string inflationRateText = string.Empty;
+    public partial string InflationRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalRateText = string.Empty;
+    public partial string WithdrawalRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string fireNumberText = string.Empty;
+    public partial string FireNumberText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string yearsToFireText = string.Empty;
+    public partial string YearsToFireText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string fireAgeText = string.Empty;
+    public partial string FireAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string retirementGoalText = string.Empty;
+    public partial string RetirementGoalText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string savingsRateText = string.Empty;
+    public partial string SavingsRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string monthlyContributionText = string.Empty;
+    public partial string MonthlyContributionText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string progressDescription = string.Empty;
+    public partial string ProgressDescription { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private double progressToFire;
+    public partial double ProgressToFire { get; set; }
 
     [ObservableProperty]
-    private string projectionSummary = string.Empty;
+    public partial string ProjectionSummary { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string leanStatusText = string.Empty;
+    public partial string LeanStatusText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string leanGuidanceText = string.Empty;
+    public partial string LeanGuidanceText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string fatStatusText = string.Empty;
+    public partial string FatStatusText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string fatGuidanceText = string.Empty;
+    public partial string FatGuidanceText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private StandardFirePreset? selectedPreset;
+    public partial StandardFirePreset? SelectedPreset { get; set; }
 
     public IReadOnlyList<StandardFirePreset> StandardFirePresets => StandardFirePreset.All;
 

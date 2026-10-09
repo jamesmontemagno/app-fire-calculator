@@ -14,38 +14,38 @@ namespace MyFireNumber.ViewModels;
 public sealed partial class AssetEditorItem : ObservableObject
 {
     [ObservableProperty]
-    private string id = Guid.NewGuid().ToString("N");
+    public partial string Id { get; set; } = Guid.NewGuid().ToString("N");
 
     [ObservableProperty]
-    private string name = "Asset";
+    public partial string Name { get; set; } = "Asset";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TypeLabel))]
-    private PropertyAssetType type = PropertyAssetType.Other;
+    public partial PropertyAssetType Type { get; set; } = PropertyAssetType.Other;
 
     [ObservableProperty]
-    private string currentValueText = string.Empty;
+    public partial string CurrentValueText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string purchaseValueText = string.Empty;
+    public partial string PurchaseValueText { get; set; } = string.Empty;
 
     /// <summary>
     /// Off for a personal-use asset someone would rather not count. The value is still stored and
     /// still shown on the asset itself; it simply stops contributing to net worth.
     /// </summary>
     [ObservableProperty]
-    private bool includeInNetWorth = true;
+    public partial bool IncludeInNetWorth { get; set; } = true;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph))]
-    private bool isExpanded;
+    public partial bool IsExpanded { get; set; }
 
     /// <summary>Set by the Accounts overview after loading check-in history; not persisted.</summary>
     [ObservableProperty]
-    private string freshnessText = "Never confirmed";
+    public partial string FreshnessText { get; set; } = "Never confirmed";
 
     [ObservableProperty]
-    private bool isOverdue;
+    public partial bool IsOverdue { get; set; }
 
     /// <summary>
     /// Appreciation or depreciation since purchase, set by whoever owns this item so the text can be
@@ -53,7 +53,7 @@ public sealed partial class AssetEditorItem : ObservableObject
     /// </summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasValueChange))]
-    private string valueChangeText = string.Empty;
+    public partial string ValueChangeText { get; set; } = string.Empty;
 
     public bool HasValueChange => !string.IsNullOrWhiteSpace(ValueChangeText);
 

@@ -24,7 +24,7 @@ public partial class RetirementAnnualDetailItem(
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ExpansionGlyph), nameof(ExpansionDescription))]
-    private bool isExpanded;
+    public partial bool IsExpanded { get; set; }
 
     public string ExpansionGlyph => IsExpanded ? "\uf077" : "\uf078";
     public string ExpansionDescription => IsExpanded ? $"Collapse {Title}" : $"Expand {Title}";
