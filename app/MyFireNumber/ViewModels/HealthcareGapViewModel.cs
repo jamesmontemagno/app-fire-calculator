@@ -42,31 +42,31 @@ public sealed partial class HealthcareGapViewModel : CalculatorViewModelBase<Hea
     }
 
     [ObservableProperty]
-    private string healthcareCurrentAgeText = string.Empty;
+    public partial string HealthcareCurrentAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string earlyRetirementAgeText = string.Empty;
+    public partial string EarlyRetirementAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string medicareAgeText = string.Empty;
+    public partial string MedicareAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string inflationRateText = string.Empty;
+    public partial string InflationRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string healthcareGapYearsText = string.Empty;
+    public partial string HealthcareGapYearsText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string healthcareAnnualCostText = string.Empty;
+    public partial string HealthcareAnnualCostText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string healthcareTotalCostText = string.Empty;
+    public partial string HealthcareTotalCostText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string healthcareAverageAnnualCostText = string.Empty;
+    public partial string HealthcareAverageAnnualCostText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string healthcareProjectionSummary = string.Empty;
+    public partial string HealthcareProjectionSummary { get; set; } = string.Empty;
 
     protected override string CalculatorId => "healthcare-gap";
 

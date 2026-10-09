@@ -30,31 +30,31 @@ public partial class TimelineOnboardingViewModel : ObservableObject
         var profile = profileService.Current;
         currentAge = profileService.DerivedCurrentAge ?? defaults.CurrentAge;
         ageRange = ProfileAgeCalculator.RetirementAgeRange(currentAge, MinimumRetirementAge, HighestRetirementAge);
-        retirementAge = Math.Clamp(
+        RetirementAge = Math.Clamp(
             (double)(profileService.DerivedTargetRetirementAge ?? defaults.RetirementAge),
             ageRange.Minimum,
             ageRange.Maximum);
-        hasPhasedRetirement = profile.PhasedRetirementDate is not null;
-        phasedRetirementAge = Math.Clamp(
-            (double)(profileService.DerivedPhasedRetirementAge ?? (int)retirementAge),
+        HasPhasedRetirement = profile.PhasedRetirementDate is not null;
+        PhasedRetirementAge = Math.Clamp(
+            (double)(profileService.DerivedPhasedRetirementAge ?? (int)RetirementAge),
             ageRange.Minimum,
-            retirementAge);
+RetirementAge);
     }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RetirementAgeText))]
     [NotifyPropertyChangedFor(nameof(TimelineSummary))]
-    private double retirementAge;
+    public partial double RetirementAge { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(PhasedRetirementAgeText))]
     [NotifyPropertyChangedFor(nameof(TimelineSummary))]
-    private double phasedRetirementAge;
+    public partial double PhasedRetirementAge { get; set; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TimelineSummary))]
     [NotifyPropertyChangedFor(nameof(HasNoPhasedRetirement))]
-    private bool hasPhasedRetirement;
+    public partial bool HasPhasedRetirement { get; set; }
 
     private readonly int currentAge;
     private readonly (int Minimum, int Maximum) ageRange;

@@ -24,24 +24,50 @@ public sealed partial class AccountItemDetailViewModel(
 
     private IReadOnlyList<AccountItemHistoryPoint> allHistory = [];
 
-    [ObservableProperty] private string itemName = string.Empty;
-    [ObservableProperty] private string itemTypeLabel = string.Empty;
-    [ObservableProperty] private bool isDebt;
-    [ObservableProperty] private string currentBalanceText = string.Empty;
-    [ObservableProperty] private string balanceLabel = "Current balance";
-    [ObservableProperty] private string freshnessText = string.Empty;
-    [ObservableProperty] private bool isOverdue;
+    [ObservableProperty]
+    public partial string ItemName { get; set; } = string.Empty;
 
-    [ObservableProperty] private HistoryRange selectedRange = HistoryRange.OneYear;
+    [ObservableProperty]
+    public partial string ItemTypeLabel { get; set; } = string.Empty;
 
-    [ObservableProperty] private bool hasHistory;
-    [ObservableProperty] private bool hasNoHistory = true;
-    [ObservableProperty] private bool hasTrendData;
+    [ObservableProperty]
+    public partial bool IsDebt { get; set; }
 
-    [ObservableProperty] private IReadOnlyList<ISeries> series = [];
-    [ObservableProperty] private Axis[] xAxes = [];
-    [ObservableProperty] private string summaryText = string.Empty;
-    [ObservableProperty] private string rangeDescription = string.Empty;
+    [ObservableProperty]
+    public partial string CurrentBalanceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string BalanceLabel { get; set; } = "Current balance";
+
+    [ObservableProperty]
+    public partial string FreshnessText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsOverdue { get; set; }
+
+    [ObservableProperty]
+    public partial HistoryRange SelectedRange { get; set; } = HistoryRange.OneYear;
+
+    [ObservableProperty]
+    public partial bool HasHistory { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasNoHistory { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool HasTrendData { get; set; }
+
+    [ObservableProperty]
+    public partial IReadOnlyList<ISeries> Series { get; set; } = [];
+
+    [ObservableProperty]
+    public partial Axis[] XAxes { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string SummaryText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RangeDescription { get; set; } = string.Empty;
 
     public TimeSpan ChartAnimationsSpeed => behaviorPreferencesService.Current.ReduceMotion
         ? TimeSpan.Zero

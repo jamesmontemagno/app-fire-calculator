@@ -56,34 +56,59 @@ public sealed partial class RetirementCashFlowViewModel : CalculatorViewModelBas
 
     public ObservableCollection<RetirementExpenseEditorItem> RetirementAdditionalExpenses { get; } = [];
 
-    [ObservableProperty] private string retirementCurrentAgeText = "45";
-    [ObservableProperty] private string retirementSemiAgeText = "55";
-    [ObservableProperty] private string retirementPlanThroughAgeText = "90";
-    [ObservableProperty] private string retirementInflationText = "3";
-    [ObservableProperty] private string retirementCurrentBalanceText = string.Empty;
-    [ObservableProperty] private string retirementBalanceAtSemiText = string.Empty;
-    [ObservableProperty] private string retirementEndingBalanceText = string.Empty;
-    [ObservableProperty] private string retirementFundedYearsText = string.Empty;
-    [ObservableProperty] private string retirementFirstShortfallText = string.Empty;
-    [ObservableProperty] private string retirementBalanceBasisText = string.Empty;
-    [ObservableProperty] private string retirementEndingBasisText = string.Empty;
-    [ObservableProperty] private string retirementPolicyExcessText = string.Empty;
-    [ObservableProperty] private bool hasRetirementPolicyExcess;
+    [ObservableProperty]
+    public partial string RetirementCurrentAgeText { get; set; } = "45";
 
     [ObservableProperty]
-    private bool withdrawOnlyAfterRetirement = true;
+    public partial string RetirementSemiAgeText { get; set; } = "55";
 
     [ObservableProperty]
-    private bool reinvestRetirementSurplus;
+    public partial string RetirementPlanThroughAgeText { get; set; } = "90";
 
     [ObservableProperty]
-    private IReadOnlyList<ISeries> retirementBucketSeries = [];
+    public partial string RetirementInflationText { get; set; } = "3";
 
     [ObservableProperty]
-    private string retirementBucketDescription = string.Empty;
+    public partial string RetirementCurrentBalanceText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string retirementBucketSummary = string.Empty;
+    public partial string RetirementBalanceAtSemiText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RetirementEndingBalanceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RetirementFundedYearsText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RetirementFirstShortfallText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RetirementBalanceBasisText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RetirementEndingBasisText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RetirementPolicyExcessText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool HasRetirementPolicyExcess { get; set; }
+
+    [ObservableProperty]
+    public partial bool WithdrawOnlyAfterRetirement { get; set; } = true;
+
+    [ObservableProperty]
+    public partial bool ReinvestRetirementSurplus { get; set; }
+
+    [ObservableProperty]
+    public partial IReadOnlyList<ISeries> RetirementBucketSeries { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string RetirementBucketDescription { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RetirementBucketSummary { get; set; } = string.Empty;
 
     protected override string CalculatorId => "retirement-cash-flow";
 

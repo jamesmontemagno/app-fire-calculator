@@ -36,40 +36,40 @@ public sealed partial class CoastFireViewModel : CalculatorViewModelBase<CoastFi
     }
 
     [ObservableProperty]
-    private string currentAgeText = string.Empty;
+    public partial string CurrentAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string retirementAgeText = string.Empty;
+    public partial string RetirementAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string currentSavingsText = string.Empty;
+    public partial string CurrentSavingsText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string expectedReturnText = string.Empty;
+    public partial string ExpectedReturnText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string inflationRateText = string.Empty;
+    public partial string InflationRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalRateText = string.Empty;
+    public partial string WithdrawalRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string coastNumberText = string.Empty;
+    public partial string CoastNumberText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string fullFireNumberText = string.Empty;
+    public partial string FullFireNumberText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string yearsToCoastText = string.Empty;
+    public partial string YearsToCoastText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string coastStatusText = string.Empty;
+    public partial string CoastStatusText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string coastProgressDescription = string.Empty;
+    public partial string CoastProgressDescription { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string coastProjectionSummary = string.Empty;
+    public partial string CoastProjectionSummary { get; set; } = string.Empty;
 
     protected override string CalculatorId => "coast-fire";
 

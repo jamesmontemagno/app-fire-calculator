@@ -19,37 +19,37 @@ public sealed partial class WithdrawalRateViewModel : CalculatorViewModelBase<Wi
     }
 
     [ObservableProperty]
-    private string portfolioValueText = string.Empty;
+    public partial string PortfolioValueText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalRateText = string.Empty;
+    public partial string WithdrawalRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string expectedReturnText = string.Empty;
+    public partial string ExpectedReturnText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string inflationRateText = string.Empty;
+    public partial string InflationRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string retirementYearsText = string.Empty;
+    public partial string RetirementYearsText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalAnnualText = string.Empty;
+    public partial string WithdrawalAnnualText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalMonthlyText = string.Empty;
+    public partial string WithdrawalMonthlyText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalLongevityText = string.Empty;
+    public partial string WithdrawalLongevityText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalHorizonFundedText = string.Empty;
+    public partial string WithdrawalHorizonFundedText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalStatusText = string.Empty;
+    public partial string WithdrawalStatusText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalRateAnalysisText = string.Empty;
+    public partial string WithdrawalRateAnalysisText { get; set; } = string.Empty;
 
     protected override string CalculatorId => "withdrawal-rate";
 

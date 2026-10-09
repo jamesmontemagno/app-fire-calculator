@@ -18,21 +18,47 @@ public sealed partial class RothConversionViewModel : CalculatorViewModelBase<Ro
         this.exportService = exportService;
     }
 
-    [ObservableProperty] private string currentAgeText = string.Empty;
-    [ObservableProperty] private string startYearText = string.Empty;
-    [ObservableProperty] private string traditionalBalanceText = string.Empty;
-    [ObservableProperty] private string rothBalanceText = string.Empty;
-    [ObservableProperty] private string annualConversionText = string.Empty;
-    [ObservableProperty] private string conversionYearsText = string.Empty;
-    [ObservableProperty] private string expectedReturnText = string.Empty;
-    [ObservableProperty] private string estimatedTaxRateText = string.Empty;
+    [ObservableProperty]
+    public partial string CurrentAgeText { get; set; } = string.Empty;
 
-    [ObservableProperty] private string totalConvertedText = string.Empty;
-    [ObservableProperty] private string totalTaxesText = string.Empty;
-    [ObservableProperty] private string firstAccessibleYearText = string.Empty;
-    [ObservableProperty] private string endingTraditionalBalanceText = string.Empty;
-    [ObservableProperty] private string endingRothBalanceText = string.Empty;
-    [ObservableProperty] private string projectionSummary = string.Empty;
+    [ObservableProperty]
+    public partial string StartYearText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string TraditionalBalanceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RothBalanceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AnnualConversionText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ConversionYearsText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ExpectedReturnText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string EstimatedTaxRateText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string TotalConvertedText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string TotalTaxesText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string FirstAccessibleYearText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string EndingTraditionalBalanceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string EndingRothBalanceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ProjectionSummary { get; set; } = string.Empty;
 
     protected override string CalculatorId => "roth-conversion";
     protected override int DraftPayloadVersion => RothConversionDraft.PayloadVersion;

@@ -56,17 +56,17 @@ public partial class SettingsViewModel : ObservableObject
         this.externalLinkService = externalLinkService;
         this.errorPresentationService = errorPresentationService;
         this.themeService = themeService;
-        selectedTheme = themeService.Preference;
+        SelectedTheme = themeService.Preference;
         var behavior = behaviorPreferencesService.Current;
-        selectedLaunchDestination = behavior.LaunchDestination;
-        restoreDrafts = behavior.RestoreDrafts;
-        confirmPlanDeletion = behavior.ConfirmPlanDeletion;
-        hapticsEnabled = behavior.Haptics;
-        reduceMotion = behavior.ReduceMotion;
-        highContrast = behavior.HighContrast;
-        showRecommendedBooks = behavior.ShowRecommendedBooks;
-        selectedCurrencyOption = currencyPreferencesService.SelectedOption;
-        privacyModeOnStartup = privacyModePreferencesService.PrivacyModeOnStartup;
+        SelectedLaunchDestination = behavior.LaunchDestination;
+        RestoreDrafts = behavior.RestoreDrafts;
+        ConfirmPlanDeletion = behavior.ConfirmPlanDeletion;
+        HapticsEnabled = behavior.Haptics;
+        ReduceMotion = behavior.ReduceMotion;
+        HighContrast = behavior.HighContrast;
+        ShowRecommendedBooks = behavior.ShowRecommendedBooks;
+        SelectedCurrencyOption = currencyPreferencesService.SelectedOption;
+        PrivacyModeOnStartup = privacyModePreferencesService.PrivacyModeOnStartup;
     }
 
     public IReadOnlyList<ThemePreference> ThemeOptions { get; } = Enum.GetValues<ThemePreference>();
@@ -75,21 +75,10 @@ public partial class SettingsViewModel : ObservableObject
     public ObservableCollection<CalculatorPreferenceItem> CalculatorPreferences { get; } = [];
 
     [ObservableProperty]
-    private ThemePreference selectedTheme;
-
-
-
-
-
-
-
-
-
-
-
+    public partial ThemePreference SelectedTheme { get; set; }
 
     [ObservableProperty]
-    private string selectedCurrencyOption = CurrencyPreferencesService.DeviceRegion;
+    public partial string SelectedCurrencyOption { get; set; } = CurrencyPreferencesService.DeviceRegion;
 
     partial void OnSelectedCurrencyOptionChanged(string value) => currencyPreferencesService.Save(value);
 
@@ -98,25 +87,25 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(LaunchDestinationDescription))]
-    private LaunchDestination selectedLaunchDestination;
+    public partial LaunchDestination SelectedLaunchDestination { get; set; }
 
     [ObservableProperty]
-    private bool restoreDrafts;
+    public partial bool RestoreDrafts { get; set; }
 
     [ObservableProperty]
-    private bool confirmPlanDeletion;
+    public partial bool ConfirmPlanDeletion { get; set; }
 
     [ObservableProperty]
-    private bool hapticsEnabled;
+    public partial bool HapticsEnabled { get; set; }
 
     [ObservableProperty]
-    private bool reduceMotion;
+    public partial bool ReduceMotion { get; set; }
 
     [ObservableProperty]
-    private bool highContrast;
+    public partial bool HighContrast { get; set; }
 
     [ObservableProperty]
-    private bool showRecommendedBooks;
+    public partial bool ShowRecommendedBooks { get; set; }
 
     /// <summary>
     /// Global override: when on, Home and Accounts privacy toggles are forced back on every time the
@@ -124,7 +113,7 @@ public partial class SettingsViewModel : ObservableObject
     /// <c>App.xaml.cs</c>; toggling it here only takes effect on the next launch, not immediately.
     /// </summary>
     [ObservableProperty]
-    private bool privacyModeOnStartup;
+    public partial bool PrivacyModeOnStartup { get; set; }
 
     partial void OnPrivacyModeOnStartupChanged(bool value) => privacyModePreferencesService.PrivacyModeOnStartup = value;
 

@@ -42,37 +42,37 @@ public sealed partial class BaristaFireViewModel : CalculatorViewModelBase<Baris
     }
 
     [ObservableProperty]
-    private string currentAgeText = string.Empty;
+    public partial string CurrentAgeText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string currentSavingsText = string.Empty;
+    public partial string CurrentSavingsText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string expectedReturnText = string.Empty;
+    public partial string ExpectedReturnText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string inflationRateText = string.Empty;
+    public partial string InflationRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string withdrawalRateText = string.Empty;
+    public partial string WithdrawalRateText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string baristaNumberText = string.Empty;
+    public partial string BaristaNumberText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string fullFireNumberText = string.Empty;
+    public partial string FullFireNumberText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string baristaYearsText = string.Empty;
+    public partial string BaristaYearsText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string baristaReductionText = string.Empty;
+    public partial string BaristaReductionText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string baristaProgressDescription = string.Empty;
+    public partial string BaristaProgressDescription { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string baristaProjectionSummary = string.Empty;
+    public partial string BaristaProjectionSummary { get; set; } = string.Empty;
 
     protected override string CalculatorId => "barista-fire";
 

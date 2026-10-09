@@ -62,7 +62,7 @@ public partial class CalculatorCatalogViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(FilteredCalculatorGroups))]
-    private string searchText = string.Empty;
+    public partial string SearchText { get; set; } = string.Empty;
 
     public IReadOnlyList<CalculatorGroup> FilteredCalculatorGroups
     {

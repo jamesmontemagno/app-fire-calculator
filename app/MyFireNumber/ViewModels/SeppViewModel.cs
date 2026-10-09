@@ -28,27 +28,65 @@ public sealed partial class SeppViewModel : CalculatorViewModelBase<SeppDraft>
     public ObservableCollection<SeppAccount> Accounts { get; } = [];
     public IReadOnlyList<SeppMethodOption> MethodOptions { get; }
 
-    [ObservableProperty] private SeppAccount? selectedAccount;
-    [ObservableProperty] private SeppMethodOption? selectedMethod;
-    [ObservableProperty] private string accountNameText = string.Empty;
-    [ObservableProperty] private string accountBalanceText = string.Empty;
-    [ObservableProperty] private string expectedReturnText = string.Empty;
-    [ObservableProperty] private DateTime birthDate = DateTime.Today.AddYears(-50);
-    [ObservableProperty] private DateTime firstPaymentDate = DateTime.Today;
-    [ObservableProperty] private string interestRateText = string.Empty;
-    [ObservableProperty] private string maximumInterestRateText = string.Empty;
-    [ObservableProperty] private string annuityFactorText = string.Empty;
+    [ObservableProperty]
+    public partial SeppAccount? SelectedAccount { get; set; }
 
-    [ObservableProperty] private string startingAgeText = string.Empty;
-    [ObservableProperty] private string lifeExpectancyFactorText = string.Empty;
-    [ObservableProperty] private string requiredEndDateText = string.Empty;
-    [ObservableProperty] private string requiredTermText = string.Empty;
-    [ObservableProperty] private string selectedAnnualPaymentText = string.Empty;
-    [ObservableProperty] private string selectedMonthlyPaymentText = string.Empty;
-    [ObservableProperty] private string rmdPaymentText = string.Empty;
-    [ObservableProperty] private string amortizationPaymentText = string.Empty;
-    [ObservableProperty] private string annuitizationPaymentText = string.Empty;
-    [ObservableProperty] private string projectionSummary = string.Empty;
+    [ObservableProperty]
+    public partial SeppMethodOption? SelectedMethod { get; set; }
+
+    [ObservableProperty]
+    public partial string AccountNameText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AccountBalanceText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ExpectedReturnText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial DateTime BirthDate { get; set; } = DateTime.Today.AddYears(-50);
+
+    [ObservableProperty]
+    public partial DateTime FirstPaymentDate { get; set; } = DateTime.Today;
+
+    [ObservableProperty]
+    public partial string InterestRateText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string MaximumInterestRateText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AnnuityFactorText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string StartingAgeText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string LifeExpectancyFactorText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RequiredEndDateText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RequiredTermText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedAnnualPaymentText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string SelectedMonthlyPaymentText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string RmdPaymentText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AmortizationPaymentText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string AnnuitizationPaymentText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string ProjectionSummary { get; set; } = string.Empty;
 
     protected override string CalculatorId => "sepp-72t";
     protected override int DraftPayloadVersion => SeppDraft.PayloadVersion;

@@ -16,12 +16,12 @@ public partial class WithdrawalRateOnboardingViewModel : ObservableObject
     {
         this.calculatorDefaultsService = calculatorDefaultsService;
         this.navigationService = navigationService;
-        withdrawalRatePercent = calculatorDefaultsService.Current.WithdrawalRate * 100;
+        WithdrawalRatePercent = calculatorDefaultsService.Current.WithdrawalRate * 100;
     }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WithdrawalRateText))]
-    private double withdrawalRatePercent;
+    public partial double WithdrawalRatePercent { get; set; }
 
     public string WithdrawalRateText => $"{WithdrawalRatePercent:0.0}%";
 

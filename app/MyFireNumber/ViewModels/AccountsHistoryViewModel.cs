@@ -62,36 +62,74 @@ public sealed partial class AccountsHistoryViewModel(
     private IReadOnlyList<PropertyAsset> currentAssets = [];
     private bool isLoaded;
 
-    [ObservableProperty] private HistoryRange selectedRange = HistoryRange.OneYear;
+    [ObservableProperty]
+    public partial HistoryRange SelectedRange { get; set; } = HistoryRange.OneYear;
 
-    [ObservableProperty] private bool hasHistory;
-    [ObservableProperty] private bool hasNoHistory = true;
-    [ObservableProperty] private bool hasTrendData;
-    [ObservableProperty] private bool hasAccountTrendData;
-    [ObservableProperty] private bool hasAllocationData;
+    [ObservableProperty]
+    public partial bool HasHistory { get; set; }
 
-    [ObservableProperty] private IReadOnlyList<ISeries> netWorthSeries = [];
-    [ObservableProperty] private Axis[] netWorthXAxes = [];
-    [ObservableProperty] private string netWorthDescription = string.Empty;
+    [ObservableProperty]
+    public partial bool HasNoHistory { get; set; } = true;
 
-    [ObservableProperty] private IReadOnlyList<ISeries> assetsVsDebtsSeries = [];
-    [ObservableProperty] private Axis[] assetsVsDebtsXAxes = [];
-    [ObservableProperty] private string assetsVsDebtsDescription = string.Empty;
+    [ObservableProperty]
+    public partial bool HasTrendData { get; set; }
 
-    [ObservableProperty] private IReadOnlyList<ISeries> accountTrendsSeries = [];
-    [ObservableProperty] private Axis[] accountTrendsXAxes = [];
-    [ObservableProperty] private string accountTrendsDescription = string.Empty;
+    [ObservableProperty]
+    public partial bool HasAccountTrendData { get; set; }
 
-    [ObservableProperty] private IReadOnlyList<ISeries> allocationSeries = [];
-    [ObservableProperty] private string allocationDescription = string.Empty;
+    [ObservableProperty]
+    public partial bool HasAllocationData { get; set; }
 
-    [ObservableProperty] private IReadOnlyList<ISeries> incomeVsExpensesSeries = [];
-    [ObservableProperty] private Axis[] incomeVsExpensesXAxes = [];
-    [ObservableProperty] private string incomeVsExpensesDescription = string.Empty;
+    [ObservableProperty]
+    public partial IReadOnlyList<ISeries> NetWorthSeries { get; set; } = [];
 
-    [ObservableProperty] private IReadOnlyList<ISeries> cashFlowSeries = [];
-    [ObservableProperty] private Axis[] cashFlowXAxes = [];
-    [ObservableProperty] private string cashFlowDescription = string.Empty;
+    [ObservableProperty]
+    public partial Axis[] NetWorthXAxes { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string NetWorthDescription { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial IReadOnlyList<ISeries> AssetsVsDebtsSeries { get; set; } = [];
+
+    [ObservableProperty]
+    public partial Axis[] AssetsVsDebtsXAxes { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string AssetsVsDebtsDescription { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial IReadOnlyList<ISeries> AccountTrendsSeries { get; set; } = [];
+
+    [ObservableProperty]
+    public partial Axis[] AccountTrendsXAxes { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string AccountTrendsDescription { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial IReadOnlyList<ISeries> AllocationSeries { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string AllocationDescription { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial IReadOnlyList<ISeries> IncomeVsExpensesSeries { get; set; } = [];
+
+    [ObservableProperty]
+    public partial Axis[] IncomeVsExpensesXAxes { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string IncomeVsExpensesDescription { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial IReadOnlyList<ISeries> CashFlowSeries { get; set; } = [];
+
+    [ObservableProperty]
+    public partial Axis[] CashFlowXAxes { get; set; } = [];
+
+    [ObservableProperty]
+    public partial string CashFlowDescription { get; set; } = string.Empty;
 
     public TimeSpan ChartAnimationsSpeed => behaviorPreferencesService.Current.ReduceMotion
         ? TimeSpan.Zero

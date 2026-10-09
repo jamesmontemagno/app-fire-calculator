@@ -86,7 +86,7 @@ public partial class HomeViewModel : ObservableObject
         this.checkInRepository = checkInRepository;
         this.currencyPreferencesService = currencyPreferencesService;
         this.privacyModePreferencesService = privacyModePreferencesService;
-        isPrivacyModeEnabled = privacyModePreferencesService.HomePrivacyEnabled;
+        IsPrivacyModeEnabled = privacyModePreferencesService.HomePrivacyEnabled;
     }
 
     public ObservableCollection<CalculatorDefinition> FeaturedCalculators { get; } = [];
@@ -104,7 +104,7 @@ public partial class HomeViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasGreeting))]
     [NotifyPropertyChangedFor(nameof(HasNoGreeting))]
-    private string greeting = string.Empty;
+    public partial string Greeting { get; set; } = string.Empty;
 
     public bool HasGreeting => !string.IsNullOrWhiteSpace(Greeting);
     public bool HasNoGreeting => !HasGreeting;
@@ -113,26 +113,47 @@ public partial class HomeViewModel : ObservableObject
     public bool ShowFeaturedCalculators => ShowGettingStarted && RecommendedCalculator is null;
 
     [ObservableProperty]
-    private CalculatorDefinition? recommendedCalculator;
+    public partial CalculatorDefinition? RecommendedCalculator { get; set; }
 
     [ObservableProperty]
-    private bool showRecommendedBooks;
+    public partial bool ShowRecommendedBooks { get; set; }
 
     // Accounts dashboard summary. Always computed from live account/debt data, never from check-in
     // history, so it matches whatever Accounts shows right now even if a check-in was never done.
-    [ObservableProperty] private bool hasAccountsData;
+    [ObservableProperty]
+    public partial bool HasAccountsData { get; set; }
+
     public bool HasNoAccountsData => !HasAccountsData;
     partial void OnHasAccountsDataChanged(bool value) => OnPropertyChanged(nameof(HasNoAccountsData));
-    [ObservableProperty] private string netWorthText = "$0";
-    [ObservableProperty] private string totalAssetsText = "$0";
-    [ObservableProperty] private string totalDebtsText = "$0";
-    [ObservableProperty] private bool hasCompletedCheckIn;
-    [ObservableProperty] private string checkInFreshnessText = string.Empty;
-    [ObservableProperty] private string nextCheckInText = string.Empty;
-    [ObservableProperty] private bool isCheckInOverdue;
-    [ObservableProperty] private bool hasNetWorthChange;
-    [ObservableProperty] private string netWorthChangeText = string.Empty;
-    [ObservableProperty] private bool isLoading = true;
+    [ObservableProperty]
+    public partial string NetWorthText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string TotalAssetsText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial string TotalDebtsText { get; set; } = "$0";
+
+    [ObservableProperty]
+    public partial bool HasCompletedCheckIn { get; set; }
+
+    [ObservableProperty]
+    public partial string CheckInFreshnessText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial string NextCheckInText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsCheckInOverdue { get; set; }
+
+    [ObservableProperty]
+    public partial bool HasNetWorthChange { get; set; }
+
+    [ObservableProperty]
+    public partial string NetWorthChangeText { get; set; } = string.Empty;
+
+    [ObservableProperty]
+    public partial bool IsLoading { get; set; } = true;
 
     public bool IsNotLoading => !IsLoading;
     partial void OnIsLoadingChanged(bool value) => OnPropertyChanged(nameof(IsNotLoading));
@@ -143,7 +164,7 @@ public partial class HomeViewModel : ObservableObject
     /// the Settings "privacy mode on startup" override is enabled.
     /// </summary>
     [ObservableProperty]
-    private bool isPrivacyModeEnabled;
+    public partial bool IsPrivacyModeEnabled { get; set; }
 
     partial void OnIsPrivacyModeEnabledChanged(bool value)
     {

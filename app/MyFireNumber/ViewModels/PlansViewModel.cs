@@ -70,16 +70,16 @@ public partial class PlansViewModel : ObservableObject
     public ObservableCollection<PlanSortOption> SortOptions { get; } = [];
 
     [ObservableProperty]
-    private bool isLoading;
+    public partial bool IsLoading { get; set; }
 
     [ObservableProperty]
-    private string errorMessage = string.Empty;
+    public partial string ErrorMessage { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private string searchText = string.Empty;
+    public partial string SearchText { get; set; } = string.Empty;
 
     [ObservableProperty]
-    private PlanSortOption? selectedSortOption;
+    public partial PlanSortOption? SelectedSortOption { get; set; }
 
     public bool HasPlans => Plans.Count > 0;
 
