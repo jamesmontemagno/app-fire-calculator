@@ -18,6 +18,7 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
     private readonly IProfileExpenseRepository profileExpenseRepository;
     private readonly IProfileIncomeRepository profileIncomeRepository;
     private readonly IProfileService profileService;
+    private bool isHydrating = true;
 
     public DefaultsOnboardingViewModel(
         ICalculatorDefaultsService calculatorDefaultsService,
@@ -45,6 +46,7 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
         HasBirthDate = profile.BirthDate is not null;
         BirthDate = (profile.BirthDate ?? localDateProvider.Today.AddYears(-defaults.CurrentAge))
             .ToDateTime(TimeOnly.MinValue);
+        isHydrating = false;
     }
 
     [ObservableProperty]
@@ -97,14 +99,29 @@ public partial class DefaultsOnboardingViewModel : ObservableObject
         }
     }
 
-    partial void OnHouseholdSizeChanged(double value) =>
-        RoundSliderValue(value, rounded => HouseholdSize = rounded, 1);
+    partial void OnHouseholdSizeChanged(double value)
+    {
+        if (!isHydrating)
+        {
+            RoundSliderValue(value, rounded => HouseholdSize = rounded, 1);
+        }
+    }
 
-    partial void OnAnnualIncomeChanged(double value) =>
-        RoundSliderValue(value, rounded => AnnualIncome = rounded, 1_000);
+    partial void OnAnnualIncomeChanged(double value)
+    {
+        if (!isHydrating)
+        {
+            RoundSliderValue(value, rounded => AnnualIncome = rounded, 1_000);
+        }
+    }
 
-    partial void OnAnnualExpensesChanged(double value) =>
-        RoundSliderValue(value, rounded => AnnualExpenses = rounded, 1_000);
+    partial void OnAnnualExpensesChanged(double value)
+    {
+        if (!isHydrating)
+        {
+            RoundSliderValue(value, rounded => AnnualExpenses = rounded, 1_000);
+        }
+    }
 
     [RelayCommand]
     private void UseBirthDate() => HasBirthDate = true;

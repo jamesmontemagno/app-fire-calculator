@@ -9,6 +9,7 @@ public partial class WithdrawalRateOnboardingViewModel : ObservableObject
     private const double RoundingTolerance = 0.000001;
     private readonly ICalculatorDefaultsService calculatorDefaultsService;
     private readonly INavigationService navigationService;
+    private bool isHydrating = true;
 
     public WithdrawalRateOnboardingViewModel(
         ICalculatorDefaultsService calculatorDefaultsService,
@@ -17,6 +18,7 @@ public partial class WithdrawalRateOnboardingViewModel : ObservableObject
         this.calculatorDefaultsService = calculatorDefaultsService;
         this.navigationService = navigationService;
         WithdrawalRatePercent = calculatorDefaultsService.Current.WithdrawalRate * 100;
+        isHydrating = false;
     }
 
     [ObservableProperty]
@@ -27,6 +29,11 @@ public partial class WithdrawalRateOnboardingViewModel : ObservableObject
 
     partial void OnWithdrawalRatePercentChanged(double value)
     {
+        if (isHydrating)
+        {
+            return;
+        }
+
         var rounded = Math.Round(value, 1);
         if (Math.Abs(value - rounded) > RoundingTolerance)
         {
