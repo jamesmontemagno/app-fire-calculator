@@ -60,6 +60,12 @@
 		<MtouchInterpreter>DocumentFormat.OpenXml,DocumentFormat.OpenXml.Framework</MtouchInterpreter>
 	</PropertyGroup>
 
+	<Target Name="ValidateMacCatalystRuntimeIdentifier"
+			BeforeTargets="PrepareForBuild"
+			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' and '$(RuntimeIdentifier)' != '' and '$(RuntimeIdentifier)' != 'maccatalyst-arm64'">
+		<Error Text="Only maccatalyst-arm64 is supported for Mac Catalyst builds. RuntimeIdentifier '$(RuntimeIdentifier)' is not supported." />
+	</Target>
+
 	<ItemGroup>
 		<!-- App Icon -->
 		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#17352C" />
