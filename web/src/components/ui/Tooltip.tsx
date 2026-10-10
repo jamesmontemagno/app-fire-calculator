@@ -72,14 +72,14 @@ export default function Tooltip({ content }: TooltipProps) {
         role="tooltip"
         className={`
           absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-3 py-2 
-          bg-content text-white text-xs rounded-control 
+          bg-surface-raised text-content text-xs rounded-control 
           w-max max-w-64 whitespace-normal z-50 text-center
           transition-all
           ${isVisible ? 'opacity-100 visible' : 'opacity-0 invisible'}
         `}
       >
         {content}
-        <span className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-content" />
+        <span className="absolute left-1/2 -translate-x-1/2 top-full border-4 border-transparent border-t-surface-raised" />
       </span>
     </span>
   )
