@@ -66,8 +66,9 @@ Use the full Apple Distribution identity shown by that command for `APPSTORE_COD
 
 ## Mac Catalyst and Mac App Store
 
-The Mac Catalyst workflow publishes an Apple Silicon (`maccatalyst-arm64`) package. It uses the
-same App Store Connect API key as iOS, plus Mac-specific signing credentials:
+The Mac Catalyst workflow publishes an Apple Silicon (`maccatalyst-arm64`) package targeting
+Mac Catalyst 17.0 (macOS 14) and later. It uses the same App Store Connect API key as iOS, plus
+Mac-specific signing credentials:
 
 | Secret | Value |
 | --- | --- |

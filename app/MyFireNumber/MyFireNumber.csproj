@@ -41,6 +41,8 @@
 		<RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('windows')) and '$(RuntimeIdentifier)' == '' and '$(Platform)' == 'x64'">win-x64</RuntimeIdentifier>
 		<RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('windows')) and '$(RuntimeIdentifier)' == '' and '$(Platform)' == 'ARM64'">win-arm64</RuntimeIdentifier>
 
+		<RuntimeIdentifiers Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">maccatalyst-arm64</RuntimeIdentifiers>
+		<RuntimeIdentifier Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">maccatalyst-arm64</RuntimeIdentifier>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">17.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
@@ -57,6 +59,12 @@
 		<!-- Spreadsheet exports are infrequent, and interpreting OpenXML avoids its expensive iOS AOT compilation. -->
 		<MtouchInterpreter>DocumentFormat.OpenXml,DocumentFormat.OpenXml.Framework</MtouchInterpreter>
 	</PropertyGroup>
+
+	<Target Name="ValidateMacCatalystRuntimeIdentifier"
+			BeforeTargets="PrepareForBuild"
+			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' and '$(RuntimeIdentifier)' != '' and '$(RuntimeIdentifier)' != 'maccatalyst-arm64'">
+		<Error Text="Only maccatalyst-arm64 is supported for Mac Catalyst builds. RuntimeIdentifier '$(RuntimeIdentifier)' is not supported." />
+	</Target>
 
 	<ItemGroup>
 		<!-- App Icon -->
