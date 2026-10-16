@@ -98,7 +98,7 @@ export default function Apps() {
 
       <MobileAppPromo
         title="The official My Fire Number app"
-        description="Keep your FIRE planning close at hand with the official companion app, now available for iPhone, iPad, and Android."
+        description="Keep your FIRE planning close at hand with the official companion app, now available for iPhone, iPad, Android, Mac, and Windows."
       />
 
       {/* Disclaimer */}
