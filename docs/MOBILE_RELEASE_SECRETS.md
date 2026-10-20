@@ -125,6 +125,25 @@ Never commit keystores, certificates, `.p8` files, passwords, or decoded secret 
 The Windows workflow creates one unsigned Store upload bundle containing x64 and ARM64
 packages. Microsoft signs the package after Store certification.
 
+Windows SDK/workload versions are pinned in the Windows workflow, separately from
+Apple/Android toolchains. Windows builds pass `WindowsOnly=true` to narrow only the
+MAUI app's framework list; shared projects keep their original frameworks. Normal
+local/mobile builds are unchanged. Only `maui-windows` is explicitly installed, and
+background workload advertising downloads are disabled.
+
+NuGet package caches are keyed by host OS/architecture, pinned toolchain, and project,
+build and NuGet configuration. Installed SDK/workload directories are not cached.
+Use `use_nuget_cache=false` to disable cache restore/save for a measurement.
+Cache transfer and workload installation still count toward total job time; compare
+several runs at the same commit and runner image rather than promising a speedup.
+
+For credential-free branch validation, dispatch the Windows workflow with
+`build_only=true`, `publish=false`, and `diagnose_only=false`. It tests the existing
+calculation/export suite on x64 and compiles both x64 and ARM64 on x64 hosted runners,
+without packaging, reading Store credentials, or submitting anything. It requires no
+release tag. Build-only mode rejects publishing or diagnostic inputs. This is not a
+native ARM runner migration and performs no disk formatting.
+
 Create a protected GitHub environment named `microsoft-store`, then add these environment
 secrets:
 

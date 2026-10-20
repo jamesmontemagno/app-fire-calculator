@@ -20,6 +20,14 @@ on:
         required: false
         default: false
         type: boolean
+      build_only:
+        description: 'Validate this branch on x64 and ARM64 without Store identity, tags, or publishing'
+        type: boolean
+        default: false
+      use_nuget_cache:
+        description: 'Restore/save NuGet packages; disable for cold-cache measurements'
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -29,6 +37,9 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  WINDOWS_DOTNET_VERSION: '10.0.401'
+  WINDOWS_WORKLOAD_VERSION: '10.0.401.1'
+  DOTNET_CLI_WORKLOAD_UPDATE_NOTIFY_DISABLE: 'true'
   APP_PROJECT: app/MyFireNumber/MyFireNumber.csproj
   TEST_PROJECT: app/MyFireNumber.Tests/MyFireNumber.Tests.csproj
   TARGET_FRAMEWORK: net10.0-windows10.0.19041.0
@@ -36,9 +47,56 @@ env:
   PACKAGE_MANIFEST: app/MyFireNumber/Platforms/Windows/Package.appxmanifest
 
 jobs:
+  validate:
+    name: Windows build validation / ${{ matrix.arch }}
+    if: github.event_name == 'workflow_dispatch' && inputs.build_only
+    runs-on: windows-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x64, ARM64]
+    steps:
+      - name: Validate build-only request
+        shell: pwsh
+        env:
+          DIAGNOSE_ONLY: ${{ inputs.diagnose_only }}
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          if ($env:DIAGNOSE_ONLY -eq 'true' -or $env:PUBLISH -eq 'true') {
+            throw 'Build-only validation cannot diagnose credentials or publish.'
+          }
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.WINDOWS_DOTNET_VERSION }}
+      - name: Cache Windows NuGet packages
+        if: inputs.use_nuget_cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-v1-${{ runner.os }}-${{ runner.arch }}-sdk${{ env.WINDOWS_DOTNET_VERSION }}-workload${{ env.WINDOWS_WORKLOAD_VERSION }}-${{ hashFiles('app/**/*.csproj', '**/Directory.*.props', '**/Directory.*.targets', '**/NuGet.config', '**/nuget.config') }}
+          restore-keys: |
+            nuget-v1-${{ runner.os }}-${{ runner.arch }}-sdk${{ env.WINDOWS_DOTNET_VERSION }}-workload${{ env.WINDOWS_WORKLOAD_VERSION }}-
+      - name: Install pinned Windows workload
+        run: dotnet workload install maui-windows --version $env:WINDOWS_WORKLOAD_VERSION
+      - name: Describe Windows toolchain
+        run: |
+          dotnet --info
+          dotnet workload list
+          dotnet nuget locals all --list
+      - name: Test calculation and export layers
+        if: matrix.arch == 'x64'
+        run: dotnet test $env:TEST_PROJECT -c Release --filter "FullyQualifiedName!~Data"
+      - name: Build Windows app without packaging
+        run: >-
+          dotnet build $env:APP_PROJECT -f $env:TARGET_FRAMEWORK -c Release
+          -p:WindowsOnly=true -p:Platform=${{ matrix.arch }}
+          -p:UseMonoRuntime=false -p:WindowsPackageType=None
+
   diagnose:
     name: Diagnose Partner Center credentials
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnose_only }}
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.diagnose_only && !inputs.build_only }}
     runs-on: windows-latest
     environment: microsoft-store
 
@@ -56,7 +114,7 @@ jobs:
 
   package:
     name: Package Microsoft Store upload
-    if: ${{ github.event_name == 'push' || !inputs.diagnose_only }}
+    if: ${{ (github.event_name == 'push' || !inputs.diagnose_only) && !inputs.build_only }}
     runs-on: windows-latest
     timeout-minutes: 45
 
@@ -67,15 +125,30 @@ jobs:
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: '10.0.x'
+          dotnet-version: ${{ env.WINDOWS_DOTNET_VERSION }}
 
-      - name: Restore .NET workloads
+      - name: Cache Windows NuGet packages
+        if: github.event_name == 'push' || inputs.use_nuget_cache
+        uses: actions/cache@v6
+        with:
+          path: ~/.nuget/packages
+          key: nuget-v1-${{ runner.os }}-${{ runner.arch }}-sdk${{ env.WINDOWS_DOTNET_VERSION }}-workload${{ env.WINDOWS_WORKLOAD_VERSION }}-${{ hashFiles('app/**/*.csproj', '**/Directory.*.props', '**/Directory.*.targets', '**/NuGet.config', '**/nuget.config') }}
+          restore-keys: |
+            nuget-v1-${{ runner.os }}-${{ runner.arch }}-sdk${{ env.WINDOWS_DOTNET_VERSION }}-workload${{ env.WINDOWS_WORKLOAD_VERSION }}-
+
+      - name: Install pinned Windows workload
         shell: pwsh
-        run: dotnet workload restore $env:APP_PROJECT -p:TargetFramework=$env:TARGET_FRAMEWORK -p:UseMonoRuntime=false
+        run: dotnet workload install maui-windows --version $env:WINDOWS_WORKLOAD_VERSION
+
+      - name: Describe Windows toolchain
+        run: |
+          dotnet --info
+          dotnet workload list
+          dotnet nuget locals all --list
 
       - name: Restore
         shell: pwsh
-        run: dotnet restore $env:APP_PROJECT -p:TargetFramework=$env:TARGET_FRAMEWORK -p:UseMonoRuntime=false
+        run: dotnet restore $env:APP_PROJECT -p:TargetFramework=$env:TARGET_FRAMEWORK -p:WindowsOnly=true -p:UseMonoRuntime=false
 
       - name: Test calculation and export layers
         shell: pwsh
@@ -135,6 +208,7 @@ jobs:
           dotnet build $env:APP_PROJECT `
             -f $env:TARGET_FRAMEWORK `
             -c Release `
+            -p:WindowsOnly=true `
             -p:Platform=x64 `
             -p:WindowsPackageType=MSIX `
             -p:UseMonoRuntime=false `
@@ -172,7 +246,7 @@ jobs:
   publish:
     name: Submit to Microsoft Store
     needs: package
-    if: ${{ github.event_name == 'push' || inputs.publish }}
+    if: ${{ (github.event_name == 'push' || inputs.publish) && !inputs.build_only }}
     runs-on: windows-latest
     environment: microsoft-store
     timeout-minutes: 30
