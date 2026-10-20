@@ -70,6 +70,13 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.WINDOWS_DOTNET_VERSION }}
+      - name: Select pinned Windows SDK
+        run: |
+          @{ sdk = @{ version = $env:WINDOWS_DOTNET_VERSION; rollForward = 'disable'; allowPrerelease = $false } } |
+            ConvertTo-Json | Set-Content -LiteralPath global.json -Encoding utf8
+          $actual = dotnet --version
+          if ($LASTEXITCODE -ne 0 -or $actual -ne $env:WINDOWS_DOTNET_VERSION) { throw "Unexpected Windows SDK: $actual" }
+          "Selected Windows SDK: $actual"
       - name: Cache Windows NuGet packages
         if: inputs.use_nuget_cache
         uses: actions/cache@v6
@@ -126,6 +133,13 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.WINDOWS_DOTNET_VERSION }}
+      - name: Select pinned Windows SDK
+        run: |
+          @{ sdk = @{ version = $env:WINDOWS_DOTNET_VERSION; rollForward = 'disable'; allowPrerelease = $false } } |
+            ConvertTo-Json | Set-Content -LiteralPath global.json -Encoding utf8
+          $actual = dotnet --version
+          if ($LASTEXITCODE -ne 0 -or $actual -ne $env:WINDOWS_DOTNET_VERSION) { throw "Unexpected Windows SDK: $actual" }
+          "Selected Windows SDK: $actual"
 
       - name: Cache Windows NuGet packages
         if: github.event_name == 'push' || inputs.use_nuget_cache

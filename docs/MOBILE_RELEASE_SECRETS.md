@@ -130,6 +130,9 @@ Apple/Android toolchains. Windows builds pass `WindowsOnly=true` to narrow only 
 MAUI app's framework list; shared projects keep their original frameworks. Normal
 local/mobile builds are unchanged. Only `maui-windows` is explicitly installed, and
 background workload advertising downloads are disabled.
+Windows jobs write a CI-only `global.json` with SDK roll-forward disabled and verify
+the selected version; installing a pinned SDK alone would still allow a newer
+preinstalled SDK to win. No SDK selection file is committed or used by mobile jobs.
 
 NuGet package caches are keyed by host OS/architecture, pinned toolchain, and project,
 build and NuGet configuration. Installed SDK/workload directories are not cached.
