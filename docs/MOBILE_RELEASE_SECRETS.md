@@ -66,8 +66,9 @@ Use the full Apple Distribution identity shown by that command for `APPSTORE_COD
 
 ## Mac Catalyst and Mac App Store
 
-The Mac Catalyst workflow publishes an Apple Silicon (`maccatalyst-arm64`) package targeting
-Mac Catalyst 17.0 (macOS 14) and later. It uses the same App Store Connect API key as iOS, plus
+The Mac Catalyst workflow publishes a universal Apple Silicon and Intel
+(`maccatalyst-arm64` and `maccatalyst-x64`) package targeting Mac Catalyst 17.0 (macOS 14)
+and later. It uses the same App Store Connect API key as iOS, plus
 Mac-specific signing credentials:
 
 | Secret | Value |
@@ -117,6 +118,21 @@ the app, so they pass library validation.
 
 The Android workflow uploads a signed AAB artifact. The Apple workflows upload a signed IPA or
 PKG artifact and, when requested, send it to TestFlight using the App Store Connect API key.
+
+The Apple workflows pin the SDK, workload set, and Xcode together and verify the selected
+versions before building. Update those pins together after checking the Apple workload
+manifests' `WorkloadDependencies.json`; a floating workload can require a newer Xcode than
+the runner's default. The project also pins MAUI with the scene lifecycle fixes described in
+[Microsoft's migration guide](https://devblogs.microsoft.com/dotnet/migrate-dotnet-maui-apps-uikit-scene-lifecycle/).
+Both Apple heads keep their registered scene delegates and single-window scene manifests.
+Credential-free builds compile ARM64 and x64 simulator/Mac Catalyst apps. All Apple builds
+inspect their packaged scene manifests; signed releases also check the packaged version
+numbers, and Mac releases verify that the executable contains both architectures.
+Physical iOS devices use `ios-arm64`; x64 is simulator-only.
+
+Apple release display versions still come from **base_version**, and build numbers remain
+`100 + GITHUB_RUN_NUMBER` within each platform workflow. Both Mac architectures are packaged
+in one universal build with the same display version and build number.
 
 Never commit keystores, certificates, `.p8` files, passwords, or decoded secret values.
 
