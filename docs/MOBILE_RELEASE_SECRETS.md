@@ -131,6 +131,10 @@ Never commit keystores, certificates, `.p8` files, passwords, or decoded secret 
 The Windows workflow creates one unsigned Store upload bundle containing x64 and ARM64
 packages. Microsoft signs the package after Store certification.
 
+On GitHub-hosted Windows runners, the packaging job places NuGet's global packages and
+HTTP cache under `RUNNER_TEMP` before .NET setup. Both caches are job-local; neither is
+saved to a remote cache. The path does not assume a drive letter or faster storage.
+
 Create a protected GitHub environment named `microsoft-store`, then add these environment
 secrets:
 

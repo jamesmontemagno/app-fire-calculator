@@ -64,6 +64,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
+      - name: Configure job-local NuGet caches
+        if: ${{ runner.os == 'Windows' && runner.environment == 'github-hosted' }}
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
+            throw "RUNNER_TEMP must be set for job-local NuGet caches."
+          }
+          $packages = Join-Path $env:RUNNER_TEMP "nuget/packages"
+          $httpCache = Join-Path $env:RUNNER_TEMP "nuget/http-cache"
+          New-Item -ItemType Directory -Force -Path $packages, $httpCache | Out-Null
+          "NUGET_PACKAGES=$packages" >> $env:GITHUB_ENV
+          "NUGET_HTTP_CACHE_PATH=$httpCache" >> $env:GITHUB_ENV
+
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v6
         with:
