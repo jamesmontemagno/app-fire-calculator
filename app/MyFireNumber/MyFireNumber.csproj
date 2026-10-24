@@ -8,10 +8,8 @@
 		<OutputType>Exe</OutputType>
 		<RootNamespace>MyFireNumber</RootNamespace>
 		<UseMaui>true</UseMaui>
-		<!-- 10.0.90 adds the null guard in Button.LayoutButton on iOS. Without it, Shell tears down a
-		     page's handlers while UIKit still lays out the button's WrapperView, which throws a
-		     NullReferenceException and aborts the app. -->
-		<MauiVersion>10.0.90</MauiVersion>
+		<!-- Includes the UIKit scene lifecycle fixes required by Xcode 27. -->
+		<MauiVersion>10.0.110</MauiVersion>
 		<SingleProject>true</SingleProject>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
@@ -41,8 +39,7 @@
 		<RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('windows')) and '$(RuntimeIdentifier)' == '' and '$(Platform)' == 'x64'">win-x64</RuntimeIdentifier>
 		<RuntimeIdentifier Condition="$([MSBuild]::IsOSPlatform('windows')) and '$(RuntimeIdentifier)' == '' and '$(Platform)' == 'ARM64'">win-arm64</RuntimeIdentifier>
 
-		<RuntimeIdentifiers Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">maccatalyst-arm64</RuntimeIdentifiers>
-		<RuntimeIdentifier Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">maccatalyst-arm64</RuntimeIdentifier>
+		<RuntimeIdentifiers Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' and '$(Configuration)' == 'Release' and '$(RuntimeIdentifier)' == ''">maccatalyst-arm64;maccatalyst-x64</RuntimeIdentifiers>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">17.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">17.0</SupportedOSPlatformVersion>
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
@@ -59,12 +56,6 @@
 		<!-- Spreadsheet exports are infrequent, and interpreting OpenXML avoids its expensive iOS AOT compilation. -->
 		<MtouchInterpreter>DocumentFormat.OpenXml,DocumentFormat.OpenXml.Framework</MtouchInterpreter>
 	</PropertyGroup>
-
-	<Target Name="ValidateMacCatalystRuntimeIdentifier"
-			BeforeTargets="PrepareForBuild"
-			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst' and '$(RuntimeIdentifier)' != '' and '$(RuntimeIdentifier)' != 'maccatalyst-arm64'">
-		<Error Text="Only maccatalyst-arm64 is supported for Mac Catalyst builds. RuntimeIdentifier '$(RuntimeIdentifier)' is not supported." />
-	</Target>
 
 	<ItemGroup>
 		<!-- App Icon -->
