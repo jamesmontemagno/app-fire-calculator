@@ -27,7 +27,7 @@ concurrency:
 jobs:
   build-android:
     name: Required / Android
-    runs-on: macos-15
+    runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -70,7 +70,17 @@ jobs:
 
       - name: Restore .NET workloads
         if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.android == 'true' }}
-        run: dotnet workload restore "${{ env.PROJECT_PATH }}"
+        run: dotnet workload restore "${{ env.PROJECT_PATH }}" -p:TargetFramework="${{ env.TARGET_FRAMEWORK }}"
+
+      - name: Install Android SDK dependencies
+        if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.android == 'true' }}
+        run: |
+          dotnet build "${{ env.PROJECT_PATH }}" \
+            -t:InstallAndroidDependencies \
+            -f "${{ env.TARGET_FRAMEWORK }}" \
+            -p:AndroidSdkDirectory="$ANDROID_HOME" \
+            -p:JavaSdkDirectory="$JAVA_HOME" \
+            -p:AcceptAndroidSdkLicenses=true
 
       - name: Restore
         if: ${{ github.event_name != 'pull_request' || steps.changes.outputs.android == 'true' }}

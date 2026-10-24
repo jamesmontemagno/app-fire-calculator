@@ -8,6 +8,12 @@ Add release credentials under **Repository Settings > Secrets and variables > Ac
 
 ## Android
 
+Android validation and signed AAB packaging run on Ubuntu with the Android-only MAUI workload.
+The workflow configures Java and installs the Android SDK dependencies required by the target
+framework. Signing remains opt-in through the manual **Build release** input; pull requests do
+not read signing secrets. The signed bundle is uploaded as the `myfirenumber-android-aab`
+artifact, not submitted to Google Play.
+
 | Secret | Value |
 | --- | --- |
 | `ANDROID_KEYSTORE` | Base64-encoded Android `.keystore` or `.jks` file |
